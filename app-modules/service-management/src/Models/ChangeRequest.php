@@ -40,23 +40,27 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\ChangeRequestFactory;
 use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
 use AidingApp\ServiceManagement\Observers\ChangeRequestObserver;
-use App\Models\BaseModel;
 use App\Models\Concerns\HasRelationBasedStateMachine;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperChangeRequest
  */
 #[ObservedBy([ChangeRequestObserver::class])]
-class ChangeRequest extends BaseModel implements Auditable
+class ChangeRequest extends Model implements Auditable
 {
     use AuditableTrait;
     use HasRelationBasedStateMachine;
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
 
     /** @use HasFactory<ChangeRequestFactory> */
     use HasFactory;

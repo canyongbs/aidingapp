@@ -51,12 +51,12 @@ use AidingApp\ServiceManagement\Models\Concerns\RestrictsVisibilityToContactType
 use AidingApp\ServiceManagement\Models\Scopes\AuditedServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
-use App\Models\BaseModel;
 use App\Models\User;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -64,18 +64,20 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperServiceRequestType
  */
 #[ObservedBy([ServiceRequestTypeObserver::class])]
-class ServiceRequestType extends BaseModel implements Auditable
+class ServiceRequestType extends Model implements Auditable
 {
     use CanBeArchived;
     use SoftDeletes;
     use HasUuids;
     use AuditableTrait;
     use RestrictsVisibilityToContactTypes;
+    use UsesTenantConnection;
 
     /** @use HasFactory<ServiceRequestTypeFactory> */
     use HasFactory;

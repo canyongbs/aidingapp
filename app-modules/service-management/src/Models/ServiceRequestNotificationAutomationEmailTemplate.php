@@ -42,18 +42,23 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
 use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
 use AidingApp\ServiceManagement\Observers\ServiceRequestNotificationAutomationEmailTemplateObserver;
-use App\Models\BaseModel;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperServiceRequestNotificationAutomationEmailTemplate
  */
 #[ObservedBy([ServiceRequestNotificationAutomationEmailTemplateObserver::class])]
-class ServiceRequestNotificationAutomationEmailTemplate extends BaseModel implements HasRichContent
+class ServiceRequestNotificationAutomationEmailTemplate extends Model implements HasRichContent
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
+
     /** @use HasFactory<ServiceRequestNotificationAutomationEmailTemplateFactory> */
     use HasFactory;
 

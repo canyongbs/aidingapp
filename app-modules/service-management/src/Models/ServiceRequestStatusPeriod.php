@@ -38,15 +38,20 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestStatusPeriodFactory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperServiceRequestStatusPeriod
  */
-class ServiceRequestStatusPeriod extends BaseModel
+class ServiceRequestStatusPeriod extends Model
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
+
     /** @use HasFactory<ServiceRequestStatusPeriodFactory> */
     use HasFactory;
 
