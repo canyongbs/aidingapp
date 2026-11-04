@@ -384,8 +384,6 @@ test('the organization name of a soft-deleted organization can be reused', funct
 });
 
 it('explains that an archived organization reserves the name', function (): void {
-    OrganizationArchivingFeature::activate();
-
     $user = User::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.create');
@@ -405,8 +403,6 @@ it('explains that an archived organization reserves the name', function (): void
 });
 
 it('keeps the unique message when an active organization has the name', function (): void {
-    OrganizationArchivingFeature::activate();
-
     $user = User::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.create');
@@ -447,7 +443,6 @@ it('uses the unique message for an archived organization name while organization
 });
 
 it('explains that an archived organization reserves the domain', function (): void {
-    OrganizationArchivingFeature::activate();
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();
@@ -471,7 +466,6 @@ it('explains that an archived organization reserves the domain', function (): vo
 });
 
 it('keeps the in-use message when an active organization has the domain', function (): void {
-    OrganizationArchivingFeature::activate();
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();

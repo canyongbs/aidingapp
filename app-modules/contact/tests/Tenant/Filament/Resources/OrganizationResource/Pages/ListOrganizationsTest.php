@@ -44,8 +44,6 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 
 it('only shows the bulk archive action to a user with the organization.delete permission', function (): void {
-    OrganizationArchivingFeature::activate();
-
     Organization::factory(15)->create();
 
     $user = User::factory()
@@ -64,8 +62,6 @@ it('only shows the bulk archive action to a user with the organization.delete pe
 });
 
 it('bulk archives organizations', function (): void {
-    OrganizationArchivingFeature::activate();
-
     actingAs(User::factory()->create()->givePermissionTo('organization.view-any', 'organization.*.view', 'organization.*.delete'));
 
     $organizations = Organization::factory(2)->create();
@@ -121,8 +117,6 @@ it('only shows the import and export actions to a user with the `organization.im
 
 describe('archived organizations', function (): void {
     beforeEach(function (): void {
-        OrganizationArchivingFeature::activate();
-
         actingAs(User::factory()->create()->givePermissionTo('organization.view-any', 'organization.*.view'));
     });
 

@@ -85,8 +85,6 @@ it('can attach a guest organization to a project', function (): void {
 });
 
 it('does not offer archived organizations to attach', function (): void {
-    OrganizationArchivingFeature::activate();
-
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -118,8 +116,6 @@ it('does not offer archived organizations to attach', function (): void {
 });
 
 it('still lists and can detach an already attached archived organization', function (): void {
-    OrganizationArchivingFeature::activate();
-
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -139,8 +135,6 @@ it('still lists and can detach an already attached archived organization', funct
 });
 
 it('marks only archived guest organizations with the archived indicator', function (): void {
-    OrganizationArchivingFeature::activate();
-
     asSuperAdmin();
 
     $project = Project::factory()->create();

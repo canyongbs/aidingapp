@@ -77,8 +77,6 @@ it('is gated with proper access control', function (): void {
 });
 
 it('archives the organization', function (): void {
-    OrganizationArchivingFeature::activate();
-
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.*.delete');
@@ -98,8 +96,6 @@ it('archives the organization', function (): void {
 });
 
 it('returns not found for an archived organization', function (): void {
-    OrganizationArchivingFeature::activate();
-
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.*.delete');
@@ -114,8 +110,6 @@ it('returns not found for an archived organization', function (): void {
 });
 
 it('checks permissions before returning not found for an archived organization', function (): void {
-    OrganizationArchivingFeature::activate();
-
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     Sanctum::actingAs($user, ['api']);

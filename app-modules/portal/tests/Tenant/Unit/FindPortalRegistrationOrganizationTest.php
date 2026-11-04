@@ -36,7 +36,6 @@
 
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Portal\Actions\FindPortalRegistrationOrganization;
-use App\Features\OrganizationArchivingFeature;
 
 test('it returns organization for exact matching domain', function (): void {
     $organization = Organization::factory()->create([
@@ -114,8 +113,6 @@ test('it returns null for invalid email format', function (): void {
 });
 
 test('it ignores archived organizations', function (): void {
-    OrganizationArchivingFeature::activate();
-
     Organization::factory()->archived()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [

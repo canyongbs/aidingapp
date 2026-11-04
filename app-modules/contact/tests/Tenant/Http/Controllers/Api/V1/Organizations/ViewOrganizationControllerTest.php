@@ -35,7 +35,6 @@
 */
 
 use AidingApp\Contact\Models\Organization;
-use App\Features\OrganizationArchivingFeature;
 use App\Models\SystemUser;
 use Laravel\Sanctum\Sanctum;
 
@@ -148,8 +147,6 @@ it('returns not found for a soft deleted organization', function (): void {
 });
 
 it('returns not found for an archived organization', function (): void {
-    OrganizationArchivingFeature::activate();
-
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.*.view');

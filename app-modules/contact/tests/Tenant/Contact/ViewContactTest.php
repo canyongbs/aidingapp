@@ -130,8 +130,6 @@ test('ViewContact renders successfully when optional fields have no value', func
 
 describe('archived organization indicator', function (): void {
     it('marks an archived organization while still showing its name', function (): void {
-        OrganizationArchivingFeature::activate();
-
         asSuperAdmin();
 
         $contact = Contact::factory()
@@ -144,8 +142,6 @@ describe('archived organization indicator', function (): void {
     });
 
     it('does not mark an active organization', function (): void {
-        OrganizationArchivingFeature::activate();
-
         asSuperAdmin();
 
         $contact = Contact::factory()
@@ -421,8 +417,6 @@ describe('section edit actions', function (): void {
         });
 
         it('keeps the linked archived organization listed and hides other archived ones', function (): void {
-            OrganizationArchivingFeature::activate();
-
             $linkedOrganization = Organization::factory()->archived()->create();
             $otherArchivedOrganization = Organization::factory()->archived()->create();
             $contact = Contact::factory()->create(['organization_id' => $linkedOrganization->getKey()]);
@@ -445,8 +439,6 @@ describe('section edit actions', function (): void {
         });
 
         it('marks only the archived selection with the archived indicator in the picker', function (): void {
-            OrganizationArchivingFeature::activate();
-
             $linkedOrganization = Organization::factory()->archived()->create();
             $activeOrganization = Organization::factory()->create();
             $contact = Contact::factory()->create(['organization_id' => $linkedOrganization->getKey()]);
@@ -472,8 +464,6 @@ describe('section edit actions', function (): void {
         });
 
         it('keeps the archived organization when the section is saved unchanged', function (): void {
-            OrganizationArchivingFeature::activate();
-
             $linkedOrganization = Organization::factory()->archived()->create();
             $contact = Contact::factory()->create(['organization_id' => $linkedOrganization->getKey()]);
 
@@ -487,8 +477,6 @@ describe('section edit actions', function (): void {
         });
 
         it('stops listing the archived organization once the contact is moved to an active one', function (): void {
-            OrganizationArchivingFeature::activate();
-
             $archivedOrganization = Organization::factory()->archived()->create();
             $activeOrganization = Organization::factory()->create();
             $contact = Contact::factory()->create(['organization_id' => $archivedOrganization->getKey()]);

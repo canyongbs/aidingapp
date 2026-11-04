@@ -129,8 +129,6 @@ it('builds a normalized domain set from eligible organizations', function (): vo
 });
 
 it('does not match an archived organization', function (): void {
-    OrganizationArchivingFeature::activate();
-
     Organization::factory()->archived()->create([
         'domains' => [['domain' => 'example.com']],
     ]);
@@ -139,8 +137,6 @@ it('does not match an archived organization', function (): void {
 });
 
 it('omits archived organization domains from the domain set', function (): void {
-    OrganizationArchivingFeature::activate();
-
     $archivedOrganization = Organization::factory()->archived()->create([
         'domains' => [['domain' => 'archived.example']],
     ]);

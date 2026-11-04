@@ -476,8 +476,6 @@ test('an organization can keep its own name when editing', function (): void {
 });
 
 it('returns not found for an archived organization', function (): void {
-    OrganizationArchivingFeature::activate();
-
     actingAs(User::factory()->create()->givePermissionTo('organization.view-any', 'organization.*.update'));
 
     $organization = Organization::factory()->archived()->create();
@@ -488,8 +486,6 @@ it('returns not found for an archived organization', function (): void {
 
 describe('archiving', function (): void {
     it('archives the organization', function (): void {
-        OrganizationArchivingFeature::activate();
-
         asSuperAdmin();
 
         $organization = Organization::factory()->create();
@@ -517,8 +513,6 @@ it('shows the delete action when the organization archiving feature is inactive'
 });
 
 it('explains that an archived organization reserves the name when editing', function (): void {
-    OrganizationArchivingFeature::activate();
-
     $user = User::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.*.update');
@@ -538,8 +532,6 @@ it('explains that an archived organization reserves the name when editing', func
 });
 
 it('allows saving an organization with its own unchanged name', function (): void {
-    OrganizationArchivingFeature::activate();
-
     $user = User::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.*.update');
@@ -577,7 +569,6 @@ it('uses the unique message for an archived organization name when editing while
 });
 
 it('explains that an archived organization reserves the domain when editing', function (): void {
-    OrganizationArchivingFeature::activate();
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();
@@ -600,7 +591,6 @@ it('explains that an archived organization reserves the domain when editing', fu
 });
 
 it('allows saving an organization with its own unchanged domains', function (): void {
-    OrganizationArchivingFeature::activate();
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();

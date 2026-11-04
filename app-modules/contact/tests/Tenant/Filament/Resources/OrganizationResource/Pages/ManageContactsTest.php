@@ -36,15 +36,12 @@
 
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Contact\Models\Organization;
-use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 it('returns not found for an archived organization', function (): void {
-    OrganizationArchivingFeature::activate();
-
     actingAs(User::factory()->create()->givePermissionTo('organization.view-any', 'organization.*.view', 'contact.view-any'));
 
     $organization = Organization::factory()->archived()->create();
