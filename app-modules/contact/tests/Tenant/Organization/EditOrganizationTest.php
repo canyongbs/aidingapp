@@ -575,3 +575,69 @@ it('uses the unique message for an archived organization name when editing while
 
     expect($component->errors()->get('data.name'))->not->toContain('An archived organization with this name already exists.');
 });
+
+it('explains that an archived organization reserves the domain when editing', function (): void {
+    OrganizationArchivingFeature::activate();
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    Organization::factory()->archived()->create(['domains' => [['domain' => 'archived-domain.com']]]);
+    $organization = Organization::factory()->create();
+
+    actingAs($user);
+
+    $component = Livewire::test(EditOrganization::class, ['record' => $organization->getRouteKey()])
+        ->fillForm(['domains' => [['domain' => 'archived-domain.com']]])
+        ->call('save')
+        ->assertHasFormErrors(['domains.0.domain' => 'This domain is reserved by an archived organization.']);
+
+    expect($component->errors()->get('data.domains.0.domain'))->toBe(['This domain is reserved by an archived organization.']);
+
+    $undoRepeaterFake();
+});
+
+it('allows saving an organization with its own unchanged domains', function (): void {
+    OrganizationArchivingFeature::activate();
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    $organization = Organization::factory()->create(['domains' => [['domain' => 'own-domain.com']]]);
+
+    actingAs($user);
+
+    Livewire::test(EditOrganization::class, ['record' => $organization->getRouteKey()])
+        ->fillForm(['domains' => [['domain' => 'own-domain.com']]])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $undoRepeaterFake();
+});
+
+it('uses the in-use message for an archived organization domain when editing while organization archiving is inactive', function (): void {
+    OrganizationArchivingFeature::deactivate();
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    Organization::factory()->archived()->create(['domains' => [['domain' => 'archived-domain.com']]]);
+    $organization = Organization::factory()->create();
+
+    actingAs($user);
+
+    $component = Livewire::test(EditOrganization::class, ['record' => $organization->getRouteKey()])
+        ->fillForm(['domains' => [['domain' => 'archived-domain.com']]])
+        ->call('save')
+        ->assertHasFormErrors(['domains.0.domain' => 'This domain is already in use and may not be used a second time.']);
+
+    expect($component->errors()->get('data.domains.0.domain'))->not->toContain('This domain is reserved by an archived organization.');
+
+    $undoRepeaterFake();
+});
