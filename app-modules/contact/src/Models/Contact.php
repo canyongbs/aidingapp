@@ -78,6 +78,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\HasApiTokens;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
@@ -317,6 +318,12 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
             )
             ->using(ProjectGuest::class)
             ->withTimestamps();
+    }
+
+    protected static function booted(): void
+    {
+        static::archived(fn () => Cache::tags('{contacts}')->flush());
+        static::unarchived(fn () => Cache::tags('{contacts}')->flush());
     }
 
     protected function serializeDate(DateTimeInterface $date): string
