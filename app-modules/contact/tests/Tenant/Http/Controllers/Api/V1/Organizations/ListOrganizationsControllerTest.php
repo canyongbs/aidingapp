@@ -159,36 +159,115 @@ it('can filter organizations by email', function (): void {
     expect($response['data'][0]['email'])->toBe('hello@acme.test');
 });
 
-it('can filter organizations by industry', function (): void {
+it('can filter organizations by industry name regardless of case', function (string $filter): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     Sanctum::actingAs($user, ['api']);
 
-    $industry = OrganizationIndustry::factory()->create();
+    $industry = OrganizationIndustry::factory()->create(['name' => 'Higher Education']);
     Organization::factory()->create(['industry_id' => $industry->getKey()]);
     Organization::factory()->count(2)->create();
 
-    $response = getJson(route('api.v1.organizations.index', ['filter' => ['industry' => $industry->getKey()]], false));
+    $response = getJson(route('api.v1.organizations.index', ['filter' => ['industry' => $filter]], false));
     $response->assertOk();
 
     expect($response['meta']['total'])->toBe(1);
     expect($response['data'][0]['industry']['id'])->toBe($industry->getKey());
-});
+})->with([
+    'same case' => 'Higher Education',
+    'lowercase' => 'higher education',
+    'uppercase' => 'HIGHER EDUCATION',
+]);
 
-it('can filter organizations by type', function (): void {
+it('can filter organizations by type name regardless of case', function (string $filter): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     Sanctum::actingAs($user, ['api']);
 
-    $type = OrganizationType::factory()->create();
+    $type = OrganizationType::factory()->create(['name' => 'Public Institution']);
     Organization::factory()->create(['type_id' => $type->getKey()]);
     Organization::factory()->count(2)->create();
 
-    $response = getJson(route('api.v1.organizations.index', ['filter' => ['type' => $type->getKey()]], false));
+    $response = getJson(route('api.v1.organizations.index', ['filter' => ['type' => $filter]], false));
     $response->assertOk();
 
     expect($response['meta']['total'])->toBe(1);
     expect($response['data'][0]['type']['id'])->toBe($type->getKey());
+})->with([
+    'same case' => 'Public Institution',
+    'lowercase' => 'public institution',
+    'uppercase' => 'PUBLIC INSTITUTION',
+]);
+
+it('does not match part of an industry or type name', function (): void {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    Sanctum::actingAs($user, ['api']);
+
+    Organization::factory()->create([
+        'industry_id' => OrganizationIndustry::factory()->create(['name' => 'Higher Education'])->getKey(),
+        'type_id' => OrganizationType::factory()->create(['name' => 'Public Institution'])->getKey(),
+    ]);
+
+    expect(getJson(route('api.v1.organizations.index', ['filter' => ['industry' => 'Higher']], false))['meta']['total'])
+        ->toBe(0);
+
+    expect(getJson(route('api.v1.organizations.index', ['filter' => ['type' => 'Public']], false))['meta']['total'])
+        ->toBe(0);
+});
+
+it('can filter organizations by an industry or type name that contains a comma', function (): void {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    Sanctum::actingAs($user, ['api']);
+
+    Organization::factory()->create([
+        'industry_id' => OrganizationIndustry::factory()->create(['name' => 'Arts, Entertainment, and Recreation'])->getKey(),
+        'type_id' => OrganizationType::factory()->create(['name' => 'Nonprofit, Private'])->getKey(),
+    ]);
+    Organization::factory()->count(2)->create();
+
+    expect(getJson(route('api.v1.organizations.index', ['filter' => ['industry' => 'Arts, Entertainment, and Recreation']], false))['meta']['total'])
+        ->toBe(1);
+
+    expect(getJson(route('api.v1.organizations.index', ['filter' => ['type' => 'Nonprofit, Private']], false))['meta']['total'])
+        ->toBe(1);
+});
+
+it('can filter organizations by multiple industry or type names separated by a pipe', function (): void {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    Sanctum::actingAs($user, ['api']);
+
+    Organization::factory()->create([
+        'industry_id' => OrganizationIndustry::factory()->create(['name' => 'Higher Education'])->getKey(),
+        'type_id' => OrganizationType::factory()->create(['name' => 'Partner'])->getKey(),
+    ]);
+    Organization::factory()->create([
+        'industry_id' => OrganizationIndustry::factory()->create(['name' => 'Arts, Entertainment, and Recreation'])->getKey(),
+        'type_id' => OrganizationType::factory()->create(['name' => 'Vendor'])->getKey(),
+    ]);
+    Organization::factory()->count(2)->create();
+
+    expect(getJson(route('api.v1.organizations.index', ['filter' => ['industry' => 'higher education|Arts, Entertainment, and Recreation']], false))['meta']['total'])
+        ->toBe(2);
+
+    expect(getJson(route('api.v1.organizations.index', ['filter' => ['type' => 'PARTNER|vendor']], false))['meta']['total'])
+        ->toBe(2);
+});
+
+it('no longer filters industry and type by identifier', function (): void {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    Sanctum::actingAs($user, ['api']);
+
+    $organization = Organization::factory()->create();
+
+    expect(getJson(route('api.v1.organizations.index', ['filter' => ['industry' => $organization->industry_id]], false))['meta']['total'])
+        ->toBe(0);
+
+    expect(getJson(route('api.v1.organizations.index', ['filter' => ['type' => $organization->type_id]], false))['meta']['total'])
+        ->toBe(0);
 });
 
 it('can filter organizations by whether contact generation is enabled', function (): void {

@@ -41,8 +41,10 @@ use AidingApp\Contact\Models\Organization;
 use Dedoc\Scramble\Attributes\Example;
 use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\QueryParameter;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\AllowedSort;
@@ -56,8 +58,14 @@ class ListOrganizationsController
     #[Group('Organizations')]
     #[QueryParameter('filter[name]', description: 'Filter the results where the name contains the provided value.', type: 'string')]
     #[QueryParameter('filter[email]', description: 'Filter the results where the email contains the provided value.', type: 'string')]
-    #[QueryParameter('filter[industry]', description: 'Filter the results where the industry ID matches the provided value.', type: 'string')]
-    #[QueryParameter('filter[type]', description: 'Filter the results where the type ID matches the provided value.', type: 'string')]
+    #[QueryParameter('filter[industry]', description: 'Filter the results where the industry name exactly matches the provided value, ignoring case. Separate multiple names with `|`.', type: 'string', examples: [
+        'single' => new Example('Higher Education'),
+        'multiple' => new Example('Higher Education|Healthcare'),
+    ])]
+    #[QueryParameter('filter[type]', description: 'Filter the results where the type name exactly matches the provided value, ignoring case. Separate multiple names with `|`.', type: 'string', examples: [
+        'single' => new Example('Partner'),
+        'multiple' => new Example('Partner|Vendor'),
+    ])]
     #[QueryParameter('filter[is_contact_generation_enabled]', description: 'Filter the results by whether contact generation is enabled.', type: 'bool')]
     #[QueryParameter('page[number]', description: 'Control which page of organizations is returned in the response.', type: 'int', default: 1)]
     #[QueryParameter('page[size]', description: 'Control how many organizations are returned in the response.', type: 'int', default: 30)]
@@ -76,8 +84,15 @@ class ListOrganizationsController
             ->allowedFilters(
                 AllowedFilter::partial('name'),
                 AllowedFilter::partial('email'),
-                AllowedFilter::belongsTo('industry', 'industry'),
-                AllowedFilter::belongsTo('type', 'type'),
+                // Names may contain commas, so multiple names are separated with a pipe instead.
+                AllowedFilter::callback('industry', fn (Builder $query, mixed $value) => $query->whereHas(
+                    'industry',
+                    fn (Builder $query) => $query->whereIn('name', Arr::wrap($value)),
+                ))->delimiter('|'),
+                AllowedFilter::callback('type', fn (Builder $query, mixed $value) => $query->whereHas(
+                    'type',
+                    fn (Builder $query) => $query->whereIn('name', Arr::wrap($value)),
+                ))->delimiter('|'),
                 AllowedFilter::exact('is_contact_generation_enabled'),
             )
             ->allowedSorts(
