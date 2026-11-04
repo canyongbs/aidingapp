@@ -48,6 +48,7 @@ use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @property string $label
+ * @property ?string $description
  * @property ?array<string, mixed> $content
  * @property int|null $sort
  * @property-read Submissible $submissible
