@@ -68,3 +68,32 @@ it('links a contact to its domain organization when it is unarchived', function 
 
     expect($contact->refresh()->organization_id)->toBe($organization->getKey());
 });
+
+it('revokes tokens when archived', function (): void {
+    ContactArchivingFeature::activate();
+
+    $contact = Contact::factory()->create();
+    $contact->createToken('first');
+    $contact->createToken('second');
+    $otherContact = Contact::factory()->create();
+    $otherContact->createToken('other');
+
+    expect($contact->tokens()->count())->toBe(2);
+
+    $contact->archive();
+
+    expect($contact->tokens()->count())->toBe(0)
+        ->and($otherContact->tokens()->count())->toBe(1);
+});
+
+it('keeps tokens when archived while the contact archiving feature is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    $contact = Contact::factory()->create();
+    $contact->createToken('first');
+    $contact->createToken('second');
+
+    $contact->archive();
+
+    expect($contact->tokens()->count())->toBe(2);
+});
