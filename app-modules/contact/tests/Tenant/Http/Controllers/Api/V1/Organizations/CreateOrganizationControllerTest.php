@@ -37,7 +37,6 @@
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
-use App\Features\OrganizationArchivingFeature;
 use App\Models\SystemUser;
 use Laravel\Sanctum\Sanctum;
 
@@ -320,8 +319,6 @@ it('can use the name of an industry or type that shares its name with a deleted 
 });
 
 it('explains that an archived organization reserves the name', function () use ($actingAsOrganizationCreator): void {
-    OrganizationArchivingFeature::activate();
-
     $actingAsOrganizationCreator();
 
     Organization::factory()->archived()->create(['name' => 'Archived Org']);

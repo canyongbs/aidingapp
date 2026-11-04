@@ -38,7 +38,6 @@ use AidingApp\Contact\Http\Requests\Api\V1\Organizations\UpdateOrganizationReque
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
-use App\Features\OrganizationArchivingFeature;
 use App\Models\SystemUser;
 use Laravel\Sanctum\Sanctum;
 
@@ -354,8 +353,6 @@ it('does not change the industry and type when they are not provided or when ide
 });
 
 it('returns not found for an archived organization before validating the request', function () use ($actingAsOrganizationUpdater): void {
-    OrganizationArchivingFeature::activate();
-
     $actingAsOrganizationUpdater();
 
     $organization = Organization::factory()->archived()->create(['name' => 'Original']);
@@ -367,8 +364,6 @@ it('returns not found for an archived organization before validating the request
 });
 
 it('checks permissions before returning not found for an archived organization', function (): void {
-    OrganizationArchivingFeature::activate();
-
     $organization = Organization::factory()->archived()->create();
 
     $user = SystemUser::factory()->create();
@@ -379,8 +374,6 @@ it('checks permissions before returning not found for an archived organization',
 });
 
 it('explains that an archived organization reserves the name', function () use ($actingAsOrganizationUpdater): void {
-    OrganizationArchivingFeature::activate();
-
     $actingAsOrganizationUpdater();
 
     Organization::factory()->archived()->create(['name' => 'Archived Org']);
