@@ -39,11 +39,13 @@ namespace AidingApp\Contact\Http\Requests\Api\V1\Contacts;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
+use App\Features\ContactArchivingFeature;
 use Closure;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
 use Illuminate\Validation\Validator;
 
 abstract class SaveContactRequest extends FormRequest
@@ -161,7 +163,7 @@ abstract class SaveContactRequest extends FormRequest
     /**
      * @return array<string, array<mixed>>
      */
-    protected function contactRules(?Contact $contact = null): array
+    protected function contactRules(?Contact $contact = null, bool $ignoreArchivedEmails = false): array
     {
         return [
             'first_name' => ['required', 'string', 'max:255'],
@@ -171,7 +173,13 @@ abstract class SaveContactRequest extends FormRequest
                 'nullable',
                 'email',
                 'max:255',
-                Rule::unique(Contact::class, 'email')->ignore($contact)->withoutTrashed(),
+                Rule::unique(Contact::class, 'email')
+                    ->ignore($contact)
+                    ->withoutTrashed()
+                    ->when(
+                        $ignoreArchivedEmails && ContactArchivingFeature::active(),
+                        fn (Unique $rule): Unique => $rule->whereNull('archived_at'),
+                    ),
             ],
             'mobile' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:255'],

@@ -338,7 +338,11 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
             }
         });
         static::unarchived(fn () => Cache::tags('{contacts}')->flush());
-        static::unarchived(fn (Contact $contact) => app(MatchContactToOrganization::class)($contact));
+        static::unarchived(function (Contact $contact): void {
+            if ($contact->shouldAutomaticallyMatchOrganization) {
+                app(MatchContactToOrganization::class)($contact);
+            }
+        });
     }
 
     /**

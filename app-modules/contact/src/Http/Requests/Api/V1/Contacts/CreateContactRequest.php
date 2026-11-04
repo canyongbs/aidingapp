@@ -61,7 +61,7 @@ class CreateContactRequest extends SaveContactRequest
     public function rules(): array
     {
         return [
-            ...$this->contactRules(),
+            ...$this->contactRules(ignoreArchivedEmails: true),
             'type' => [
                 Rule::requiredIf(fn (): bool => ContactType::resolveDefault() === null),
                 'nullable',
@@ -72,13 +72,22 @@ class CreateContactRequest extends SaveContactRequest
     }
 
     /**
-     * The full name is derived from the first and last name.
+     * The full name is derived from the first and last name. Columns that are not provided are
+     * explicitly cleared, so an archived contact restored by this request keeps none of its old data.
      *
      * @return array<string, mixed>
      */
     public function contactAttributes(): array
     {
         $attributes = parent::contactAttributes();
+
+        foreach (array_keys($this->contactRules()) as $field) {
+            if ($field === 'organization') {
+                continue;
+            }
+
+            $attributes[static::COLUMN_NAMES[$field] ?? $field] ??= null;
+        }
 
         $attributes['full_name'] = "{$attributes['first_name']} {$attributes['last_name']}";
 
