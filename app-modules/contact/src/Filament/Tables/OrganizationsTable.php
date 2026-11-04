@@ -36,6 +36,7 @@
 
 namespace AidingApp\Contact\Filament\Tables;
 
+use AidingApp\Contact\Filament\Support\OrganizationArchivedName;
 use AidingApp\Contact\Models\Builders\OrganizationBuilder;
 use AidingApp\Contact\Models\Organization;
 use App\Features\OrganizationArchivingFeature;
@@ -43,6 +44,7 @@ use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 
 class OrganizationsTable
@@ -70,6 +72,7 @@ class OrganizationsTable
                 IdColumn::make(),
                 TextColumn::make('name')
                     ->label('Organization Name')
+                    ->formatStateUsing(fn (Organization $record, string $state): string | View => OrganizationArchivedName::format($record, $state))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('website')

@@ -128,6 +128,50 @@ test('ViewContact renders successfully when optional fields have no value', func
         ->assertSuccessful();
 });
 
+describe('archived organization indicator', function (): void {
+    it('marks an archived organization while still showing its name', function (): void {
+        OrganizationArchivingFeature::activate();
+
+        asSuperAdmin();
+
+        $contact = Contact::factory()
+            ->for(Organization::factory()->archived()->state(['name' => 'Acme Inc']), 'organization')
+            ->create();
+
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+            ->assertSee('Acme Inc')
+            ->assertSee('This organization is archived.');
+    });
+
+    it('does not mark an active organization', function (): void {
+        OrganizationArchivingFeature::activate();
+
+        asSuperAdmin();
+
+        $contact = Contact::factory()
+            ->for(Organization::factory()->state(['name' => 'Acme Inc']), 'organization')
+            ->create();
+
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+            ->assertSee('Acme Inc')
+            ->assertDontSee('This organization is archived.');
+    });
+
+    it('does not mark an archived organization when the feature is inactive', function (): void {
+        OrganizationArchivingFeature::deactivate();
+
+        asSuperAdmin();
+
+        $contact = Contact::factory()
+            ->for(Organization::factory()->archived()->state(['name' => 'Acme Inc']), 'organization')
+            ->create();
+
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+            ->assertSee('Acme Inc')
+            ->assertDontSee('This organization is archived.');
+    });
+});
+
 it('returns not found for an archived contact', function (): void {
     asSuperAdmin();
 
@@ -398,6 +442,33 @@ describe('section edit actions', function (): void {
             ])
                 ->assertCanSeeTableRecords([$linkedOrganization])
                 ->assertCanNotSeeTableRecords([$otherArchivedOrganization]);
+        });
+
+        it('marks only the archived selection with the archived indicator in the picker', function (): void {
+            OrganizationArchivingFeature::activate();
+
+            $linkedOrganization = Organization::factory()->archived()->create();
+            $activeOrganization = Organization::factory()->create();
+            $contact = Contact::factory()->create(['organization_id' => $linkedOrganization->getKey()]);
+
+            $component = Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+                ->mountAction(TestAction::make('editCustomerInformation')->schemaComponent('customerInformation'));
+
+            $field = (fn () => $this->getMountedActionSchema())->call($component->instance())->getFlatComponents()['organization_id'] ?? null;
+
+            assert($field instanceof TableSelect);
+
+            $html = Livewire::test(TableSelectLivewireComponent::class, [
+                'tableConfiguration' => base64_encode(OrganizationsTable::class),
+                'tableArguments' => $field->getTableArguments(),
+                'model' => Contact::class,
+                'relationshipName' => 'organization',
+            ])
+                ->assertCanSeeTableRecords([$linkedOrganization, $activeOrganization])
+                ->html();
+
+            expect(substr_count($html, 'This organization is archived.'))->toBe(substr_count(view('filament.tables.columns.organization.archived-name', ['name' => 'x'])->render(), 'This organization is archived.'))
+                ->toBeGreaterThan(0);
         });
 
         it('keeps the archived organization when the section is saved unchanged', function (): void {
