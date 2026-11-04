@@ -37,6 +37,7 @@
 namespace AidingApp\Contact\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Actions\MatchContactToOrganization;
 use AidingApp\Contact\Database\Factories\ContactFactory;
 use AidingApp\Contact\Enums\EmailHealthStatus;
 use AidingApp\Contact\Filament\Resources\ContactResource;
@@ -324,6 +325,7 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     {
         static::archived(fn () => Cache::tags('{contacts}')->flush());
         static::unarchived(fn () => Cache::tags('{contacts}')->flush());
+        static::unarchived(fn (Contact $contact) => app(MatchContactToOrganization::class)($contact));
     }
 
     protected function serializeDate(DateTimeInterface $date): string

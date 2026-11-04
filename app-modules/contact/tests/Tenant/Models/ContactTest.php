@@ -36,6 +36,8 @@
 
 use AidingApp\Contact\Enums\EmailHealthStatus;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
+use App\Features\ContactArchivingFeature;
 
 it('reports a bounced email health status and cannot receive email when the email has bounced', function (): void {
     $contact = Contact::factory()->create(['email_bounce' => true]);
@@ -49,4 +51,20 @@ it('reports a healthy email health status and can receive email when the email h
 
     expect($contact->getEmailHealthStatus())->toBe(EmailHealthStatus::Healthy)
         ->and($contact->canReceiveEmail())->toBeTrue();
+});
+
+it('links a contact to its domain organization when it is unarchived', function (): void {
+    ContactArchivingFeature::activate();
+
+    $contact = Contact::factory()->archived()->create([
+        'email' => 'person@example.com',
+        'organization_id' => null,
+    ]);
+    $organization = Organization::factory()->create(['domains' => []]);
+    $organization->domains = [['domain' => 'example.com']];
+    $organization->saveQuietly();
+
+    $contact->unarchive();
+
+    expect($contact->refresh()->organization_id)->toBe($organization->getKey());
 });
