@@ -39,6 +39,7 @@ namespace AidingApp\Contact\Http\Requests\Api\V1\Contacts;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Support\ContactFullName;
 use App\Features\ContactArchivingFeature;
 use Closure;
 use Illuminate\Database\Query\Expression;
@@ -144,16 +145,13 @@ abstract class SaveContactRequest extends FormRequest
                 $firstName = $this->input('first_name', $contact instanceof Contact ? $contact->first_name : null);
                 $lastName = $this->input('last_name', $contact instanceof Contact ? $contact->last_name : null);
 
-                if (! is_string($firstName) || ! is_string($lastName) || Str::length("{$firstName} {$lastName}") <= 255) {
+                if (! is_string($firstName) || ! is_string($lastName) || ! ContactFullName::exceedsMaxLength($firstName, $lastName)) {
                     return;
                 }
 
                 foreach (['first_name', 'last_name'] as $field) {
                     if ($this->exists($field)) {
-                        $validator->errors()->add($field, __('validation.max.string', [
-                            'attribute' => 'full name',
-                            'max' => 255,
-                        ]));
+                        $validator->errors()->add($field, ContactFullName::tooLongMessage());
                     }
                 }
             },

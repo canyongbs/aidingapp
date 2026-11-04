@@ -38,12 +38,16 @@ namespace AidingApp\Contact\Http\Controllers\Api\V1\Contacts;
 
 use AidingApp\Contact\Http\Resources\Api\V1\ContactResource;
 use AidingApp\Contact\Models\Contact;
+use Closure;
 use Dedoc\Scramble\Attributes\Example;
 use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\QueryParameter;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
@@ -58,8 +62,8 @@ class ListContactsController
     #[Group('Contacts')]
     #[QueryParameter('filter[name]', description: 'Filter the results where the full name partially matches the provided value.', type: 'string')]
     #[QueryParameter('filter[email]', description: 'Filter the results where the email address partially matches the provided value.', type: 'string')]
-    #[QueryParameter('filter[type]', description: 'Filter the results where the contact type ID matches the provided value.', type: 'string')]
-    #[QueryParameter('filter[organization]', description: 'Filter the results where the organization ID matches the provided value.', type: 'string')]
+    #[QueryParameter('filter[type]', description: 'Filter the results where the contact type ID matches the provided value. Accepts a UUID or a comma-separated list of UUIDs; other values return a validation error.', type: 'string')]
+    #[QueryParameter('filter[organization]', description: 'Filter the results where the organization ID matches the provided value. Accepts a UUID or a comma-separated list of UUIDs; other values return a validation error.', type: 'string')]
     #[QueryParameter('page[number]', description: 'Control which page of contacts is returned in the response.', type: 'int', default: 1)]
     #[QueryParameter('page[size]', description: 'Control how many contacts are returned in the response.', type: 'int', default: 30)]
     #[QueryParameter('sort', description: 'Control the order of contacts that are returned in the response. Ascending order is used by default, prepend the sort with `-` to sort descending.', type: 'string', default: 'name', examples: [
@@ -67,9 +71,14 @@ class ListContactsController
         'email' => new Example('email'),
         'created_at' => new Example('created_at'),
     ])]
-    public function __invoke(): AnonymousResourceCollection
+    public function __invoke(Request $request): AnonymousResourceCollection
     {
         Gate::authorize('viewAny', Contact::class);
+
+        $request->validate([
+            'filter.type' => [$this->uuidListRule()],
+            'filter.organization' => [$this->uuidListRule()],
+        ]);
 
         return QueryBuilder::for(
             Contact::query()->withoutArchived()->with(['type', 'organization'])
@@ -88,5 +97,23 @@ class ListContactsController
             ->defaultSort(AllowedSort::field('name', 'full_name'))
             ->jsonPaginate()
             ->toResourceCollection(ContactResource::class);
+    }
+
+    /**
+     * The exact filters compare against UUID columns, so every supplied value must be a UUID.
+     * Lists are split with the same delimiter the query builder uses.
+     */
+    private function uuidListRule(): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail): void {
+            $delimiter = config('query-builder.delimiter', ',');
+
+            $ids = collect(Arr::flatten(Arr::wrap($value)))
+                ->flatMap(fn (mixed $id): array => is_string($id) && $delimiter !== '' ? explode($delimiter, $id) : [$id]);
+
+            if ($ids->contains(fn (mixed $id): bool => ! is_string($id) || ! Str::isUuid($id))) {
+                $fail('The :attribute must be a valid ID or a comma-separated list of valid IDs.');
+            }
+        };
     }
 }

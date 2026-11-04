@@ -107,6 +107,51 @@ it('does not include archived contacts', function (): void {
         ->and($response['data'][0]['id'])->toBe($contact->getKey());
 });
 
+it('rejects ID filters that are not UUIDs', function (string $filter, mixed $value): void {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    Sanctum::actingAs($user, ['api']);
+
+    Contact::factory()->create();
+
+    getJson(route('api.v1.contacts.index', ['filter' => [$filter => $value]], false))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(["filter.{$filter}"]);
+})->with([
+    'type name' => ['type', 'Customer'],
+    'organization that is not a UUID' => ['organization', 'not-a-uuid'],
+    'list with an invalid member' => ['type', '2f7b2f5e-7a43-4a0c-8d3f-4d2f9a3b7c11,Customer'],
+    'array with an invalid member' => ['organization', ['2f7b2f5e-7a43-4a0c-8d3f-4d2f9a3b7c11', 'nope']],
+    'list with an empty member' => ['type', '2f7b2f5e-7a43-4a0c-8d3f-4d2f9a3b7c11,'],
+]);
+
+it('can filter contacts by a list of IDs', function (string $filter): void {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    Sanctum::actingAs($user, ['api']);
+
+    $firstType = ContactType::factory()->create();
+    $secondType = ContactType::factory()->create();
+    $firstOrganization = Organization::factory()->create();
+    $secondOrganization = Organization::factory()->create();
+
+    $first = Contact::factory()->create(['type_id' => $firstType->getKey(), 'organization_id' => $firstOrganization->getKey()]);
+    $second = Contact::factory()->create(['type_id' => $secondType->getKey(), 'organization_id' => $secondOrganization->getKey()]);
+    Contact::factory()->create();
+
+    $values = [
+        'type' => [$firstType->getKey(), $secondType->getKey()],
+        'organization' => [$firstOrganization->getKey(), $secondOrganization->getKey()],
+    ][$filter];
+
+    $response = getJson(route('api.v1.contacts.index', ['filter' => [$filter => implode(',', $values)]], false));
+    $response->assertOk();
+
+    $ids = array_column($response->json('data'), 'id');
+
+    expect($ids)->toEqualCanonicalizing([$first->getKey(), $second->getKey()]);
+})->with(['type', 'organization']);
+
 it('can filter contacts by name, email, type, and organization', function (string $filter): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('contact.view-any');

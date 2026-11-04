@@ -73,22 +73,4 @@ class UpdateContactRequest extends SaveContactRequest
 
         return array_map(fn (array $fieldRules): array => ['sometimes', ...$fieldRules], $rules);
     }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function contactAttributes(): array
-    {
-        $attributes = parent::contactAttributes();
-
-        if (array_key_exists('first_name', $attributes) || array_key_exists('last_name', $attributes)) {
-            $contact = $this->route('contact');
-
-            assert($contact instanceof Contact);
-
-            $attributes['full_name'] = ($attributes['first_name'] ?? $contact->first_name) . ' ' . ($attributes['last_name'] ?? $contact->last_name);
-        }
-
-        return $attributes;
-    }
 }

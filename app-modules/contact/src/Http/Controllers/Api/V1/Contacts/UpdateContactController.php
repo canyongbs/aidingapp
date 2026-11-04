@@ -36,6 +36,7 @@
 
 namespace AidingApp\Contact\Http\Controllers\Api\V1\Contacts;
 
+use AidingApp\Contact\Actions\UpdateContact;
 use AidingApp\Contact\Http\Requests\Api\V1\Contacts\UpdateContactRequest;
 use AidingApp\Contact\Http\Resources\Api\V1\ContactResource;
 use AidingApp\Contact\Models\Contact;
@@ -49,7 +50,7 @@ class UpdateContactController
      * Managed contacts, which are synchronized from a user, cannot be updated, and archived contacts are not found.
      * Relationships accept exact, case-insensitive names in `type` and `organization`.
      * Unknown names and ambiguous contact type names return validation errors.
-     * Providing `organization: null` clears the organization without automatic email-domain matching.
+     * Providing `organization: null` clears the organization without automatic email-domain matching on that request.
      * UUID relationship fields are not accepted.
      * The combined first and last name, including unchanged components and the separating space,
      * must not exceed 255 characters.
@@ -57,18 +58,15 @@ class UpdateContactController
      * @response ContactResource
      */
     #[Group('Contacts')]
-    public function __invoke(UpdateContactRequest $request, Contact $contact): JsonResource
+    public function __invoke(UpdateContactRequest $request, Contact $contact, UpdateContact $updateContact): JsonResource
     {
-        if ($request->exists('type')) {
-            $contact->type()->associate($request->getResolvedType());
-        }
-
-        if ($request->exists('organization')) {
-            $contact->organization()->associate($request->getResolvedOrganization());
-        }
-
-        $contact->shouldAutomaticallyMatchOrganization = ! $request->exists('organization');
-        $contact->update($request->contactAttributes());
+        $contact = $updateContact(
+            contact: $contact,
+            attributes: $request->contactAttributes(),
+            type: $request->getResolvedType(),
+            organization: $request->getResolvedOrganization(),
+            updateOrganization: $request->exists('organization'),
+        );
 
         return $contact
             ->fresh(['type', 'organization'])

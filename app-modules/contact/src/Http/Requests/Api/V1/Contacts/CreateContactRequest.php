@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Http\Requests\Api\V1\Contacts;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
+use AidingApp\Contact\Support\ContactFullName;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
@@ -89,7 +90,7 @@ class CreateContactRequest extends SaveContactRequest
             $attributes[static::COLUMN_NAMES[$field] ?? $field] ??= null;
         }
 
-        $attributes['full_name'] = "{$attributes['first_name']} {$attributes['last_name']}";
+        $attributes['full_name'] = ContactFullName::make($attributes['first_name'], $attributes['last_name']);
 
         return $attributes;
     }

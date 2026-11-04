@@ -332,6 +332,35 @@ describe('archived contacts', function () use ($actingAsContactCreator): void {
             ->assertJsonPath('data.organization', null);
     });
 
+    it('rolls back the overwrite when restoring the archived contact is cancelled', function () use ($actingAsContactCreator): void {
+        $actingAsContactCreator();
+
+        $archived = Contact::factory()->archived()->create([
+            'email' => 'archived@example.com',
+            'first_name' => 'Old',
+            'last_name' => 'Name',
+            'full_name' => 'Old Name',
+            'phone' => '555-0100',
+        ]);
+        Contact::unarchiving(fn (): bool => false);
+
+        postJson(route('api.v1.contacts.store', [], false), [
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
+            'email' => 'archived@example.com',
+            'type' => ContactType::factory()->create(['name' => 'Restored Type'])->name,
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors(['email'])
+            ->assertJsonPath('errors.email.0', 'The archived contact with this email could not be restored.');
+
+        $archived->refresh();
+
+        expect($archived->isArchived())->toBeTrue()
+            ->and($archived->full_name)->toBe('Old Name')
+            ->and($archived->phone)->toBe('555-0100')
+            ->and(Contact::query()->count())->toBe(1);
+    });
+
     it('still rejects an email used by an active contact', function () use ($actingAsContactCreator): void {
         $actingAsContactCreator();
 

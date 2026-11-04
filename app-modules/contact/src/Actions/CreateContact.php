@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use App\Features\ContactArchivingFeature;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class CreateContact
 {
@@ -68,7 +69,11 @@ class CreateContact
             $contact->save();
 
             // Unarchiving after the save lets organization matching see the new data.
-            $archivedContact?->unarchive();
+            if ($archivedContact !== null && ! $archivedContact->unarchive()) {
+                throw ValidationException::withMessages([
+                    'email' => 'The archived contact with this email could not be restored.',
+                ]);
+            }
 
             return $contact;
         });
