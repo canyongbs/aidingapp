@@ -90,7 +90,7 @@ class ListContactsController
                 AllowedFilter::partial('email'),
                 // Names may contain commas, so multiple names are separated with a pipe instead.
                 AllowedFilter::callback('type', $this->relatedNameFilter('type'))->delimiter('|'),
-                AllowedFilter::callback('organization', $this->relatedNameFilter('organization'))->delimiter('|'),
+                AllowedFilter::callback('organization', $this->relatedNameFilter('organization', isNameCaseInsensitive: true))->delimiter('|'),
             )
             ->allowedSorts(
                 AllowedSort::field('name', 'full_name'),
@@ -103,21 +103,26 @@ class ListContactsController
     }
 
     /**
-     * Match the related record's name exactly, ignoring case.
+     * Match the related record's name exactly, ignoring case. Organization names are `citext`, so they
+     * compare case-insensitively as they are, whereas contact type names need `lower()`.
      *
      * @return Closure(Builder<Contact>, mixed): Builder<Contact>
      */
-    private function relatedNameFilter(string $relationship): Closure
+    private function relatedNameFilter(string $relationship, bool $isNameCaseInsensitive = false): Closure
     {
-        return function (Builder $query, mixed $value) use ($relationship): Builder {
-            $names = array_map(
-                fn (mixed $name): string => Str::lower((string) $name),
-                Arr::flatten(Arr::wrap($value)),
-            );
+        return function (Builder $query, mixed $value) use ($relationship, $isNameCaseInsensitive): Builder {
+            $names = Arr::flatten(Arr::wrap($value));
+
+            if (! $isNameCaseInsensitive) {
+                $names = array_map(fn (mixed $name): string => Str::lower((string) $name), $names);
+            }
 
             return $query->whereHas(
                 $relationship,
-                fn (Builder $query) => $query->whereIn(new Expression('lower(name)'), $names),
+                fn (Builder $query) => $query->whereIn(
+                    $isNameCaseInsensitive ? 'name' : new Expression('lower(name)'),
+                    $names,
+                ),
             );
         };
     }

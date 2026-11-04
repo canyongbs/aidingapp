@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Http\Requests\Api\V1\Contacts;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
-use AidingApp\Contact\Support\ContactFullName;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
@@ -70,28 +69,5 @@ class CreateContactRequest extends SaveContactRequest
                 'max:255',
             ],
         ];
-    }
-
-    /**
-     * The full name is derived from the first and last name. Columns that are not provided are
-     * explicitly cleared, so an archived contact restored by this request keeps none of its old data.
-     *
-     * @return array<string, mixed>
-     */
-    public function contactAttributes(): array
-    {
-        $attributes = parent::contactAttributes();
-
-        foreach (array_keys($this->contactRules()) as $field) {
-            if ($field === 'organization') {
-                continue;
-            }
-
-            $attributes[static::COLUMN_NAMES[$field] ?? $field] ??= null;
-        }
-
-        $attributes['full_name'] = ContactFullName::make($attributes['first_name'], $attributes['last_name']);
-
-        return $attributes;
     }
 }

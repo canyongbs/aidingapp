@@ -36,7 +36,8 @@
 
 namespace AidingApp\Contact\Http\Controllers\Api\V1\Contacts;
 
-use AidingApp\Contact\Actions\UpdateContact;
+use AidingApp\Contact\Actions\SaveContact;
+use AidingApp\Contact\DataTransferObjects\ContactDataObject;
 use AidingApp\Contact\Http\Requests\Api\V1\Contacts\UpdateContactRequest;
 use AidingApp\Contact\Http\Resources\Api\V1\ContactResource;
 use AidingApp\Contact\Models\Contact;
@@ -51,22 +52,15 @@ class UpdateContactController
      * Relationships accept exact, case-insensitive names in `type` and `organization`.
      * Unknown names and ambiguous contact type names return validation errors.
      * Providing `organization: null` clears the organization without automatic email-domain matching on that request.
-     * UUID relationship fields are not accepted.
      * The combined first and last name, including unchanged components and the separating space,
      * must not exceed 255 characters.
      *
      * @response ContactResource
      */
     #[Group('Contacts')]
-    public function __invoke(UpdateContactRequest $request, Contact $contact, UpdateContact $updateContact): JsonResource
+    public function __invoke(UpdateContactRequest $request, Contact $contact, SaveContact $saveContact): JsonResource
     {
-        $contact = $updateContact(
-            contact: $contact,
-            attributes: $request->contactAttributes(),
-            type: $request->getResolvedType(),
-            organization: $request->getResolvedOrganization(),
-            updateOrganization: $request->exists('organization'),
-        );
+        $contact = $saveContact(ContactDataObject::fromData($request->validated()), $contact);
 
         return $contact
             ->fresh(['type', 'organization'])

@@ -227,8 +227,6 @@ it('validates the request', function (array $payload, array $errors) use ($actin
     'organization must exist' => [['organization' => 'Unknown organization'], ['organization']],
     'type must be a string' => [['type' => ['Invalid']], ['type']],
     'organization must be a string' => [['organization' => ['Invalid']], ['organization']],
-    'type UUID field is not accepted' => [['type_id' => '2f7b2f5e-7a43-4a0c-8d3f-4d2f9a3b7c11'], ['type_id']],
-    'organization UUID field is not accepted' => [['organization_id' => '2f7b2f5e-7a43-4a0c-8d3f-4d2f9a3b7c11'], ['organization_id']],
 ]);
 
 it('allows a contact to keep its own email address', function () use ($actingAsContactUpdater): void {

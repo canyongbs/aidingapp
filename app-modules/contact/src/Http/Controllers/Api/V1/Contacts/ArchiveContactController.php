@@ -37,11 +37,11 @@
 namespace AidingApp\Contact\Http\Controllers\Api\V1\Contacts;
 
 use AidingApp\Contact\Actions\ArchiveContact;
+use AidingApp\Contact\Http\Requests\Api\V1\Contacts\ArchiveContactRequest;
 use AidingApp\Contact\Models\Contact;
 use App\Features\ContactArchivingFeature;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Gate;
 
 class ArchiveContactController
 {
@@ -51,11 +51,8 @@ class ArchiveContactController
      * This endpoint is unavailable until contact archiving is enabled.
      */
     #[Group('Contacts')]
-    public function __invoke(Contact $contact, ArchiveContact $archiveContact): Response
+    public function __invoke(ArchiveContactRequest $request, Contact $contact, ArchiveContact $archiveContact): Response
     {
-        Gate::authorize('viewAny', Contact::class);
-        Gate::authorize('delete', $contact);
-
         abort_unless(ContactArchivingFeature::active(), 404);
 
         $archiveContact($contact);
