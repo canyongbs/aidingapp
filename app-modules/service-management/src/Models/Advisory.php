@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Department\Models\Department;
+use AidingApp\ServiceManagement\Database\Factories\AdvisoryFactory;
 use AidingApp\ServiceManagement\Enums\AdvisoryVisibility;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
