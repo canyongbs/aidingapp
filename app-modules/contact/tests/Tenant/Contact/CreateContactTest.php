@@ -35,10 +35,14 @@
 */
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
+use AidingApp\Contact\Filament\Tables\OrganizationsTable;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\CreateContactRequestFactory;
 use App\Features\ContactArchivingFeature;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
+use Filament\Forms\Components\TableSelect\Livewire\TableSelectLivewireComponent;
 use Filament\Forms\Components\TextInput;
 use Livewire\Livewire;
 
@@ -201,4 +205,36 @@ it('rejects the email of an archived contact with the unique message while conta
     expect($component->errors()->get('data.email'))->not->toContain('An archived contact with this email already exists.');
 
     assertCount(1, Contact::all());
+});
+
+describe('organization picker', function (): void {
+    it('lists active organizations and not archived ones when organization archiving is active', function (): void {
+        OrganizationArchivingFeature::activate();
+        asSuperAdmin();
+
+        $organization = Organization::factory()->create();
+        $archivedOrganization = Organization::factory()->archived()->create();
+
+        Livewire::test(TableSelectLivewireComponent::class, [
+            'tableConfiguration' => base64_encode(OrganizationsTable::class),
+            'model' => Contact::class,
+            'relationshipName' => 'organization',
+        ])
+            ->assertCanSeeTableRecords([$organization])
+            ->assertCanNotSeeTableRecords([$archivedOrganization]);
+    });
+
+    it('lists archived organizations when organization archiving is inactive', function (): void {
+        OrganizationArchivingFeature::deactivate();
+        asSuperAdmin();
+
+        $archivedOrganization = Organization::factory()->archived()->create();
+
+        Livewire::test(TableSelectLivewireComponent::class, [
+            'tableConfiguration' => base64_encode(OrganizationsTable::class),
+            'model' => Contact::class,
+            'relationshipName' => 'organization',
+        ])
+            ->assertCanSeeTableRecords([$archivedOrganization]);
+    });
 });
