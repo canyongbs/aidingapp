@@ -39,20 +39,22 @@ namespace AidingApp\Report\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Group\Models\Group;
 use AidingApp\Report\Database\Factories\ReportGroupAccessFactory;
-use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @mixin IdeHelperReportGroupAccess
  */
-class ReportGroupAccess extends BaseModel implements Auditable
+class ReportGroupAccess extends Model implements Auditable
 {
     /** @use HasFactory<ReportGroupAccessFactory> */
     use HasFactory;
 
     use AuditableTrait;
+    use HasUuids;
 
     protected $fillable = [
         'report_key',
