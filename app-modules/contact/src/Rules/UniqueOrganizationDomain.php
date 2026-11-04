@@ -75,17 +75,13 @@ class UniqueOrganizationDomain implements ValidationRule
         if (
             Organization::query()
                 ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
-                ->where(
-                    fn (Builder $query) => $query
-                        ->whereJsonContains('domains', [['domain' => $value]])
-                        ->orWhereRaw(
-                            "EXISTS (
-                                SELECT 1
-                                FROM jsonb_array_elements(domains) AS elem
-                                WHERE {$storedDomain} = {$givenDomain}
-                            )",
-                            [$value],
-                        )
+                ->whereRaw(
+                    "EXISTS (
+                        SELECT 1
+                        FROM jsonb_array_elements(domains) AS elem
+                        WHERE {$storedDomain} = {$givenDomain}
+                    )",
+                    [$value],
                 )
                 ->exists()
         ) {
