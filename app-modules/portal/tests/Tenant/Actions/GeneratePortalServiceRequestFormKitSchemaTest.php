@@ -87,7 +87,7 @@ it('renders a title and description header for each step of a multi-step form', 
 
     $schema = $generateSchema($type);
 
-    expect(array_column($findNodesByClass($schema, 'wizard-title'), 'children'))->toBe(['Main', 'Personal details', 'Review'])
+    expect(array_column($findNodesByClass($schema, 'wizard-title'), 'children'))->toBe(['Request Details', 'Personal details', 'Review'])
         ->and(array_column($findNodesByClass($schema, 'wizard-description'), 'children'))->toBe(['Tell us about yourself.']);
 });
 

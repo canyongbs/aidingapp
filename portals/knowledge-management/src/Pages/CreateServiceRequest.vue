@@ -123,6 +123,30 @@
         await checkAndGenerateQuestions(newStep);
     });
 
+    const stepProgress = ref(null);
+
+    // Moving between steps swaps the form content in place, so bring the progress bar back
+    // into view when the user has scrolled past it (e.g. after clicking Next at the bottom).
+    watch(activeStep, (newStep, oldStep) => {
+        if (!oldStep) {
+            return;
+        }
+
+        nextTick(() => {
+            const element = stepProgress.value;
+
+            if (!element) {
+                return;
+            }
+
+            const offset = parseFloat(getComputedStyle(element).scrollMarginTop) || 0;
+
+            if (element.getBoundingClientRect().top < offset) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+
     const categoryBreadcrumbs = computed(() => {
         if (!categoryData.value) return [];
 
@@ -226,6 +250,17 @@
                 });
         },
     });
+
+    // Pressing Enter in a field submits the whole form, which FormKit rejects while later steps
+    // are still empty (and flags their fields as errored), so treat it as Next until the last step.
+    function advanceOnEnter(event) {
+        if (event.isComposing || !(event.target instanceof HTMLInputElement) || data.isLastStep()) {
+            return;
+        }
+
+        event.preventDefault();
+        data.setStep(1)();
+    }
 
     async function preloadAiResolution() {
         try {
@@ -515,24 +550,25 @@
                 <div
                     class="service-request-form prose max-w-none min-w-0"
                     v-show="!isGeneratingQuestions && !isEvaluatingAiResolution && !showAiResolutionStep"
+                    @keydown.enter="advanceOnEnter"
                 >
                     <div
                         v-if="user?.email"
-                        class="not-prose mb-6 flex items-center justify-between gap-4 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3"
+                        class="not-prose mb-6 flex items-center justify-between gap-3 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 sm:gap-4"
                     >
                         <div class="flex min-w-0 items-center gap-3">
                             <span
-                                class="flex size-9 shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-700"
+                                class="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-600"
                             >
                                 <UserIcon class="size-5" />
                             </span>
                             <div class="min-w-0 text-sm leading-tight">
                                 <p class="text-xs text-gray-500">Signed in as</p>
-                                <p class="truncate font-semibold text-gray-900">{{ user.email }}</p>
+                                <p class="font-semibold wrap-anywhere text-gray-900">{{ user.email }}</p>
                             </div>
                         </div>
                         <div class="flex shrink-0 items-center gap-4">
-                            <span class="h-6 w-px bg-gray-300"></span>
+                            <span class="hidden h-6 w-px bg-brand-200 sm:block"></span>
                             <button
                                 type="button"
                                 class="cursor-pointer text-sm font-semibold text-brand-600 transition-colors hover:text-brand-700"
@@ -543,17 +579,28 @@
                         </div>
                     </div>
 
-                    <div v-if="totalSteps > 1" class="not-prose mb-6 border-b border-gray-200 pb-6">
-                        <div class="mb-2 flex items-center justify-between">
+                    <div
+                        v-if="totalSteps > 1"
+                        ref="stepProgress"
+                        class="not-prose mb-6 scroll-mt-24 border-b border-gray-200 pb-6"
+                    >
+                        <div class="mb-2 flex items-center justify-between" aria-live="polite">
                             <span class="text-sm font-bold text-gray-900">
                                 Step {{ currentStep }} of {{ totalSteps }}
                             </span>
                             <span class="text-sm text-gray-500">{{ percentComplete }}% complete</span>
                         </div>
-                        <div class="h-2 w-full rounded-full bg-gray-200">
+                        <div
+                            class="h-2 w-full rounded-full bg-gray-200"
+                            role="progressbar"
+                            aria-label="Form progress"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            :aria-valuenow="percentComplete"
+                        >
                             <div
                                 class="h-2 rounded-full bg-brand-600 transition-all"
-                                :style="{ width: `${(currentStep / totalSteps) * 100}%` }"
+                                :style="{ width: `${percentComplete}%` }"
                             ></div>
                         </div>
                     </div>

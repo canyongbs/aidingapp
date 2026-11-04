@@ -81,6 +81,8 @@ class GeneratePortalServiceRequestFormKitSchema
     /**
      * Renders each step with a title and description header, followed by Back / Next
      * navigation around a "Step X of Y" progress label, in place of the shared step tabs.
+     * The progress label repeats the page's progress bar, so it is hidden from assistive
+     * technology and on narrow screens.
      *
      * @param FormKitBlocks $blocks
      *
@@ -144,7 +146,7 @@ class GeneratePortalServiceRequestFormKitSchema
                                 '$el' => 'div',
                                 'attrs' => [
                                     'class' => 'step-progress not-prose',
-                                    'aria-live' => 'polite',
+                                    'aria-hidden' => 'true',
                                     'style' => $isMultiStep ? null : 'display: none;',
                                 ],
                                 'children' => [

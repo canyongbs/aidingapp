@@ -205,7 +205,7 @@ it('lends the combined step title and description to the Main step while keeping
         ->and($result->steps->first()->getAttribute('display_label'))->toBe('Personal details');
 });
 
-it('does not give the Main step a title or description when no step is combined into it', function () use ($serviceRequestFormStepContent): void {
+it('titles the Main step "Request Details" without a description when no step is combined into it', function () use ($serviceRequestFormStepContent): void {
     $type = ServiceRequestType::factory()->create();
 
     $form = ServiceRequestForm::factory()
@@ -225,6 +225,6 @@ it('does not give the Main step a title or description when no step is combined 
 
     expect($result->steps->first()->label)->toBe('Main')
         ->and($result->steps->first()->description)->toBeNull()
-        ->and($result->steps->first()->getAttribute('display_label'))->toBeNull()
+        ->and($result->steps->first()->getAttribute('display_label'))->toBe('Request Details')
         ->and($result->steps->last()->description)->toBe('Tell us about yourself.');
 });
