@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
+use App\Features\OrganizationArchivingFeature;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
@@ -47,10 +48,22 @@ use Illuminate\Validation\Rule;
 
 class UpdateOrganizationRequest extends FormRequest
 {
+    /**
+     * Archived organizations are not found once the user is authorized, before the payload is validated.
+     */
     public function authorize(): bool
     {
-        return Gate::allows('viewAny', Organization::class)
-            && Gate::allows('update', $this->route('organization'));
+        $organization = $this->route('organization');
+
+        if (! (Gate::allows('viewAny', Organization::class) && Gate::allows('update', $organization))) {
+            return false;
+        }
+
+        if (OrganizationArchivingFeature::active() && $organization instanceof Organization && $organization->isArchived()) {
+            abort(404);
+        }
+
+        return true;
     }
 
     /**

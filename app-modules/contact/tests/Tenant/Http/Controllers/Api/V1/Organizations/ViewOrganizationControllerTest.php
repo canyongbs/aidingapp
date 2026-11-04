@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Organization;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\SystemUser;
 use Laravel\Sanctum\Sanctum;
 
@@ -141,6 +142,20 @@ it('returns not found for a soft deleted organization', function (): void {
 
     $organization = Organization::factory()->create();
     $organization->delete();
+
+    getJson(route('api.v1.organizations.show', ['organization' => $organization], false))
+        ->assertNotFound();
+});
+
+it('returns not found for an archived organization', function (): void {
+    OrganizationArchivingFeature::activate();
+
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.view');
+    Sanctum::actingAs($user, ['api']);
+
+    $organization = Organization::factory()->archived()->create();
 
     getJson(route('api.v1.organizations.show', ['organization' => $organization], false))
         ->assertNotFound();
