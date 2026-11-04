@@ -107,49 +107,66 @@ it('does not include archived contacts', function (): void {
         ->and($response['data'][0]['id'])->toBe($contact->getKey());
 });
 
-it('rejects ID filters that are not UUIDs', function (string $filter, mixed $value): void {
+it('filters contacts by exact type and organization names ignoring case', function (string $filter): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('contact.view-any');
     Sanctum::actingAs($user, ['api']);
 
-    Contact::factory()->create();
+    $included = Contact::factory()
+        ->for(ContactType::factory()->create(['name' => 'Quill Partner']), 'type')
+        ->for(Organization::factory()->create(['name' => 'Quill University']), 'organization')
+        ->create();
+    Contact::factory()
+        ->for(ContactType::factory()->create(['name' => 'Quill Partner Extra']), 'type')
+        ->for(Organization::factory()->create(['name' => 'Quill University Extra']), 'organization')
+        ->create();
 
-    getJson(route('api.v1.contacts.index', ['filter' => [$filter => $value]], false))
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors(["filter.{$filter}"]);
-})->with([
-    'type name' => ['type', 'Customer'],
-    'organization that is not a UUID' => ['organization', 'not-a-uuid'],
-    'list with an invalid member' => ['type', '2f7b2f5e-7a43-4a0c-8d3f-4d2f9a3b7c11,Customer'],
-    'array with an invalid member' => ['organization', ['2f7b2f5e-7a43-4a0c-8d3f-4d2f9a3b7c11', 'nope']],
-    'list with an empty member' => ['type', '2f7b2f5e-7a43-4a0c-8d3f-4d2f9a3b7c11,'],
-]);
+    $value = ['type' => 'quill PARTNER', 'organization' => 'QUILL university'][$filter];
 
-it('can filter contacts by a list of IDs', function (string $filter): void {
-    $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
-    Sanctum::actingAs($user, ['api']);
-
-    $firstType = ContactType::factory()->create();
-    $secondType = ContactType::factory()->create();
-    $firstOrganization = Organization::factory()->create();
-    $secondOrganization = Organization::factory()->create();
-
-    $first = Contact::factory()->create(['type_id' => $firstType->getKey(), 'organization_id' => $firstOrganization->getKey()]);
-    $second = Contact::factory()->create(['type_id' => $secondType->getKey(), 'organization_id' => $secondOrganization->getKey()]);
-    Contact::factory()->create();
-
-    $values = [
-        'type' => [$firstType->getKey(), $secondType->getKey()],
-        'organization' => [$firstOrganization->getKey(), $secondOrganization->getKey()],
-    ][$filter];
-
-    $response = getJson(route('api.v1.contacts.index', ['filter' => [$filter => implode(',', $values)]], false));
+    $response = getJson(route('api.v1.contacts.index', ['filter' => [$filter => $value]], false));
     $response->assertOk();
 
-    $ids = array_column($response->json('data'), 'id');
+    expect($response['data'])->toHaveCount(1)
+        ->and($response['data'][0]['id'])->toBe($included->getKey());
+})->with(['type', 'organization']);
 
-    expect($ids)->toEqualCanonicalizing([$first->getKey(), $second->getKey()]);
+it('filters contacts by multiple names separated with a pipe', function (string $filter): void {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    Sanctum::actingAs($user, ['api']);
+
+    $first = Contact::factory()
+        ->for(ContactType::factory()->create(['name' => 'Partner, Premier']), 'type')
+        ->for(Organization::factory()->create(['name' => 'Acme, Inc']), 'organization')
+        ->create();
+    $second = Contact::factory()
+        ->for(ContactType::factory()->create(['name' => 'Vendor']), 'type')
+        ->for(Organization::factory()->create(['name' => 'Globex']), 'organization')
+        ->create();
+    Contact::factory()
+        ->for(ContactType::factory()->create(['name' => 'Other Type']), 'type')
+        ->for(Organization::factory()->create(['name' => 'Other Organization']), 'organization')
+        ->create();
+
+    $value = ['type' => 'Partner, Premier|vendor', 'organization' => 'Acme, Inc|GLOBEX'][$filter];
+
+    $response = getJson(route('api.v1.contacts.index', ['filter' => [$filter => $value]], false));
+    $response->assertOk();
+
+    expect(array_column($response->json('data'), 'id'))->toEqualCanonicalizing([$first->getKey(), $second->getKey()]);
+})->with(['type', 'organization']);
+
+it('returns no contacts for a type or organization name that does not exist', function (string $filter): void {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    Sanctum::actingAs($user, ['api']);
+
+    Contact::factory()->count(2)->create();
+
+    $response = getJson(route('api.v1.contacts.index', ['filter' => [$filter => 'Unknown name']], false));
+    $response->assertOk();
+
+    expect($response['data'])->toBeEmpty();
 })->with(['type', 'organization']);
 
 it('can filter contacts by name, email, type, and organization', function (string $filter): void {
@@ -157,8 +174,8 @@ it('can filter contacts by name, email, type, and organization', function (strin
     $user->givePermissionTo('contact.view-any');
     Sanctum::actingAs($user, ['api']);
 
-    $type = ContactType::factory()->create();
-    $organization = Organization::factory()->create();
+    $type = ContactType::factory()->create(['name' => 'Zebediah Type']);
+    $organization = Organization::factory()->create(['name' => 'Zebediah Organization']);
 
     $included = Contact::factory()->create([
         'full_name' => 'Zebediah Quillfeather',
@@ -172,8 +189,8 @@ it('can filter contacts by name, email, type, and organization', function (strin
     $value = [
         'name' => 'quillfeather',
         'email' => 'zebediah@',
-        'type' => $type->getKey(),
-        'organization' => $organization->getKey(),
+        'type' => $type->name,
+        'organization' => $organization->name,
     ][$filter];
 
     $response = getJson(route('api.v1.contacts.index', ['filter' => [$filter => $value]], false));
