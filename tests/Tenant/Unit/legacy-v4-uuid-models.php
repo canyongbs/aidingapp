@@ -152,7 +152,6 @@ use AidingApp\Theme\Settings\SettingsProperties\ThemeSettingsProperty;
 use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Webhook\Models\InboundWebhook;
 use AidingApp\Webhook\Models\LandlordInboundWebhook;
-use App\Models\BaseModel;
 use App\Models\Export;
 use App\Models\FailedImportRow;
 use App\Models\HealthCheckResultHistoryItem;
@@ -280,7 +279,6 @@ return [
     Tag::class,
     Tenant::class,
     User::class,
-    BaseModel::class,
     Submissible::class,
     SubmissibleField::class,
     Submission::class,
