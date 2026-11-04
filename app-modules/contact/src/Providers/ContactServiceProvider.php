@@ -55,10 +55,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Notifications\Events\NotificationSending;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Str;
-use Symfony\Component\HttpFoundation\Response;
 
 class ContactServiceProvider extends ServiceProvider
 {
@@ -82,15 +79,6 @@ class ContactServiceProvider extends ServiceProvider
             'organization_industry' => OrganizationIndustry::class,
             'organization_type' => OrganizationType::class,
         ]);
-
-        Route::bind('contact', function (string $value): Contact {
-            abort_unless(Str::isUuid($value), Response::HTTP_NOT_FOUND);
-
-            return Contact::query()
-                ->withoutArchived()
-                ->whereKey($value)
-                ->firstOrFail();
-        });
 
         Event::listen(SesBounceEvent::class, SaveBouncedContactEmail::class);
 

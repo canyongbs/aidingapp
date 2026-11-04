@@ -34,8 +34,8 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\ArchiveContactController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\CreateContactController;
+use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\DeleteContactController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\ListContactsController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\UpdateContactController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\ViewContactController;
@@ -64,6 +64,6 @@ Route::api(majorVersion: 1, routes: function (): void {
             Route::post('/', CreateContactController::class)->name('store');
             Route::get('/{contact}', ViewContactController::class)->name('show');
             Route::patch('/{contact}', UpdateContactController::class)->name('update');
-            Route::delete('/{contact}', ArchiveContactController::class)->name('archive');
+            Route::delete('/{contact}', DeleteContactController::class)->name('delete');
         });
 });

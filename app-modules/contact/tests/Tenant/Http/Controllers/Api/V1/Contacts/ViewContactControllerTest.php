@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use App\Features\ContactArchivingFeature;
 use App\Models\SystemUser;
 use Laravel\Sanctum\Sanctum;
 
@@ -118,6 +119,31 @@ it('returns not found for an archived contact', function (): void {
 
     getJson(route('api.v1.contacts.show', ['contact' => $contact], false))
         ->assertNotFound();
+});
+
+it('checks permissions before returning not found for an archived contact', function (): void {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    Sanctum::actingAs($user, ['api']);
+
+    $contact = Contact::factory()->archived()->create();
+
+    getJson(route('api.v1.contacts.show', ['contact' => $contact], false))
+        ->assertForbidden();
+});
+
+it('returns an archived contact while contact archiving is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['contact.view-any', 'contact.*.view']);
+    Sanctum::actingAs($user, ['api']);
+
+    $contact = Contact::factory()->archived()->create();
+
+    getJson(route('api.v1.contacts.show', ['contact' => $contact], false))
+        ->assertOk()
+        ->assertJsonPath('data.id', $contact->getKey());
 });
 
 it('returns not found for an identifier that is not a UUID', function (): void {

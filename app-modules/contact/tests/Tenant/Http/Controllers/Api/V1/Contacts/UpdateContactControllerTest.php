@@ -341,6 +341,26 @@ it('cannot update an archived contact', function () use ($actingAsContactUpdater
     expect($contact->refresh()->job_title)->toBe('Original');
 });
 
+it('returns not found for an archived contact before validating the request', function () use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $contact = Contact::factory()->archived()->create();
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['email' => 'not-an-email'])
+        ->assertNotFound();
+});
+
+it('checks permissions before returning not found for an archived contact', function (): void {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    Sanctum::actingAs($user, ['api']);
+
+    $contact = Contact::factory()->archived()->create();
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['job_title' => 'Updated'])
+        ->assertForbidden();
+});
+
 it('clears the organization when no other organization matches the email domain', function () use ($actingAsContactUpdater): void {
     $actingAsContactUpdater();
 

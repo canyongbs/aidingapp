@@ -47,7 +47,7 @@ class UpdateContactRequest extends FormRequest
 {
     /**
      * Authorization runs before validation so unauthorized callers cannot probe
-     * the data through validation messages.
+     * the data through validation messages. Archived contacts are not found once the user is authorized.
      */
     public function authorize(): bool
     {
@@ -57,6 +57,8 @@ class UpdateContactRequest extends FormRequest
 
         Gate::authorize('viewAny', Contact::class);
         Gate::authorize('update', $contact);
+
+        abort_if(ContactArchivingFeature::active() && $contact->isArchived(), 404);
 
         return true;
     }

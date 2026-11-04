@@ -37,23 +37,26 @@
 namespace AidingApp\Contact\Http\Controllers\Api\V1\Contacts;
 
 use AidingApp\Contact\Actions\ArchiveContact;
-use AidingApp\Contact\Http\Requests\Api\V1\Contacts\ArchiveContactRequest;
+use AidingApp\Contact\Http\Requests\Api\V1\Contacts\DeleteContactRequest;
 use AidingApp\Contact\Models\Contact;
 use App\Features\ContactArchivingFeature;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Response;
 
-class ArchiveContactController
+class DeleteContactController
 {
     /**
      * Archive a contact. The contact is not deleted, but it is no longer returned by the API.
      * Requires contact view-any and delete permissions. Managed contacts cannot be archived.
-     * This endpoint is unavailable until contact archiving is enabled.
      */
     #[Group('Contacts')]
-    public function __invoke(ArchiveContactRequest $request, Contact $contact, ArchiveContact $archiveContact): Response
+    public function __invoke(DeleteContactRequest $request, Contact $contact, ArchiveContact $archiveContact): Response
     {
-        abort_unless(ContactArchivingFeature::active(), 404);
+        if (! ContactArchivingFeature::active()) {
+            $contact->delete();
+
+            return response()->noContent();
+        }
 
         $archiveContact($contact);
 

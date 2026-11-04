@@ -37,11 +37,15 @@
 namespace AidingApp\Contact\Http\Requests\Api\V1\Contacts;
 
 use AidingApp\Contact\Models\Contact;
+use App\Features\ContactArchivingFeature;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 
-class ArchiveContactRequest extends FormRequest
+class DeleteContactRequest extends FormRequest
 {
+    /**
+     * Archived contacts are not found once the user is authorized.
+     */
     public function authorize(): bool
     {
         $contact = $this->route('contact');
@@ -50,6 +54,8 @@ class ArchiveContactRequest extends FormRequest
 
         Gate::authorize('viewAny', Contact::class);
         Gate::authorize('delete', $contact);
+
+        abort_if(ContactArchivingFeature::active() && $contact->isArchived(), 404);
 
         return true;
     }

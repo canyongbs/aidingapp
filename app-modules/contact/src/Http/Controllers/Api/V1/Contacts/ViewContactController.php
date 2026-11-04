@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Http\Controllers\Api\V1\Contacts;
 
 use AidingApp\Contact\Http\Resources\Api\V1\ContactResource;
 use AidingApp\Contact\Models\Contact;
+use App\Features\ContactArchivingFeature;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
@@ -54,6 +55,8 @@ class ViewContactController
     {
         Gate::authorize('viewAny', Contact::class);
         Gate::authorize('view', $contact);
+
+        abort_if(ContactArchivingFeature::active() && $contact->isArchived(), 404);
 
         $contact->loadMissing(['type', 'organization']);
 
