@@ -63,44 +63,37 @@ class SaveOrganization
 
         if (! $data->industry instanceof Optional) {
             $attributes['industry_id'] = $this->resolveId(OrganizationIndustry::class, 'industry', $data->industry);
+        } elseif ($organization === null) {
+            $attributes['industry_id'] = OrganizationIndustry::query()->where('is_default', true)->value('id');
         }
 
         if (! $data->type instanceof Optional) {
             $attributes['type_id'] = $this->resolveId(OrganizationType::class, 'type', $data->type);
+        } elseif ($organization === null) {
+            $attributes['type_id'] = OrganizationType::query()->where('is_default', true)->value('id');
         }
 
-        if ($data->domains instanceof Optional) {
-            unset($attributes['domains']);
-        } else {
+        if (! $data->domains instanceof Optional) {
             $attributes['domains'] = filled($data->domains)
                 ? array_map(fn (string $domain): array => ['domain' => $domain], array_values($data->domains))
                 : null;
         }
 
-        if ($organization === null) {
-            $attributes = [
-                'industry_id' => OrganizationIndustry::query()->where('is_default', true)->value('id'),
-                'type_id' => OrganizationType::query()->where('is_default', true)->value('id'),
-                ...$attributes,
-            ];
-
-            $organization = new Organization();
-        }
+        $organization ??= new Organization();
+        $organization->fill($attributes);
 
         if (blank($attributes['domains'] ?? null)) {
-            $organization->fill($attributes)->save();
+            $organization->save();
+        } else {
+            // The request was validated before the lock was taken, so the domains are checked again while holding it.
+            DB::transaction(function () use ($organization, $attributes): void {
+                $this->domainsLock->acquire();
 
-            return $organization;
+                $this->ensureDomainsAreUnclaimed($organization, $attributes['domains']);
+
+                $organization->save();
+            });
         }
-
-        // The request was validated before the lock was taken, so the domains are checked again while holding it.
-        DB::transaction(function () use ($organization, $attributes): void {
-            $this->domainsLock->acquire();
-
-            $this->ensureDomainsAreUnclaimed($organization, $attributes['domains']);
-
-            $organization->fill($attributes)->save();
-        });
 
         return $organization;
     }
