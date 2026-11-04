@@ -80,7 +80,7 @@ class CreateOrganization extends CreateRecord
                             // Stops at the first failure, so an archived match shows its own message instead of the generic unique one.
                             ->rule('bail', fn (): bool => OrganizationArchivingFeature::active())
                             ->rule(
-                                fn (?Organization $record): OrganizationNameNotArchived => new OrganizationNameNotArchived(),
+                                fn (): OrganizationNameNotArchived => new OrganizationNameNotArchived(),
                                 fn (): bool => OrganizationArchivingFeature::active(),
                             )
                             ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
