@@ -51,16 +51,14 @@ class OrganizationsTable
     {
         return $table
             ->query(fn (): Builder => Organization::query())
-            ->modifyQueryUsing(function (Builder $query) use ($table): Builder {
+            ->modifyQueryUsing(function (OrganizationBuilder $query) use ($table): OrganizationBuilder {
                 if (! OrganizationArchivingFeature::active()) {
                     return $query;
                 }
 
                 $selectedOrganizationId = $table->getArguments()['selectedOrganizationId'] ?? null;
 
-                return $query->where(function (Builder $query) use ($selectedOrganizationId): void {
-                    assert($query instanceof OrganizationBuilder);
-
+                return $query->where(function (OrganizationBuilder $query) use ($selectedOrganizationId): void {
                     $query->withoutArchived();
 
                     if (filled($selectedOrganizationId)) {
