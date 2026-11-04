@@ -39,11 +39,13 @@
     import PageCard from '@common/portal/PageCard.vue';
     import { createMessage, getNode } from '@formkit/core';
     import { FormKitSchema } from '@formkit/vue';
+    import { UserIcon } from '@heroicons/vue/24/outline';
     import DOMPurify from 'dompurify';
     import { marked } from 'marked';
     import { storeToRefs } from 'pinia';
     import { computed, nextTick, provide, reactive, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
+    import { usePortalAuth } from '../Composables/usePortalAuth.js';
     import { createPasswordStorageCoordinator, passwordStorageKey } from '../FormKit/passwordStorage.js';
     import wizard from '../FormKit/wizard.js';
     import { apiPost } from '../Services/api.js';
@@ -65,13 +67,19 @@
         }
     }
 
-    let { steps, visitedSteps, activeStep, setStep, wizardPlugin } = wizard();
+    let { steps, visitedSteps, activeStep, currentStep, totalSteps, setStep, wizardPlugin } = wizard();
+
+    const percentComplete = computed(() =>
+        totalSteps.value > 0 ? Math.round((currentStep.value / totalSteps.value) * 100) : 0,
+    );
 
     const route = useRoute();
 
     // The authenticated contact is resolved during portal boot, so it is available
     // synchronously here.
     const { user } = storeToRefs(useAuthStore());
+
+    const { logout } = usePortalAuth();
 
     // The form schema for the selected type arrives via the route data loader.
     const { data: initialData } = useCreateServiceRequestData();
@@ -115,6 +123,30 @@
         await checkAndGenerateQuestions(newStep);
     });
 
+    const stepProgress = ref(null);
+
+    // Moving between steps swaps the form content in place, so bring the progress bar back
+    // into view when the user has scrolled past it (e.g. after clicking Next at the bottom).
+    watch(activeStep, (newStep, oldStep) => {
+        if (!oldStep) {
+            return;
+        }
+
+        nextTick(() => {
+            const element = stepProgress.value;
+
+            if (!element) {
+                return;
+            }
+
+            const offset = parseFloat(getComputedStyle(element).scrollMarginTop) || 0;
+
+            if (element.getBoundingClientRect().top < offset) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+
     const categoryBreadcrumbs = computed(() => {
         if (!categoryData.value) return [];
 
@@ -145,6 +177,9 @@
         steps,
         visitedSteps,
         activeStep,
+        currentStep,
+        totalSteps,
+        percentComplete,
         plugins: [wizardPlugin],
         preparePasswordSubmit: passwordStorage.prepareSubmit,
         setStep: (target) => async () => {
@@ -177,58 +212,6 @@
             }
 
             setStep(target);
-        },
-        setActiveStep: (stepName) => async () => {
-            if (!(await passwordStorage.flushAll())) {
-                return;
-            }
-
-            const stepNames = Object.keys(steps);
-            const targetIndex = stepNames.indexOf(stepName);
-
-            for (let i = 0; i < targetIndex; i++) {
-                const stepToValidate = stepNames[i];
-                const stepNode = getNode(stepToValidate);
-
-                if (stepNode) {
-                    stepNode.walk((node) => {
-                        node.store.set(
-                            createMessage({
-                                key: 'submitted',
-                                value: true,
-                                visible: false,
-                            }),
-                        );
-                    });
-                }
-            }
-
-            nextTick(() => {
-                for (let i = 0; i < targetIndex; i++) {
-                    const step = stepNames[i];
-
-                    if (steps[step].errorCount > 0 || steps[step].blockingCount > 0) {
-                        return;
-                    }
-                }
-
-                data.activeStep = stepName;
-            });
-        },
-        showStepErrors: (stepName) => {
-            return (
-                (steps[stepName].errorCount > 0 || steps[stepName].blockingCount > 0) &&
-                visitedSteps.value &&
-                visitedSteps.value.includes(stepName)
-            );
-        },
-        stepIsValid: (stepName) => {
-            const stepNames = Object.keys(steps);
-            const stepIndex = stepNames.indexOf(stepName);
-            const activeIndex = stepNames.indexOf(activeStep.value);
-            const isPastOrCurrentStep = stepIndex <= activeIndex;
-
-            return isPastOrCurrentStep && steps[stepName].valid && steps[stepName].errorCount === 0;
         },
         isLastStep: () => {
             const stepNames = Object.keys(steps);
@@ -267,6 +250,17 @@
                 });
         },
     });
+
+    // Pressing Enter in a field submits the whole form, which FormKit rejects while later steps
+    // are still empty (and flags their fields as errored), so treat it as Next until the last step.
+    function advanceOnEnter(event) {
+        if (event.isComposing || !(event.target instanceof HTMLInputElement) || data.isLastStep()) {
+            return;
+        }
+
+        event.preventDefault();
+        data.setStep(1)();
+    }
 
     async function preloadAiResolution() {
         try {
@@ -425,7 +419,9 @@
         const groups = sections
             .filter((sectionNode) => sectionNode && sectionNode.$el === 'section')
             .map((section) =>
-                Array.isArray(section.children) ? section.children[0] : Object.values(section.children)[0],
+                (Array.isArray(section.children) ? section.children : Object.values(section.children)).find(
+                    (child) => child && child.$formkit === 'group',
+                ),
             )
             .filter(Boolean);
 
@@ -552,9 +548,63 @@
                 </div>
 
                 <div
-                    class="prose max-w-none"
+                    class="service-request-form prose max-w-none min-w-0"
                     v-show="!isGeneratingQuestions && !isEvaluatingAiResolution && !showAiResolutionStep"
+                    @keydown.enter="advanceOnEnter"
                 >
+                    <div
+                        v-if="user?.email"
+                        class="not-prose mb-6 flex items-center justify-between gap-3 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3 sm:gap-4"
+                    >
+                        <div class="flex min-w-0 items-center gap-3">
+                            <span
+                                class="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-600"
+                            >
+                                <UserIcon class="size-5" />
+                            </span>
+                            <div class="min-w-0 text-sm leading-tight">
+                                <p class="text-xs text-gray-500">Signed in as</p>
+                                <p class="font-semibold wrap-anywhere text-gray-900">{{ user.email }}</p>
+                            </div>
+                        </div>
+                        <div class="flex shrink-0 items-center gap-4">
+                            <span class="hidden h-6 w-px bg-brand-200 sm:block"></span>
+                            <button
+                                type="button"
+                                class="cursor-pointer text-sm font-semibold text-brand-600 transition-colors hover:text-brand-700"
+                                @click="logout"
+                            >
+                                Sign out
+                            </button>
+                        </div>
+                    </div>
+
+                    <div
+                        v-if="totalSteps > 1"
+                        ref="stepProgress"
+                        class="not-prose mb-6 scroll-mt-24 border-b border-gray-200 pb-6"
+                    >
+                        <div class="mb-2 flex items-center justify-between" aria-live="polite">
+                            <span class="text-sm font-bold text-gray-900">
+                                Step {{ currentStep }} of {{ totalSteps }}
+                            </span>
+                            <span class="text-sm text-gray-500">{{ percentComplete }}% complete</span>
+                        </div>
+                        <div
+                            class="h-2 w-full rounded-full bg-gray-200"
+                            role="progressbar"
+                            aria-label="Form progress"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                            :aria-valuenow="percentComplete"
+                        >
+                            <div
+                                class="h-2 rounded-full bg-brand-600 transition-all"
+                                :style="{ width: `${percentComplete}%` }"
+                            ></div>
+                        </div>
+                    </div>
+
                     <FormKitSchema :schema="schema" :data="data" />
                 </div>
             </div>

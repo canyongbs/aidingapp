@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Providers;
 
 use AidingApp\Contact\ContactPlugin;
 use AidingApp\Contact\Listeners\CancelNotificationsToArchivedContacts;
-use AidingApp\Contact\Listeners\FlushOrganizationImportDomainClaims;
 use AidingApp\Contact\Listeners\SaveBouncedContactEmail;
 use AidingApp\Contact\Models\Builders\ContactBuilder;
 use AidingApp\Contact\Models\Contact;
@@ -47,7 +46,6 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\IntegrationAwsSesEventHandling\Events\SesBounceEvent;
-use Filament\Actions\Imports\Events\ImportCompleted;
 use Filament\Panel;
 use Illuminate\Auth\EloquentUserProvider;
 use Illuminate\Contracts\Auth\UserProvider;
@@ -81,8 +79,6 @@ class ContactServiceProvider extends ServiceProvider
             'organization_industry' => OrganizationIndustry::class,
             'organization_type' => OrganizationType::class,
         ]);
-
-        Event::listen(ImportCompleted::class, FlushOrganizationImportDomainClaims::class);
 
         Event::listen(SesBounceEvent::class, SaveBouncedContactEmail::class);
 

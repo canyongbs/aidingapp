@@ -45,17 +45,22 @@ use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetDepartment;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeDepartmentAuditor;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeDepartmentManager;
-use App\Models\BaseModel;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperDepartment
  */
-class Department extends BaseModel
+class Department extends Model
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
+
     /** @use HasFactory<DepartmentFactory> */
     use HasFactory;
 

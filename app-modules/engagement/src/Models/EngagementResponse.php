@@ -46,10 +46,10 @@ use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Timeline\Timelines\EngagementResponseTimeline;
-use App\Models\BaseModel;
 use App\Models\Media;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -61,6 +61,7 @@ use Illuminate\Support\Str;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 
@@ -68,10 +69,12 @@ use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
  * @mixin IdeHelperEngagementResponse
  */
 #[ObservedBy([EngagementResponseObserver::class])]
-class EngagementResponse extends BaseModel implements Auditable, ProvidesATimeline, HasDeliveryMethod, HasMedia
+class EngagementResponse extends Model implements Auditable, ProvidesATimeline, HasDeliveryMethod, HasMedia
 {
     use AuditableTrait;
     use SoftDeletes;
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
 
     /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;

@@ -54,7 +54,7 @@ class PipelineFactory extends Factory
     {
         return [
             'project_id' => Project::factory(),
-            'name' => $this->faker->word(),
+            'name' => $this->faker->unique()->words(asText: true),
             'description' => $this->faker->sentence(3),
         ];
     }

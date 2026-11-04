@@ -37,22 +37,25 @@
 namespace AidingApp\Form\Models;
 
 use App\Models\Attributes\NoPermissions;
-use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @property Carbon|null $created_at
  * @property-read Submissible $submissible
  */
 #[NoPermissions]
-abstract class SubmissibleAuthentication extends BaseModel
+abstract class SubmissibleAuthentication extends Model
 {
     use MassPrunable;
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
 
     /**
      * @return BelongsTo<Submissible, $this>

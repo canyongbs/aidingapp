@@ -39,21 +39,26 @@ namespace AidingApp\Engagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Database\Factories\EngagementFileFactory;
-use App\Models\BaseModel;
 use App\Models\Media;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperEngagementFile
  */
-class EngagementFile extends BaseModel implements HasMedia, Auditable
+class EngagementFile extends Model implements HasMedia, Auditable
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
+
     /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
 

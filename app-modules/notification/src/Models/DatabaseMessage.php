@@ -38,16 +38,20 @@ namespace AidingApp\Notification\Models;
 
 use AidingApp\Notification\Database\Factories\DatabaseMessageFactory;
 use AidingApp\Notification\Models\Contracts\Message;
-use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperDatabaseMessage
  */
-class DatabaseMessage extends BaseModel implements Message
+class DatabaseMessage extends Model implements Message
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
+
     /** @use HasFactory<DatabaseMessageFactory> */
     use HasFactory;
 

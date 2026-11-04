@@ -34,14 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Rules\UniqueOrganizationDomain;
 
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Model;
-use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
+$passes = fn (string $domain, string | null $ignoreId = null): bool => validator(
+    ['domain' => $domain],
+    ['domain' => [new UniqueOrganizationDomain($ignoreId)]],
+)->passes();
 
-abstract class BaseModel extends Model
-{
-    use HasUuids;
-    use UsesTenantConnection;
-}
+it('fails for a domain stored exactly by another organization', function () use ($passes): void {
+    Organization::factory()->create(['domains' => [['domain' => 'shared.edu']]]);
+
+    expect($passes('shared.edu'))->toBeFalse();
+});
+
+it('fails for a domain that differs only by case, www, scheme, port or path', function (string $domain) use ($passes): void {
+    Organization::factory()->create(['domains' => [['domain' => 'HTTPS://WWW.Shared.edu:8443/path']]]);
+
+    expect($passes($domain))->toBeFalse();
+})->with(['shared.edu', 'SHARED.EDU', 'www.shared.edu']);
+
+it('passes for an unclaimed domain', function () use ($passes): void {
+    Organization::factory()->create(['domains' => [['domain' => 'shared.edu']]]);
+
+    expect($passes('other.edu'))->toBeTrue();
+});
+
+it('passes for the domains of the organization being ignored', function () use ($passes): void {
+    $organization = Organization::factory()->create(['domains' => [['domain' => 'Shared.edu']]]);
+
+    expect($passes('shared.edu', $organization->getKey()))->toBeTrue();
+});
+
+it('passes for the domains of a soft deleted organization', function () use ($passes): void {
+    Organization::factory()->create(['domains' => [['domain' => 'shared.edu']]])->delete();
+
+    expect($passes('shared.edu'))->toBeTrue();
+});

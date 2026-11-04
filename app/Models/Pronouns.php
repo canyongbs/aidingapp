@@ -38,17 +38,22 @@ namespace App\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use Database\Factories\PronounsFactory;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperPronouns
  */
-class Pronouns extends BaseModel implements Auditable
+class Pronouns extends Model implements Auditable
 {
     use SoftDeletes;
     use AuditableTrait;
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
 
     /** @use HasFactory<PronounsFactory> */
     use HasFactory;

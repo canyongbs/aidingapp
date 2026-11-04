@@ -39,16 +39,21 @@ namespace AidingApp\Report\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Department\Models\Department;
 use AidingApp\Report\Database\Factories\ReportDepartmentAccessFactory;
-use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperReportDepartmentAccess
  */
-class ReportDepartmentAccess extends BaseModel implements Auditable
+class ReportDepartmentAccess extends Model implements Auditable
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
+
     /** @use HasFactory<ReportDepartmentAccessFactory> */
     use HasFactory;
 
