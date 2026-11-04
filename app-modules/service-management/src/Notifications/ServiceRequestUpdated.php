@@ -47,6 +47,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceReques
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Notifications\Concerns\BuildsServiceRequestDatabaseNotificationContent;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -56,6 +57,7 @@ use InvalidArgumentException;
 
 class ServiceRequestUpdated extends BaseNotification implements ShouldQueue, HasBeforeSendHook
 {
+    use BuildsServiceRequestDatabaseNotificationContent;
     use Queueable;
 
     /** @var ServiceRequest */
@@ -116,9 +118,13 @@ class ServiceRequestUpdated extends BaseNotification implements ShouldQueue, Has
      */
     public function toDatabase(object $notifiable): array
     {
+        $serviceRequestLink = $this->buildServiceRequestNumberLink($this->serviceRequest);
+        $typeName = $this->buildServiceRequestTypeName($this->serviceRequest);
+        $customerLink = $this->buildServiceRequestCustomerLink($this->serviceRequest);
+
         return Notification::make()
             ->success()
-            ->title((string) str("New update on [service request {$this->serviceRequestUpdate->serviceRequest->service_request_number}](" . ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequestUpdate->serviceRequest]) . ')')->markdown())
+            ->title("Service request {$serviceRequestLink} ({$typeName}) has been updated for {$customerLink}.")
             ->getDatabaseMessage();
     }
 
