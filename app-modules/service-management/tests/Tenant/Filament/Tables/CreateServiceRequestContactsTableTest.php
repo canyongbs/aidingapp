@@ -135,6 +135,17 @@ it('does not show an organization description when none is associated', function
         ->assertTableColumnHasDescription('type.name', null, $contact);
 });
 
+it('excludes archived contacts', function (): void {
+    asSuperAdmin();
+
+    $contact = Contact::factory()->create();
+    $archivedContact = Contact::factory()->archived()->create();
+
+    liveCreateServiceRequestContactsTable()
+        ->assertCanSeeTableRecords([$contact])
+        ->assertCanNotSeeTableRecords([$archivedContact]);
+});
+
 describe('search', function (): void {
     it('searches by contact name and email', function (string $search): void {
         asSuperAdmin();

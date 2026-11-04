@@ -40,17 +40,20 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestConversationFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestConversationFinishedReason;
-use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperServiceRequestConversation
  */
-class ServiceRequestConversation extends BaseModel
+class ServiceRequestConversation extends Model
 {
+    use UsesTenantConnection;
+
     /** @use HasFactory<ServiceRequestConversationFactory> */
     use HasFactory;
 

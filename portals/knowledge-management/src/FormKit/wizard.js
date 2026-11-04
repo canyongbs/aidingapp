@@ -32,12 +32,14 @@
 </COPYRIGHT>
 */
 import { createMessage, getNode } from '@formkit/core';
-import { reactive, ref, toRef, watch } from 'vue';
+import { computed, reactive, ref, toRef, watch } from 'vue';
 
 export default function wizard() {
     const activeStep = ref('');
     const steps = reactive({});
     const visitedSteps = ref([]);
+    const currentStep = computed(() => Object.keys(steps).indexOf(activeStep.value) + 1);
+    const totalSteps = computed(() => Object.keys(steps).length);
 
     watch(activeStep, (newStep, oldStep) => {
         if (oldStep && !visitedSteps.value.includes(oldStep)) {
@@ -90,5 +92,5 @@ export default function wizard() {
         }
     };
 
-    return { activeStep, visitedSteps, steps, wizardPlugin: stepPlugin, setStep };
+    return { activeStep, currentStep, totalSteps, visitedSteps, steps, wizardPlugin: stepPlugin, setStep };
 }

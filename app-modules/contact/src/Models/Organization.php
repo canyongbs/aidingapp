@@ -41,11 +41,11 @@ use AidingApp\Contact\Database\Factories\OrganizationFactory;
 use AidingApp\Contact\Observers\OrganizationObserver;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectGuest;
-use App\Models\BaseModel;
 use App\Models\Media;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
@@ -53,13 +53,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperOrganization
  */
 #[ObservedBy([OrganizationObserver::class])]
-class Organization extends BaseModel implements HasMedia, Auditable
+class Organization extends Model implements HasMedia, Auditable
 {
+    use UsesTenantConnection;
+
     /** @use HasFactory<OrganizationFactory> */
     use HasFactory;
 
@@ -70,6 +73,11 @@ class Organization extends BaseModel implements HasMedia, Auditable
     use InteractsWithMedia;
 
     use AuditableTrait;
+
+    /**
+     * A hostname whose labels do not start or end with a hyphen.
+     */
+    public const string DOMAIN_PATTERN = '/^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$/';
 
     protected $fillable = [
         'name',

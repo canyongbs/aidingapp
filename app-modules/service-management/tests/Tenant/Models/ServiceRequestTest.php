@@ -64,6 +64,22 @@ it('excludes its secret key from serialization and audits', function (): void {
         ->and($audit->old_values)->not()->toHaveKey('secret_key');
 });
 
+it('serializes its dates as UTC ISO-8601 strings', function (): void {
+    travelTo(CarbonImmutable::parse('2026-01-02 03:04:05', 'UTC'));
+
+    $serviceRequest = ServiceRequest::factory()->create([
+        'created_at' => CarbonImmutable::parse('2025-12-31 23:59:58', 'UTC'),
+    ]);
+
+    $array = $serviceRequest->toArray();
+    $json = json_decode($serviceRequest->toJson(), true);
+
+    expect($array['created_at'])->toBe('2025-12-31T23:59:58.000000Z')
+        ->and($array['updated_at'])->toBe('2026-01-02T03:04:05.000000Z')
+        ->and($json['created_at'])->toBe('2025-12-31T23:59:58.000000Z')
+        ->and($json['updated_at'])->toBe('2026-01-02T03:04:05.000000Z');
+});
+
 if (! function_exists('recentUpdateCreatorInfo')) {
     function recentUpdateCreatorInfo(ServiceRequest $serviceRequest): string
     {

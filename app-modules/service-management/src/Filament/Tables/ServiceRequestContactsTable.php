@@ -48,7 +48,7 @@ class ServiceRequestContactsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->query(fn (): Builder => Contact::query())
+            ->query(fn (): Builder => Contact::query()->withoutArchived())
             ->columns([
                 IdColumn::make(),
                 TextColumn::make(Contact::displayNameKey())

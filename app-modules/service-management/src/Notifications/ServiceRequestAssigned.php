@@ -42,6 +42,7 @@ use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
+use AidingApp\ServiceManagement\Notifications\Concerns\BuildsServiceRequestDatabaseNotificationContent;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -50,6 +51,7 @@ use InvalidArgumentException;
 
 class ServiceRequestAssigned extends BaseNotification implements ShouldQueue
 {
+    use BuildsServiceRequestDatabaseNotificationContent;
     use Queueable;
 
     /**
@@ -107,9 +109,16 @@ class ServiceRequestAssigned extends BaseNotification implements ShouldQueue
      */
     public function toDatabase(object $notifiable): array
     {
+        $serviceRequestLink = $this->buildServiceRequestNumberLink($this->serviceRequest);
+        $typeName = $this->buildServiceRequestTypeName($this->serviceRequest);
+        $customerLink = $this->buildServiceRequestCustomerLink($this->serviceRequest);
+
+        $assignee = $this->serviceRequest->assignedTo?->user;
+        $assignedTo = $assignee?->is($notifiable) ? 'you' : e($assignee?->full_name);
+
         return Notification::make()
             ->success()
-            ->title((string) str("[Service request {$this->serviceRequest->service_request_number}](" . ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]) . ') assigned to agent')->markdown())
+            ->title("Service request {$serviceRequestLink} ({$typeName}) for {$customerLink} has been assigned to {$assignedTo}.")
             ->getDatabaseMessage();
     }
 }

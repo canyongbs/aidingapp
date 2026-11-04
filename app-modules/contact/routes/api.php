@@ -34,22 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Listeners;
+use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\CreateOrganizationController;
+use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\ListOrganizationsController;
+use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\UpdateOrganizationController;
+use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\ViewOrganizationController;
+use Illuminate\Support\Facades\Route;
 
-use AidingApp\Contact\Imports\OrganizationImporter;
-use Filament\Actions\Imports\Events\ImportCompleted;
-use Illuminate\Support\Facades\Cache;
-
-class FlushOrganizationImportDomainClaims
-{
-    public function handle(ImportCompleted $event): void
-    {
-        $import = $event->getImport();
-
-        if ($import->importer !== OrganizationImporter::class) {
-            return;
-        }
-
-        Cache::tags([OrganizationImporter::domainClaimCacheTag($import->getKey())])->flush();
-    }
-}
+Route::api(majorVersion: 1, routes: function (): void {
+    Route::name('organizations.')
+        ->prefix('organizations')
+        ->group(function (): void {
+            Route::get('/', ListOrganizationsController::class)->name('index');
+            Route::post('/', CreateOrganizationController::class)->name('store');
+            Route::get('/{organization}', ViewOrganizationController::class)->name('show');
+            Route::patch('/{organization}', UpdateOrganizationController::class)->name('update');
+        });
+});

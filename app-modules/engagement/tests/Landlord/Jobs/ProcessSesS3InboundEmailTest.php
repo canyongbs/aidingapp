@@ -36,7 +36,9 @@
 
 use AidingApp\Contact\Database\Seeders\ContactTypeSeeder;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Support\OrganizationEmailDomainLookup;
 use AidingApp\Engagement\Enums\EngagementResponseType;
 use AidingApp\Engagement\Exceptions\SesS3InboundServiceRequestTypeNotFound;
 use AidingApp\Engagement\Exceptions\SesS3InboundSpamOrVirusDetected;
@@ -256,6 +258,64 @@ describe('Engagement response processing', function (): void {
                 'sender_type' => $contact->getMorphClass(),
                 'type' => EngagementResponseType::Email->value,
                 'raw' => file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email')),
+            ]);
+        });
+
+        $filesystem->assertMissing('s3_email');
+    });
+
+    it('does not match an inbound email to an archived contact', function (): void {
+        $fakeStorage = Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+
+        Event::listen(
+            MadeTenantCurrentEvent::class,
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage): void {
+                Storage::set('s3', $fakeStorage);
+            }
+        );
+
+        $tenant = Tenant::query()->first();
+
+        assert($tenant instanceof Tenant);
+
+        $contact = null;
+
+        $tenant->execute(function () use (&$contact): void {
+            $contact = Contact::factory()->archived()->create([
+                'email' => 'kevin.ullyott@canyongbs.com',
+            ]);
+        });
+
+        assert($contact instanceof Contact);
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email'));
+
+        $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+        $filesystem->putFileAs('', $file, 's3_email');
+
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
+
+        $mock->handle();
+
+        $tenant->execute(function () use ($contact): void {
+            expect($contact->engagementResponses()->count())->toBe(0);
+
+            assertDatabaseHas(UnmatchedInboundCommunication::class, [
+                'sender' => 'kevin.ullyott@canyongbs.com',
             ]);
         });
 
@@ -649,7 +709,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $tenant->execute(function (): void {
             Organization::factory()->create([
-                'domains' => ['canyongbs.com'],
+                'domains' => [['domain' => 'canyongbs.com']],
             ]);
 
             $serviceRequestType = ServiceRequestType::factory()
@@ -722,6 +782,99 @@ describe('Service Request Type Service Request creation from inbound email', fun
         );
     });
 
+    it('treats an archived contact as an unknown sender for service requests', function (): void {
+        $notificationFake = Notification::fake();
+
+        Event::listen(
+            MadeTenantCurrentEvent::class,
+            function (MadeTenantCurrentEvent $event) use ($notificationFake): void {
+                Notification::swap($notificationFake);
+            }
+        );
+
+        $tenant = Tenant::query()->firstOrFail();
+
+        $archivedContact = null;
+
+        $tenant->execute(function () use (&$archivedContact): void {
+            Organization::factory()->create([
+                'domains' => [['domain' => 'canyongbs.com']],
+            ]);
+
+            $archivedContact = Contact::factory()->archived()->create([
+                'email' => 'kevin.ullyott@canyongbs.com',
+            ]);
+
+            $serviceRequestType = ServiceRequestType::factory()
+                ->has(
+                    TenantServiceRequestTypeDomain::factory()->state([
+                        'domain' => 'help',
+                    ]),
+                    'domain'
+                )
+                ->has(
+                    ServiceRequestPriority::factory()->count(3),
+                    'priorities'
+                )
+                ->create([
+                    'is_email_automatic_creation_enabled' => true,
+                    'is_email_automatic_creation_contact_create_enabled' => false,
+                ]);
+
+            $assignedPriority = $serviceRequestType->priorities->first();
+
+            $serviceRequestType->update([
+                'email_automatic_creation_priority_id' => $assignedPriority->getKey(),
+            ]);
+        });
+
+        assert($archivedContact instanceof Contact);
+
+        Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
+
+        $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+        $filesystem->putFileAs('', $file, 's3_email');
+
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
+
+        $mock->handle();
+
+        $tenant->makeCurrent();
+
+        assertDatabaseEmpty(EngagementResponse::class);
+
+        assertDatabaseEmpty(ServiceRequest::class);
+
+        expect(Contact::query()->count())->toBe(1);
+
+        expect($archivedContact->refresh()->isArchived())->toBeTrue();
+
+        $filesystem->assertMissing('s3_email');
+
+        $notificationFake->assertSentOnDemand(
+            IneligibleContactSesS3InboundEmailServiceRequestNotification::class,
+            function (IneligibleContactSesS3InboundEmailServiceRequestNotification $notification, array $channels, object $notifiable): bool {
+                return $notifiable->routes['mail'] === 'kevin.ullyott@canyongbs.com';
+            }
+        );
+    });
+
     it('ineligible email includes proper bcc to provided email when set', function (): void {
         Event::fake([MessageSending::class]);
 
@@ -731,7 +884,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $tenant->execute(function () use ($bccEmail): void {
             Organization::factory()->create([
-                'domains' => ['canyongbs.com'],
+                'domains' => [['domain' => 'canyongbs.com']],
             ]);
 
             $serviceRequestType = ServiceRequestType::factory()
@@ -814,7 +967,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
             seed(ContactTypeSeeder::class);
 
             $organization = Organization::factory()->create([
-                'domains' => ['canyongbs.com'],
+                'domains' => [['domain' => 'canyongbs.com']],
             ]);
 
             $serviceRequestType = ServiceRequestType::factory()
@@ -894,6 +1047,278 @@ describe('Service Request Type Service Request creation from inbound email', fun
             ->and($respondent->last_name)->toBe('Ullyott')
             ->and($respondent->full_name)->toBe('Kevin Ullyott')
             ->and($respondent->organization->is($organization))->toBeTrue();
+
+        $filesystem->assertMissing('s3_email');
+    });
+
+    $runInboundEmailForArchivedContact = function (?string $fromHeader, bool $hasOrganization = true, string $fixture = 's3_email_for_service_request', string $replacedFromHeader = 'From: Kevin Ullyott <kevin.ullyott@canyongbs.com>'): array {
+        $tenant = Tenant::query()->firstOrFail();
+
+        [$archivedContact, $otherOrganization, $serviceRequestType, $domainOrganization] = $tenant->execute(function () use ($hasOrganization): array {
+            seed(ContactTypeSeeder::class);
+
+            $domainOrganization = Organization::factory()->create([
+                'domains' => [['domain' => 'canyongbs.com']],
+            ]);
+
+            $otherOrganization = Organization::factory()->create([
+                'domains' => [['domain' => 'other-domain.test']],
+            ]);
+
+            $archivedContact = Contact::factory()->archived()->create([
+                'email' => 'kevin.ullyott@canyongbs.com',
+                'first_name' => 'Old',
+                'last_name' => 'Name',
+                'full_name' => 'Old Name',
+                'organization_id' => $hasOrganization ? $otherOrganization->getKey() : null,
+            ]);
+
+            $serviceRequestType = ServiceRequestType::factory()
+                ->has(
+                    TenantServiceRequestTypeDomain::factory()->state([
+                        'domain' => 'help',
+                    ]),
+                    'domain'
+                )
+                ->has(
+                    ServiceRequestPriority::factory()->count(3),
+                    'priorities'
+                )
+                ->create([
+                    'is_email_automatic_creation_enabled' => true,
+                    'is_email_automatic_creation_contact_create_enabled' => true,
+                ]);
+
+            $serviceRequestType->update([
+                'email_automatic_creation_priority_id' => $serviceRequestType->priorities->first()->getKey(),
+            ]);
+
+            return [$archivedContact, $otherOrganization, $serviceRequestType, $domainOrganization];
+        });
+
+        Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', "tests/Landlord/Fixtures/{$fixture}"));
+
+        if ($fromHeader !== null) {
+            $replaced = str_replace($replacedFromHeader, $fromHeader, $content);
+
+            expect($replaced)->not->toBe($content);
+
+            $content = $replaced;
+        }
+
+        $filesystem->putFileAs('', UploadedFile::fake()->createWithContent('s3_email', $content), 's3_email');
+
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
+
+        $mock->handle();
+
+        $tenant->makeCurrent();
+
+        return [
+            'archivedContact' => $archivedContact,
+            'otherOrganization' => $otherOrganization,
+            'serviceRequestType' => $serviceRequestType,
+            'domainOrganization' => $domainOrganization,
+            'filesystem' => $filesystem,
+        ];
+    };
+
+    it('unarchives an archived contact instead of creating one for a service request', function () use ($runInboundEmailForArchivedContact): void {
+        [
+            'archivedContact' => $archivedContact,
+            'otherOrganization' => $otherOrganization,
+            'serviceRequestType' => $serviceRequestType,
+            'filesystem' => $filesystem,
+        ] = $runInboundEmailForArchivedContact(null);
+
+        $originalTypeId = $archivedContact->type_id;
+
+        expect($originalTypeId)->not->toBe(ContactType::resolveDefault()?->getKey());
+
+        expect(Contact::query()->count())->toBe(1);
+
+        $archivedContact->refresh();
+
+        expect($archivedContact->isArchived())->toBeFalse()
+            ->and($archivedContact->type_id)->toBe($originalTypeId)
+            ->and($archivedContact->first_name)->toBe('Kevin')
+            ->and($archivedContact->last_name)->toBe('Ullyott')
+            ->and($archivedContact->full_name)->toBe('Kevin Ullyott')
+            ->and($archivedContact->organization->is($otherOrganization))->toBeTrue();
+
+        $serviceRequests = ServiceRequest::all();
+
+        expect($serviceRequests)->toHaveCount(1);
+
+        $serviceRequest = $serviceRequests->first();
+
+        assert($serviceRequest instanceof ServiceRequest);
+
+        expect($serviceRequest->respondent->is($archivedContact))->toBeTrue()
+            ->and($serviceRequest->priority->type->is($serviceRequestType))->toBeTrue();
+
+        $filesystem->assertMissing('s3_email');
+    });
+
+    it('keeps an archived contact\'s names when the inbound email has no sender name', function () use ($runInboundEmailForArchivedContact): void {
+        [
+            'archivedContact' => $archivedContact,
+            'filesystem' => $filesystem,
+        ] = $runInboundEmailForArchivedContact('From: kevin.ullyott@canyongbs.com');
+
+        expect(Contact::query()->count())->toBe(1);
+
+        $archivedContact->refresh();
+
+        expect($archivedContact->isArchived())->toBeFalse()
+            ->and($archivedContact->first_name)->toBe('Old')
+            ->and($archivedContact->last_name)->toBe('Name')
+            ->and($archivedContact->full_name)->toBe('Old Name');
+
+        $serviceRequest = ServiceRequest::query()->sole();
+
+        expect($serviceRequest->respondent->is($archivedContact))->toBeTrue();
+
+        $filesystem->assertMissing('s3_email');
+    });
+
+    it('keeps an archived contact\'s names when a forwarded email\'s original sender has no name', function () use ($runInboundEmailForArchivedContact): void {
+        [
+            'archivedContact' => $archivedContact,
+            'filesystem' => $filesystem,
+        ] = $runInboundEmailForArchivedContact(
+            'From: kevin.ullyott@canyongbs.com',
+            fixture: 's3_email_forwarded_gmail',
+            replacedFromHeader: 'From: Jordan Student <student@example.com>',
+        );
+
+        expect(Contact::query()->count())->toBe(1);
+
+        $archivedContact->refresh();
+
+        expect($archivedContact->isArchived())->toBeFalse()
+            ->and($archivedContact->first_name)->toBe('Old')
+            ->and($archivedContact->last_name)->toBe('Name')
+            ->and($archivedContact->full_name)->toBe('Old Name');
+
+        expect(ServiceRequest::query()->sole()->respondent->is($archivedContact))->toBeTrue();
+
+        $filesystem->assertMissing('s3_email');
+    });
+
+    it('assigns the sender domain\'s organization to an archived contact without one', function () use ($runInboundEmailForArchivedContact): void {
+        [
+            'archivedContact' => $archivedContact,
+            'domainOrganization' => $domainOrganization,
+            'filesystem' => $filesystem,
+        ] = $runInboundEmailForArchivedContact(null, hasOrganization: false);
+
+        $archivedContact->refresh();
+
+        expect($archivedContact->isArchived())->toBeFalse()
+            ->and($archivedContact->organization->is($domainOrganization))->toBeTrue();
+
+        $filesystem->assertMissing('s3_email');
+    });
+
+    it('reuses a contact that another worker unarchived after the sender lookup', function (): void {
+        $tenant = Tenant::query()->firstOrFail();
+
+        [$contact, $domainOrganization] = $tenant->execute(function (): array {
+            seed(ContactTypeSeeder::class);
+
+            $domainOrganization = Organization::factory()->create([
+                'domains' => [['domain' => 'canyongbs.com']],
+            ]);
+
+            $contact = Contact::factory()->archived()->create([
+                'email' => 'kevin.ullyott@canyongbs.com',
+                'first_name' => 'Old',
+                'last_name' => 'Name',
+                'full_name' => 'Old Name',
+                'organization_id' => $domainOrganization->getKey(),
+            ]);
+
+            $serviceRequestType = ServiceRequestType::factory()
+                ->has(
+                    TenantServiceRequestTypeDomain::factory()->state([
+                        'domain' => 'help',
+                    ]),
+                    'domain'
+                )
+                ->has(
+                    ServiceRequestPriority::factory()->count(3),
+                    'priorities'
+                )
+                ->create([
+                    'is_email_automatic_creation_enabled' => true,
+                    'is_email_automatic_creation_contact_create_enabled' => true,
+                    'email_automatic_creation_contact_create_condition' => EmailAutomaticCreationContactCreateCondition::IfEligible,
+                ]);
+
+            $serviceRequestType->update([
+                'email_automatic_creation_priority_id' => $serviceRequestType->priorities->first()->getKey(),
+            ]);
+
+            return [$contact, $domainOrganization];
+        });
+
+        // The organization lookup runs between the job's sender lookup and contact creation, so unarchiving here stands in for another worker.
+        partialMock(OrganizationEmailDomainLookup::class, function (MockInterface $mock) use ($contact, $domainOrganization): void {
+            $mock
+                ->shouldReceive('find')
+                ->once()
+                ->andReturnUsing(function () use ($contact, $domainOrganization): Organization {
+                    $contact->unarchive();
+
+                    return $domainOrganization;
+                });
+        });
+
+        Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
+
+        $filesystem->putFileAs('', UploadedFile::fake()->createWithContent('s3_email', $content), 's3_email');
+
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
+
+        $mock->handle();
+
+        $tenant->makeCurrent();
+
+        expect(Contact::query()->count())->toBe(1)
+            ->and($contact->refresh()->isArchived())->toBeFalse()
+            ->and($contact->full_name)->toBe('Old Name')
+            ->and(ServiceRequest::query()->sole()->respondent->is($contact))->toBeTrue();
 
         $filesystem->assertMissing('s3_email');
     });
@@ -1826,7 +2251,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
             $tenant->execute(function (): void {
                 Organization::factory()->create([
-                    'domains' => ['canyongbs.com'],
+                    'domains' => [['domain' => 'canyongbs.com']],
                 ]);
 
                 $serviceRequestType = ServiceRequestType::factory()
@@ -1903,7 +2328,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
                 seed(ContactTypeSeeder::class);
 
                 $organization = Organization::factory()->create([
-                    'domains' => ['canyongbs.com'],
+                    'domains' => [['domain' => 'canyongbs.com']],
                 ]);
 
                 $serviceRequestType = ServiceRequestType::factory()
@@ -2261,7 +2686,7 @@ describe('Forwarded email Service Request creation', function (): void {
 
             // Organization matches the ORIGINAL sender's domain (example.com), not the forwarder's (school.edu).
             $organization = Organization::factory()->create([
-                'domains' => ['example.com'],
+                'domains' => [['domain' => 'example.com']],
             ]);
 
             $serviceRequestType = ServiceRequestType::factory()
@@ -2344,7 +2769,7 @@ describe('Forwarded email Service Request creation', function (): void {
         $tenant->execute(function (): void {
             // Organization matches only the forwarder's domain, so the original sender is ineligible.
             Organization::factory()->create([
-                'domains' => ['school.edu'],
+                'domains' => [['domain' => 'school.edu']],
             ]);
 
             $serviceRequestType = ServiceRequestType::factory()

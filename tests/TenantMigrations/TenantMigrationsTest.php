@@ -39,12 +39,18 @@ use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\LicenseManagement\Models\Product;
+use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\PipelineStage;
+use AidingApp\Project\Models\Project;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\EmailTemplateNameUniquenessFeature;
 use App\Features\MaintenanceProviderNameUniquenessFeature;
+use App\Features\PipelineNameUniquenessFeature;
+use App\Features\PipelineStageNameUniquenessFeature;
 use App\Features\ProductNameUniquenessFeature;
 use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Features\ServiceRequestFileUploadTypeFeature;
+use App\Features\SystemUserNameUniquenessFeature;
 use App\Models\SystemUser;
 use App\Models\User;
 use Carbon\CarbonInterface;
@@ -368,6 +374,154 @@ describe('2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique',
     });
 });
 
+// TODO: Cleanup Task (system-user-name-uniqueness): delete this describe and the tests within
+describe('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique', function (): void {
+    $migrationPath = 'database/migrations/2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique.php';
+
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest and activates the feature flag', function () use ($migrationPath): void {
+        isolatedMigration('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique', function () use ($migrationPath): void {
+            $first = SystemUser::factory()->create(['name' => 'Integration Service', 'created_at' => now()->subMinutes(3)]);
+            $second = SystemUser::factory()->create(['name' => 'integration service', 'created_at' => now()->subMinutes(2)]);
+            $third = SystemUser::factory()->create(['name' => 'INTEGRATION SERVICE', 'created_at' => now()->subMinute()]);
+            $unique = SystemUser::factory()->create(['name' => 'Reporting Service', 'created_at' => now()->subMinutes(4)]);
+
+            expect(SystemUserNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($first->refresh()->name)->toBe('Integration Service')
+                ->and($second->refresh()->name)->toBe('integration service-2')
+                ->and($third->refresh()->name)->toBe('INTEGRATION SERVICE-3')
+                ->and($unique->refresh()->name)->toBe('Reporting Service')
+                ->and(SystemUserNameUniquenessFeature::active())->toBeTrue();
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched', function () use ($migrationPath): void {
+        isolatedMigration('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique', function () use ($migrationPath): void {
+            $kept = SystemUser::factory()->create(['name' => 'Integration Service', 'created_at' => now()->subMinutes(2)]);
+            $trashed = SystemUser::factory()->create(['name' => 'integration service', 'created_at' => now()->subMinute()]);
+            $trashed->delete();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($kept->refresh()->name)->toBe('Integration Service')
+                ->and($trashed->refresh()->name)->toBe('integration service');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness among non-trashed system users at the database level', function () use ($migrationPath): void {
+        isolatedMigration('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique', function () use ($migrationPath): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            SystemUser::factory()->create(['name' => 'Integration Service']);
+
+            expect(fn () => SystemUser::factory()->create(['name' => 'INTEGRATION SERVICE']))
+                ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+
+    it('allows a non-trashed system user to reuse a soft-deleted name once the migration has run', function () use ($migrationPath): void {
+        isolatedMigration('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique', function () use ($migrationPath): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            SystemUser::factory()->create(['name' => 'Integration Service'])->delete();
+
+            $live = SystemUser::factory()->create(['name' => 'Integration Service']);
+
+            expect($live->refresh()->name)->toBe('Integration Service');
+        });
+    });
+
+    it('strips the numeric suffix on rollback once the original name is no longer taken', function () use ($migrationPath): void {
+        isolatedMigration('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique', function () use ($migrationPath): void {
+            $first = SystemUser::factory()->create(['name' => 'Integration Service', 'created_at' => now()->subMinutes(2)]);
+            $second = SystemUser::factory()->create(['name' => 'integration service', 'created_at' => now()->subMinute()]);
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($second->refresh()->name)->toBe('integration service-2');
+
+            $first->delete();
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect($second->refresh()->name)->toBe('integration service')
+                ->and(SystemUserNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+
+    it('restores the case-sensitive unique constraint on rollback', function () use ($migrationPath): void {
+        isolatedMigration('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique', function () use ($migrationPath): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            SystemUser::factory()->create(['name' => 'Integration Service']);
+
+            expect(fn () => SystemUser::factory()->create(['name' => 'Integration Service']))
+                ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+
+    it('reconciles a live and soft-deleted name collision so rollback can restore the global unique constraint', function () use ($migrationPath): void {
+        isolatedMigration('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique', function () use ($migrationPath): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            // Supported post-migration workflow: the partial unique index ignores soft-deleted rows,
+            // so a live row may reuse the exact name of a soft-deleted one.
+            $deleted = SystemUser::factory()->create(['name' => 'Integration Service']);
+            DB::table('system_users')->where('id', $deleted->getKey())->update(['deleted_at' => now()]);
+
+            $live = SystemUser::factory()->create(['name' => 'Integration Service']);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            // The live row keeps the exact name; the soft-deleted collision is suffixed so the
+            // restored global unique constraint can build.
+            expect(DB::table('system_users')->where('id', $live->getKey())->value('name'))->toBe('Integration Service')
+                ->and(DB::table('system_users')->where('id', $deleted->getKey())->value('name'))->toBe('Integration Service-2');
+        });
+    });
+
+    it('does not rename a case-variant duplicate system user onto an existing truncated name', function () use ($migrationPath): void {
+        isolatedMigration('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique', function () use ($migrationPath): void {
+            // Regression: a 255-char duplicate renamed with a "-2" suffix is truncated to 253
+            // chars + "-2", which can land on an unrelated live row that already holds that exact
+            // truncated value. The de-duplicator must truncate to stay within varchar(255), detect
+            // the live collision, and pick the next free suffix instead of producing a name that
+            // breaks the new unique index.
+            $maxLengthUpper = str_repeat('A', 255);
+            $maxLengthLower = str_repeat('a', 255);
+            $truncatedCollision = str_repeat('a', 253) . '-2';
+
+            $first = SystemUser::factory()->create(['name' => $maxLengthUpper, 'created_at' => now()->subMinutes(2)]);
+            $second = SystemUser::factory()->create(['name' => $maxLengthLower, 'created_at' => now()->subMinute()]);
+            $third = SystemUser::factory()->create(['name' => $truncatedCollision, 'created_at' => now()]);
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            // The oldest live record keeps its name.
+            expect($first->refresh()->name)->toBe($maxLengthUpper)
+                // "-2" would collide with the pre-existing truncated row, so the next suffix is used.
+                ->and($second->refresh()->name)->toBe(str_repeat('a', 253) . '-3')
+                // The pre-existing truncated row is in its own group and is left untouched.
+                ->and($third->refresh()->name)->toBe($truncatedCollision);
+        });
+    });
+});
+
 // TODO: Cleanup Task (service-monitoring-target-name-uniqueness): delete this describe and the tests within
 describe('2026_10_26_122324_convert_service_monitoring_targets_name_to_citext_and_enforce_unique', function (): void {
     $migrationName = '2026_10_26_122324_convert_service_monitoring_targets_name_to_citext_and_enforce_unique';
@@ -640,6 +794,162 @@ describe('2026_10_30_104700_convert_tags_name_to_citext_and_enforce_unique', fun
             expect($rollback)->toBe(Command::SUCCESS);
 
             expect(DB::table('tags')->where('id', $secondId)->value('name'))->toBe('billing');
+        });
+    });
+});
+
+// TODO: Cleanup Task (pipeline-name-uniqueness): delete this describe and the tests within
+describe('2026_11_04_100000_convert_pipelines_name_to_citext_and_enforce_unique', function (): void {
+    $migrationName = '2026_11_04_100000_convert_pipelines_name_to_citext_and_enforce_unique';
+    $migrationPath = "app-modules/project/database/migrations/{$migrationName}.php";
+
+    it('rewrites case-insensitive duplicate names within a project with a numeric suffix, keeps the oldest and leaves other projects untouched', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            $project = Project::factory()->create();
+            $otherProject = Project::factory()->create();
+
+            $first = Pipeline::factory()->for($project)->create(['name' => 'Admissions', 'created_at' => now()->subMinutes(3)]);
+            $second = Pipeline::factory()->for($project)->create(['name' => 'admissions', 'created_at' => now()->subMinutes(2)]);
+            $third = Pipeline::factory()->for($project)->create(['name' => 'ADMISSIONS', 'created_at' => now()->subMinute()]);
+            $unique = Pipeline::factory()->for($project)->create(['name' => 'Retention', 'created_at' => now()->subMinutes(4)]);
+            $other = Pipeline::factory()->for($otherProject)->create(['name' => 'admissions', 'created_at' => now()->subMinutes(5)]);
+
+            expect(PipelineNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($first->refresh()->name)->toBe('Admissions')
+                ->and($second->refresh()->name)->toBe('admissions-2')
+                ->and($third->refresh()->name)->toBe('ADMISSIONS-3')
+                ->and($unique->refresh()->name)->toBe('Retention')
+                ->and($other->refresh()->name)->toBe('admissions')
+                ->and(PipelineNameUniquenessFeature::active())->toBeTrue()
+                ->and(PipelineStageNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+
+    it('treats archived pipelines as regular rows when repairing duplicates', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            $project = Project::factory()->create();
+            $kept = Pipeline::factory()->for($project)->create(['name' => 'Admissions', 'created_at' => now()->subMinutes(2)]);
+            $archived = Pipeline::factory()->for($project)->create(['name' => 'admissions', 'created_at' => now()->subMinute()]);
+            $archived->archive();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($kept->refresh()->name)->toBe('Admissions')
+                ->and($archived->refresh()->name)->toBe('admissions-2');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness within a project at the database level but not across projects', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $project = Project::factory()->create();
+            Pipeline::factory()->for($project)->create(['name' => 'Admissions']);
+
+            expect(fn () => Pipeline::factory()->for($project)->create(['name' => 'ADMISSIONS']))
+                ->toThrow(UniqueConstraintViolationException::class);
+
+            $other = Pipeline::factory()->for(Project::factory()->create())->create(['name' => 'ADMISSIONS']);
+
+            expect($other->refresh()->name)->toBe('ADMISSIONS');
+        });
+    });
+
+    it('keeps names untouched on rollback, including legitimate names that end in a numeric suffix', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            $project = Project::factory()->create();
+            Pipeline::factory()->for($project)->create(['name' => 'Admissions', 'created_at' => now()->subMinutes(3)]);
+            $renamed = Pipeline::factory()->for($project)->create(['name' => 'admissions', 'created_at' => now()->subMinutes(2)]);
+            $legitimate = Pipeline::factory()->for($project)->create(['name' => 'Release-2026', 'created_at' => now()->subMinute()]);
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect($renamed->refresh()->name)->toBe('admissions-2')
+                ->and($legitimate->refresh()->name)->toBe('Release-2026')
+                ->and(PipelineNameUniquenessFeature::active())->toBeFalse();
+
+            Pipeline::factory()->for($project)->create(['name' => 'ADMISSIONS']);
+        });
+    });
+});
+
+// TODO: Cleanup Task (pipeline-name-uniqueness): delete this describe and the tests within
+describe('2026_11_04_100100_convert_pipeline_stages_name_to_citext_and_enforce_unique', function (): void {
+    $migrationName = '2026_11_04_100100_convert_pipeline_stages_name_to_citext_and_enforce_unique';
+    $migrationPath = "app-modules/project/database/migrations/{$migrationName}.php";
+
+    it('rewrites case-insensitive duplicate names within a pipeline, keeps the oldest and leaves other pipelines untouched', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            $pipeline = Pipeline::factory()->create();
+            $otherPipeline = Pipeline::factory()->create();
+
+            $first = PipelineStage::factory()->for($pipeline)->create(['name' => 'Review', 'created_at' => now()->subMinutes(3)]);
+            $second = PipelineStage::factory()->for($pipeline)->create(['name' => 'review', 'created_at' => now()->subMinutes(2)]);
+            $third = PipelineStage::factory()->for($pipeline)->create(['name' => 'REVIEW', 'created_at' => now()->subMinute()]);
+            $other = PipelineStage::factory()->for($otherPipeline)->create(['name' => 'review', 'created_at' => now()->subMinutes(4)]);
+
+            expect(PipelineStageNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($first->refresh()->name)->toBe('Review')
+                ->and($second->refresh()->name)->toBe('review-2')
+                ->and($third->refresh()->name)->toBe('REVIEW-3')
+                ->and($other->refresh()->name)->toBe('review')
+                ->and(PipelineStageNameUniquenessFeature::active())->toBeTrue();
+        });
+    });
+
+    it('enforces case-insensitive uniqueness within a pipeline at the database level but not across pipelines', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $pipeline = Pipeline::factory()->create();
+            PipelineStage::factory()->for($pipeline)->create(['name' => 'Review']);
+
+            expect(fn () => PipelineStage::factory()->for($pipeline)->create(['name' => 'REVIEW']))
+                ->toThrow(UniqueConstraintViolationException::class);
+
+            $other = PipelineStage::factory()->for(Pipeline::factory()->create())->create(['name' => 'REVIEW']);
+
+            expect($other->refresh()->name)->toBe('REVIEW');
+        });
+    });
+
+    it('keeps names untouched on rollback and restores the original unique constraint', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            $pipeline = Pipeline::factory()->create();
+            PipelineStage::factory()->for($pipeline)->create(['name' => 'Review', 'created_at' => now()->subMinutes(3)]);
+            $renamed = PipelineStage::factory()->for($pipeline)->create(['name' => 'review', 'created_at' => now()->subMinutes(2)]);
+            $legitimate = PipelineStage::factory()->for($pipeline)->create(['name' => 'Phase-2', 'created_at' => now()->subMinute()]);
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect($renamed->refresh()->name)->toBe('review-2')
+                ->and($legitimate->refresh()->name)->toBe('Phase-2')
+                ->and(PipelineStageNameUniquenessFeature::active())->toBeFalse()
+                ->and(PipelineNameUniquenessFeature::active())->toBeTrue();
+
+            PipelineStage::factory()->for($pipeline)->create(['name' => 'REVIEW']);
+
+            expect(fn () => PipelineStage::factory()->for($pipeline)->create(['name' => 'REVIEW']))
+                ->toThrow(UniqueConstraintViolationException::class);
         });
     });
 });

@@ -73,4 +73,6 @@ interface CanBeNotified
     public function canRecieveSms(): bool;
 
     public function canReceiveEmail(): bool;
+
+    public function isSuppressedByArchival(): bool;
 }

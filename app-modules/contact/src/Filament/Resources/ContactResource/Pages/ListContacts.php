@@ -43,6 +43,8 @@ use AidingApp\Contact\Imports\ContactImporter;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use App\Features\ContactArchivingFeature;
+use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -87,6 +89,16 @@ class ListContacts extends ListRecords
                     ->formatStateUsing(fn (int $state): string => "{$state} Open")
                     ->color(fn (int $state): string => $state > 0 ? 'warning' : 'gray')
                     ->description(fn (Contact $record): string => "{$record->service_requests_count} Total"),
+                TextColumn::make('created_at')
+                    ->label('Created At')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->label('Updated At')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('type_id')
@@ -97,8 +109,9 @@ class ListContacts extends ListRecords
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->authorizeIndividualRecords('delete'),
+                    ContactArchivingFeature::active()
+                        ? ArchiveBulkAction::make()->authorizeIndividualRecords('delete')
+                        : DeleteBulkAction::make()->authorizeIndividualRecords('delete'),
                     BulkEngagementAction::make(context: 'contacts'),
                 ]),
             ]);

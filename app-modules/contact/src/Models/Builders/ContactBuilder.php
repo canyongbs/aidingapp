@@ -34,20 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+namespace AidingApp\Contact\Models\Builders;
 
-use DateTimeInterface;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Model;
-use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
+use AidingApp\Contact\Models\Contact;
+use App\Features\ContactArchivingFeature;
+use Illuminate\Database\Eloquent\Builder;
 
-abstract class BaseModel extends Model
+/**
+ * @template TModel of Contact
+ *
+ * @extends Builder<TModel>
+ */
+class ContactBuilder extends Builder
 {
-    use HasUuids;
-    use UsesTenantConnection;
-
-    protected function serializeDate(DateTimeInterface $date): string
+    /**
+     * Overrides the `withoutArchived()` macro so it does nothing while the contact archiving feature is inactive.
+     *
+     * TODO: Cleanup Task (contact-builder-without-archived) - delete this override so the macro applies.
+     */
+    public function withoutArchived(): static
     {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
+        if (! ContactArchivingFeature::active()) {
+            return $this;
+        }
+
+        return parent::__call(__FUNCTION__, []);
     }
 }

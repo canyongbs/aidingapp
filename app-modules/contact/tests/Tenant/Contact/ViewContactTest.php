@@ -45,6 +45,7 @@ use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\EditContactRequestFactory;
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers\EngagementFilesRelationManager;
+use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use Dom\HTMLDocument;
 use Dom\Node;
@@ -121,6 +122,43 @@ test('ViewContact renders successfully when optional fields have no value', func
 
     Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
         ->assertSuccessful();
+});
+
+it('returns not found for an archived contact', function (): void {
+    asSuperAdmin();
+
+    $contact = Contact::factory()->archived()->create();
+
+    \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
+        ->assertNotFound();
+});
+
+describe('archiving', function (): void {
+    it('archives the contact', function (): void {
+        asSuperAdmin();
+
+        $contact = Contact::factory()->create();
+
+        expect($contact->isArchived())->toBeFalse();
+
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+            ->callAction('archive')
+            ->assertRedirect(ContactResource::getUrl('index'));
+
+        expect($contact->refresh()->isArchived())->toBeTrue();
+    });
+});
+
+it('shows the delete action when the contact archiving feature is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    asSuperAdmin();
+
+    $contact = Contact::factory()->create();
+
+    Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+        ->assertActionVisible('delete')
+        ->assertActionDoesNotExist('archive');
 });
 
 // Permission Tests
@@ -350,6 +388,29 @@ describe('section edit actions', function (): void {
                 'email' => 'Other@Example.com',
             ])
             ->assertHasFormErrors(['email']);
+    });
+
+    it('does not save the email of an archived contact', function (): void {
+        $user = User::factory()->create();
+        $user->givePermissionTo('contact.view-any');
+        $user->givePermissionTo('contact.*.view');
+        $user->givePermissionTo('contact.*.update');
+
+        Contact::factory()->archived()->create(['email' => 'archived@example.com']);
+        $contact = Contact::factory()->create(['email' => 'mine@example.com']);
+
+        actingAs($user);
+
+        $component = Livewire::test(ViewContact::class, [
+            'record' => $contact->getRouteKey(),
+        ])
+            ->callAction(TestAction::make('editContactInformation')->schemaComponent('contactInformation'), data: [
+                'email' => 'Archived@Example.com',
+            ])
+            ->assertHasFormErrors(['email' => 'An archived contact with this email already exists.']);
+
+        expect($component->errors()->get('mountedActions.0.data.email'))->toBe(['An archived contact with this email already exists.'])
+            ->and($contact->fresh()->email)->toBe('mine@example.com');
     });
 });
 

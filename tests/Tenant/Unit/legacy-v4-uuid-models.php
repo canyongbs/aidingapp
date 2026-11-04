@@ -87,8 +87,11 @@ use AidingApp\Notification\Models\StoredAnonymousNotifiable;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Models\PortalGuest;
+use AidingApp\Portal\Settings\SettingsProperties\PortalSettingsProperty;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\Project\Models\PipelineEntryAsset;
+use AidingApp\Project\Models\PipelineEntryServiceRequest;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectAuditorDepartment;
@@ -97,6 +100,8 @@ use AidingApp\Project\Models\ProjectFile;
 use AidingApp\Project\Models\ProjectManagerDepartment;
 use AidingApp\Project\Models\ProjectManagerUser;
 use AidingApp\Project\Models\ProjectMilestone;
+use AidingApp\Report\Models\ReportDepartmentAccess;
+use AidingApp\Report\Models\ReportUserAccess;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
@@ -106,11 +111,17 @@ use AidingApp\ServiceManagement\Models\ChangeRequestResponse;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetConfidentialContact;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetConfidentialDepartment;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetConfidentialUser;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetDepartment;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetUser;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
+use AidingApp\ServiceManagement\Models\ServiceRequestCategoryType;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormAuthentication;
@@ -118,22 +129,29 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
+use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatusPeriod;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditorGroup;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategoryVisibilityContactType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeDepartmentAuditor;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeDepartmentManager;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeManagerGroup;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserAuditor;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserManager;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeVisibilityContactType;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\Sla;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
+use AidingApp\Theme\Settings\SettingsProperties\ThemeSettingsProperty;
 use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Webhook\Models\InboundWebhook;
 use AidingApp\Webhook\Models\LandlordInboundWebhook;
-use App\Models\BaseModel;
 use App\Models\Export;
 use App\Models\FailedImportRow;
 use App\Models\HealthCheckResultHistoryItem;
@@ -141,10 +159,13 @@ use App\Models\Import;
 use App\Models\LandlordSettingsProperty;
 use App\Models\Pronouns;
 use App\Models\SettingsProperty;
+use App\Models\SettingsPropertyWithMedia;
 use App\Models\SystemUser;
 use App\Models\Tag;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Settings\SettingsProperties\EmailSettingsProperty;
+use App\Settings\SettingsProperties\NotificationSettingsProperty;
 
 // This is a frozen snapshot of all model classes that existed prior to the
 // adoption of Laravel's HasUuids (UUIDv7) trait. These models must continue
@@ -258,10 +279,41 @@ return [
     Tag::class,
     Tenant::class,
     User::class,
-    BaseModel::class,
     Submissible::class,
     SubmissibleField::class,
     Submission::class,
     SubmissibleAuthentication::class,
     SubmissibleStep::class,
+
+    // These models were created after the UUIDv7 policy, but inherited UUIDv4 from BaseModel,
+    // so their tables only hold v4 IDs and they must stay on HasVersion4Uuids.
+    ReportDepartmentAccess::class,
+    ReportUserAccess::class,
+    ServiceMonitoringReportConfiguration::class,
+    ServiceRequestNotificationAutomationEmailTemplate::class,
+    ServiceRequestStatusPeriod::class,
+
+    // These models use HasVersion4Uuids directly, but were never listed because arch()->ignoring()
+    // matches by prefix (e.g. ServiceRequest exempted ServiceRequestCategoryType), so their tables
+    // only hold v4 IDs and they must stay on HasVersion4Uuids.
+    PipelineEntryAsset::class,
+    PipelineEntryServiceRequest::class,
+    ServiceMonitoringTargetConfidentialContact::class,
+    ServiceMonitoringTargetConfidentialDepartment::class,
+    ServiceMonitoringTargetConfidentialUser::class,
+    ServiceRequestCategoryType::class,
+    ServiceRequestConversation::class,
+    ServiceRequestTypeAuditorGroup::class,
+    ServiceRequestTypeCategoryVisibilityContactType::class,
+    ServiceRequestTypeEmailPreference::class,
+    ServiceRequestTypeManagerGroup::class,
+    ServiceRequestTypeVisibilityContactType::class,
+
+    // These settings properties inherit HasVersion4Uuids from SettingsProperty and share its
+    // settings table, so they must stay on HasVersion4Uuids.
+    SettingsPropertyWithMedia::class,
+    EmailSettingsProperty::class,
+    NotificationSettingsProperty::class,
+    PortalSettingsProperty::class,
+    ThemeSettingsProperty::class,
 ];

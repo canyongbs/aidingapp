@@ -36,6 +36,7 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
+use App\Features\ContactArchivingFeature;
 
 it('resolves a contact regardless of the email case', function (string $lookup): void {
     $contact = Contact::factory()->create(['email' => 'Author@Example.com']);
@@ -59,4 +60,18 @@ it('returns null when no contact matches the email', function (): void {
 
 it('returns null for a blank email', function (): void {
     expect(app(ResolveSubmissionAuthorFromEmail::class)(null))->toBeNull();
+});
+
+it('does not resolve an archived contact', function (): void {
+    Contact::factory()->archived()->create(['email' => 'author@example.com']);
+
+    expect(app(ResolveSubmissionAuthorFromEmail::class)('author@example.com'))->toBeNull();
+});
+
+it('resolves an archived contact while archiving is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    $contact = Contact::factory()->archived()->create(['email' => 'author@example.com']);
+
+    expect(app(ResolveSubmissionAuthorFromEmail::class)('author@example.com')?->getKey())->toBe($contact->getKey());
 });
