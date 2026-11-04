@@ -36,6 +36,7 @@
 
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Support\OrganizationEmailDomainLookup;
+use App\Features\OrganizationArchivingFeature;
 
 it('matches an exact email domain', function (): void {
     $organization = Organization::factory()->create([
@@ -125,4 +126,37 @@ it('builds a normalized domain set from eligible organizations', function (): vo
 
     expect($lookup->domainSet())->toEqual(['example.com' => true, 'other.example' => true])
         ->and($lookup->domainSet($organization))->toBe(['example.com' => true]);
+});
+
+it('does not match an archived organization', function (): void {
+    OrganizationArchivingFeature::activate();
+
+    Organization::factory()->archived()->create([
+        'domains' => [['domain' => 'example.com']],
+    ]);
+
+    expect(app(OrganizationEmailDomainLookup::class)->find('person@example.com'))->toBeNull();
+});
+
+it('omits archived organization domains from the domain set', function (): void {
+    OrganizationArchivingFeature::activate();
+
+    $archivedOrganization = Organization::factory()->archived()->create([
+        'domains' => [['domain' => 'archived.example']],
+    ]);
+    Organization::factory()->create(['domains' => [['domain' => 'active.example']]]);
+    $lookup = app(OrganizationEmailDomainLookup::class);
+
+    expect($lookup->domainSet())->toBe(['active.example' => true])
+        ->and($lookup->domainSet($archivedOrganization))->toBe([]);
+});
+
+it('still matches an archived organization while archiving is inactive', function (): void {
+    OrganizationArchivingFeature::deactivate();
+
+    $organization = Organization::factory()->archived()->create([
+        'domains' => [['domain' => 'example.com']],
+    ]);
+
+    expect(app(OrganizationEmailDomainLookup::class)->find('person@example.com')?->is($organization))->toBeTrue();
 });

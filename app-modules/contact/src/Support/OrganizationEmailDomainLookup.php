@@ -76,6 +76,7 @@ class OrganizationEmailDomainLookup
         $normalizedDomain = $this->normalizedDomainSql("elem->>'domain'");
 
         return Organization::query()
+            ->withoutArchived()
             ->when($organization, fn (Builder $query) => $query->whereKey($organization->getKey()))
             ->when($requireContactGenerationEnabled, fn (Builder $query) => $query->where('is_contact_generation_enabled', true))
             ->whereRaw(
@@ -95,6 +96,7 @@ class OrganizationEmailDomainLookup
     public function domainSet(?Organization $organization = null): array
     {
         $domains = Organization::query()
+            ->withoutArchived()
             ->when($organization, fn (Builder $query) => $query->whereKey($organization->getKey()))
             ->crossJoin(DB::raw('jsonb_array_elements(domains) AS elem'))
             ->selectRaw($this->normalizedDomainSql("elem->>'domain'") . ' AS normalized_domain')
