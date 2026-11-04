@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Department\Models\Department;
 use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\Project\Enums\PipelineStageClassification;
@@ -52,6 +53,7 @@ use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectFile;
 use AidingApp\Project\Models\ProjectMilestone;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
@@ -307,6 +309,44 @@ it('can render the project access widget and mount the manage access action', fu
         ->assertActionExists('manageAccess')
         ->mountAction('manageAccess')
         ->assertHasNoErrors();
+});
+
+it('omits archived organizations from the project access widget guests when archiving is active', function (): void {
+    OrganizationArchivingFeature::activate();
+
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $activeOrganization = Organization::factory()->create();
+    $archivedOrganization = Organization::factory()->create();
+    $archivedOrganization->archive();
+    $project->guestOrganizations()->attach([$activeOrganization->getKey(), $archivedOrganization->getKey()]);
+
+    $guestKeys = Livewire::test(ProjectAccessWidget::class, ['record' => $project])
+        ->instance()
+        ->guests()
+        ->map(fn (Organization $guest) => $guest->getKey());
+
+    expect($guestKeys->all())->toBe([$activeOrganization->getKey()]);
+});
+
+it('keeps archived organizations in the project access widget guests when archiving is inactive', function (): void {
+    OrganizationArchivingFeature::deactivate();
+
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $activeOrganization = Organization::factory()->create();
+    $archivedOrganization = Organization::factory()->create();
+    $archivedOrganization->archive();
+    $project->guestOrganizations()->attach([$activeOrganization->getKey(), $archivedOrganization->getKey()]);
+
+    $guestKeys = Livewire::test(ProjectAccessWidget::class, ['record' => $project])
+        ->instance()
+        ->guests()
+        ->map(fn (Organization $guest) => $guest->getKey());
+
+    expect($guestKeys->all())->toEqualCanonicalizing([$activeOrganization->getKey(), $archivedOrganization->getKey()]);
 });
 
 it('can list pipeline entries in the project work pipeline widget', function (): void {
