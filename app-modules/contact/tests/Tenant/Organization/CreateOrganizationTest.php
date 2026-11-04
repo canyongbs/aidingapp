@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Support\OrganizationDomainsLock;
 use AidingApp\Contact\Tests\Tenant\Organization\RequestFactories\CreateOrganizationRequestFactory;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
 use Livewire\Livewire;
@@ -380,4 +381,67 @@ test('the organization name of a soft-deleted organization can be reused', funct
         ->assertHasNoFormErrors();
 
     $undoRepeaterFake();
+});
+
+it('explains that an archived organization reserves the name', function (): void {
+    OrganizationArchivingFeature::activate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    Organization::factory()->archived()->create(['name' => 'Archived Org']);
+
+    $request = collect(CreateOrganizationRequestFactory::new()->state(['name' => 'ARCHIVED ORG', 'domains' => null])->create());
+
+    actingAs($user);
+
+    $component = Livewire::test(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors(['name' => 'An archived organization with this name already exists.']);
+
+    expect($component->errors()->get('data.name'))->toBe(['An archived organization with this name already exists.']);
+});
+
+it('keeps the unique message when an active organization has the name', function (): void {
+    OrganizationArchivingFeature::activate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    Organization::factory()->create(['name' => 'Active Org']);
+
+    $request = collect(CreateOrganizationRequestFactory::new()->state(['name' => 'Active Org', 'domains' => null])->create());
+
+    actingAs($user);
+
+    $component = Livewire::test(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors(['name' => 'unique']);
+
+    expect($component->errors()->get('data.name'))->not->toContain('An archived organization with this name already exists.');
+});
+
+it('uses the unique message for an archived organization name while organization archiving is inactive', function (): void {
+    OrganizationArchivingFeature::deactivate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    Organization::factory()->archived()->create(['name' => 'Archived Org']);
+
+    $request = collect(CreateOrganizationRequestFactory::new()->state(['name' => 'Archived Org', 'domains' => null])->create());
+
+    actingAs($user);
+
+    $component = Livewire::test(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors(['name' => 'unique']);
+
+    expect($component->errors()->get('data.name'))->not->toContain('An archived organization with this name already exists.');
 });

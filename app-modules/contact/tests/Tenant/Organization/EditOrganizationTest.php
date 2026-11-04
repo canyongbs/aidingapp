@@ -515,3 +515,63 @@ it('shows the delete action when the organization archiving feature is inactive'
         ->assertActionVisible('delete')
         ->assertActionDoesNotExist('archive');
 });
+
+it('explains that an archived organization reserves the name when editing', function (): void {
+    OrganizationArchivingFeature::activate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    Organization::factory()->archived()->create(['name' => 'Archived Org']);
+    $organization = Organization::factory()->create();
+
+    actingAs($user);
+
+    $component = Livewire::test(EditOrganization::class, ['record' => $organization->getRouteKey()])
+        ->set('data.domains', null)
+        ->fillForm(['name' => 'archived org'])
+        ->call('save')
+        ->assertHasFormErrors(['name' => 'An archived organization with this name already exists.']);
+
+    expect($component->errors()->get('data.name'))->toBe(['An archived organization with this name already exists.']);
+});
+
+it('allows saving an organization with its own unchanged name', function (): void {
+    OrganizationArchivingFeature::activate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    $organization = Organization::factory()->create(['name' => 'Own Org']);
+
+    actingAs($user);
+
+    Livewire::test(EditOrganization::class, ['record' => $organization->getRouteKey()])
+        ->set('data.domains', null)
+        ->fillForm(['name' => 'Own Org'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+});
+
+it('uses the unique message for an archived organization name when editing while organization archiving is inactive', function (): void {
+    OrganizationArchivingFeature::deactivate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    Organization::factory()->archived()->create(['name' => 'Archived Org']);
+    $organization = Organization::factory()->create();
+
+    actingAs($user);
+
+    $component = Livewire::test(EditOrganization::class, ['record' => $organization->getRouteKey()])
+        ->set('data.domains', null)
+        ->fillForm(['name' => 'Archived Org'])
+        ->call('save')
+        ->assertHasFormErrors(['name' => 'unique']);
+
+    expect($component->errors()->get('data.name'))->not->toContain('An archived organization with this name already exists.');
+});
