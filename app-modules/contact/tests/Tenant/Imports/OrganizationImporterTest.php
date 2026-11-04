@@ -38,11 +38,13 @@ use AidingApp\Contact\Imports\OrganizationImporter;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\Contact\Support\OrganizationDomainsLock;
 use App\Models\Import;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+
+use function Pest\Laravel\mock;
 
 /**
  * @param  array<string, mixed>  $row
@@ -62,10 +64,6 @@ $runOrganizationImport = function (array $row, ?Import $import = null): void {
     );
     $importer($row);
 };
-
-beforeEach(function (): void {
-    Cache::flush();
-});
 
 it('creates a new organization with all fields, industry and type', function () use ($runOrganizationImport): void {
     $industry = OrganizationIndustry::factory()->create(['name' => 'Technology']);
@@ -204,12 +202,16 @@ it('imports domains from a comma-separated list', function () use ($runOrganizat
     ]);
 });
 
-it('fails the row when a domain is invalid', function () use ($runOrganizationImport): void {
+it('fails the row when a domain is invalid', function (string $domain) use ($runOrganizationImport): void {
     $runOrganizationImport([
         'name' => 'College Community College',
-        'domains' => 'collegecc.edu|not a domain',
+        'domains' => "collegecc.edu|{$domain}",
     ]);
-})->throws(ValidationException::class);
+})->with([
+    'not a domain',
+    'college-.edu',
+    'sub.-college.edu',
+])->throws(ValidationException::class);
 
 it('fails the row when the same domain is listed more than once in one row', function () use ($runOrganizationImport): void {
     $runOrganizationImport([
@@ -241,6 +243,35 @@ it('rejects a domain already used by another organization case-insensitively', f
         'domains' => 'shared.edu',
     ]);
 })->throws(RowImportFailedException::class);
+
+it('rejects a domain that differs from one used by another organization only by www', function (string $storedDomain, string $importedDomain) use ($runOrganizationImport): void {
+    Organization::factory()->create([
+        'name' => 'Existing College',
+        'domains' => [['domain' => $storedDomain]],
+    ]);
+
+    $runOrganizationImport([
+        'name' => 'New College',
+        'domains' => $importedDomain,
+    ]);
+})->with([
+    'www added' => ['shared.edu', 'www.shared.edu'],
+    'www removed' => ['www.Shared.edu', 'shared.edu'],
+])->throws(RowImportFailedException::class, 'is already in use by another organization');
+
+it('allows an organization to keep its own domain when it is reimported with www', function () use ($runOrganizationImport): void {
+    $organization = Organization::factory()->create([
+        'name' => 'Keep College',
+        'domains' => [['domain' => 'keep.edu']],
+    ]);
+
+    $runOrganizationImport([
+        'name' => 'Keep College',
+        'domains' => 'www.keep.edu',
+    ]);
+
+    expect($organization->refresh()->domains)->toBe([['domain' => 'www.keep.edu']]);
+});
 
 it('allows an organization to keep its own domain while adding another on update', function () use ($runOrganizationImport): void {
     $organization = Organization::factory()->create([
@@ -275,52 +306,58 @@ it('leaves existing domains unchanged when the domains column is blank', functio
         ->and($organization->city)->toBe('New City');
 });
 
-it('rejects a domain claimed by a different organization earlier in the same import', function () use ($runOrganizationImport): void {
+it('rejects a domain imported for a different organization earlier in the same import', function () use ($runOrganizationImport): void {
     $import = new Import();
     $import->id = (string) Str::uuid();
 
-    Cache::tags([OrganizationImporter::domainClaimCacheTag($import->getKey())])
-        ->add('shared.edu', 'existing college', now()->addDay());
+    $runOrganizationImport([
+        'name' => 'Existing College',
+        'domains' => 'shared.edu',
+    ], $import);
 
     $runOrganizationImport([
         'name' => 'New College',
-        'domains' => 'Shared.edu',
+        'domains' => 'www.Shared.edu',
     ], $import);
-})->throws(RowImportFailedException::class);
+})->throws(RowImportFailedException::class, 'is already in use by another organization');
 
-it('allows an organization to re-claim its own domains within the same import', function () use ($runOrganizationImport): void {
+it('allows an organization listed more than once in the same import to keep its domains', function () use ($runOrganizationImport): void {
     $import = new Import();
     $import->id = (string) Str::uuid();
-
-    Cache::tags([OrganizationImporter::domainClaimCacheTag($import->getKey())])
-        ->add('shared.edu', Str::lower('Retry College'), now()->addDay());
 
     $runOrganizationImport([
         'name' => 'Retry College',
         'domains' => 'shared.edu',
     ], $import);
 
+    $runOrganizationImport([
+        'name' => 'RETRY COLLEGE',
+        'domains' => 'shared.edu|extra.edu',
+    ], $import);
+
     expect(Organization::query()->where('name', 'Retry College')->firstOrFail()->domains)
-        ->toBe([['domain' => 'shared.edu']]);
+        ->toBe([['domain' => 'shared.edu'], ['domain' => 'extra.edu']]);
 });
 
-it('does not reject a domain claimed by a different import', function () use ($runOrganizationImport): void {
-    $otherImport = new Import();
-    $otherImport->id = (string) Str::uuid();
-
-    Cache::tags([OrganizationImporter::domainClaimCacheTag($otherImport->getKey())])
-        ->add('shared.edu', 'existing college', now()->addDay());
-
-    $import = new Import();
-    $import->id = (string) Str::uuid();
+it('takes the organization domains lock when the domains column is mapped', function () use ($runOrganizationImport): void {
+    mock(OrganizationDomainsLock::class)->shouldReceive('acquire')->once();
 
     $runOrganizationImport([
         'name' => 'New College',
-        'domains' => 'shared.edu',
-    ], $import);
+        'domains' => 'new.edu',
+    ]);
 
-    expect(Organization::query()->where('name', 'New College')->firstOrFail()->domains)
-        ->toBe([['domain' => 'shared.edu']]);
+    expect(Organization::query()->where('name', 'New College')->exists())->toBeTrue();
+});
+
+it('does not take the organization domains lock when the domains column is not mapped', function () use ($runOrganizationImport): void {
+    mock(OrganizationDomainsLock::class)->shouldNotReceive('acquire');
+
+    $runOrganizationImport([
+        'name' => 'New College',
+    ]);
+
+    expect(Organization::query()->where('name', 'New College')->exists())->toBeTrue();
 });
 
 it('fails the row when the industry does not exist', function () use ($runOrganizationImport): void {

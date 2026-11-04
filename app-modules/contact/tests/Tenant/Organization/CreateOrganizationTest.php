@@ -38,12 +38,14 @@ use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\CreateOrganization;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Support\OrganizationDomainsLock;
 use AidingApp\Contact\Tests\Tenant\Organization\RequestFactories\CreateOrganizationRequestFactory;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\mock;
 
 test('Create Organization is gated with proper access control', function (): void {
     $user = User::factory()->create();
@@ -151,6 +153,44 @@ test('if the domain is already in use then not be used second time.', function (
     $undoRepeaterFake();
 });
 
+test('a domain that only differs by case or www from one stored by another organization cannot be used', function (string $domain): void {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    Organization::factory()
+        ->state([
+            'domains' => [
+                ['domain' => 'Shared.edu'],
+            ],
+        ])->create();
+
+    $request = collect(CreateOrganizationRequestFactory::new()
+        ->state([
+            'domains' => [
+                ['domain' => $domain],
+            ],
+        ])->create());
+
+    actingAs($user);
+
+    Livewire::test(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors([
+            'domains.0.domain',
+        ]);
+
+    $undoRepeaterFake();
+})->with([
+    'lowercase' => 'shared.edu',
+    'uppercase' => 'SHARED.EDU',
+    'www prefix' => 'www.shared.edu',
+]);
+
 test('check if the provided domain is invalid', function (string $domain): void {
     $undoRepeaterFake = Repeater::fake();
 
@@ -189,6 +229,9 @@ test('check if the provided domain is invalid', function (string $domain): void 
         'example.com::8080',
         'mydomain.com/path',
         '-mydomain.com',
+        'mydomain-.com',
+        'sub.-domain.com',
+        'sub-.domain.com',
     ]);
 
 test('check if the provided domain is valid', function (string $domain): void {
@@ -222,6 +265,50 @@ test('check if the provided domain is valid', function (string $domain): void {
         'test-domain-123.com',
         'subdomain.example.org',
     ]);
+
+test('the organization domains lock is taken when domains are saved', function (): void {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    $request = collect(CreateOrganizationRequestFactory::new()->create());
+
+    actingAs($user);
+
+    mock(OrganizationDomainsLock::class)->shouldReceive('acquire')->once();
+
+    Livewire::test(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $undoRepeaterFake();
+});
+
+test('the organization domains lock is not taken when no domains are saved', function (): void {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    $request = collect(CreateOrganizationRequestFactory::new()->create())->put('domains', []);
+
+    actingAs($user);
+
+    mock(OrganizationDomainsLock::class)->shouldNotReceive('acquire');
+
+    Livewire::test(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $undoRepeaterFake();
+});
 
 test('the organization name must be unique among non-trashed organizations', function (): void {
     $undoRepeaterFake = Repeater::fake();

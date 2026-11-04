@@ -74,6 +74,11 @@ class Organization extends Model implements HasMedia, Auditable
 
     use AuditableTrait;
 
+    /**
+     * A hostname whose labels do not start or end with a hyphen.
+     */
+    public const string DOMAIN_PATTERN = '/^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$/';
+
     protected $fillable = [
         'name',
         'email',
