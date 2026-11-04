@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Enums\EngagementResponseType;
 use AidingApp\Engagement\Jobs\UnmatchedInboundCommunicationsJob;
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
+use App\Features\ContactArchivingFeature;
 
 use function Pest\Laravel\assertDatabaseHas;
 
@@ -93,4 +94,20 @@ it('can check unmatched inbound communications with no match', function (): void
 
     expect(UnmatchedInboundCommunication::count())->toBe(1);
     expect(Contact::query()->whereHas('engagementResponses')->count())->toBe(0);
+});
+
+it('does not match an archived contact', function (): void {
+    ContactArchivingFeature::activate();
+
+    $communication = UnmatchedInboundCommunication::factory()->email()->create();
+
+    $contact = Contact::factory()->archived()->create([
+        'email' => $communication->sender,
+    ]);
+
+    $job = new UnmatchedInboundCommunicationsJob();
+    $job->handle();
+
+    expect(UnmatchedInboundCommunication::query()->whereKey($communication->getKey())->exists())->toBeTrue();
+    expect($contact->engagementResponses()->count())->toBe(0);
 });

@@ -64,6 +64,7 @@ class UnmatchedInboundCommunicationsJob implements ShouldQueue
     protected function processEmail(UnmatchedInboundCommunication $communication): void
     {
         $contacts = Contact::query()
+            ->withoutArchived()
             ->where(new Expression('lower(email)'), Str::lower($communication->sender))
             ->get();
 
