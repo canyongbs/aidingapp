@@ -311,9 +311,7 @@ it('can render the project access widget and mount the manage access action', fu
         ->assertHasNoErrors();
 });
 
-it('omits archived organizations from the project access widget guests when archiving is active', function (): void {
-    OrganizationArchivingFeature::activate();
-
+it('omits archived organizations from the project access widget guests', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();

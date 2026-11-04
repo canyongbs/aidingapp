@@ -9,6 +9,8 @@ created: 2026-11-04
 
 ## Temporary Migrations
 
+- app-modules/contact/database/migrations/2026_11_04_120100_tmp_activate_organization_archiving_feature.php
+
 ## Additional Cleanup
 
 - Search for `TODO: Cleanup Task (organization-builder-without-archived)`

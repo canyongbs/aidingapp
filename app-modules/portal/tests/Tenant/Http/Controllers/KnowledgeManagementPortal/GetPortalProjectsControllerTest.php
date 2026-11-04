@@ -180,8 +180,6 @@ it('lists organization projects once when the contact is also a direct guest', f
 });
 
 it('does not list a project reached only through an archived organization', function (): void {
-    OrganizationArchivingFeature::activate();
-
     $organization = Organization::factory()->create();
     $contact = Contact::factory()->for($organization)->create();
     $project = Project::factory()->create();
@@ -203,8 +201,6 @@ it('does not list a project reached only through an archived organization', func
 });
 
 it('still lists a project through a direct guest assignment when the organization is archived', function (): void {
-    OrganizationArchivingFeature::activate();
-
     $organization = Organization::factory()->create();
     $contact = Contact::factory()->for($organization)->create();
     $project = Project::factory()->create();

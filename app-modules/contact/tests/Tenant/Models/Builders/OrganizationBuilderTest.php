@@ -38,8 +38,6 @@ use AidingApp\Contact\Models\Organization;
 use App\Features\OrganizationArchivingFeature;
 
 it('excludes archived organizations', function (): void {
-    OrganizationArchivingFeature::activate();
-
     $organization = Organization::factory()->create();
     Organization::factory()->archived()->create();
 

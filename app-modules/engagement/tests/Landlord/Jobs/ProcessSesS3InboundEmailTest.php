@@ -64,7 +64,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
 use App\Actions\Paths\ModulePath;
-use App\Features\OrganizationArchivingFeature;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -2335,7 +2334,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
             $tenant = Tenant::query()->firstOrFail();
 
             $tenant->execute(function (): void {
-                OrganizationArchivingFeature::activate();
                 seed(ContactTypeSeeder::class);
 
                 Organization::factory()->archived()->create([

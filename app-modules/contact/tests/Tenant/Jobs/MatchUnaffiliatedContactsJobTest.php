@@ -39,7 +39,6 @@ use AidingApp\Contact\Jobs\MatchUnaffiliatedContactsJob;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Support\OrganizationEmailDomainLookup;
-use App\Features\OrganizationArchivingFeature;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Events\QueryExecuted;
@@ -291,8 +290,6 @@ it('links live contacts but not archived contacts to an organization', function 
 });
 
 it('does not match contacts to an archived organization', function (bool $targeted): void {
-    OrganizationArchivingFeature::activate();
-
     $organization = Organization::factory()->archived()->create([
         'domains' => [['domain' => 'example.com']],
     ]);

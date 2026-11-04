@@ -40,7 +40,6 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\ServiceManagement\Filament\Tables\CreateServiceRequestContactsTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Features\OrganizationArchivingFeature;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TableSelect\Livewire\TableSelectLivewireComponent;
 use Filament\Tables\Columns\TextColumn;
@@ -235,7 +234,6 @@ describe('filters', function (): void {
 });
 
 it('does not offer archived organizations in the organization filter', function (): void {
-    OrganizationArchivingFeature::activate();
     asSuperAdmin();
 
     $organization = Organization::factory()->create();

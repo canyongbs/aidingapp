@@ -208,8 +208,7 @@ it('rejects the email of an archived contact with the unique message while conta
 });
 
 describe('organization picker', function (): void {
-    it('lists active organizations and not archived ones when organization archiving is active', function (): void {
-        OrganizationArchivingFeature::activate();
+    it('lists active organizations and not archived ones', function (): void {
         asSuperAdmin();
 
         $organization = Organization::factory()->create();

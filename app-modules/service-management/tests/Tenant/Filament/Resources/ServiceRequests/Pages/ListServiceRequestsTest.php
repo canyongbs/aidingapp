@@ -1211,7 +1211,6 @@ it('places a type under every category it belongs to in the type filter tree', f
 });
 
 it('does not offer archived organizations in the organization filter', function (): void {
-    OrganizationArchivingFeature::activate();
     asSuperAdmin();
 
     $organization = Organization::factory()->create();

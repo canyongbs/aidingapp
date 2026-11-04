@@ -401,8 +401,6 @@ it('preserves the existing industry and type when the columns are blank on updat
 });
 
 it('unarchives and updates an archived organization with the same name and links unaffiliated contacts', function () use ($runOrganizationImport): void {
-    OrganizationArchivingFeature::activate();
-
     $organization = Organization::factory()->archived()->create([
         'name' => 'Archived College',
         'city' => 'Old City',

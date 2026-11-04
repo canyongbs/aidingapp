@@ -38,7 +38,6 @@ use AidingApp\Contact\Actions\MatchContactToOrganization;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use App\Features\ContactArchivingFeature;
-use App\Features\OrganizationArchivingFeature;
 
 it('associates an unaffiliated contact with the matching organization', function (): void {
     $organization = Organization::factory()->create([
@@ -195,8 +194,6 @@ it('links an archived contact to an organization while archiving is inactive', f
 });
 
 it('does not associate a contact with an archived organization', function (): void {
-    OrganizationArchivingFeature::activate();
-
     Organization::factory()->archived()->create([
         'domains' => [['domain' => 'example.com']],
     ]);
