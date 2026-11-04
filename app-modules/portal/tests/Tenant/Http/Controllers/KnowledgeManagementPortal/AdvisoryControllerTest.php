@@ -49,6 +49,7 @@ use Illuminate\Support\Carbon;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
+use function Pest\Laravel\withToken;
 
 beforeEach(function (): void {
     $settings = app(PortalSettings::class);
@@ -367,6 +368,28 @@ describe('visibility', function (): void {
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.id', $restrictedAdvisory->getKey())
             ->assertJsonPath('counts.open', 1);
+    });
+
+    it('lists authenticated and contact type restricted advisories for a request with only an access token', function (): void {
+        auth()->logout();
+
+        $contactType = ContactType::factory()->create();
+        $contact = Contact::factory()->for($contactType, 'type')->create();
+
+        $advisories = collect([
+            Advisory::factory()->authenticated()->for(AdvisoryStatus::factory()->open(), 'status')->create(),
+            Advisory::factory()->restrictedToContactTypes($contactType)->for(AdvisoryStatus::factory()->open(), 'status')->create(),
+        ]);
+
+        Advisory::factory()->restrictedToContactTypes(ContactType::factory()->create())->for(AdvisoryStatus::factory()->open(), 'status')->create();
+
+        $response = withToken($contact->createToken('knowledge-management-portal-access-token')->plainTextToken)
+            ->getJson(route('api.portal.advisories'))
+            ->assertOk()
+            ->assertJsonPath('counts.open', 2);
+
+        expect($response->collect('data')->pluck('id')->sort()->values()->all())
+            ->toBe($advisories->pluck('id')->sort()->values()->all());
     });
 
     it('lists nothing to guests until the advisory visibility migration has run', function (): void {

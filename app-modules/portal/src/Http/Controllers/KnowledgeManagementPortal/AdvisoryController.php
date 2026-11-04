@@ -37,6 +37,7 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Portal\Actions\ResolvePortalContact;
 use AidingApp\Portal\DataTransferObjects\AdvisoryData;
 use AidingApp\Portal\DataTransferObjects\AdvisorySeverityData;
 use AidingApp\Portal\DataTransferObjects\AdvisoryStatusData;
@@ -58,7 +59,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AdvisoryController
 {
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(Request $request, ResolvePortalContact $resolvePortalContact): JsonResponse
     {
         abort_unless(resolve(LicenseSettings::class)->data?->addons->advisoryManagement, Response::HTTP_FORBIDDEN);
 
@@ -76,7 +77,7 @@ class AdvisoryController
         $statusId = $validated['status'] ?? null;
         $sort = AdvisorySort::tryFrom($validated['sort'] ?? '') ?? AdvisorySort::HighestSeverity;
 
-        $contact = auth('contact')->user();
+        $contact = $resolvePortalContact();
 
         $advisories = Advisory::query()
             ->with(['severity', 'status'])
