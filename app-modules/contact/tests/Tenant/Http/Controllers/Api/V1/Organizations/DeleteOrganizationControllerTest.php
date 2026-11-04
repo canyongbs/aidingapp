@@ -53,26 +53,26 @@ it('is gated with proper access control', function (): void {
 
     $user = SystemUser::factory()->create();
     Sanctum::actingAs($user, ['api']);
-    deleteJson(route('api.v1.organizations.destroy', ['organization' => $organization], false))
+    deleteJson(route('api.v1.organizations.delete', ['organization' => $organization], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     Sanctum::actingAs($user, ['api']);
-    deleteJson(route('api.v1.organizations.destroy', ['organization' => $organization], false))
+    deleteJson(route('api.v1.organizations.delete', ['organization' => $organization], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.*.delete');
     Sanctum::actingAs($user, ['api']);
-    deleteJson(route('api.v1.organizations.destroy', ['organization' => $organization], false))
+    deleteJson(route('api.v1.organizations.delete', ['organization' => $organization], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.*.delete');
     Sanctum::actingAs($user, ['api']);
-    deleteJson(route('api.v1.organizations.destroy', ['organization' => $organization], false))
+    deleteJson(route('api.v1.organizations.delete', ['organization' => $organization], false))
         ->assertNoContent();
 });
 
@@ -88,7 +88,7 @@ it('archives the organization', function (): void {
 
     expect($organization->isArchived())->toBeFalse();
 
-    deleteJson(route('api.v1.organizations.destroy', ['organization' => $organization], false))
+    deleteJson(route('api.v1.organizations.delete', ['organization' => $organization], false))
         ->assertNoContent();
 
     $organization->refresh();
@@ -107,7 +107,7 @@ it('returns not found for an archived organization', function (): void {
 
     $organization = Organization::factory()->archived()->create();
 
-    deleteJson(route('api.v1.organizations.destroy', ['organization' => $organization], false))
+    deleteJson(route('api.v1.organizations.delete', ['organization' => $organization], false))
         ->assertNotFound();
 
     assertModelExists($organization);
@@ -122,7 +122,7 @@ it('checks permissions before returning not found for an archived organization',
 
     $organization = Organization::factory()->archived()->create();
 
-    deleteJson(route('api.v1.organizations.destroy', ['organization' => $organization], false))
+    deleteJson(route('api.v1.organizations.delete', ['organization' => $organization], false))
         ->assertForbidden();
 });
 
@@ -135,7 +135,7 @@ it('returns not found for a soft deleted organization', function (): void {
     $organization = Organization::factory()->create();
     $organization->delete();
 
-    deleteJson(route('api.v1.organizations.destroy', ['organization' => $organization], false))
+    deleteJson(route('api.v1.organizations.delete', ['organization' => $organization], false))
         ->assertNotFound();
 });
 
@@ -149,7 +149,7 @@ it('soft deletes the organization when organization archiving is inactive', func
 
     $organization = Organization::factory()->create();
 
-    deleteJson(route('api.v1.organizations.destroy', ['organization' => $organization], false))
+    deleteJson(route('api.v1.organizations.delete', ['organization' => $organization], false))
         ->assertNoContent();
 
     assertSoftDeleted($organization);

@@ -49,6 +49,6 @@ Route::api(majorVersion: 1, routes: function (): void {
             Route::post('/', CreateOrganizationController::class)->name('store');
             Route::get('/{organization}', ViewOrganizationController::class)->name('show');
             Route::patch('/{organization}', UpdateOrganizationController::class)->name('update');
-            Route::delete('/{organization}', DeleteOrganizationController::class)->name('destroy');
+            Route::delete('/{organization}', DeleteOrganizationController::class)->name('delete');
         });
 });
