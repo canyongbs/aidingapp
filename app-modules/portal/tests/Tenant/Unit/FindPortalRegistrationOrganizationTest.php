@@ -111,3 +111,14 @@ test('it returns null for invalid email format', function (): void {
     expect($action('invalid-email'))->toBeNull()
         ->and($action('myemail@'))->toBeNull();
 });
+
+test('it ignores archived organizations', function (): void {
+    Organization::factory()->archived()->create([
+        'is_contact_generation_enabled' => true,
+        'domains' => [
+            ['domain' => 'example.com'],
+        ],
+    ]);
+
+    expect(app(FindPortalRegistrationOrganization::class)('myemail@example.com'))->toBeNull();
+});

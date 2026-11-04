@@ -39,9 +39,15 @@ use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\LicenseManagement\Models\Product;
+use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\PipelineStage;
+use AidingApp\Project\Models\Project;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\EmailTemplateNameUniquenessFeature;
+use App\Features\KnowledgeBaseCategoryNameUniquenessFeature;
 use App\Features\MaintenanceProviderNameUniquenessFeature;
+use App\Features\PipelineNameUniquenessFeature;
+use App\Features\PipelineStageNameUniquenessFeature;
 use App\Features\ProductNameUniquenessFeature;
 use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Features\ServiceRequestFileUploadTypeFeature;
@@ -701,6 +707,128 @@ describe('2026_10_26_122324_convert_service_monitoring_targets_name_to_citext_an
     });
 });
 
+// TODO: Cleanup Task (knowledge-base-category-name-uniqueness): delete this describe and the tests within
+describe('2026_11_02_120000_convert_knowledge_base_categories_name_to_citext_and_enforce_unique', function (): void {
+    $migrationName = '2026_11_02_120000_convert_knowledge_base_categories_name_to_citext_and_enforce_unique';
+    $migrationPath = "app-modules/knowledge-base/database/migrations/{$migrationName}.php";
+
+    $insertCategory = function (string $name, CarbonInterface $createdAt, ?CarbonInterface $deletedAt = null): string {
+        $id = (string) Str::uuid();
+
+        DB::table('knowledge_base_categories')->insert([
+            'id' => $id,
+            'name' => $name,
+            'public_id' => Str::random(8),
+            'slug' => Str::uuid()->toString(),
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+            'deleted_at' => $deletedAt,
+        ]);
+
+        return $id;
+    };
+
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates the feature flag', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $firstId = $insertCategory('Getting Started', now()->subMinutes(3));
+            $secondId = $insertCategory('getting started', now()->subMinutes(2));
+            $thirdId = $insertCategory('GETTING STARTED', now()->subMinute());
+            $existingSuffixedId = $insertCategory('Getting Started-2', now()->subMinutes(4));
+            $uniqueId = $insertCategory('Billing', now()->subMinutes(5));
+
+            expect(KnowledgeBaseCategoryNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table('knowledge_base_categories')->where('id', $id)->value('name');
+
+            expect($name($firstId))->toBe('Getting Started')
+                ->and($name($secondId))->toBe('getting started-3')
+                ->and($name($thirdId))->toBe('GETTING STARTED-4')
+                ->and($name($existingSuffixedId))->toBe('Getting Started-2')
+                ->and($name($uniqueId))->toBe('Billing')
+                ->and(KnowledgeBaseCategoryNameUniquenessFeature::active())->toBeTrue();
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $keptId = $insertCategory('Getting Started', now()->subMinutes(2));
+            $trashedId = $insertCategory('getting started', now()->subMinute(), now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('knowledge_base_categories')->where('id', $keptId)->value('name'))->toBe('Getting Started')
+                ->and(DB::table('knowledge_base_categories')->where('id', $trashedId)->value('name'))->toBe('getting started');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness among non-trashed knowledge base categories at the database level', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertCategory('Getting Started', now());
+
+            expect(fn (): string => $insertCategory('GETTING STARTED', now()))
+                ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+
+    it('allows a non-trashed knowledge base category to reuse a soft-deleted name once the migration has run', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertCategory('Getting Started', now(), now());
+
+            $liveId = $insertCategory('Getting Started', now());
+
+            expect(DB::table('knowledge_base_categories')->where('id', $liveId)->value('name'))->toBe('Getting Started');
+        });
+    });
+
+    it('leaves deduplicated names unchanged on rollback and only deactivates the feature flag', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $firstId = $insertCategory('Getting Started', now()->subMinutes(2));
+            $secondId = $insertCategory('getting started', now()->subMinute());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('knowledge_base_categories')->where('id', $secondId)->value('name'))->toBe('getting started-2');
+
+            DB::table('knowledge_base_categories')->where('id', $firstId)->update(['deleted_at' => now()]);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect(DB::table('knowledge_base_categories')->where('id', $firstId)->value('name'))->toBe('Getting Started')
+                ->and(DB::table('knowledge_base_categories')->where('id', $secondId)->value('name'))->toBe('getting started-2')
+                ->and(KnowledgeBaseCategoryNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+
+    it('does not mutate an originally numbered name on rollback', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $numberedId = $insertCategory('ISO-27001', now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('knowledge_base_categories')->where('id', $numberedId)->value('name'))->toBe('ISO-27001');
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect(DB::table('knowledge_base_categories')->where('id', $numberedId)->value('name'))->toBe('ISO-27001')
+                ->and(KnowledgeBaseCategoryNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+});
+
 // TODO: Cleanup Task (maintenance-provider-name-uniqueness): delete this describe and the tests within
 describe('2026_10_29_112040_convert_maintenance_providers_name_to_citext_and_enforce_unique', function (): void {
     $migrationName = '2026_10_29_112040_convert_maintenance_providers_name_to_citext_and_enforce_unique';
@@ -786,6 +914,255 @@ describe('2026_10_29_112040_convert_maintenance_providers_name_to_citext_and_enf
 
             expect(DB::table('maintenance_providers')->where('id', $secondId)->value('name'))->toBe('acme repairs')
                 ->and(MaintenanceProviderNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+});
+
+// TODO: Cleanup Task (tag-name-uniqueness): delete this describe and the tests within
+describe('2026_10_30_104700_convert_tags_name_to_citext_and_enforce_unique', function (): void {
+    $migrationName = '2026_10_30_104700_convert_tags_name_to_citext_and_enforce_unique';
+    $migrationPath = "database/migrations/{$migrationName}.php";
+
+    $insertTag = function (string $name, CarbonInterface $createdAt, ?string $type = 'knowledge_base_item'): string {
+        $id = (string) Str::uuid();
+
+        DB::table('tags')->insert([
+            'id' => $id,
+            'name' => $name,
+            'type' => $type,
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+        ]);
+
+        return $id;
+    };
+
+    it('rewrites case-insensitive duplicate names with a numeric suffix and keeps the oldest', function () use ($migrationName, $migrationPath, $insertTag): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertTag): void {
+            $firstId = $insertTag('Billing', now()->subMinutes(3));
+            $secondId = $insertTag('billing', now()->subMinutes(2));
+            $thirdId = $insertTag('BILLING', now()->subMinute());
+            $existingSuffixedId = $insertTag('Billing-2', now()->subMinutes(4));
+            $uniqueId = $insertTag('Shipping', now()->subMinutes(5));
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table('tags')->where('id', $id)->value('name');
+
+            expect($name($firstId))->toBe('Billing')
+                ->and($name($secondId))->toBe('billing-3')
+                ->and($name($thirdId))->toBe('BILLING-4')
+                ->and($name($existingSuffixedId))->toBe('Billing-2')
+                ->and($name($uniqueId))->toBe('Shipping');
+        });
+    });
+
+    it('only resolves duplicate names within the same type', function () use ($migrationName, $migrationPath, $insertTag): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertTag): void {
+            $knowledgeBaseItemId = $insertTag('Billing', now()->subMinutes(4));
+            $otherTypeId = $insertTag('billing', now()->subMinutes(3), 'other_type');
+            $firstUntypedId = $insertTag('BILLING', now()->subMinutes(2), null);
+            $secondUntypedId = $insertTag('Billing', now()->subMinute(), null);
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table('tags')->where('id', $id)->value('name');
+
+            expect($name($knowledgeBaseItemId))->toBe('Billing')
+                ->and($name($otherTypeId))->toBe('billing')
+                ->and($name($firstUntypedId))->toBe('BILLING')
+                ->and($name($secondUntypedId))->toBe('Billing-2');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness per type at the database level', function () use ($migrationName, $migrationPath, $insertTag): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertTag): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertTag('Billing', now());
+            $insertTag('Billing', now(), 'other_type');
+            $insertTag('Billing', now(), null);
+
+            expect(fn (): string => $insertTag('BILLING', now()))->toThrow(UniqueConstraintViolationException::class)
+                ->and(fn (): string => $insertTag('BILLING', now(), null))->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+
+    it('strips the numeric suffix on rollback once the original name is no longer taken', function () use ($migrationName, $migrationPath, $insertTag): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertTag): void {
+            $firstId = $insertTag('Billing', now()->subMinutes(2));
+            $secondId = $insertTag('billing', now()->subMinute());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('tags')->where('id', $secondId)->value('name'))->toBe('billing-2');
+
+            DB::table('tags')->where('id', $firstId)->delete();
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect(DB::table('tags')->where('id', $secondId)->value('name'))->toBe('billing');
+        });
+    });
+});
+
+// TODO: Cleanup Task (pipeline-name-uniqueness): delete this describe and the tests within
+describe('2026_11_04_100000_convert_pipelines_name_to_citext_and_enforce_unique', function (): void {
+    $migrationName = '2026_11_04_100000_convert_pipelines_name_to_citext_and_enforce_unique';
+    $migrationPath = "app-modules/project/database/migrations/{$migrationName}.php";
+
+    it('rewrites case-insensitive duplicate names within a project with a numeric suffix, keeps the oldest and leaves other projects untouched', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            $project = Project::factory()->create();
+            $otherProject = Project::factory()->create();
+
+            $first = Pipeline::factory()->for($project)->create(['name' => 'Admissions', 'created_at' => now()->subMinutes(3)]);
+            $second = Pipeline::factory()->for($project)->create(['name' => 'admissions', 'created_at' => now()->subMinutes(2)]);
+            $third = Pipeline::factory()->for($project)->create(['name' => 'ADMISSIONS', 'created_at' => now()->subMinute()]);
+            $unique = Pipeline::factory()->for($project)->create(['name' => 'Retention', 'created_at' => now()->subMinutes(4)]);
+            $other = Pipeline::factory()->for($otherProject)->create(['name' => 'admissions', 'created_at' => now()->subMinutes(5)]);
+
+            expect(PipelineNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($first->refresh()->name)->toBe('Admissions')
+                ->and($second->refresh()->name)->toBe('admissions-2')
+                ->and($third->refresh()->name)->toBe('ADMISSIONS-3')
+                ->and($unique->refresh()->name)->toBe('Retention')
+                ->and($other->refresh()->name)->toBe('admissions')
+                ->and(PipelineNameUniquenessFeature::active())->toBeTrue()
+                ->and(PipelineStageNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+
+    it('treats archived pipelines as regular rows when repairing duplicates', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            $project = Project::factory()->create();
+            $kept = Pipeline::factory()->for($project)->create(['name' => 'Admissions', 'created_at' => now()->subMinutes(2)]);
+            $archived = Pipeline::factory()->for($project)->create(['name' => 'admissions', 'created_at' => now()->subMinute()]);
+            $archived->archive();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($kept->refresh()->name)->toBe('Admissions')
+                ->and($archived->refresh()->name)->toBe('admissions-2');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness within a project at the database level but not across projects', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $project = Project::factory()->create();
+            Pipeline::factory()->for($project)->create(['name' => 'Admissions']);
+
+            expect(fn () => Pipeline::factory()->for($project)->create(['name' => 'ADMISSIONS']))
+                ->toThrow(UniqueConstraintViolationException::class);
+
+            $other = Pipeline::factory()->for(Project::factory()->create())->create(['name' => 'ADMISSIONS']);
+
+            expect($other->refresh()->name)->toBe('ADMISSIONS');
+        });
+    });
+
+    it('keeps names untouched on rollback, including legitimate names that end in a numeric suffix', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            $project = Project::factory()->create();
+            Pipeline::factory()->for($project)->create(['name' => 'Admissions', 'created_at' => now()->subMinutes(3)]);
+            $renamed = Pipeline::factory()->for($project)->create(['name' => 'admissions', 'created_at' => now()->subMinutes(2)]);
+            $legitimate = Pipeline::factory()->for($project)->create(['name' => 'Release-2026', 'created_at' => now()->subMinute()]);
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect($renamed->refresh()->name)->toBe('admissions-2')
+                ->and($legitimate->refresh()->name)->toBe('Release-2026')
+                ->and(PipelineNameUniquenessFeature::active())->toBeFalse();
+
+            Pipeline::factory()->for($project)->create(['name' => 'ADMISSIONS']);
+        });
+    });
+});
+
+// TODO: Cleanup Task (pipeline-name-uniqueness): delete this describe and the tests within
+describe('2026_11_04_100100_convert_pipeline_stages_name_to_citext_and_enforce_unique', function (): void {
+    $migrationName = '2026_11_04_100100_convert_pipeline_stages_name_to_citext_and_enforce_unique';
+    $migrationPath = "app-modules/project/database/migrations/{$migrationName}.php";
+
+    it('rewrites case-insensitive duplicate names within a pipeline, keeps the oldest and leaves other pipelines untouched', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            $pipeline = Pipeline::factory()->create();
+            $otherPipeline = Pipeline::factory()->create();
+
+            $first = PipelineStage::factory()->for($pipeline)->create(['name' => 'Review', 'created_at' => now()->subMinutes(3)]);
+            $second = PipelineStage::factory()->for($pipeline)->create(['name' => 'review', 'created_at' => now()->subMinutes(2)]);
+            $third = PipelineStage::factory()->for($pipeline)->create(['name' => 'REVIEW', 'created_at' => now()->subMinute()]);
+            $other = PipelineStage::factory()->for($otherPipeline)->create(['name' => 'review', 'created_at' => now()->subMinutes(4)]);
+
+            expect(PipelineStageNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($first->refresh()->name)->toBe('Review')
+                ->and($second->refresh()->name)->toBe('review-2')
+                ->and($third->refresh()->name)->toBe('REVIEW-3')
+                ->and($other->refresh()->name)->toBe('review')
+                ->and(PipelineStageNameUniquenessFeature::active())->toBeTrue();
+        });
+    });
+
+    it('enforces case-insensitive uniqueness within a pipeline at the database level but not across pipelines', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $pipeline = Pipeline::factory()->create();
+            PipelineStage::factory()->for($pipeline)->create(['name' => 'Review']);
+
+            expect(fn () => PipelineStage::factory()->for($pipeline)->create(['name' => 'REVIEW']))
+                ->toThrow(UniqueConstraintViolationException::class);
+
+            $other = PipelineStage::factory()->for(Pipeline::factory()->create())->create(['name' => 'REVIEW']);
+
+            expect($other->refresh()->name)->toBe('REVIEW');
+        });
+    });
+
+    it('keeps names untouched on rollback and restores the original unique constraint', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            $pipeline = Pipeline::factory()->create();
+            PipelineStage::factory()->for($pipeline)->create(['name' => 'Review', 'created_at' => now()->subMinutes(3)]);
+            $renamed = PipelineStage::factory()->for($pipeline)->create(['name' => 'review', 'created_at' => now()->subMinutes(2)]);
+            $legitimate = PipelineStage::factory()->for($pipeline)->create(['name' => 'Phase-2', 'created_at' => now()->subMinute()]);
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect($renamed->refresh()->name)->toBe('review-2')
+                ->and($legitimate->refresh()->name)->toBe('Phase-2')
+                ->and(PipelineStageNameUniquenessFeature::active())->toBeFalse()
+                ->and(PipelineNameUniquenessFeature::active())->toBeTrue();
+
+            PipelineStage::factory()->for($pipeline)->create(['name' => 'REVIEW']);
+
+            expect(fn () => PipelineStage::factory()->for($pipeline)->create(['name' => 'REVIEW']))
+                ->toThrow(UniqueConstraintViolationException::class);
         });
     });
 });

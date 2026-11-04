@@ -1599,16 +1599,16 @@
         },
         {
             "name": "canyongbs/common",
-            "version": "2.46.1",
+            "version": "2.46.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/canyongbs/common.git",
-                "reference": "9e05a7a4b9e0476c65da256ae0511280eee350bc"
+                "reference": "bf32cdfe519b7180110a2d5aeb6b7b3b3afa9262"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/canyongbs/common/zipball/9e05a7a4b9e0476c65da256ae0511280eee350bc",
-                "reference": "9e05a7a4b9e0476c65da256ae0511280eee350bc",
+                "url": "https://api.github.com/repos/canyongbs/common/zipball/bf32cdfe519b7180110a2d5aeb6b7b3b3afa9262",
+                "reference": "bf32cdfe519b7180110a2d5aeb6b7b3b3afa9262",
                 "shasum": ""
             },
             "require": {
@@ -1666,9 +1666,10 @@
             ],
             "support": {
                 "issues": "https://github.com/canyongbs/common/issues",
-                "source": "https://github.com/canyongbs/common/tree/2.46.1"
+                "source": "https://github.com/canyongbs/common/tree/2.46.3"
             },
-            "time": "2026-10-26T15:37:46+00:00"
+            "time": "2026-11-02T19:48:00+00:00",
+            "published-time": "2026-11-02T20:51:31+00:00"
         },
         {
             "name": "canyongbs/model-state-machine",
@@ -9778,8 +9779,7 @@
                 "issues": "https://github.com/PHPOffice/PhpSpreadsheet/issues",
                 "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.30.7"
             },
-            "time": "2026-09-17T03:56:23+00:00",
-            "published-time": "2026-09-17T04:07:00+00:00"
+            "time": "2026-09-17T03:56:23+00:00"
         },
         {
             "name": "phpoption/phpoption",
@@ -10085,8 +10085,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-08-31T19:09:43+00:00",
-            "published-time": "2026-08-31T19:09:59+00:00"
+            "time": "2026-08-31T19:09:43+00:00"
         },
         {
             "name": "pragmarx/google2fa",

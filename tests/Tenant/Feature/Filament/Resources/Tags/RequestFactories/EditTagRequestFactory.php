@@ -34,20 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+namespace Tests\Tenant\Feature\Filament\Resources\Tags\RequestFactories;
 
-use DateTimeInterface;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Model;
-use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use Worksome\RequestFactories\RequestFactory;
 
-abstract class BaseModel extends Model
+class EditTagRequestFactory extends RequestFactory
 {
-    use HasUuids;
-    use UsesTenantConnection;
-
-    protected function serializeDate(DateTimeInterface $date): string
+    public function definition(): array
     {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
+        return [
+            'type' => KnowledgeBaseItem::getTagType(),
+            'name' => $this->faker->unique()->words(asText: true),
+        ];
     }
 }

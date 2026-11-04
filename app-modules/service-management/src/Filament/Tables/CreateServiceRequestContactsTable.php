@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Tables;
 
 use AidingApp\Contact\Filament\Resources\ContactResource\Tables\Columns\ContactNameColumn;
+use AidingApp\Contact\Models\Builders\OrganizationBuilder;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use Filament\Tables\Columns\TextColumn;
@@ -98,7 +99,7 @@ class CreateServiceRequestContactsTable
                     ->preload(),
                 SelectFilter::make('organization_id')
                     ->label('Organization')
-                    ->relationship('organization', 'name')
+                    ->relationship('organization', 'name', fn (OrganizationBuilder $query): OrganizationBuilder => $query->withoutArchived())
                     ->searchable()
                     ->preload(),
             ])

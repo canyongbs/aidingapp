@@ -36,16 +36,20 @@
 
 namespace AidingApp\Authorization\Models;
 
-use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperPermissionGroup
  */
-class PermissionGroup extends BaseModel
+class PermissionGroup extends Model
 {
     use SoftDeletes;
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
 
     protected $fillable = [
         'name',

@@ -41,14 +41,16 @@ use AidingApp\Contact\Models\ContactType;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeCategoryFactory;
 use AidingApp\ServiceManagement\Models\Concerns\RestrictsVisibilityToContactTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeCategoryObserver;
-use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 use Staudenmeir\EloquentHasManyDeep\HasManyDeep;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
@@ -56,12 +58,14 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
  * @mixin IdeHelperServiceRequestTypeCategory
  */
 #[ObservedBy([ServiceRequestTypeCategoryObserver::class])]
-class ServiceRequestTypeCategory extends BaseModel implements Auditable
+class ServiceRequestTypeCategory extends Model implements Auditable
 {
     use SoftDeletes;
     use AuditableTrait;
     use HasRelationships;
     use RestrictsVisibilityToContactTypes;
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
 
     /** @use HasFactory<ServiceRequestTypeCategoryFactory> */
     use HasFactory;

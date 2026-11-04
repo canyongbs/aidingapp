@@ -36,6 +36,7 @@
 
 namespace AidingApp\Report\Enums;
 
+use AidingApp\Group\Models\Group;
 use AidingApp\Report\Filament\Pages\AdvisoryManagement;
 use AidingApp\Report\Filament\Pages\AiClarification;
 use AidingApp\Report\Filament\Pages\AiResolution;
@@ -52,8 +53,10 @@ use AidingApp\Report\Filament\Pages\ServiceRequestFeedback;
 use AidingApp\Report\Filament\Pages\ServiceRequests;
 use AidingApp\Report\Filament\Pages\Sla;
 use AidingApp\Report\Models\ReportDepartmentAccess;
+use AidingApp\Report\Models\ReportGroupAccess;
 use AidingApp\Report\Models\ReportUserAccess;
 use App\Enums\Feature;
+use App\Features\ReportGroupAccessFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
@@ -193,7 +196,7 @@ enum ReportAccessKey: string
             return true;
         }
 
-        return ReportUserAccess::query()
+        $hasUserOrDepartmentAccess = ReportUserAccess::query()
             ->where('report_key', $this->value)
             ->where('user_id', $user->getKey())
             ->selectRaw('1')
@@ -204,11 +207,26 @@ enum ReportAccessKey: string
                     ->selectRaw('1')
             )
             ->exists();
+
+        if ($hasUserOrDepartmentAccess) {
+            return true;
+        }
+
+        return ReportGroupAccessFeature::active()
+            && $user->groups()
+                ->whereIn(
+                    (new Group())->getQualifiedKeyName(),
+                    ReportGroupAccess::query()
+                        ->where('report_key', $this->value)
+                        ->select('group_id')
+                )
+                ->exists();
     }
 
     /**
      * The number of distinct users that have access to the report, counting both
-     * direct user assignments and members of assigned departments (deduplicated).
+     * direct user assignments, members of assigned departments, and members of
+     * assigned groups (deduplicated).
      */
     public function accessCount(): int
     {
@@ -225,6 +243,18 @@ enum ReportAccessKey: string
                         ReportDepartmentAccess::query()
                             ->where('report_key', $this->value)
                             ->select('department_id')
+                    )
+                    ->when(
+                        ReportGroupAccessFeature::active(),
+                        fn (Builder $query): Builder => $query->orWhereHas(
+                            'groups',
+                            fn (Builder $query): Builder => $query->whereIn(
+                                (new Group())->getQualifiedKeyName(),
+                                ReportGroupAccess::query()
+                                    ->where('report_key', $this->value)
+                                    ->select('group_id')
+                            )
+                        )
                     );
             })
             ->count();

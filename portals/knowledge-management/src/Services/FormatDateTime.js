@@ -46,11 +46,11 @@ export function resolveTimezone() {
 /**
  * Parse an incoming value into an absolute instant.
  *
- * The API sends datetimes in two shapes: ISO-8601 carrying an offset, from controllers that call
- * `toIso8601String()` and from Data objects, and the offset-less `Y-m-d H:i:s` that
- * `BaseModel::serializeDate()` produces for any endpoint returning raw models. The second is always
- * UTC, but JavaScript reads an offset-less string as *local* time, so it must be pinned to UTC here
- * or the conversion below silently shifts an already-correct instant.
+ * The API sends datetimes as ISO-8601 carrying an offset, from controllers that call `toIso8601String()`,
+ * from Data objects, and from Laravel's default serialization of raw models. An offset-less value
+ * (`Y-m-d`, or a `Y-m-d H:i:s` string formatted without a zone) is still treated as UTC, because
+ * JavaScript reads an offset-less string as *local* time, so it must be pinned to UTC here or the
+ * conversion below silently shifts an already-correct instant.
  *
  * @param {string|Date} value
  * @returns {Date}

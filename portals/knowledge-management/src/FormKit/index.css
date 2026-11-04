@@ -31,34 +31,66 @@
 
 </COPYRIGHT>
 */
-.wizard {
-    @apply bg-gray-100 flex flex-col mb-3 p-1 rounded-lg gap-1 md:overflow-x-auto md:flex-row md:items-center;
+.wizard-header {
+    @apply mb-6 rounded-lg bg-brand-50 px-4 py-3;
 }
 
-.step {
-    @apply text-gray-500 rounded relative flex items-center justify-center px-8 py-3 hover:text-gray-700 hover:cursor-pointer;
+.wizard-title {
+    @apply m-0! text-lg! leading-7! font-semibold! text-gray-900 wrap-break-word;
 }
 
-[data-step-active='true'] {
-    @apply bg-white text-gray-900;
-}
-
-.step--errors,
-[data-step-valid='true']:after {
-    @apply absolute text-xs text-white flex flex-col items-center justify-center top-1 inset-e-1 h-4 w-4 rounded z-10;
-}
-
-[data-step-valid='true']:after {
-    content: '\2713'; /* Check mark for valid step */
-    @apply bg-green-500;
-}
-
-.step--errors {
-    @apply bg-red-500;
+.wizard-description {
+    @apply mt-1 text-sm text-gray-600 wrap-break-word whitespace-pre-line;
 }
 
 .step-nav {
-    @apply flex gap-3 mt-3 items-center justify-between;
+    @apply grid grid-cols-3 items-center gap-3 mt-6 pt-6 border-t border-gray-200;
+}
+
+.step-nav .formkit-outer,
+.step-nav .formkit-wrapper {
+    @apply mb-0!;
+}
+
+.step-nav__back {
+    @apply justify-self-start min-w-0;
+}
+
+.step-nav__back button {
+    @apply sm:min-w-24 px-5 border-transparent! bg-gray-200! text-gray-700! hover:bg-gray-300!;
+}
+
+.step-progress {
+    @apply hidden sm:block justify-self-center text-center;
+}
+
+.step-progress__label {
+    @apply text-sm font-bold text-gray-900;
+}
+
+.step-progress__percent {
+    @apply mt-0.5 text-xs text-gray-500;
+}
+
+.step-nav__next {
+    @apply col-start-3 justify-self-end min-w-0;
+}
+
+.step-nav__next button {
+    @apply sm:min-w-24 px-5;
+}
+
+.step-nav__next-btn button {
+    @apply border-transparent! bg-brand-600! text-white! hover:bg-brand-500! focus-visible:ring-brand-500!;
+}
+
+.step-nav__next-btn button::after {
+    content: '\2192' / '';
+}
+
+.service-request-form .formkit-inner,
+.service-request-form .formkit-fieldset {
+    @apply max-w-none!;
 }
 
 .responsive-grid-2 {

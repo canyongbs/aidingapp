@@ -37,6 +37,7 @@
 namespace AidingApp\Report\Providers;
 
 use AidingApp\Report\Models\ReportDepartmentAccess;
+use AidingApp\Report\Models\ReportGroupAccess;
 use AidingApp\Report\Models\ReportUserAccess;
 use AidingApp\Report\ReportPlugin;
 use Filament\Panel;
@@ -61,6 +62,7 @@ class ReportServiceProvider extends ServiceProvider
         Relation::morphMap([
             'report_user_access' => ReportUserAccess::class,
             'report_department_access' => ReportDepartmentAccess::class,
+            'report_group_access' => ReportGroupAccess::class,
         ]);
     }
 }

@@ -47,6 +47,6 @@ Route::api(majorVersion: 1, routes: function () {
             Route::get('/', ListUsersController::class)->name('index');
             Route::post('/', CreateUserController::class)->name('store');
             Route::get('/{user}', ViewUserController::class)->name('show');
-            Route::delete('/{user}', DeleteUserController::class)->name('destroy');
+            Route::delete('/{user}', DeleteUserController::class)->name('delete');
         });
 });

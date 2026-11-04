@@ -44,7 +44,6 @@ use AidingApp\Project\Database\Factories\ProjectFactory;
 use AidingApp\Project\Models\Scopes\ProjectVisibilityScope;
 use AidingApp\Project\Models\Scopes\WithProgressCounts;
 use AidingApp\Project\Observers\ProjectObserver;
-use App\Models\BaseModel;
 use App\Models\User;
 use CanyonGBS\Common\Enums\Color;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
@@ -60,14 +59,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperProject
  */
 #[ObservedBy([ProjectObserver::class])]
 #[ScopedBy(ProjectVisibilityScope::class)]
-class Project extends BaseModel implements Auditable
+class Project extends Model implements Auditable
 {
+    use UsesTenantConnection;
+
     /** @use HasFactory<ProjectFactory> */
     use HasFactory;
 

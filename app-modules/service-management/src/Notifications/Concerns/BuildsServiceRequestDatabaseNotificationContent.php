@@ -34,22 +34,46 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Listeners;
+namespace AidingApp\ServiceManagement\Notifications\Concerns;
 
-use AidingApp\Contact\Imports\OrganizationImporter;
-use Filament\Actions\Imports\Events\ImportCompleted;
-use Illuminate\Support\Facades\Cache;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 
-class FlushOrganizationImportDomainClaims
+trait BuildsServiceRequestDatabaseNotificationContent
 {
-    public function handle(ImportCompleted $event): void
+    /**
+     * A link to the service request, labelled with its number, that opens in a new tab.
+     */
+    protected function buildServiceRequestNumberLink(ServiceRequest $serviceRequest): string
     {
-        $import = $event->getImport();
+        $url = ServiceRequestResource::getUrl('view', ['record' => $serviceRequest]);
+        $number = e($serviceRequest->service_request_number);
 
-        if ($import->importer !== OrganizationImporter::class) {
-            return;
+        return "<a href='{$url}' target='_blank' class='underline'>{$number}</a>";
+    }
+
+    /**
+     * A link to the service request's customer, labelled as "Contact name (Organization name)"
+     * — or only the contact name when no organization is available — that opens in a new tab.
+     */
+    protected function buildServiceRequestCustomerLink(ServiceRequest $serviceRequest): string
+    {
+        $contact = $serviceRequest->respondent;
+
+        $label = e($contact->{$contact::displayNameKey()});
+
+        if (filled($contact->organization?->name)) {
+            $label .= ' (' . e($contact->organization->name) . ')';
         }
 
-        Cache::tags([OrganizationImporter::domainClaimCacheTag($import->getKey())])->flush();
+        $url = ContactResource::getUrl('view', ['record' => $contact]);
+
+        return "<a href='{$url}' target='_blank' class='underline'>{$label}</a>";
+    }
+
+    protected function buildServiceRequestTypeName(ServiceRequest $serviceRequest): string
+    {
+        return e($serviceRequest->priority?->type?->name);
     }
 }

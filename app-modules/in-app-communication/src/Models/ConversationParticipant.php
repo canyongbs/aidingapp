@@ -38,18 +38,20 @@ namespace AidingApp\InAppCommunication\Models;
 
 use AidingApp\InAppCommunication\Database\Factories\ConversationParticipantFactory;
 use AidingApp\InAppCommunication\Enums\ConversationNotificationPreference;
-use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperConversationParticipant
  */
-class ConversationParticipant extends BaseModel
+class ConversationParticipant extends Model
 {
+    use UsesTenantConnection;
+
     /** @use HasFactory<ConversationParticipantFactory> */
     use HasFactory;
 

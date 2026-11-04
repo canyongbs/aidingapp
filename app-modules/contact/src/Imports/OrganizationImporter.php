@@ -39,15 +39,16 @@ namespace AidingApp\Contact\Imports;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\Contact\Rules\UniqueOrganizationDomain;
+use AidingApp\Contact\Support\OrganizationDomainsLock;
+use App\Features\OrganizationArchivingFeature;
 use Closure;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -181,7 +182,7 @@ class OrganizationImporter extends Importer
                         ->filter();
 
                     $domains->each(function (string $domain) use ($fail): void {
-                        if (! preg_match('/^(?!-)([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,63}$/', $domain)) {
+                        if (! preg_match(Organization::DOMAIN_PATTERN, $domain)) {
                             $fail("The domain '{$domain}' is not a valid domain.");
                         }
                     });
@@ -212,6 +213,11 @@ class OrganizationImporter extends Importer
     {
         $name = $this->data['name'];
 
+        // Taken before the name lock on every row so all chunk workers acquire the two locks in the same order and cannot deadlock.
+        if (filled($this->columnMap['domains'] ?? null)) {
+            app(OrganizationDomainsLock::class)->acquire();
+        }
+
         // Serialize concurrent chunk workers importing the same name so the unique index cannot abort a chunk transaction.
         DB::selectOne('SELECT pg_advisory_xact_lock(hashtext(?))', [Str::lower(trim((string) $name))]);
 
@@ -235,14 +241,21 @@ class OrganizationImporter extends Importer
         return $body;
     }
 
-    /**
-     * The cache tag under which this import's claimed domains are held so duplicates across rows can be rejected.
-     */
-    public static function domainClaimCacheTag(int|string|null $importKey): string
+    public function afterSave(): void
     {
-        return "{organization-import-domain-claims-{$importKey}}";
+        $record = $this->record;
+
+        assert($record instanceof Organization);
+
+        if (OrganizationArchivingFeature::active() && $record->isArchived()) {
+            $record->unarchive();
+        }
     }
 
+    /**
+     * Earlier rows in this chunk share its transaction and other chunks wait on the domains lock, so this also
+     * rejects domains claimed earlier in the same import.
+     */
     protected function beforeSave(): void
     {
         assert($this->record instanceof Organization);
@@ -255,33 +268,12 @@ class OrganizationImporter extends Importer
         /** @var array<int, array{domain: string}> $domains */
         $domains = $this->record->domains ?? [];
 
-        $ignoreId = $this->record->exists ? $this->record->getKey() : null;
+        $rule = new UniqueOrganizationDomain($this->record->exists ? $this->record->getKey() : null);
 
         foreach ($domains as $domain) {
-            $usedByAnotherOrganization = Organization::query()
-                ->when($ignoreId, fn (Builder $query) => $query->whereKeyNot($ignoreId))
-                ->whereRaw("EXISTS (SELECT 1 FROM jsonb_array_elements(domains) AS element WHERE lower(element->>'domain') = ?)", [$domain['domain']])
-                ->exists();
-
-            if ($usedByAnotherOrganization) {
+            $rule->validate('domains', $domain['domain'], function (string $message) use ($domain): never {
                 throw new RowImportFailedException("The domain '{$domain['domain']}' is already in use by another organization.");
-            }
-        }
-
-        $tag = self::domainClaimCacheTag($this->import->getKey());
-
-        // The claim value records which organization won the domain so a chunk retry can re-claim its own domains.
-        $claimant = Str::lower((string) $this->record->name);
-
-        foreach ($domains as $domain) {
-            // Cache::add is an atomic set-if-absent, so the first organization to claim a domain wins across concurrent workers.
-            if (Cache::tags([$tag])->add($domain['domain'], $claimant, now()->addDay())) {
-                continue;
-            }
-
-            if (Cache::tags([$tag])->get($domain['domain']) !== $claimant) {
-                throw new RowImportFailedException("The domain '{$domain['domain']}' was already imported for a different organization in this file.");
-            }
+            });
         }
     }
 

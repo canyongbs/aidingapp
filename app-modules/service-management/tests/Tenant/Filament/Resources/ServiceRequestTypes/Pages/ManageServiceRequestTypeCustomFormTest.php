@@ -39,6 +39,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\Man
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\StepDescriptionFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Str;
@@ -364,4 +365,116 @@ it('stores steps and clears top-level content for a multi-step form', function (
         ->and($type->form->content)->toBeNull()
         ->and($type->form->steps()->count())->toBe(1)
         ->and($type->form->steps()->first()->label)->toBe('Step One');
+});
+
+it('stores the step description for a multi-step form', function () use ($customFormContent): void {
+    asSuperAdmin();
+
+    $type = ServiceRequestType::factory()->create();
+
+    Livewire::test(ManageServiceRequestTypeCustomForm::class, [
+        'record' => $type->getKey(),
+    ])
+        ->set('data.is_wizard', true)
+        ->set('data.steps', [
+            [
+                'label' => 'Step One',
+                'description' => 'Tell us about yourself.',
+                'content' => $customFormContent('Step field'),
+            ],
+            [
+                'label' => 'Step Two',
+                'content' => $customFormContent('Other field'),
+            ],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $type->unsetRelation('form');
+
+    expect($type->form->steps()->pluck('description', 'label')->all())->toBe([
+        'Step One' => 'Tell us about yourself.',
+        'Step Two' => null,
+    ]);
+});
+
+it('hydrates the step description from an existing form', function (): void {
+    asSuperAdmin();
+
+    $type = ServiceRequestType::factory()->create();
+
+    $form = ServiceRequestForm::factory()
+        ->for($type, 'type')
+        ->create(['is_wizard' => true]);
+
+    $form->steps()->create([
+        'label' => 'Step One',
+        'description' => 'Tell us about yourself.',
+        'sort' => 0,
+        'content' => ['type' => 'doc', 'content' => []],
+    ]);
+
+    Livewire::test(ManageServiceRequestTypeCustomForm::class, [
+        'record' => $type->getKey(),
+    ])
+        ->assertSet('data.steps', fn (array $steps): bool => array_column($steps, 'description') === ['Tell us about yourself.']);
+});
+
+it('shows the step description field only when `StepDescriptionFeature` is active', function (bool $isFeatureActive): void {
+    asSuperAdmin();
+
+    if (! $isFeatureActive) {
+        StepDescriptionFeature::deactivate();
+    }
+
+    $type = ServiceRequestType::factory()->create();
+
+    $form = ServiceRequestForm::factory()
+        ->for($type, 'type')
+        ->create(['is_wizard' => true]);
+
+    $form->steps()->create([
+        'label' => 'Step One',
+        'sort' => 0,
+        'content' => ['type' => 'doc', 'content' => []],
+    ]);
+
+    $component = Livewire::test(ManageServiceRequestTypeCustomForm::class, [
+        'record' => $type->getKey(),
+    ]);
+
+    $stepKey = array_key_first($component->get('data.steps'));
+
+    $isFeatureActive
+        ? $component->assertFormFieldVisible("steps.{$stepKey}.description")
+        : $component->assertFormFieldHidden("steps.{$stepKey}.description");
+})->with([
+    'active' => true,
+    'inactive' => false,
+]);
+
+it('does not store the step description when `StepDescriptionFeature` is inactive', function () use ($customFormContent): void {
+    asSuperAdmin();
+
+    StepDescriptionFeature::deactivate();
+
+    $type = ServiceRequestType::factory()->create();
+
+    Livewire::test(ManageServiceRequestTypeCustomForm::class, [
+        'record' => $type->getKey(),
+    ])
+        ->set('data.is_wizard', true)
+        ->set('data.steps', [
+            [
+                'label' => 'Step One',
+                'description' => 'Tell us about yourself.',
+                'content' => $customFormContent('Step field'),
+            ],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $type->unsetRelation('form');
+
+    expect($type->form->steps()->first()->description)->toBeNull();
 });

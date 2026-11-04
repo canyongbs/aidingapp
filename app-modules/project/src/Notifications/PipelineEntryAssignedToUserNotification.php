@@ -38,12 +38,14 @@ namespace AidingApp\Project\Notifications;
 
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\PipelineEntry;
 use App\Models\User;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\HtmlString;
 
 class PipelineEntryAssignedToUserNotification extends Notification implements ShouldQueue
 {
@@ -64,30 +66,48 @@ class PipelineEntryAssignedToUserNotification extends Notification implements Sh
     public function toMail(User $notifiable): MailMessage
     {
         return MailMessage::make()
-            ->subject('You have been assigned a new Pipeline Task')
-            ->line('You have been assigned the pipeline task: ')
-            ->line("\"{$this->pipelineEntry->name}\"");
+            ->subject('You have been assigned a new Project Task')
+            ->line($this->getMessage($notifiable));
     }
 
     /**
      * @return array<string, mixed>
      */
-    public function toDatabase(object $notifiable): array
+    public function toDatabase(User $notifiable): array
     {
-        $url = PipelineResource::getUrl('entries', [
-            'record' => $this->pipelineEntry->pipelineStage->pipeline_id,
-            'project' => $this->pipelineEntry->pipelineStage->pipeline->project_id,
-        ]);
-
-        $title = str($this->pipelineEntry->name)->limit();
-
-        $message = filled($url)
-          ? "You have been assigned a new Pipeline Task: <a href='{$url}' target='_blank' class='underline'>{$title}</a>"
-          : "You have been assigned a new Pipeline Task: {$title}";
-
         return FilamentNotification::make()
             ->success()
-            ->title($message)
+            ->title($this->getMessage($notifiable, limitTaskName: true)->toHtml())
             ->getDatabaseMessage();
+    }
+
+    protected function getMessage(User $notifiable, bool $limitTaskName = false): HtmlString
+    {
+        $pipeline = $this->pipelineEntry->pipelineStage->pipeline;
+
+        $projectUrl = ProjectResource::getUrl('view', ['record' => $pipeline->project_id]);
+
+        $taskUrl = PipelineResource::getUrl('entries', [
+            'record' => $pipeline->id,
+            'project' => $pipeline->project_id,
+        ]);
+
+        $projectLink = $this->makeLink($projectUrl, $pipeline->project->name);
+
+        $taskName = $limitTaskName ? str($this->pipelineEntry->name)->limit()->toString() : $this->pipelineEntry->name;
+        $taskLink = $this->makeLink($taskUrl, $taskName);
+
+        if ($this->pipelineEntry->due === null) {
+            return new HtmlString("For the project {$projectLink} you have been assigned a new task to {$taskLink}. There was no assigned due date at task creation.");
+        }
+
+        $due = e($this->pipelineEntry->due->copy()->setTimezone($notifiable->getTimezone())->format('M j, Y g:i a'));
+
+        return new HtmlString("For the project {$projectLink} you have been assigned a new task: {$taskLink} with a due date of {$due}.");
+    }
+
+    protected function makeLink(string $url, string $text): string
+    {
+        return '<a href="' . e($url) . '" target="_blank" class="underline">' . e($text) . '</a>';
     }
 }

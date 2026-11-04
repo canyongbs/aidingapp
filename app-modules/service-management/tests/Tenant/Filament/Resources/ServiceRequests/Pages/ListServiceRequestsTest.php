@@ -50,9 +50,11 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\Select;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -1206,4 +1208,45 @@ it('places a type under every category it belongs to in the type filter tree', f
 
     expect(collect($nodeA['children'])->pluck('value'))->toContain($type->getKey())
         ->and(collect($nodeB['children'])->pluck('value'))->toContain($type->getKey());
+});
+
+it('does not offer archived organizations in the organization filter', function (): void {
+    asSuperAdmin();
+
+    $organization = Organization::factory()->create();
+    $archivedOrganization = Organization::factory()->archived()->create();
+
+    $select = Livewire::test(ListServiceRequests::class)
+        ->instance()
+        ->getTableFiltersForm()
+        ->getComponentByStatePath('organization.value');
+
+    assert($select instanceof Select);
+
+    $options = $select->getOptions();
+
+    expect($options)
+        ->toHaveKey($organization->getKey())
+        ->not()->toHaveKey($archivedOrganization->getKey());
+});
+
+it('offers every organization in the organization filter when archiving is inactive', function (): void {
+    OrganizationArchivingFeature::deactivate();
+    asSuperAdmin();
+
+    $organization = Organization::factory()->create();
+    $archivedOrganization = Organization::factory()->archived()->create();
+
+    $select = Livewire::test(ListServiceRequests::class)
+        ->instance()
+        ->getTableFiltersForm()
+        ->getComponentByStatePath('organization.value');
+
+    assert($select instanceof Select);
+
+    $options = $select->getOptions();
+
+    expect($options)
+        ->toHaveKey($organization->getKey())
+        ->toHaveKey($archivedOrganization->getKey());
 });

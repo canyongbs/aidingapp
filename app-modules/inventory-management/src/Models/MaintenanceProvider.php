@@ -38,17 +38,21 @@ namespace AidingApp\InventoryManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\InventoryManagement\Database\Factories\MaintenanceProviderFactory;
-use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperMaintenanceProvider
  */
-class MaintenanceProvider extends BaseModel implements Auditable
+class MaintenanceProvider extends Model implements Auditable
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
     use AuditableTrait;
     use SoftDeletes;
 

@@ -40,21 +40,24 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\KnowledgeBase\Database\Factories\KnowledgeBaseItemConcernFactory;
 use AidingApp\KnowledgeBase\Enums\ConcernStatus;
 use AidingApp\KnowledgeBase\Observers\KnowledgeBaseItemConcernObserver;
-use App\Models\BaseModel;
 use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperKnowledgeBaseItemConcern
  */
 #[ObservedBy(KnowledgeBaseItemConcernObserver::class)]
-class KnowledgeBaseItemConcern extends BaseModel implements Auditable
+class KnowledgeBaseItemConcern extends Model implements Auditable
 {
+    use UsesTenantConnection;
+
     /** @use HasFactory<KnowledgeBaseItemConcernFactory> */
     use HasFactory;
 

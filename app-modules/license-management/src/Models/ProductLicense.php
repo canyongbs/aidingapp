@@ -43,22 +43,26 @@ use AidingApp\LicenseManagement\Enums\ProductLicenseStatus;
 use AidingApp\LicenseManagement\Models\Scopes\AuthorizeLicensesScope;
 use AidingApp\LicenseManagement\Observers\ProductLicenseObserver;
 use App\LicenseManagement\Exceptions\FailedToDetermineProductLicenseStatus;
-use App\Models\BaseModel;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperProductLicense
  */
 #[ObservedBy(ProductLicenseObserver::class)] #[ScopedBy(AuthorizeLicensesScope::class)]
-class ProductLicense extends BaseModel implements Auditable
+class ProductLicense extends Model implements Auditable
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
     use AuditableTrait;
     use SoftDeletes;
 

@@ -46,7 +46,6 @@ use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Timeline\Timelines\EngagementTimeline;
-use App\Models\BaseModel;
 use App\Models\Contracts\Educatable;
 use App\Models\Media;
 use App\Models\User;
@@ -56,6 +55,7 @@ use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichConten
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -68,6 +68,7 @@ use Illuminate\Support\HtmlString;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @property-read Educatable $recipient
@@ -75,9 +76,11 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @mixin IdeHelperEngagement
  */
 #[ObservedBy([EngagementObserver::class])]
-class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasDeliveryMethod, HasMedia, HasRichContent
+class Engagement extends Model implements Auditable, ProvidesATimeline, HasDeliveryMethod, HasMedia, HasRichContent
 {
     use AuditableTrait;
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
 
     /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;

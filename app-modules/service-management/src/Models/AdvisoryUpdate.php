@@ -38,17 +38,21 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\AdvisoryUpdateFactory;
-use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperAdvisoryUpdate
  */
-class AdvisoryUpdate extends BaseModel implements Auditable
+class AdvisoryUpdate extends Model implements Auditable
 {
     use AuditableTrait;
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
 
     /** @use HasFactory<AdvisoryUpdateFactory> */
     use HasFactory;

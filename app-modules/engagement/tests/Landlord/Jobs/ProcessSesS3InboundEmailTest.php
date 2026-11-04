@@ -2321,6 +2321,86 @@ describe('Service Request Type Service Request creation from inbound email', fun
             );
         });
 
+        it('IfEligible condition sends an ineligible notification when the only matching organization is archived', function (): void {
+            $notificationFake = Notification::fake();
+
+            Event::listen(
+                MadeTenantCurrentEvent::class,
+                function (MadeTenantCurrentEvent $event) use ($notificationFake): void {
+                    Notification::swap($notificationFake);
+                }
+            );
+
+            $tenant = Tenant::query()->firstOrFail();
+
+            $tenant->execute(function (): void {
+                seed(ContactTypeSeeder::class);
+
+                Organization::factory()->archived()->create([
+                    'is_contact_generation_enabled' => true,
+                    'domains' => [['domain' => 'canyongbs.com']],
+                ]);
+
+                $serviceRequestType = ServiceRequestType::factory()
+                    ->has(
+                        TenantServiceRequestTypeDomain::factory()->state([
+                            'domain' => 'help',
+                        ]),
+                        'domain'
+                    )
+                    ->has(
+                        ServiceRequestPriority::factory()->count(3),
+                        'priorities'
+                    )
+                    ->create([
+                        'is_email_automatic_creation_enabled' => true,
+                        'is_email_automatic_creation_contact_create_enabled' => true,
+                        'email_automatic_creation_contact_create_condition' => EmailAutomaticCreationContactCreateCondition::IfEligible,
+                    ]);
+
+                $serviceRequestType->update([
+                    'email_automatic_creation_priority_id' => $serviceRequestType->priorities->first()->getKey(),
+                ]);
+            });
+
+            Storage::fake('s3');
+            $filesystem = Storage::fake('s3-inbound-email');
+
+            $modulePath = resolve(ModulePath::class);
+
+            $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
+
+            $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+            $filesystem->putFileAs('', $file, 's3_email');
+
+            $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
+                $mock
+                    ->shouldAllowMockingProtectedMethods()
+                    ->shouldReceive('getContent')
+                    ->once()
+                    ->andReturn($content);
+            });
+
+            assert($mock instanceof ProcessSesS3InboundEmail);
+
+            invade($mock)->__set('emailFilePath', 's3_email');
+
+            $mock->handle();
+
+            $tenant->makeCurrent();
+
+            assertDatabaseEmpty(Contact::class);
+            assertDatabaseEmpty(ServiceRequest::class);
+
+            $notificationFake->assertSentOnDemand(
+                IneligibleContactSesS3InboundEmailServiceRequestNotification::class,
+                function (IneligibleContactSesS3InboundEmailServiceRequestNotification $notification, array $channels, object $notifiable): bool {
+                    return $notifiable->routes['mail'] === 'kevin.ullyott@canyongbs.com';
+                }
+            );
+        });
+
         it('IfEligible condition creates a new contact linked to the matched organization when no contact exists and contact creation is enabled', function (): void {
             $tenant = Tenant::query()->firstOrFail();
 

@@ -40,7 +40,9 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactEmailHealthCallout;
 use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactFormSchema;
 use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactInfolist;
+use AidingApp\Contact\Filament\Support\OrganizationArchivedName;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
 use App\Enums\PresenceStatus;
 use App\Features\ContactArchivingFeature;
 use App\Features\ContactTrackingFeature;
@@ -55,6 +57,7 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\View\View;
 
 class ViewContact extends ViewRecord
 {
@@ -194,7 +197,12 @@ class ViewContact extends ViewRecord
                                     ])
                                     ->schema([
                                         TextEntry::make('organization.name')
-                                            ->label('Organization'),
+                                            ->label('Organization')
+                                            ->formatStateUsing(function (Contact $record, string $state): string | View {
+                                                assert($record->organization instanceof Organization);
+
+                                                return OrganizationArchivedName::format($record->organization, $state);
+                                            }),
                                     ])
                                     ->columns(2),
                             ]),
