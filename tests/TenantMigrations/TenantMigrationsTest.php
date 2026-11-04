@@ -754,22 +754,20 @@ describe('2026_11_04_100000_convert_pipelines_name_to_citext_and_enforce_unique'
         });
     });
 
-    it('strips the numeric suffix on rollback once the original name is no longer taken', function () use ($migrationName, $migrationPath): void {
+    it('keeps names untouched on rollback, including legitimate names that end in a numeric suffix', function () use ($migrationName, $migrationPath): void {
         isolatedMigration($migrationName, function () use ($migrationPath): void {
-            $first = Pipeline::factory()->create(['name' => 'Admissions', 'created_at' => now()->subMinutes(2)]);
-            $second = Pipeline::factory()->create(['name' => 'admissions', 'created_at' => now()->subMinute()]);
+            Pipeline::factory()->create(['name' => 'Admissions', 'created_at' => now()->subMinutes(3)]);
+            $renamed = Pipeline::factory()->create(['name' => 'admissions', 'created_at' => now()->subMinutes(2)]);
+            $legitimate = Pipeline::factory()->create(['name' => 'Release-2026', 'created_at' => now()->subMinute()]);
 
             $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
             expect($migrate)->toBe(Command::SUCCESS);
 
-            expect($second->refresh()->name)->toBe('admissions-2');
-
-            $first->delete();
-
             $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
             expect($rollback)->toBe(Command::SUCCESS);
 
-            expect($second->refresh()->name)->toBe('admissions')
+            expect($renamed->refresh()->name)->toBe('admissions-2')
+                ->and($legitimate->refresh()->name)->toBe('Release-2026')
                 ->and(PipelineNameUniquenessFeature::active())->toBeFalse();
 
             Pipeline::factory()->create(['name' => 'ADMISSIONS']);
@@ -820,23 +818,21 @@ describe('2026_11_04_100100_convert_pipeline_stages_name_to_citext_and_enforce_u
         });
     });
 
-    it('strips the numeric suffix on rollback and restores the original unique constraint', function () use ($migrationName, $migrationPath): void {
+    it('keeps names untouched on rollback and restores the original unique constraint', function () use ($migrationName, $migrationPath): void {
         isolatedMigration($migrationName, function () use ($migrationPath): void {
             $pipeline = Pipeline::factory()->create();
-            $first = PipelineStage::factory()->for($pipeline)->create(['name' => 'Review', 'created_at' => now()->subMinutes(2)]);
-            $second = PipelineStage::factory()->for($pipeline)->create(['name' => 'review', 'created_at' => now()->subMinute()]);
+            PipelineStage::factory()->for($pipeline)->create(['name' => 'Review', 'created_at' => now()->subMinutes(3)]);
+            $renamed = PipelineStage::factory()->for($pipeline)->create(['name' => 'review', 'created_at' => now()->subMinutes(2)]);
+            $legitimate = PipelineStage::factory()->for($pipeline)->create(['name' => 'Phase-2', 'created_at' => now()->subMinute()]);
 
             $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
             expect($migrate)->toBe(Command::SUCCESS);
 
-            expect($second->refresh()->name)->toBe('review-2');
-
-            $first->delete();
-
             $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
             expect($rollback)->toBe(Command::SUCCESS);
 
-            expect($second->refresh()->name)->toBe('review')
+            expect($renamed->refresh()->name)->toBe('review-2')
+                ->and($legitimate->refresh()->name)->toBe('Phase-2')
                 ->and(PipelineNameUniquenessFeature::active())->toBeFalse();
 
             PipelineStage::factory()->for($pipeline)->create(['name' => 'REVIEW']);

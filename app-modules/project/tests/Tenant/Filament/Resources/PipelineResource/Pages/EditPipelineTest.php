@@ -250,6 +250,42 @@ describe('name uniqueness', function (): void {
         expect($stage->refresh()->name)->toBe('REVIEW');
     });
 
+    it('allows renaming several stages at once even when an earlier stage takes the name of a later one', function (): void {
+        asSuperAdmin();
+
+        $project = Project::factory()->create();
+        $pipeline = Pipeline::factory()->for($project)->create();
+        $planning = PipelineStage::factory()->for($pipeline)->create(['name' => 'Planning', 'order' => 1]);
+        $review = PipelineStage::factory()->for($pipeline)->create(['name' => 'Review', 'order' => 2]);
+
+        Livewire::test(EditPipeline::class, ['record' => $pipeline->getKey(), 'parentRecord' => $project])
+            ->set("data.stages.record-{$planning->getKey()}.name", 'REVIEW')
+            ->set("data.stages.record-{$review->getKey()}.name", 'Done')
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        expect($planning->refresh()->name)->toBe('REVIEW')
+            ->and($review->refresh()->name)->toBe('Done');
+    });
+
+    it('allows swapping the names of two stages', function (): void {
+        asSuperAdmin();
+
+        $project = Project::factory()->create();
+        $pipeline = Pipeline::factory()->for($project)->create();
+        $first = PipelineStage::factory()->for($pipeline)->create(['name' => 'Review', 'order' => 1]);
+        $second = PipelineStage::factory()->for($pipeline)->create(['name' => 'Approval', 'order' => 2]);
+
+        Livewire::test(EditPipeline::class, ['record' => $pipeline->getKey(), 'parentRecord' => $project])
+            ->set("data.stages.record-{$first->getKey()}.name", 'approval')
+            ->set("data.stages.record-{$second->getKey()}.name", 'review')
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        expect($first->refresh()->name)->toBe('approval')
+            ->and($second->refresh()->name)->toBe('review');
+    });
+
     describe('feature flag', function (): void {
         it('does not apply the unique form rule when the feature is disabled', function (): void {
             PipelineNameUniquenessFeature::deactivate();

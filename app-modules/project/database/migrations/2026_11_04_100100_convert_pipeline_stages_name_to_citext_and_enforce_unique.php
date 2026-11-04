@@ -44,7 +44,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     /*
      * TODO: Cleanup Task (pipeline-name-uniqueness): after PipelineNameUniquenessFeature is removed:
-     * - remove the `FixesDuplicateNames` trait, the `$chunkSize`, `$usesSoftDeletes` and `$groupByColumns` properties, and the `fixDuplicates()` / `revertDuplicates()` calls
+     * - remove the `FixesDuplicateNames` trait, the `$chunkSize`, `$usesSoftDeletes` and `$groupByColumns` properties, and the `fixDuplicates()` call
      * - keep the citext column conversion and the unique index, they are permanent
      */
     use FixesDuplicateNames;
@@ -63,15 +63,18 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function (): void {
+            // Block concurrent writes so the repair and the unique constraint operate on a stable set of rows.
+            DB::statement("LOCK TABLE {$this->table} IN ACCESS EXCLUSIVE MODE");
+
             DB::statement('ALTER TABLE pipeline_stages DROP CONSTRAINT IF EXISTS pipeline_stages_name_pipeline_id_unique');
 
             $this->fixDuplicates();
 
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
 
-            Schema::table($this->table, function (Blueprint $table): void {
-                $table->uniqueIndex([$this->column, 'pipeline_id'], 'pipeline_stages_name_pipeline_id_unique');
-            });
+            // Deferrable so a multi-stage rename (e.g. swapping or shifting names) can be saved in one
+            // transaction with `SET CONSTRAINTS ALL DEFERRED` without tripping on intermediate states.
+            DB::statement("ALTER TABLE {$this->table} ADD CONSTRAINT pipeline_stages_name_pipeline_id_unique UNIQUE ({$this->column}, pipeline_id) DEFERRABLE INITIALLY IMMEDIATE");
 
             PipelineNameUniquenessFeature::activate();
         });
@@ -82,11 +85,13 @@ return new class () extends Migration {
         DB::transaction(function (): void {
             PipelineNameUniquenessFeature::deactivate();
 
+            DB::statement('ALTER TABLE pipeline_stages DROP CONSTRAINT IF EXISTS pipeline_stages_name_pipeline_id_unique');
+
             DB::statement('DROP INDEX IF EXISTS pipeline_stages_name_pipeline_id_unique');
 
+            // Names rewritten by up() are intentionally kept: stripping numeric suffixes cannot tell them
+            // apart from legitimate names and could recreate duplicates.
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
-
-            $this->revertDuplicates();
 
             Schema::table($this->table, function (Blueprint $table): void {
                 $table->unique([$this->column, 'pipeline_id'], 'pipeline_stages_name_pipeline_id_unique');

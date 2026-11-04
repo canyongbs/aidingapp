@@ -44,7 +44,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     /*
      * TODO: Cleanup Task (pipeline-name-uniqueness): after PipelineNameUniquenessFeature is removed:
-     * - remove the `FixesDuplicateNames` trait, the `$chunkSize` and `$usesSoftDeletes` properties, and the `fixDuplicates()` / `revertDuplicates()` calls
+     * - remove the `FixesDuplicateNames` trait, the `$chunkSize` and `$usesSoftDeletes` properties, and the `fixDuplicates()` call
      * - keep the citext column conversion and the unique index, they are permanent
      */
     use FixesDuplicateNames;
@@ -60,6 +60,9 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function (): void {
+            // Block concurrent writes so the repair and the unique index operate on a stable set of rows.
+            DB::statement("LOCK TABLE {$this->table} IN ACCESS EXCLUSIVE MODE");
+
             $this->fixDuplicates();
 
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
@@ -79,9 +82,9 @@ return new class () extends Migration {
 
             DB::statement('DROP INDEX IF EXISTS pipelines_name_unique');
 
+            // Names rewritten by up() are intentionally kept: stripping numeric suffixes cannot tell them
+            // apart from legitimate names and could recreate duplicates.
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
-
-            $this->revertDuplicates();
         });
     }
 };

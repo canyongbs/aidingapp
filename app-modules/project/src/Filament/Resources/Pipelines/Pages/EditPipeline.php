@@ -52,12 +52,15 @@ use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\DB;
 
 class EditPipeline extends EditRecord
 {
     protected static string $resource = PipelineResource::class;
 
     protected static ?string $navigationLabel = 'Edit';
+
+    protected ?bool $hasDatabaseTransactions = true;
 
     public function form(Schema $schema): Schema
     {
@@ -113,6 +116,13 @@ class EditPipeline extends EditRecord
                     ->minItems(1)
                     ->maxItems(5),
             ]);
+    }
+
+    protected function beforeSave(): void
+    {
+        // Stages are saved one at a time, so renames such as swapping or shifting names would otherwise
+        // collide with a stage that has not been updated yet. Uniqueness is checked once on commit instead.
+        DB::statement('SET CONSTRAINTS ALL DEFERRED');
     }
 
     protected function getHeaderActions(): array
