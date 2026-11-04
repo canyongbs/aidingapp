@@ -40,25 +40,29 @@ use AidingApp\Engagement\Database\Factories\EngagementBatchFactory;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
 use AidingApp\Engagement\Observers\EngagementBatchObserver;
 use AidingApp\Notification\Enums\NotificationChannel;
-use App\Models\BaseModel;
 use App\Models\Media;
 use App\Models\User;
 use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperEngagementBatch
  */
 #[ObservedBy([EngagementBatchObserver::class])]
-class EngagementBatch extends BaseModel implements HasMedia, HasRichContent
+class EngagementBatch extends Model implements HasMedia, HasRichContent
 {
     use HasManyEngagements;
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
 
     /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
