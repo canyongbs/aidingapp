@@ -38,6 +38,7 @@ namespace AidingApp\Portal\Http\Requests;
 
 use AidingApp\Portal\Actions\FindPortalRegistrationOrganization;
 use AidingApp\Portal\Models\PortalAuthentication;
+use App\Rules\MatchesAuthenticationEmail;
 use App\Rules\ValidAuthenticationCode;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
@@ -60,7 +61,14 @@ class KnowledgeManagementPortalRegisterRequest extends FormRequest
         assert($authentication instanceof PortalAuthentication);
 
         return [
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where(fn (Builder $query) => $query->whereNotNull('deleted_at'))],
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->where(fn (Builder $query) => $query->whereNotNull('deleted_at')),
+                new MatchesAuthenticationEmail($this->query('email')),
+            ],
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'preferred' => ['nullable', 'string', 'max:255'],

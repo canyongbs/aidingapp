@@ -153,6 +153,7 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
                 name: $route,
                 parameters: [
                     'authentication' => $authentication,
+                    ...(is_null($contact) ? ['email' => $email] : []),
                 ],
                 absolute: false,
             )

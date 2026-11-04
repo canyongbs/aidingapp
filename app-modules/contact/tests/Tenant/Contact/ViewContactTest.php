@@ -363,6 +363,31 @@ describe('section edit actions', function (): void {
             ])
             ->assertHasFormErrors(['email']);
     });
+
+    it('does not save the email of an archived contact', function (): void {
+        ContactArchivingFeature::activate();
+
+        $user = User::factory()->create();
+        $user->givePermissionTo('contact.view-any');
+        $user->givePermissionTo('contact.*.view');
+        $user->givePermissionTo('contact.*.update');
+
+        Contact::factory()->archived()->create(['email' => 'archived@example.com']);
+        $contact = Contact::factory()->create(['email' => 'mine@example.com']);
+
+        actingAs($user);
+
+        $component = Livewire::test(ViewContact::class, [
+            'record' => $contact->getRouteKey(),
+        ])
+            ->callAction(TestAction::make('editContactInformation')->schemaComponent('contactInformation'), data: [
+                'email' => 'Archived@Example.com',
+            ])
+            ->assertHasFormErrors(['email' => 'An archived contact with this email already exists.']);
+
+        expect($component->errors()->get('mountedActions.0.data.email'))->toBe(['An archived contact with this email already exists.'])
+            ->and($contact->fresh()->email)->toBe('mine@example.com');
+    });
 });
 
 describe('email health', function (): void {
