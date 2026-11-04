@@ -80,7 +80,18 @@ it('bulk archives organizations', function (): void {
 it('shows the bulk delete action when the organization archiving feature is inactive', function (): void {
     OrganizationArchivingFeature::deactivate();
 
-    actingAs(User::factory()->create()->givePermissionTo('organization.view-any', 'organization.*.view', 'organization.*.delete'));
+    Organization::factory(3)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('organization.view-any', 'organization.*.view');
+
+    actingAs($user);
+
+    Livewire::test(ListOrganizations::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('organization.*.delete');
 
     Livewire::test(ListOrganizations::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk())
