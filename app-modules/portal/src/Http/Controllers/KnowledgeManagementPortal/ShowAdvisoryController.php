@@ -38,6 +38,7 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Portal\DataTransferObjects\AdvisoryDetailData;
 use AidingApp\ServiceManagement\Models\Advisory;
+use AidingApp\ServiceManagement\Models\Scopes\VisibleToPortalContact;
 use App\Settings\LicenseSettings;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
@@ -50,6 +51,7 @@ class ShowAdvisoryController
         abort_unless(resolve(LicenseSettings::class)->data?->addons->advisoryManagement, Response::HTTP_FORBIDDEN);
 
         $advisory = Advisory::query()
+            ->tap(new VisibleToPortalContact(auth('contact')->user()))
             ->with([
                 'severity',
                 'status',

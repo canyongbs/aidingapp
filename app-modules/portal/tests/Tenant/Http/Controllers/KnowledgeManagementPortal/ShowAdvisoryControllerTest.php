@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\Department\Models\Department;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Models\Advisory;
@@ -126,13 +127,49 @@ it('returns not found for a deleted advisory', function (): void {
     getJson(route('api.portal.advisories.show', ['advisory' => $advisory]))->assertNotFound();
 });
 
-describe('authorization', function (): void {
-    it('denies access to guests', function (): void {
+describe('visibility', function (): void {
+    it('shows a public advisory to guests', function (): void {
         auth()->logout();
 
-        getJson(route('api.portal.advisories.show', ['advisory' => Advisory::factory()->create()]))->assertUnauthorized();
+        $advisory = Advisory::factory()->create();
+
+        getJson(route('api.portal.advisories.show', ['advisory' => $advisory]))
+            ->assertOk()
+            ->assertJsonPath('data.id', $advisory->getKey());
     });
 
+    it('does not show an authenticated advisory to guests', function (): void {
+        auth()->logout();
+
+        getJson(route('api.portal.advisories.show', ['advisory' => Advisory::factory()->authenticated()->create()]))->assertNotFound();
+    });
+
+    it('shows an authenticated advisory to a signed-in contact', function (): void {
+        actingAs(Contact::factory()->create(), 'contact');
+
+        $advisory = Advisory::factory()->authenticated()->create();
+
+        getJson(route('api.portal.advisories.show', ['advisory' => $advisory]))
+            ->assertOk()
+            ->assertJsonPath('data.id', $advisory->getKey());
+    });
+
+    it('only shows an advisory restricted to specific contact types to contacts of those types', function (): void {
+        $allowedType = ContactType::factory()->create();
+
+        $advisory = Advisory::factory()->restrictedToContactTypes($allowedType)->create();
+
+        actingAs(Contact::factory()->create(), 'contact');
+
+        getJson(route('api.portal.advisories.show', ['advisory' => $advisory]))->assertNotFound();
+
+        actingAs(Contact::factory()->for($allowedType, 'type')->create(), 'contact');
+
+        getJson(route('api.portal.advisories.show', ['advisory' => $advisory]))->assertOk();
+    });
+});
+
+describe('authorization', function (): void {
     it('denies access without the advisory management add-on', function (): void {
         $licenseSettings = app(LicenseSettings::class);
         $licenseSettings->data->addons->advisoryManagement = false;

@@ -178,10 +178,8 @@ Route::prefix('api')
                     ->name('product.licenses');
 
                 Route::get('/advisories', AdvisoryController::class)
-                    ->middleware(['auth:sanctum'])
                     ->name('advisories');
                 Route::get('/advisories/{advisory}', ShowAdvisoryController::class)
-                    ->middleware(['auth:sanctum'])
                     ->whereUuid('advisory')
                     ->name('advisories.show');
                 Route::get('/status', ServiceMonitorStatusController::class)
