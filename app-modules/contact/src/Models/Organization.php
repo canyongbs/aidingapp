@@ -55,6 +55,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Bus\PendingDispatch;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -171,8 +172,6 @@ class Organization extends Model implements HasMedia, Auditable
 
     protected static function booted(): void
     {
-        static::unarchived(function (Organization $organization): void {
-            dispatch((new MatchUnaffiliatedContactsJob((string) $organization->getKey()))->afterCommit());
-        });
+        static::unarchived(fn (Organization $organization): PendingDispatch => dispatch((new MatchUnaffiliatedContactsJob((string) $organization->getKey()))->afterCommit()));
     }
 }
