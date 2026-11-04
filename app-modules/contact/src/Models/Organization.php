@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Database\Factories\OrganizationFactory;
+use AidingApp\Contact\Jobs\MatchUnaffiliatedContactsJob;
 use AidingApp\Contact\Models\Builders\OrganizationBuilder;
 use AidingApp\Contact\Observers\OrganizationObserver;
 use AidingApp\Project\Models\Project;
@@ -54,6 +55,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Bus\PendingDispatch;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -166,5 +168,10 @@ class Organization extends Model implements HasMedia, Auditable
             )
             ->using(ProjectGuest::class)
             ->withTimestamps();
+    }
+
+    protected static function booted(): void
+    {
+        static::unarchived(fn (Organization $organization): PendingDispatch => dispatch((new MatchUnaffiliatedContactsJob((string) $organization->getKey()))->afterCommit()));
     }
 }
