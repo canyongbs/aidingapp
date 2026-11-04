@@ -37,6 +37,7 @@
 use AidingApp\Contact\Actions\SaveOrganization;
 use AidingApp\Contact\DataTransferObjects\OrganizationDataObject;
 use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Models\OrganizationIndustry;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -75,4 +76,20 @@ it('revalidates the domains of an updated organization but allows its own', func
         ->toThrow(ValidationException::class);
 
     expect($organization->refresh()->domains)->toBe([['domain' => 'mine.edu'], ['domain' => 'extra.edu']]);
+});
+
+it('resolves the industry by name and rejects a name that no longer exists', function (): void {
+    $industry = OrganizationIndustry::factory()->create(['name' => 'Retail']);
+    $action = app(SaveOrganization::class);
+
+    $organization = $action(OrganizationDataObject::fromData(['name' => 'Acme', 'industry' => 'retail']));
+
+    expect($organization->industry_id)->toBe($industry->getKey());
+
+    $industry->delete();
+
+    expect(fn () => $action(OrganizationDataObject::fromData(['industry' => 'Retail']), $organization))
+        ->toThrow(ValidationException::class);
+
+    expect($organization->refresh()->industry_id)->toBe($industry->getKey());
 });

@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Spatie\LaravelData\Optional;
@@ -61,7 +62,15 @@ class SaveOrganization
      */
     public function __invoke(OrganizationDataObject $data, ?Organization $organization = null): Organization
     {
-        $attributes = $data->toArray();
+        $attributes = Arr::except($data->toArray(), ['industry', 'type']);
+
+        if (! $data->industry instanceof Optional) {
+            $attributes['industry_id'] = $this->resolveId(OrganizationIndustry::class, 'industry', $data->industry);
+        }
+
+        if (! $data->type instanceof Optional) {
+            $attributes['type_id'] = $this->resolveId(OrganizationType::class, 'type', $data->type);
+        }
 
         if ($data->domains instanceof Optional) {
             unset($attributes['domains']);
@@ -98,6 +107,28 @@ class SaveOrganization
         });
 
         return $organization;
+    }
+
+    /**
+     * Industries and types are referenced by name, which is unique among those that have not been deleted.
+     *
+     * @param class-string<OrganizationIndustry|OrganizationType> $model
+     *
+     * @throws ValidationException
+     */
+    private function resolveId(string $model, string $field, ?string $name): ?string
+    {
+        if ($name === null) {
+            return null;
+        }
+
+        $id = $model::query()->where('name', $name)->value('id');
+
+        if (! is_string($id)) {
+            throw ValidationException::withMessages([$field => "The selected {$field} is invalid."]);
+        }
+
+        return $id;
     }
 
     /**

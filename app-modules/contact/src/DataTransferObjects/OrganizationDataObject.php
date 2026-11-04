@@ -45,6 +45,8 @@ use Spatie\LaravelData\Optional;
 class OrganizationDataObject extends Data
 {
     /**
+     * @param string|null|Optional $industry The name of the organization industry.
+     * @param string|null|Optional $type The name of the organization type.
      * @param array<int, string>|null|Optional $domains
      */
     public function __construct(
@@ -52,8 +54,8 @@ class OrganizationDataObject extends Data
         public string | null | Optional $email,
         public string | null | Optional $phoneNumber,
         public string | null | Optional $website,
-        public string | null | Optional $industryId,
-        public string | null | Optional $typeId,
+        public string | null | Optional $industry,
+        public string | null | Optional $type,
         public string | null | Optional $description,
         public int | null | Optional $numberOfEmployees,
         public string | null | Optional $address,
@@ -78,8 +80,8 @@ class OrganizationDataObject extends Data
             email: self::value($data, 'email'),
             phoneNumber: self::value($data, 'phone_number'),
             website: self::value($data, 'website'),
-            industryId: self::value($data, 'industry_id'),
-            typeId: self::value($data, 'type_id'),
+            industry: self::value($data, 'industry'),
+            type: self::value($data, 'type'),
             description: self::value($data, 'description'),
             numberOfEmployees: self::value($data, 'number_of_employees'),
             address: self::value($data, 'address'),

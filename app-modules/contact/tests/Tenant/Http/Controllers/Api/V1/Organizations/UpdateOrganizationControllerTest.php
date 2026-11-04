@@ -101,7 +101,7 @@ it('can update every attribute', function () use ($actingAsOrganizationUpdater):
         'email' => 'updated@acme.test',
         'phone_number' => '+15555550101',
         'website' => 'https://updated.test',
-        'industry_id' => $industry->getKey(),
+        'industry' => $industry->name,
         'description' => 'Updated description',
         'number_of_employees' => 10,
         'address' => '2 Road Runner Way',
@@ -173,8 +173,8 @@ it('can clear nullable attributes by providing null', function () use ($actingAs
 
     patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), [
         'email' => null,
-        'industry_id' => null,
-        'type_id' => null,
+        'industry' => null,
+        'type' => null,
         'number_of_employees' => null,
         'domains' => null,
     ])
@@ -230,8 +230,10 @@ it('validates the request', function (array $data, array $errors) use ($actingAs
     'name is too long' => [['name' => str_repeat('a', 256)], ['name']],
     'email must be an email' => [['email' => 'nope'], ['email']],
     'website must be a url' => [['website' => 'nope'], ['website']],
-    'industry_id must be a uuid' => [['industry_id' => 'nope'], ['industry_id']],
-    'type_id must exist' => [['type_id' => '7a5c0c61-5a3c-4d2b-9d7f-0d1d1f0d1d1d'], ['type_id']],
+    'industry must be a string' => [['industry' => 123], ['industry']],
+    'industry must exist' => [['industry' => 'Unknown industry'], ['industry']],
+    'type must be a string' => [['type' => 123], ['type']],
+    'type must exist' => [['type' => 'Unknown type'], ['type']],
     'number_of_employees must be an integer' => [['number_of_employees' => 'many'], ['number_of_employees']],
     'domains must be valid' => [['domains' => ['not a domain']], ['domains.0']],
     'domains must be distinct' => [['domains' => ['acme.test', 'acme.test']], ['domains.0', 'domains.1']],
@@ -309,12 +311,41 @@ it('rejects a soft deleted industry or type', function () use ($actingAsOrganiza
     $type->delete();
 
     patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), [
-        'industry_id' => $industry->getKey(),
-        'type_id' => $type->getKey(),
+        'industry' => $industry->name,
+        'type' => $type->name,
     ])
         ->assertUnprocessable()
-        ->assertJsonValidationErrors(['industry_id', 'type_id']);
+        ->assertJsonValidationErrors(['industry', 'type']);
 
     expect($organization->refresh()->only(['industry_id', 'type_id']))
         ->toBe(['industry_id' => $originalIndustryId, 'type_id' => $originalTypeId]);
+});
+
+it('finds the industry and type by name without regard to case', function () use ($actingAsOrganizationUpdater): void {
+    $actingAsOrganizationUpdater();
+
+    $organization = Organization::factory()->create();
+    $industry = OrganizationIndustry::factory()->create(['name' => 'Higher Education']);
+    $type = OrganizationType::factory()->create(['name' => 'Public']);
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['industry' => 'higher education', 'type' => 'PUBLIC'])
+        ->assertOk()
+        ->assertJsonPath('data.industry.id', $industry->getKey())
+        ->assertJsonPath('data.type.id', $type->getKey());
+
+    expect($organization->refresh()->only(['industry_id', 'type_id']))
+        ->toBe(['industry_id' => $industry->getKey(), 'type_id' => $type->getKey()]);
+});
+
+it('does not change the industry and type when they are not provided or when identifiers are sent', function () use ($actingAsOrganizationUpdater): void {
+    $actingAsOrganizationUpdater();
+
+    $organization = Organization::factory()->create();
+    $original = $organization->only(['industry_id', 'type_id']);
+    $other = OrganizationIndustry::factory()->create();
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['industry_id' => $other->getKey(), 'type_id' => $other->getKey()])
+        ->assertOk();
+
+    expect($organization->refresh()->only(['industry_id', 'type_id']))->toBe($original);
 });

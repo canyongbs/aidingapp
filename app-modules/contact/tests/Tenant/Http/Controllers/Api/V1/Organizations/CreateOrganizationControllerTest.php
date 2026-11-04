@@ -108,8 +108,8 @@ it('can create an organization with all attributes', function () use ($actingAsO
         'email' => 'hello@acme.test',
         'phone_number' => '+15555550100',
         'website' => 'https://acme.test',
-        'industry_id' => $industry->getKey(),
-        'type_id' => $type->getKey(),
+        'industry' => $industry->name,
+        'type' => $type->name,
         'description' => 'A company that makes everything.',
         'number_of_employees' => 250,
         'address' => '1 Road Runner Way',
@@ -177,7 +177,7 @@ it('does not use the default industry and type when null is explicitly provided'
     OrganizationIndustry::factory()->create(['is_default' => true]);
     OrganizationType::factory()->create(['is_default' => true]);
 
-    postJson(route('api.v1.organizations.store', [], false), ['name' => 'Acme', 'industry_id' => null, 'type_id' => null])
+    postJson(route('api.v1.organizations.store', [], false), ['name' => 'Acme', 'industry' => null, 'type' => null])
         ->assertCreated()
         ->assertJsonPath('data.industry', null)
         ->assertJsonPath('data.type', null);
@@ -208,9 +208,11 @@ it('validates the request', function (array $data, array $errors) use ($actingAs
     'linkedin_url must be a url' => [['name' => 'Acme', 'linkedin_url' => 'nope'], ['linkedin_url']],
     'facebook_url must be a url' => [['name' => 'Acme', 'facebook_url' => 'nope'], ['facebook_url']],
     'twitter_url must be a url' => [['name' => 'Acme', 'twitter_url' => 'nope'], ['twitter_url']],
-    'industry_id must be a uuid' => [['name' => 'Acme', 'industry_id' => 'nope'], ['industry_id']],
-    'industry_id must exist' => [['name' => 'Acme', 'industry_id' => '7a5c0c61-5a3c-4d2b-9d7f-0d1d1f0d1d1d'], ['industry_id']],
-    'type_id must exist' => [['name' => 'Acme', 'type_id' => '7a5c0c61-5a3c-4d2b-9d7f-0d1d1f0d1d1d'], ['type_id']],
+    'industry must be a string' => [['name' => 'Acme', 'industry' => 123], ['industry']],
+    'industry is too long' => [['name' => 'Acme', 'industry' => str_repeat('a', 256)], ['industry']],
+    'industry must exist' => [['name' => 'Acme', 'industry' => 'Unknown industry'], ['industry']],
+    'type must be a string' => [['name' => 'Acme', 'type' => 123], ['type']],
+    'type must exist' => [['name' => 'Acme', 'type' => 'Unknown type'], ['type']],
     'number_of_employees must be an integer' => [['name' => 'Acme', 'number_of_employees' => 'many'], ['number_of_employees']],
     'number_of_employees must not be negative' => [['name' => 'Acme', 'number_of_employees' => -1], ['number_of_employees']],
     'domains must be an array' => [['name' => 'Acme', 'domains' => 'acme.test'], ['domains']],
@@ -268,11 +270,48 @@ it('rejects a soft deleted industry or type', function () use ($actingAsOrganiza
 
     postJson(route('api.v1.organizations.store', [], false), [
         'name' => 'Acme',
-        'industry_id' => $industry->getKey(),
-        'type_id' => $type->getKey(),
+        'industry' => $industry->name,
+        'type' => $type->name,
     ])
         ->assertUnprocessable()
-        ->assertJsonValidationErrors(['industry_id', 'type_id']);
+        ->assertJsonValidationErrors(['industry', 'type']);
 
     expect(Organization::query()->count())->toBe(0);
+});
+
+it('finds the industry and type by name without regard to case', function () use ($actingAsOrganizationCreator): void {
+    $actingAsOrganizationCreator();
+
+    $industry = OrganizationIndustry::factory()->create(['name' => 'Higher Education']);
+    $type = OrganizationType::factory()->create(['name' => 'Public']);
+
+    postJson(route('api.v1.organizations.store', [], false), ['name' => 'Acme', 'industry' => 'higher education', 'type' => 'PUBLIC'])
+        ->assertCreated()
+        ->assertJsonPath('data.industry.id', $industry->getKey())
+        ->assertJsonPath('data.industry.name', 'Higher Education')
+        ->assertJsonPath('data.type.id', $type->getKey())
+        ->assertJsonPath('data.type.name', 'Public');
+});
+
+it('does not accept industry and type identifiers', function () use ($actingAsOrganizationCreator): void {
+    $actingAsOrganizationCreator();
+
+    $industry = OrganizationIndustry::factory()->create();
+    $type = OrganizationType::factory()->create();
+
+    postJson(route('api.v1.organizations.store', [], false), ['name' => 'Acme', 'industry_id' => $industry->getKey(), 'type_id' => $type->getKey()])
+        ->assertCreated()
+        ->assertJsonPath('data.industry', null)
+        ->assertJsonPath('data.type', null);
+});
+
+it('can use the name of an industry or type that shares its name with a deleted one', function () use ($actingAsOrganizationCreator): void {
+    $actingAsOrganizationCreator();
+
+    OrganizationIndustry::factory()->create(['name' => 'Retail'])->delete();
+    $industry = OrganizationIndustry::factory()->create(['name' => 'Retail']);
+
+    postJson(route('api.v1.organizations.store', [], false), ['name' => 'Acme', 'industry' => 'Retail'])
+        ->assertCreated()
+        ->assertJsonPath('data.industry.id', $industry->getKey());
 });
