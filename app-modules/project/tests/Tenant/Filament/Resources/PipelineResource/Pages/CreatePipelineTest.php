@@ -40,6 +40,7 @@ use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Tests\Tenant\Filament\Resources\PipelineResource\RequestFactory\CreatePipelineRequestFactory;
 use App\Features\PipelineNameUniquenessFeature;
+use App\Features\PipelineStageNameUniquenessFeature;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -99,6 +100,25 @@ it('can validate create pipeline inputs', function (CreatePipelineRequestFactory
         ['description' => 'max'],
     ],
 ]);
+
+it('validates the stage name length', function (): void {
+    $undoRepeaterFake = Repeater::fake();
+
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
+        ->fillForm(CreatePipelineRequestFactory::new()->state([
+            'stages' => [['name' => str()->random(256), 'classification' => 'planning']],
+        ])->create())
+        ->call('create')
+        ->assertHasFormErrors(['stages.0.name' => 'max']);
+
+    expect(Pipeline::query()->count())->toBe(0);
+
+    $undoRepeaterFake();
+});
 
 it('can create pipelines', function (): void {
     $undoRepeaterFake = Repeater::fake();
@@ -251,6 +271,28 @@ describe('name uniqueness', function (): void {
                 ->fillForm(CreatePipelineRequestFactory::new()->state(['name' => 'Admissions'])->create())
                 ->call('create'))
                 ->toThrow(UniqueConstraintViolationException::class);
+        });
+
+        it('falls back to the case-sensitive stage name rule when the stage feature is disabled', function (): void {
+            PipelineStageNameUniquenessFeature::deactivate();
+
+            $undoRepeaterFake = Repeater::fake();
+
+            asSuperAdmin();
+
+            $project = Project::factory()->create();
+
+            expect(fn () => Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
+                ->fillForm(CreatePipelineRequestFactory::new()->state([
+                    'stages' => [
+                        ['name' => 'Review', 'classification' => 'planning'],
+                        ['name' => 'review', 'classification' => 'planning'],
+                    ],
+                ])->create())
+                ->call('create'))
+                ->toThrow(UniqueConstraintViolationException::class);
+
+            $undoRepeaterFake();
         });
     });
 });

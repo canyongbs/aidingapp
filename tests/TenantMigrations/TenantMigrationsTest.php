@@ -46,6 +46,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\EmailTemplateNameUniquenessFeature;
 use App\Features\MaintenanceProviderNameUniquenessFeature;
 use App\Features\PipelineNameUniquenessFeature;
+use App\Features\PipelineStageNameUniquenessFeature;
 use App\Features\ProductNameUniquenessFeature;
 use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Features\ServiceRequestFileUploadTypeFeature;
@@ -730,7 +731,8 @@ describe('2026_11_04_100000_convert_pipelines_name_to_citext_and_enforce_unique'
                 ->and($third->refresh()->name)->toBe('ADMISSIONS-3')
                 ->and($unique->refresh()->name)->toBe('Retention')
                 ->and($other->refresh()->name)->toBe('admissions')
-                ->and(PipelineNameUniquenessFeature::active())->toBeTrue();
+                ->and(PipelineNameUniquenessFeature::active())->toBeTrue()
+                ->and(PipelineStageNameUniquenessFeature::active())->toBeFalse();
         });
     });
 
@@ -803,6 +805,8 @@ describe('2026_11_04_100100_convert_pipeline_stages_name_to_citext_and_enforce_u
             $third = PipelineStage::factory()->for($pipeline)->create(['name' => 'REVIEW', 'created_at' => now()->subMinute()]);
             $other = PipelineStage::factory()->for($otherPipeline)->create(['name' => 'review', 'created_at' => now()->subMinutes(4)]);
 
+            expect(PipelineStageNameUniquenessFeature::active())->toBeFalse();
+
             $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
             expect($migrate)->toBe(Command::SUCCESS);
 
@@ -810,7 +814,7 @@ describe('2026_11_04_100100_convert_pipeline_stages_name_to_citext_and_enforce_u
                 ->and($second->refresh()->name)->toBe('review-2')
                 ->and($third->refresh()->name)->toBe('REVIEW-3')
                 ->and($other->refresh()->name)->toBe('review')
-                ->and(PipelineNameUniquenessFeature::active())->toBeTrue();
+                ->and(PipelineStageNameUniquenessFeature::active())->toBeTrue();
         });
     });
 
@@ -846,7 +850,8 @@ describe('2026_11_04_100100_convert_pipeline_stages_name_to_citext_and_enforce_u
 
             expect($renamed->refresh()->name)->toBe('review-2')
                 ->and($legitimate->refresh()->name)->toBe('Phase-2')
-                ->and(PipelineNameUniquenessFeature::active())->toBeFalse();
+                ->and(PipelineStageNameUniquenessFeature::active())->toBeFalse()
+                ->and(PipelineNameUniquenessFeature::active())->toBeTrue();
 
             PipelineStage::factory()->for($pipeline)->create(['name' => 'REVIEW']);
 

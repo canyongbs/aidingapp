@@ -36,7 +36,7 @@
 
 namespace AidingApp\Project\Filament\Resources\Pipelines\Forms\Components;
 
-use App\Features\PipelineNameUniquenessFeature;
+use App\Features\PipelineStageNameUniquenessFeature;
 use Closure;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -50,9 +50,10 @@ class PipelineStageNameInput
         return TextInput::make('name')
             ->label('Stage')
             ->required()
+            ->maxLength(255)
             // TODO: Cleanup Task (pipeline-name-uniqueness): remove this `when()` and always apply the case-insensitive rule (drop the `distinct()` fallback) once the flag is removed.
             ->when(
-                PipelineNameUniquenessFeature::active(),
+                PipelineStageNameUniquenessFeature::active(),
                 fn (TextInput $input): TextInput => $input->rule(static fn (TextInput $component): Closure => function (string $attribute, mixed $value, Closure $fail) use ($component): void {
                     $repeater = $component->getParentRepeater();
                     $item = $component->getParentRepeaterItem();

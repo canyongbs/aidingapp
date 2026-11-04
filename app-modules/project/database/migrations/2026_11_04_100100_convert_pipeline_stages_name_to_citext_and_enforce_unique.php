@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use App\Features\PipelineNameUniquenessFeature;
+use App\Features\PipelineStageNameUniquenessFeature;
 use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
@@ -43,9 +43,9 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     /*
-     * TODO: Cleanup Task (pipeline-name-uniqueness): after PipelineNameUniquenessFeature is removed:
+     * TODO: Cleanup Task (pipeline-name-uniqueness): after PipelineStageNameUniquenessFeature is removed:
      * - remove the `FixesDuplicateNames` trait, the `$chunkSize`, `$usesSoftDeletes` and `$groupByColumns` properties, and the `fixDuplicates()` call
-     * - keep the citext column conversion and the unique index, they are permanent
+     * - keep the citext column conversion and the unique constraint, they are permanent
      */
     use FixesDuplicateNames;
 
@@ -76,14 +76,14 @@ return new class () extends Migration {
             // transaction with `SET CONSTRAINTS ALL DEFERRED` without tripping on intermediate states.
             DB::statement("ALTER TABLE {$this->table} ADD CONSTRAINT pipeline_stages_name_pipeline_id_unique UNIQUE ({$this->column}, pipeline_id) DEFERRABLE INITIALLY IMMEDIATE");
 
-            PipelineNameUniquenessFeature::activate();
+            PipelineStageNameUniquenessFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function (): void {
-            PipelineNameUniquenessFeature::deactivate();
+            PipelineStageNameUniquenessFeature::deactivate();
 
             DB::statement('ALTER TABLE pipeline_stages DROP CONSTRAINT IF EXISTS pipeline_stages_name_pipeline_id_unique');
 

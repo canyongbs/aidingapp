@@ -6,6 +6,7 @@ created: 2026-11-04
 ## Feature Flags
 
 - App\Features\PipelineNameUniquenessFeature
+- App\Features\PipelineStageNameUniquenessFeature
 
 ## Temporary Migrations
 
