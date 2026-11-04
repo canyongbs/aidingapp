@@ -212,6 +212,85 @@ test('if the domain is already in use then not be used second time.', function (
     $undoRepeaterFake();
 });
 
+test('a domain that only differs by case or www from one stored by another organization cannot be used', function (string $domain): void {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    Organization::factory()
+        ->state([
+            'domains' => [
+                ['domain' => 'Shared.edu'],
+            ],
+        ])->create();
+
+    $organization = Organization::factory()->create();
+
+    $request = collect(EditOrganizationRequestFactory::new()
+        ->state([
+            'domains' => [
+                ['domain' => $domain],
+            ],
+        ])->create());
+
+    actingAs($user);
+
+    Livewire::test(EditOrganization::class, [
+        'record' => $organization->getRouteKey(),
+    ])
+        ->fillForm($request->toArray())
+        ->call('save')
+        ->assertHasFormErrors([
+            'domains.0.domain',
+        ]);
+
+    $undoRepeaterFake();
+})->with([
+    'lowercase' => 'shared.edu',
+    'uppercase' => 'SHARED.EDU',
+    'www prefix' => 'www.shared.edu',
+]);
+
+test('an organization can keep its own domain when it is resubmitted in a different case', function (): void {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    $organization = Organization::factory()
+        ->state([
+            'domains' => [
+                ['domain' => 'Shared.edu'],
+            ],
+        ])->create();
+
+    $request = collect(EditOrganizationRequestFactory::new()
+        ->state([
+            'name' => $organization->name,
+            'domains' => [
+                ['domain' => 'shared.edu'],
+            ],
+        ])->create());
+
+    actingAs($user);
+
+    Livewire::test(EditOrganization::class, [
+        'record' => $organization->getRouteKey(),
+    ])
+        ->fillForm($request->toArray())
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($organization->refresh()->domains[0])->toBe(['domain' => 'shared.edu']);
+
+    $undoRepeaterFake();
+});
+
 test('check if the provided domain is invalid', function (string $domain): void {
     $undoRepeaterFake = Repeater::fake();
 

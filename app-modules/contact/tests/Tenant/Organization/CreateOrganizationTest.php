@@ -151,6 +151,44 @@ test('if the domain is already in use then not be used second time.', function (
     $undoRepeaterFake();
 });
 
+test('a domain that only differs by case or www from one stored by another organization cannot be used', function (string $domain): void {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    Organization::factory()
+        ->state([
+            'domains' => [
+                ['domain' => 'Shared.edu'],
+            ],
+        ])->create();
+
+    $request = collect(CreateOrganizationRequestFactory::new()
+        ->state([
+            'domains' => [
+                ['domain' => $domain],
+            ],
+        ])->create());
+
+    actingAs($user);
+
+    Livewire::test(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors([
+            'domains.0.domain',
+        ]);
+
+    $undoRepeaterFake();
+})->with([
+    'lowercase' => 'shared.edu',
+    'uppercase' => 'SHARED.EDU',
+    'www prefix' => 'www.shared.edu',
+]);
+
 test('check if the provided domain is invalid', function (string $domain): void {
     $undoRepeaterFake = Repeater::fake();
 
