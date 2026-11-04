@@ -36,6 +36,7 @@
 
 namespace AidingApp\Contact\Filament\Tables;
 
+use AidingApp\Contact\Models\Builders\OrganizationBuilder;
 use AidingApp\Contact\Models\Organization;
 use App\Features\OrganizationArchivingFeature;
 use App\Filament\Tables\Columns\IdColumn;
@@ -58,10 +59,12 @@ class OrganizationsTable
                 $selectedOrganizationId = $table->getArguments()['selectedOrganizationId'] ?? null;
 
                 return $query->where(function (Builder $query) use ($selectedOrganizationId): void {
-                    $query->whereNull($query->qualifyColumn('archived_at'));
+                    assert($query instanceof OrganizationBuilder);
+
+                    $query->withoutArchived();
 
                     if (filled($selectedOrganizationId)) {
-                        $query->orWhere($query->qualifyColumn('id'), $selectedOrganizationId);
+                        $query->orWhereKey($selectedOrganizationId);
                     }
                 });
             })
