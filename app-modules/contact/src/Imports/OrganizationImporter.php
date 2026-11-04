@@ -48,7 +48,6 @@ use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -242,13 +241,9 @@ class OrganizationImporter extends Importer
     }
 
     /**
-     * The cache tag under which this import's claimed domains are held so duplicates across rows can be rejected.
+     * Earlier rows in this chunk share its transaction and other chunks wait on the domains lock, so this also
+     * rejects domains claimed earlier in the same import.
      */
-    public static function domainClaimCacheTag(int|string|null $importKey): string
-    {
-        return "{organization-import-domain-claims-{$importKey}}";
-    }
-
     protected function beforeSave(): void
     {
         assert($this->record instanceof Organization);
@@ -267,22 +262,6 @@ class OrganizationImporter extends Importer
             $rule->validate('domains', $domain['domain'], function (string $message) use ($domain): never {
                 throw new RowImportFailedException("The domain '{$domain['domain']}' is already in use by another organization.");
             });
-        }
-
-        $tag = self::domainClaimCacheTag($this->import->getKey());
-
-        // The claim value records which organization won the domain so a chunk retry can re-claim its own domains.
-        $claimant = Str::lower((string) $this->record->name);
-
-        foreach ($domains as $domain) {
-            // Cache::add is an atomic set-if-absent, so the first organization to claim a domain wins across concurrent workers.
-            if (Cache::tags([$tag])->add($domain['domain'], $claimant, now()->addDay())) {
-                continue;
-            }
-
-            if (Cache::tags([$tag])->get($domain['domain']) !== $claimant) {
-                throw new RowImportFailedException("The domain '{$domain['domain']}' was already imported for a different organization in this file.");
-            }
         }
     }
 
