@@ -36,6 +36,7 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
 
+use AidingApp\Contact\Models\Builders\OrganizationBuilder;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
@@ -61,6 +62,7 @@ class GuestOrganizationsRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
+                    ->recordSelectOptionsQuery(fn (OrganizationBuilder $query): OrganizationBuilder => $query->withoutArchived())
                     ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->recordActions([

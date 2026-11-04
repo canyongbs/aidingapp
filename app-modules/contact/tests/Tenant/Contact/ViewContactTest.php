@@ -40,17 +40,21 @@ use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\AssetC
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\AssetCheckOutRelationManager;
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\EngagementsRelationManager;
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\ServiceRequestsRelationManager;
+use AidingApp\Contact\Filament\Tables\OrganizationsTable;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\EditContactRequestFactory;
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers\EngagementFilesRelationManager;
 use App\Features\ContactArchivingFeature;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 use Dom\HTMLDocument;
 use Dom\Node;
 use Dom\XPath;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\TableSelect;
+use Filament\Forms\Components\TableSelect\Livewire\TableSelectLivewireComponent;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Callout;
 use Livewire\Livewire;
@@ -360,6 +364,119 @@ describe('section edit actions', function (): void {
             ->assertHasNoFormErrors();
 
         expect($contact->fresh()->organization_id)->toEqual($organization->getKey());
+    });
+
+    describe('organization picker', function (): void {
+        beforeEach(function (): void {
+            $user = User::factory()->create();
+            $user->givePermissionTo('contact.view-any');
+            $user->givePermissionTo('contact.*.view');
+            $user->givePermissionTo('contact.*.update');
+
+            actingAs($user);
+        });
+
+        it('keeps the linked archived organization listed and hides other archived ones', function (): void {
+            OrganizationArchivingFeature::activate();
+
+            $linkedOrganization = Organization::factory()->archived()->create();
+            $otherArchivedOrganization = Organization::factory()->archived()->create();
+            $contact = Contact::factory()->create(['organization_id' => $linkedOrganization->getKey()]);
+
+            $component = Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+                ->mountAction(TestAction::make('editCustomerInformation')->schemaComponent('customerInformation'));
+
+            $field = (fn () => $this->getMountedActionSchema())->call($component->instance())->getFlatComponents()['organization_id'] ?? null;
+
+            assert($field instanceof TableSelect);
+
+            Livewire::test(TableSelectLivewireComponent::class, [
+                'tableConfiguration' => base64_encode(OrganizationsTable::class),
+                'tableArguments' => $field->getTableArguments(),
+                'model' => Contact::class,
+                'relationshipName' => 'organization',
+            ])
+                ->assertCanSeeTableRecords([$linkedOrganization])
+                ->assertCanNotSeeTableRecords([$otherArchivedOrganization]);
+        });
+
+        it('keeps the archived organization when the section is saved unchanged', function (): void {
+            OrganizationArchivingFeature::activate();
+
+            $linkedOrganization = Organization::factory()->archived()->create();
+            $contact = Contact::factory()->create(['organization_id' => $linkedOrganization->getKey()]);
+
+            Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+                ->callAction(TestAction::make('editCustomerInformation')->schemaComponent('customerInformation'), data: [
+                    'organization_id' => $linkedOrganization->getKey(),
+                ])
+                ->assertHasNoFormErrors();
+
+            expect($contact->fresh()->organization_id)->toEqual($linkedOrganization->getKey());
+        });
+
+        it('stops listing the archived organization once the contact is moved to an active one', function (): void {
+            OrganizationArchivingFeature::activate();
+
+            $archivedOrganization = Organization::factory()->archived()->create();
+            $activeOrganization = Organization::factory()->create();
+            $contact = Contact::factory()->create(['organization_id' => $archivedOrganization->getKey()]);
+
+            Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+                ->callAction(TestAction::make('editCustomerInformation')->schemaComponent('customerInformation'), data: [
+                    'organization_id' => $activeOrganization->getKey(),
+                ])
+                ->assertHasNoFormErrors();
+
+            expect($contact->fresh()->organization_id)->toEqual($activeOrganization->getKey());
+
+            $component = Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+                ->mountAction(TestAction::make('editCustomerInformation')->schemaComponent('customerInformation'));
+
+            $field = (fn () => $this->getMountedActionSchema())->call($component->instance())->getFlatComponents()['organization_id'] ?? null;
+
+            assert($field instanceof TableSelect);
+
+            Livewire::test(TableSelectLivewireComponent::class, [
+                'tableConfiguration' => base64_encode(OrganizationsTable::class),
+                'tableArguments' => $field->getTableArguments(),
+                'model' => Contact::class,
+                'relationshipName' => 'organization',
+            ])
+                ->assertCanSeeTableRecords([$activeOrganization])
+                ->assertCanNotSeeTableRecords([$archivedOrganization]);
+        });
+
+        it('lists archived organizations while organization archiving is inactive', function (): void {
+            OrganizationArchivingFeature::deactivate();
+
+            $archivedOrganization = Organization::factory()->archived()->create();
+            $contact = Contact::factory()->create(['organization_id' => null]);
+
+            Livewire::test(TableSelectLivewireComponent::class, [
+                'tableConfiguration' => base64_encode(OrganizationsTable::class),
+                'tableArguments' => ['selectedOrganizationId' => $contact->organization_id],
+                'model' => Contact::class,
+                'relationshipName' => 'organization',
+            ])
+                ->assertCanSeeTableRecords([$archivedOrganization]);
+        });
+
+        it('lists archived organizations alongside the linked organization while organization archiving is inactive', function (): void {
+            OrganizationArchivingFeature::deactivate();
+
+            $linkedOrganization = Organization::factory()->create();
+            $archivedOrganization = Organization::factory()->archived()->create();
+            $contact = Contact::factory()->create(['organization_id' => $linkedOrganization->getKey()]);
+
+            Livewire::test(TableSelectLivewireComponent::class, [
+                'tableConfiguration' => base64_encode(OrganizationsTable::class),
+                'tableArguments' => ['selectedOrganizationId' => $contact->organization_id],
+                'model' => Contact::class,
+                'relationshipName' => 'organization',
+            ])
+                ->assertCanSeeTableRecords([$linkedOrganization, $archivedOrganization]);
+        });
     });
 
     test('the contact information section keeps its own email but rejects another contact\'s email case-insensitively', function (): void {
