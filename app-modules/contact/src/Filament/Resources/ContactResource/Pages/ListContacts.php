@@ -36,6 +36,7 @@
 
 namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
+use AidingApp\Contact\Filament\Actions\ChangeTypeBulkAction;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\ContactResource\Tables\Columns\ContactIdentifiersColumn;
 use AidingApp\Contact\Filament\Resources\ContactResource\Tables\Columns\ContactNameColumn;
@@ -45,6 +46,7 @@ use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use App\Features\ContactArchivingFeature;
 use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -109,10 +111,15 @@ class ListContacts extends ListRecords
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    ContactArchivingFeature::active()
-                        ? ArchiveBulkAction::make()->authorizeIndividualRecords('delete')
-                        : DeleteBulkAction::make()->authorizeIndividualRecords('delete'),
-                    BulkEngagementAction::make(context: 'contacts'),
+                    ActionGroup::make([
+                        BulkEngagementAction::make(context: 'contacts'),
+                        ChangeTypeBulkAction::make(),
+                    ])->dropdown(false),
+                    ActionGroup::make([
+                        ContactArchivingFeature::active()
+                            ? ArchiveBulkAction::make()->authorizeIndividualRecords('delete')
+                            : DeleteBulkAction::make()->authorizeIndividualRecords('delete'),
+                    ])->dropdown(false),
                 ]),
             ]);
     }

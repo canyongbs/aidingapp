@@ -57,3 +57,8 @@ it('allows deleting a managed contact when the contact archiving feature is inac
 
     expect(Gate::forUser($user)->inspect('delete', $managed)->allowed())->toBeTrue();
 });
+
+it('only allows updating any contact with the `contact.*.update` permission', function (): void {
+    expect(Gate::forUser(User::factory()->create())->inspect('updateAny', Contact::class)->denied())->toBeTrue()
+        ->and(Gate::forUser(User::factory()->create()->givePermissionTo('contact.*.update'))->inspect('updateAny', Contact::class)->allowed())->toBeTrue();
+});

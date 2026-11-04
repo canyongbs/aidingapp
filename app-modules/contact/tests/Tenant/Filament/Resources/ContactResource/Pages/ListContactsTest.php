@@ -43,6 +43,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use App\Settings\PresenceSettings;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Notifications\Livewire\Notifications;
@@ -514,4 +517,27 @@ it('bulk deletes managed contacts when the contact archiving feature is inactive
         ->callAction(TestAction::make(DeleteBulkAction::class)->table()->bulk());
 
     expect(Contact::find($managed->getKey()))->toBeNull();
+});
+
+it('orders the bulk actions with email first and archive separated by a divider', function (): void {
+    actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update', 'contact.*.delete'));
+
+    $toolbarGroup = array_values(Livewire::test(ListContacts::class)->instance()->getTable()->getToolbarActions())[0];
+
+    assert($toolbarGroup instanceof BulkActionGroup);
+
+    $groups = array_values($toolbarGroup->getActions());
+
+    expect($groups)->toHaveCount(2)
+        ->and($groups[0])->toBeInstanceOf(ActionGroup::class)
+        ->and($groups[1])->toBeInstanceOf(ActionGroup::class);
+
+    assert($groups[0] instanceof ActionGroup && $groups[1] instanceof ActionGroup);
+
+    $names = fn (ActionGroup $group): array => array_values(array_map(fn (Action | ActionGroup $action): ?string => $action->getName(), $group->getActions()));
+
+    expect($groups[0]->hasDropdown())->toBeFalse()
+        ->and($groups[1]->hasDropdown())->toBeFalse()
+        ->and($names($groups[0]))->toBe(['email', 'changeType'])
+        ->and($names($groups[1]))->toBe(['archive']);
 });
