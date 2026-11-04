@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Models\Pipeline;
@@ -42,6 +43,7 @@ use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
+use App\Features\OrganizationArchivingFeature;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
@@ -316,6 +318,21 @@ it('denies access when Project Management is not licensed', function (): void {
 it('does not disclose an inaccessible project', function (): void {
     $contact = Contact::factory()->create();
     $project = Project::factory()->create();
+
+    actingAs($contact, 'contact');
+
+    getJson(route('api.portal.projects.show', ['portalProject' => $project->getKey()]))
+        ->assertNotFound();
+});
+
+it('does not disclose a project reached only through an archived organization', function (): void {
+    OrganizationArchivingFeature::activate();
+
+    $organization = Organization::factory()->create();
+    $contact = Contact::factory()->for($organization)->create();
+    $project = Project::factory()->create();
+    $project->guestOrganizations()->attach($organization);
+    $organization->archive();
 
     actingAs($contact, 'contact');
 
