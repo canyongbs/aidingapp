@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\CreateOrganizationController;
-use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\DeleteOrganizationController;
-use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\ListOrganizationsController;
-use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\UpdateOrganizationController;
-use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\ViewOrganizationController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\ArchiveContactController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\CreateContactController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\ListContactsController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\UpdateContactController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\ViewContactController;
+use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\CreateOrganizationController;
+use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\DeleteOrganizationController;
+use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\ListOrganizationsController;
+use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\UpdateOrganizationController;
+use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\ViewOrganizationController;
 use Illuminate\Support\Facades\Route;
 
 Route::api(majorVersion: 1, routes: function (): void {
