@@ -479,7 +479,6 @@ it('does not store the step description when `StepDescriptionFeature` is inactiv
     expect($type->form->steps()->first()->description)->toBeNull();
 });
 
-
 it('marks the fields rich editor so the custom block badges are shown', function (): void {
     asSuperAdmin();
 
