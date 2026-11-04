@@ -467,7 +467,8 @@ describe('section edit actions', function (): void {
                 ->assertCanSeeTableRecords([$linkedOrganization, $activeOrganization])
                 ->html();
 
-            expect(substr_count($html, 'This organization is archived.'))->toBe(substr_count(view('filament.tables.columns.organization.archived-name', ['name' => 'x'])->render(), 'This organization is archived.'));
+            expect(substr_count($html, 'This organization is archived.'))->toBe(substr_count(view('filament.tables.columns.organization.archived-name', ['name' => 'x'])->render(), 'This organization is archived.'))
+                ->toBeGreaterThan(0);
         });
 
         it('keeps the archived organization when the section is saved unchanged', function (): void {
