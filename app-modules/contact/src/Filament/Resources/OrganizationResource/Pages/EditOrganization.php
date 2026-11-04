@@ -108,7 +108,7 @@ class EditOrganization extends EditRecord
                                     ->label('Domain')
                                     ->required()
                                     ->maxLength(255)
-                                    ->regex('/^(?!-)([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,63}$/')
+                                    ->regex(Organization::DOMAIN_PATTERN)
                                     ->rule(new UniqueOrganizationDomain($record->getKey()))
                                     ->distinct()
                                     ->validationMessages([

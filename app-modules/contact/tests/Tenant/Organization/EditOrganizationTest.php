@@ -335,6 +335,9 @@ test('check if the provided domain is invalid', function (string $domain): void 
         'example.com::8080',
         'mydomain.com/path',
         '-mydomain.com',
+        'mydomain-.com',
+        'sub.-domain.com',
+        'sub-.domain.com',
     ]);
 
 test('check if the provided domain is valid', function (string $domain): void {

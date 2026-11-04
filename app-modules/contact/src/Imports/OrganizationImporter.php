@@ -181,7 +181,7 @@ class OrganizationImporter extends Importer
                         ->filter();
 
                     $domains->each(function (string $domain) use ($fail): void {
-                        if (! preg_match('/^(?!-)([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,63}$/', $domain)) {
+                        if (! preg_match(Organization::DOMAIN_PATTERN, $domain)) {
                             $fail("The domain '{$domain}' is not a valid domain.");
                         }
                     });

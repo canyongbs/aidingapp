@@ -76,7 +76,7 @@ class CreateOrganizationRequest extends FormRequest
             'facebook_url' => ['nullable', 'string', 'url', 'max:255'],
             'twitter_url' => ['nullable', 'string', 'url', 'max:255'],
             'domains' => ['nullable', 'array'],
-            'domains.*' => ['required', 'string', 'max:255', 'regex:/^(?!-)([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,63}$/', 'distinct', new UniqueOrganizationDomain()],
+            'domains.*' => ['required', 'string', 'max:255', 'regex:' . Organization::DOMAIN_PATTERN, 'distinct', new UniqueOrganizationDomain()],
             'is_contact_generation_enabled' => ['sometimes', 'boolean'],
         ];
     }

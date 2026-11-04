@@ -202,12 +202,16 @@ it('imports domains from a comma-separated list', function () use ($runOrganizat
     ]);
 });
 
-it('fails the row when a domain is invalid', function () use ($runOrganizationImport): void {
+it('fails the row when a domain is invalid', function (string $domain) use ($runOrganizationImport): void {
     $runOrganizationImport([
         'name' => 'College Community College',
-        'domains' => 'collegecc.edu|not a domain',
+        'domains' => "collegecc.edu|{$domain}",
     ]);
-})->throws(ValidationException::class);
+})->with([
+    'not a domain',
+    'college-.edu',
+    'sub.-college.edu',
+])->throws(ValidationException::class);
 
 it('fails the row when the same domain is listed more than once in one row', function () use ($runOrganizationImport): void {
     $runOrganizationImport([

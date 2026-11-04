@@ -236,6 +236,8 @@ it('validates the request', function (array $data, array $errors) use ($actingAs
     'type must exist' => [['type' => 'Unknown type'], ['type']],
     'number_of_employees must be an integer' => [['number_of_employees' => 'many'], ['number_of_employees']],
     'domains must be valid' => [['domains' => ['not a domain']], ['domains.0']],
+    'domains must not have a label ending with a hyphen' => [['domains' => ['acme-.test']], ['domains.0']],
+    'domains must not have a label starting with a hyphen' => [['domains' => ['sub.-acme.test']], ['domains.0']],
     'domains must be distinct' => [['domains' => ['acme.test', 'acme.test']], ['domains.0', 'domains.1']],
     'is_contact_generation_enabled cannot be null' => [['is_contact_generation_enabled' => null], ['is_contact_generation_enabled']],
 ]);

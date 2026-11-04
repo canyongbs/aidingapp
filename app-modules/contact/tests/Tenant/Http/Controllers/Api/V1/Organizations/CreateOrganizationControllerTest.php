@@ -217,6 +217,8 @@ it('validates the request', function (array $data, array $errors) use ($actingAs
     'number_of_employees must not be negative' => [['name' => 'Acme', 'number_of_employees' => -1], ['number_of_employees']],
     'domains must be an array' => [['name' => 'Acme', 'domains' => 'acme.test'], ['domains']],
     'domains must be valid' => [['name' => 'Acme', 'domains' => ['not a domain']], ['domains.0']],
+    'domains must not have a label ending with a hyphen' => [['name' => 'Acme', 'domains' => ['acme-.test']], ['domains.0']],
+    'domains must not have a label starting with a hyphen' => [['name' => 'Acme', 'domains' => ['sub.-acme.test']], ['domains.0']],
     'domains must be distinct' => [['name' => 'Acme', 'domains' => ['acme.test', 'ACME.test']], ['domains.0', 'domains.1']],
     'is_contact_generation_enabled must be a boolean' => [['name' => 'Acme', 'is_contact_generation_enabled' => 'maybe'], ['is_contact_generation_enabled']],
 ]);
