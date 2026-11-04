@@ -52,8 +52,7 @@ class CreateContactController
      * The combined first and last name, including the separating space, must not exceed 255 characters.
      * When `organization` is omitted, the contact is matched to an organization by its email domain.
      * Providing `organization: null` leaves the contact unaffiliated.
-     * When an archived contact already uses the `email`, that contact is unarchived and overwritten with the
-     * provided data, and fields that are not provided are cleared.
+     * An `email` used by an archived contact is rejected.
      *
      * @response ContactResource
      */

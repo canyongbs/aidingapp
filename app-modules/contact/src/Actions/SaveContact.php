@@ -41,8 +41,8 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Support\ContactFullName;
-use App\Features\ContactArchivingFeature;
 use Illuminate\Database\Query\Expression;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -52,38 +52,8 @@ use Spatie\LaravelData\Optional;
 class SaveContact
 {
     /**
-     * The nullable contact columns that are cleared when an archived contact is restored,
-     * so that it keeps none of its previous data.
-     *
-     * @var array<int, string>
-     */
-    private const array NULLABLE_COLUMNS = [
-        'preferred',
-        'email',
-        'mobile',
-        'phone',
-        'job_title',
-        'employee_id',
-        'work_number',
-        'work_extension',
-        'student_id',
-        'school',
-        'academic_department',
-        'program',
-        'address',
-        'address_2',
-        'city',
-        'state',
-        'postal',
-        'country',
-    ];
-
-    /**
      * Creates a contact, or updates the given one. Only attributes present on the data object are
-     * written when updating.
-     *
-     * When creating, an archived contact that already uses the email address is unarchived and
-     * overwritten instead, and an omitted type falls back to the default contact type.
+     * written when updating, and an omitted type falls back to the default contact type when creating.
      *
      * An existing contact is re-read under a row lock, so the full name is derived from its current
      * names and concurrent partial updates cannot leave the name columns inconsistent.
@@ -94,46 +64,44 @@ class SaveContact
     {
         [$type, $organization] = $this->resolveRelationships($data);
 
-        return DB::transaction(function () use ($data, $existing, $type, $organization): Contact {
-            $archivedContact = $existing === null ? $this->findArchivedContact($data->email) : null;
+        try {
+            return DB::transaction(function () use ($data, $existing, $type, $organization): Contact {
+                $contact = $existing === null
+                    ? new Contact()
+                    : Contact::query()->withoutArchived()->whereKey($existing->getKey())->lockForUpdate()->firstOrFail();
 
-            $contact = $existing === null
-                ? ($archivedContact ?? new Contact())
-                : Contact::query()->withoutArchived()->whereKey($existing->getKey())->lockForUpdate()->firstOrFail();
+                $attributes = Arr::except($data->toArray(), ['type', 'organization']);
 
-            $attributes = Arr::except($data->toArray(), ['type', 'organization']);
+                $contact->fill([...$attributes, ...$this->fullNameAttributes($contact, $attributes)]);
 
-            if ($archivedContact !== null) {
-                $attributes = [...array_fill_keys(self::NULLABLE_COLUMNS, null), ...$attributes];
+                $type ??= $existing === null ? ContactType::resolveDefault() : null;
+
+                if ($type !== null) {
+                    $contact->type()->associate($type);
+                }
+
+                if ($existing === null || ! $data->organization instanceof Optional) {
+                    $contact->organization()->associate($organization);
+                }
+
+                // When updating, an unrelated change must not assign an organization, so matching is only attempted
+                // for a new contact, or when the email address is changing.
+                $contact->shouldAutomaticallyMatchOrganization = $data->organization instanceof Optional
+                    && ($existing === null || $contact->isDirty('email'));
+                $contact->save();
+
+                return $contact;
+            });
+        } catch (UniqueConstraintViolationException $exception) {
+            // A concurrent request can claim the email after the request was validated.
+            if (! str_contains($exception->getMessage(), 'contacts_email_unique')) {
+                throw $exception;
             }
 
-            $contact->fill([...$attributes, ...$this->fullNameAttributes($contact, $attributes)]);
-
-            $type ??= $existing === null ? ContactType::resolveDefault() : null;
-
-            if ($type !== null) {
-                $contact->type()->associate($type);
-            }
-
-            if ($existing === null || ! $data->organization instanceof Optional) {
-                $contact->organization()->associate($organization);
-            }
-
-            // When updating, an unrelated change must not assign an organization, so matching is only attempted
-            // for a new or restored contact, or when the email address is changing.
-            $contact->shouldAutomaticallyMatchOrganization = $data->organization instanceof Optional
-                && ($existing === null || $contact->isDirty('email'));
-            $contact->save();
-
-            // Unarchiving after the save lets organization matching see the new data.
-            if ($archivedContact !== null && ! $archivedContact->unarchive()) {
-                throw ValidationException::withMessages([
-                    'email' => 'The archived contact with this email could not be restored.',
-                ]);
-            }
-
-            return $contact;
-        });
+            throw ValidationException::withMessages([
+                'email' => __('validation.unique', ['attribute' => 'email']),
+            ]);
+        }
     }
 
     /**
@@ -210,18 +178,5 @@ class SaveContact
         }
 
         return ['full_name' => ContactFullName::make($firstName, $lastName)];
-    }
-
-    private function findArchivedContact(mixed $email): ?Contact
-    {
-        if (! ContactArchivingFeature::active() || ! is_string($email) || blank($email)) {
-            return null;
-        }
-
-        return Contact::query()
-            ->onlyArchived()
-            ->where('email', $email)
-            ->lockForUpdate()
-            ->first();
     }
 }

@@ -297,6 +297,19 @@ it('validates the request', function (array $payload, array $errors) use ($actin
     'organization must be a string' => [['organization' => ['Invalid']], ['organization']],
 ]);
 
+it('explains that an archived contact reserves the email', function () use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    Contact::factory()->archived()->create(['email' => 'archived@example.com']);
+    $contact = Contact::factory()->create(['email' => 'jane@example.com']);
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['email' => 'ARCHIVED@example.com'])
+        ->assertUnprocessable()
+        ->assertJsonPath('errors.email', ['An archived contact with this email already exists.']);
+
+    expect($contact->refresh()->email)->toBe('jane@example.com');
+});
+
 it('allows a contact to keep its own email address', function () use ($actingAsContactUpdater): void {
     $actingAsContactUpdater();
 

@@ -37,6 +37,8 @@
 namespace AidingApp\Contact\Http\Requests\Api\V1\Contacts;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Rules\ContactEmailNotArchived;
+use App\Features\ContactArchivingFeature;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -67,7 +69,9 @@ class UpdateContactRequest extends FormRequest
      */
     public function rules(): array
     {
+        // The route parameter is unavailable when Scramble generates the API documentation.
         $contact = $this->route('contact');
+        $contact = $contact instanceof Contact ? $contact : null;
 
         return [
             'first_name' => ['sometimes', 'string', 'max:255'],
@@ -78,7 +82,9 @@ class UpdateContactRequest extends FormRequest
                 'nullable',
                 'email',
                 'max:255',
-                Rule::unique(Contact::class, 'email')->ignore($contact instanceof Contact ? $contact : null)->withoutTrashed(),
+                // Stops at the first failure, so an archived match shows its own message instead of the generic unique one.
+                Rule::when(fn (): bool => ContactArchivingFeature::active(), ['bail', new ContactEmailNotArchived(ignore: $contact)]),
+                Rule::unique(Contact::class, 'email')->ignore($contact)->withoutTrashed(),
             ],
             'mobile' => ['sometimes', 'nullable', 'string', 'max:255'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:255'],

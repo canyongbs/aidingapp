@@ -180,26 +180,25 @@ it('does not update a contact that was archived after it was loaded', function (
     expect($contact->refresh()->job_title)->not->toBe('Updated');
 });
 
-it('restores an archived contact with the same email and clears the attributes that are not provided', function (): void {
-    $archived = Contact::factory()->archived()->create([
-        'email' => 'jane@example.com',
-        'phone' => '555-0100',
-        'job_title' => 'Old title',
-    ]);
+it('reports an email claimed after validation as taken', function (bool $updating): void {
+    Contact::factory()->create(['email' => 'jane@example.com']);
+    $existing = $updating ? Contact::factory()->create(['email' => 'other@example.com']) : null;
 
-    $contact = app(SaveContact::class)(ContactDataObject::fromData([
-        'first_name' => 'Jane',
-        'last_name' => 'Doe',
-        'email' => 'JANE@example.com',
-        'job_title' => 'New title',
-    ]));
+    $exception = null;
 
-    $contact->refresh();
+    try {
+        app(SaveContact::class)(ContactDataObject::fromData([
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
+            'email' => 'JANE@example.com',
+        ]), $existing);
+    } catch (ValidationException $caught) {
+        $exception = $caught;
+    }
 
-    expect($contact->is($archived))->toBeTrue()
-        ->and($contact->isArchived())->toBeFalse()
-        ->and($contact->full_name)->toBe('Jane Doe')
-        ->and($contact->job_title)->toBe('New title')
-        ->and($contact->phone)->toBeNull()
-        ->and(Contact::query()->count())->toBe(1);
-});
+    expect($exception?->errors())->toBe(['email' => ['The email has already been taken.']])
+        ->and(Contact::query()->where('email', 'jane@example.com')->count())->toBe(1);
+})->with([
+    'creating' => [false],
+    'updating' => [true],
+]);

@@ -38,11 +38,11 @@ namespace AidingApp\Contact\Http\Requests\Api\V1\Contacts;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
+use AidingApp\Contact\Rules\ContactEmailNotArchived;
 use App\Features\ContactArchivingFeature;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Unique;
 
 class CreateContactRequest extends FormRequest
 {
@@ -71,13 +71,9 @@ class CreateContactRequest extends FormRequest
                 'nullable',
                 'email',
                 'max:255',
-                // An archived contact with the same email is restored, so it does not count as taken.
-                Rule::unique(Contact::class, 'email')
-                    ->withoutTrashed()
-                    ->when(
-                        ContactArchivingFeature::active(),
-                        fn (Unique $rule): Unique => $rule->whereNull('archived_at'),
-                    ),
+                // Stops at the first failure, so an archived match shows its own message instead of the generic unique one.
+                Rule::when(fn (): bool => ContactArchivingFeature::active(), ['bail', new ContactEmailNotArchived()]),
+                Rule::unique(Contact::class, 'email')->withoutTrashed(),
             ],
             'mobile' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:255'],

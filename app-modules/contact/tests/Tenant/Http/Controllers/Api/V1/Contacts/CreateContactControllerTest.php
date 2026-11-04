@@ -288,161 +288,40 @@ it('allows an email address belonging to a deleted contact', function () use ($a
     ])->assertCreated();
 });
 
-describe('archived contacts', function () use ($actingAsContactCreator): void {
-    it('unarchives an archived contact with the same email and replaces its data', function () use ($actingAsContactCreator): void {
-        $actingAsContactCreator();
+it('explains that an archived contact reserves the email', function () use ($actingAsContactCreator): void {
+    $actingAsContactCreator();
 
-        $organization = Organization::factory()->create();
-        $archived = Contact::factory()->archived()->for($organization, 'organization')->create([
-            'email' => 'Reused@Example.com',
-            'first_name' => 'Old',
-            'last_name' => 'Name',
-            'full_name' => 'Old Name',
-            'phone' => '555-0100',
-            'job_title' => 'Old title',
-        ]);
-        $type = ContactType::factory()->create(['name' => 'Restored Type']);
+    $archived = Contact::factory()->archived()->create(['email' => 'archived@example.com', 'full_name' => 'Old Name']);
 
-        expect($archived->refresh()->isArchived())->toBeTrue();
+    postJson(route('api.v1.contacts.store', [], false), [
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+        'email' => 'ARCHIVED@example.com',
+        'type' => ContactType::factory()->create()->name,
+    ])->assertUnprocessable()
+        ->assertJsonPath('errors.email', ['An archived contact with this email already exists.']);
 
-        $response = postJson(route('api.v1.contacts.store', [], false), [
-            'first_name' => 'Jane',
-            'last_name' => 'Doe',
-            'email' => 'reused@example.com',
-            'type' => $type->name,
-            'organization' => null,
-            'job_title' => 'New title',
-        ])->assertCreated()
-            ->assertJsonPath('data.id', $archived->getKey())
-            ->assertJsonPath('data.name', 'Jane Doe')
-            ->assertJsonPath('data.job_title', 'New title')
-            ->assertJsonPath('data.phone', null)
-            ->assertJsonPath('data.organization', null)
-            ->assertJsonPath('data.type.id', $type->getKey());
+    $archived->refresh();
 
-        $archived->refresh();
+    expect($archived->isArchived())->toBeTrue()
+        ->and($archived->full_name)->toBe('Old Name')
+        ->and(Contact::query()->count())->toBe(1);
+});
 
-        expect($archived->isArchived())->toBeFalse()
-            ->and($archived->full_name)->toBe('Jane Doe')
-            ->and($archived->phone)->toBeNull()
-            ->and($archived->organization_id)->toBeNull()
-            ->and($archived->type_id)->toBe($type->getKey())
-            ->and(Contact::query()->count())->toBe(1)
-            ->and($response['data']['id'])->toBe($archived->getKey());
-    });
+it('rejects an email used by an archived contact while contact archiving is inactive', function () use ($actingAsContactCreator): void {
+    $actingAsContactCreator();
 
-    it('matches the restored contact to an organization when none is provided', function () use ($actingAsContactCreator): void {
-        $actingAsContactCreator();
+    ContactArchivingFeature::deactivate();
 
-        $organization = Organization::factory()->create(['domains' => [['domain' => 'example.com']]]);
-        $archived = Contact::factory()->archived()->create(['email' => 'jane@example.com', 'organization_id' => null]);
+    Contact::factory()->archived()->create(['email' => 'archived@example.com']);
 
-        postJson(route('api.v1.contacts.store', [], false), [
-            'first_name' => 'Jane',
-            'last_name' => 'Doe',
-            'email' => 'jane@example.com',
-            'type' => ContactType::factory()->create(['name' => 'Restored Type'])->name,
-        ])->assertCreated()
-            ->assertJsonPath('data.id', $archived->getKey())
-            ->assertJsonPath('data.organization.id', $organization->getKey());
-    });
-
-    it('does not match the restored contact to an organization when it is explicitly cleared', function () use ($actingAsContactCreator): void {
-        $actingAsContactCreator();
-
-        Organization::factory()->create(['domains' => [['domain' => 'example.com']]]);
-        Contact::factory()->archived()->create(['email' => 'jane@example.com', 'organization_id' => null]);
-
-        postJson(route('api.v1.contacts.store', [], false), [
-            'first_name' => 'Jane',
-            'last_name' => 'Doe',
-            'email' => 'jane@example.com',
-            'type' => ContactType::factory()->create(['name' => 'Restored Type'])->name,
-            'organization' => null,
-        ])->assertCreated()
-            ->assertJsonPath('data.organization', null);
-    });
-
-    it('rolls back the overwrite when restoring the archived contact is cancelled', function () use ($actingAsContactCreator): void {
-        $actingAsContactCreator();
-
-        $archived = Contact::factory()->archived()->create([
-            'email' => 'archived@example.com',
-            'first_name' => 'Old',
-            'last_name' => 'Name',
-            'full_name' => 'Old Name',
-            'phone' => '555-0100',
-        ]);
-        Contact::unarchiving(fn (): bool => false);
-
-        postJson(route('api.v1.contacts.store', [], false), [
-            'first_name' => 'Jane',
-            'last_name' => 'Doe',
-            'email' => 'archived@example.com',
-            'type' => ContactType::factory()->create(['name' => 'Restored Type'])->name,
-        ])->assertUnprocessable()
-            ->assertJsonValidationErrors(['email'])
-            ->assertJsonPath('errors.email.0', 'The archived contact with this email could not be restored.');
-
-        $archived->refresh();
-
-        expect($archived->isArchived())->toBeTrue()
-            ->and($archived->full_name)->toBe('Old Name')
-            ->and($archived->phone)->toBe('555-0100')
-            ->and(Contact::query()->count())->toBe(1);
-    });
-
-    it('still rejects an email used by an active contact', function () use ($actingAsContactCreator): void {
-        $actingAsContactCreator();
-
-        Contact::factory()->create(['email' => 'taken@example.com']);
-        $archived = Contact::factory()->archived()->create(['email' => 'archived@example.com']);
-
-        postJson(route('api.v1.contacts.store', [], false), [
-            'first_name' => 'Jane',
-            'last_name' => 'Doe',
-            'email' => 'taken@example.com',
-            'type' => ContactType::factory()->create(['name' => 'Restored Type'])->name,
-        ])->assertUnprocessable()
-            ->assertJsonValidationErrors(['email']);
-
-        expect($archived->refresh()->isArchived())->toBeTrue();
-    });
-
-    it('does not restore an archived contact that uses a different email', function () use ($actingAsContactCreator): void {
-        $actingAsContactCreator();
-
-        $archived = Contact::factory()->archived()->create(['email' => 'archived@example.com']);
-
-        postJson(route('api.v1.contacts.store', [], false), [
-            'first_name' => 'Jane',
-            'last_name' => 'Doe',
-            'email' => 'new@example.com',
-            'type' => ContactType::factory()->create(['name' => 'Restored Type'])->name,
-        ])->assertCreated()
-            ->assertJsonPath('data.id', fn (string $id): bool => $id !== $archived->getKey());
-
-        expect($archived->refresh()->isArchived())->toBeTrue()
-            ->and(Contact::query()->count())->toBe(2);
-    });
-
-    it('does not restore an archived contact while archiving is inactive', function () use ($actingAsContactCreator): void {
-        $actingAsContactCreator();
-
-        ContactArchivingFeature::deactivate();
-
-        $archived = Contact::factory()->archived()->create(['email' => 'archived@example.com']);
-
-        postJson(route('api.v1.contacts.store', [], false), [
-            'first_name' => 'Jane',
-            'last_name' => 'Doe',
-            'email' => 'archived@example.com',
-            'type' => ContactType::factory()->create(['name' => 'Restored Type'])->name,
-        ])->assertUnprocessable()
-            ->assertJsonValidationErrors(['email']);
-
-        expect($archived->refresh()->isArchived())->toBeTrue();
-    });
+    postJson(route('api.v1.contacts.store', [], false), [
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+        'email' => 'archived@example.com',
+        'type' => ContactType::factory()->create()->name,
+    ])->assertUnprocessable()
+        ->assertJsonPath('errors.email', ['The email has already been taken.']);
 });
 
 it('matches an organization only when the organization field is omitted', function (bool $omitOrganization) use ($actingAsContactCreator): void {
