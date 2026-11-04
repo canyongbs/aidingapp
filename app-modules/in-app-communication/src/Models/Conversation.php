@@ -41,21 +41,23 @@ use AidingApp\InAppCommunication\Database\Factories\ConversationFactory;
 use AidingApp\InAppCommunication\Enums\ConversationEphemeralPeriod;
 use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
-use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperConversation
  */
-class Conversation extends BaseModel implements Auditable
+class Conversation extends Model implements Auditable
 {
+    use UsesTenantConnection;
     use AuditableTrait;
 
     /** @use HasFactory<ConversationFactory> */

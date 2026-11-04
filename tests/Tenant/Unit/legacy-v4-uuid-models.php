@@ -66,9 +66,6 @@ use AidingApp\Form\Models\SubmissibleAuthentication;
 use AidingApp\Form\Models\SubmissibleField;
 use AidingApp\Form\Models\SubmissibleStep;
 use AidingApp\Form\Models\Submission;
-use AidingApp\InAppCommunication\Models\Conversation;
-use AidingApp\InAppCommunication\Models\ConversationParticipant;
-use AidingApp\InAppCommunication\Models\Message;
 use AidingApp\IntegrationOpenAi\Models\OpenAiVectorStore;
 use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\InventoryManagement\Models\AssetCheckIn;
@@ -80,7 +77,6 @@ use AidingApp\InventoryManagement\Models\MaintenanceActivity;
 use AidingApp\InventoryManagement\Models\MaintenanceProvider;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\LicenseManagement\Models\ProductLicense;
@@ -298,14 +294,6 @@ return [
     ServiceMonitoringReportConfiguration::class,
     ServiceRequestNotificationAutomationEmailTemplate::class,
     ServiceRequestStatusPeriod::class,
-
-    // These models declare HasUuids (UUIDv7) themselves, which overrides the HasVersion4Uuids they
-    // inherit from BaseModel, so they already generate v7 IDs. They are only listed because BaseModel
-    // puts HasVersion4Uuids in their trait hierarchy, and must be removed once they stop extending it.
-    Conversation::class,
-    ConversationParticipant::class,
-    Message::class,
-    KnowledgeBaseItemConcern::class,
 
     // These models use HasVersion4Uuids directly, but were never listed because arch()->ignoring()
     // matches by prefix (e.g. ServiceRequest exempted ServiceRequestCategoryType), so their tables
