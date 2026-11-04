@@ -109,8 +109,6 @@ test('it registers a new portal contact for matching organization domain', funct
 });
 
 it('unarchives and updates an archived contact with the same email', function (): void {
-    ContactArchivingFeature::activate();
-
     ContactType::factory()->create([
         'is_default' => true,
     ]);
@@ -447,8 +445,6 @@ test('it returns validation error when code is invalid', function (): void {
 });
 
 it('does not register with an email other than the one the code was sent to', function (array $signedParameters): void {
-    ContactArchivingFeature::activate();
-
     Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [

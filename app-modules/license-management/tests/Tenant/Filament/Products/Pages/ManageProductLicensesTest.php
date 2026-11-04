@@ -82,8 +82,6 @@ it('is gated with proper access control', function (): void {
 });
 
 test('ManageProductLicenses does not offer archived contacts as the license assignee', function (): void {
-    ContactArchivingFeature::activate();
-
     $settings = app(LicenseSettings::class);
     $settings->data->addons->licenseManagement = true;
     $settings->save();
@@ -106,8 +104,6 @@ test('ManageProductLicenses does not offer archived contacts as the license assi
 });
 
 test('ManageProductLicenses keeps an archived contact that is already assigned to the license', function (): void {
-    ContactArchivingFeature::activate();
-
     $settings = app(LicenseSettings::class);
     $settings->data->addons->licenseManagement = true;
     $settings->save();

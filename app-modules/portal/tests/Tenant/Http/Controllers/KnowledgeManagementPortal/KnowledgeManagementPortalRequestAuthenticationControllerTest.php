@@ -39,7 +39,6 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Notifications\AuthenticatePortalNotification;
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\ContactArchivingFeature;
 use App\Support\AuthenticationCodeRateLimiter;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
@@ -149,8 +148,6 @@ test('it allows registration flow when email domain matches an organization doma
 });
 
 test('it offers registration to an archived contact when the organization domain matches', function (): void {
-    ContactArchivingFeature::activate();
-
     Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [

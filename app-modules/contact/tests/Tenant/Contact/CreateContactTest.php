@@ -154,8 +154,6 @@ test('CreateContact allows reusing a soft-deleted contact email', function (): v
 });
 
 it('does not create a contact with the email of an archived contact', function (): void {
-    ContactArchivingFeature::activate();
-
     $user = User::factory()->create();
     $user->givePermissionTo('contact.view-any');
     $user->givePermissionTo('contact.create');

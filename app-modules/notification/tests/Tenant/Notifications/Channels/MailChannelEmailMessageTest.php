@@ -145,8 +145,6 @@ it('suppresses the send and records a SuppressedByBounced event for a bounced co
 });
 
 it('suppresses the send and records a SuppressedByArchived event for an archived contact', function (): void {
-    ContactArchivingFeature::activate();
-
     $contact = Contact::factory()->archived()->create();
 
     $contact->notify(new TestEmailNotification());
@@ -161,8 +159,6 @@ it('suppresses the send and records a SuppressedByArchived event for an archived
 });
 
 it('records SuppressedByArchived rather than SuppressedByBounced for an archived contact that has bounced', function (): void {
-    ContactArchivingFeature::activate();
-
     $contact = Contact::factory()->archived()->bounced()->create();
 
     $contact->notify(new TestEmailNotification());
@@ -177,8 +173,6 @@ it('records SuppressedByArchived rather than SuppressedByBounced for an archived
 });
 
 it('suppresses the send and records a SuppressedByArchived event for an on-demand notification to a contact archived before delivery', function (): void {
-    ContactArchivingFeature::activate();
-
     $contact = Contact::factory()->create();
 
     $notification = new TestOnDemandEmailNotification($contact);

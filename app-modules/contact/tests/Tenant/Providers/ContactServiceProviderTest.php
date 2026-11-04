@@ -40,8 +40,6 @@ use Illuminate\Auth\SessionGuard;
 use Illuminate\Support\Facades\Auth;
 
 it('does not retrieve an archived contact for the contact guard', function (): void {
-    ContactArchivingFeature::activate();
-
     $archived = Contact::factory()->archived()->create();
     $active = Contact::factory()->create();
 

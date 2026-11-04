@@ -64,7 +64,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
 use App\Actions\Paths\ModulePath;
-use App\Features\ContactArchivingFeature;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -283,8 +282,6 @@ describe('Engagement response processing', function (): void {
         $contact = null;
 
         $tenant->execute(function () use (&$contact): void {
-            ContactArchivingFeature::activate();
-
             $contact = Contact::factory()->archived()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -800,8 +797,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
         $archivedContact = null;
 
         $tenant->execute(function () use (&$archivedContact): void {
-            ContactArchivingFeature::activate();
-
             Organization::factory()->create([
                 'domains' => [['domain' => 'canyongbs.com']],
             ]);
@@ -1062,8 +1057,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
         [$archivedContact, $otherOrganization, $serviceRequestType, $domainOrganization] = $tenant->execute(function () use ($hasOrganization): array {
             seed(ContactTypeSeeder::class);
 
-            ContactArchivingFeature::activate();
-
             $domainOrganization = Organization::factory()->create([
                 'domains' => [['domain' => 'canyongbs.com']],
             ]);
@@ -1248,8 +1241,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         [$contact, $domainOrganization] = $tenant->execute(function (): array {
             seed(ContactTypeSeeder::class);
-
-            ContactArchivingFeature::activate();
 
             $domainOrganization = Organization::factory()->create([
                 'domains' => [['domain' => 'canyongbs.com']],

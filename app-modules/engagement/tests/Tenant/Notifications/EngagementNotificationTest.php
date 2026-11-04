@@ -39,7 +39,6 @@ use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementBatch;
 use AidingApp\Engagement\Notifications\EngagementNotification;
 use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
-use App\Features\ContactArchivingFeature;
 use App\Models\Tenant;
 use App\Models\User;
 
@@ -126,8 +125,6 @@ it('advances processed_engagements but not successful_engagements for a bounced 
 });
 
 it('advances processed_engagements but not successful_engagements for an archived recipient in a batch', function (): void {
-    ContactArchivingFeature::activate();
-
     $contact = Contact::factory()->archived()->create();
 
     $batch = EngagementBatch::factory()->create([

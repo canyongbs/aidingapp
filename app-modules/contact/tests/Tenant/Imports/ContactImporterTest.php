@@ -113,8 +113,6 @@ it('preserves an existing organization when importing a contact', function () us
 });
 
 it('unarchives and updates an archived contact with the same email', function () use ($runContactImport): void {
-    ContactArchivingFeature::activate();
-
     $existingContact = Contact::factory()->archived()->create([
         'email' => 'person@example.com',
         'first_name' => 'Original',

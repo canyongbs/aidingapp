@@ -38,7 +38,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageGuests;
 use AidingApp\Project\Filament\Resources\Projects\RelationManagers\GuestContactsRelationManager;
 use AidingApp\Project\Models\Project;
-use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
@@ -85,8 +84,6 @@ it('can attach a guest contact to a project', function (): void {
 });
 
 it('does not offer archived contacts to attach', function (): void {
-    ContactArchivingFeature::activate();
-
     asSuperAdmin();
 
     $project = Project::factory()->create();

@@ -132,8 +132,6 @@ test('it returns expired when the authentication has expired', function () use (
 });
 
 test('it does not authenticate an archived contact', function () use ($assistantAuthenticate): void {
-    ContactArchivingFeature::activate();
-
     $contact = Contact::factory()->create();
 
     $plainCode = 445566;

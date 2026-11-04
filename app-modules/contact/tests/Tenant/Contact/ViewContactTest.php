@@ -125,8 +125,6 @@ test('ViewContact renders successfully when optional fields have no value', func
 });
 
 it('returns not found for an archived contact', function (): void {
-    ContactArchivingFeature::activate();
-
     asSuperAdmin();
 
     $contact = Contact::factory()->archived()->create();
@@ -136,10 +134,6 @@ it('returns not found for an archived contact', function (): void {
 });
 
 describe('archiving', function (): void {
-    beforeEach(function (): void {
-        ContactArchivingFeature::activate();
-    });
-
     it('archives the contact', function (): void {
         asSuperAdmin();
 
@@ -397,8 +391,6 @@ describe('section edit actions', function (): void {
     });
 
     it('does not save the email of an archived contact', function (): void {
-        ContactArchivingFeature::activate();
-
         $user = User::factory()->create();
         $user->givePermissionTo('contact.view-any');
         $user->givePermissionTo('contact.*.view');

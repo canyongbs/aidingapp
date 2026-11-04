@@ -1155,8 +1155,6 @@ test('EditServiceMonitoring does not apply the unique name rule when the feature
 });
 
 test('EditServiceMonitoring does not offer archived contacts as report recipients', function (): void {
-    ContactArchivingFeature::activate();
-
     asSuperAdmin();
 
     $activeContact = Contact::factory()->create();
@@ -1176,8 +1174,6 @@ test('EditServiceMonitoring does not offer archived contacts as report recipient
 });
 
 test('EditServiceMonitoring keeps an archived report contact that is already selected', function (): void {
-    ContactArchivingFeature::activate();
-
     asSuperAdmin();
 
     $archivedContact = Contact::factory()->create();
@@ -1217,8 +1213,6 @@ test('EditServiceMonitoring offers every contact as a report recipient when the 
 });
 
 test('EditServiceMonitoring does not offer archived contacts as confidential contacts', function (): void {
-    ContactArchivingFeature::activate();
-
     asSuperAdmin();
 
     $activeContact = Contact::factory()->create();
@@ -1238,8 +1232,6 @@ test('EditServiceMonitoring does not offer archived contacts as confidential con
 });
 
 test('EditServiceMonitoring keeps an archived confidential contact that is already selected', function (): void {
-    ContactArchivingFeature::activate();
-
     asSuperAdmin();
 
     $archivedContact = Contact::factory()->create();

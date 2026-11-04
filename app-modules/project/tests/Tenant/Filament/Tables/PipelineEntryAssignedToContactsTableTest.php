@@ -36,14 +36,12 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Tables\PipelineEntryAssignedToContactsTable;
-use App\Features\ContactArchivingFeature;
 use Filament\Forms\Components\TableSelect\Livewire\TableSelectLivewireComponent;
 use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
 
 it('excludes archived contacts', function (): void {
-    ContactArchivingFeature::activate();
     asSuperAdmin();
 
     $contact = Contact::factory()->create();
