@@ -38,13 +38,17 @@ namespace AidingApp\Contact\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Database\Factories\OrganizationFactory;
+use AidingApp\Contact\Models\Builders\OrganizationBuilder;
 use AidingApp\Contact\Observers\OrganizationObserver;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectGuest;
 use App\Models\Media;
+use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -59,9 +63,14 @@ use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
  * @mixin IdeHelperOrganization
  */
 #[ObservedBy([OrganizationObserver::class])]
+#[UseEloquentBuilder(OrganizationBuilder::class)]
 class Organization extends Model implements HasMedia, Auditable
 {
     use UsesTenantConnection;
+    use CanBeArchived;
+
+    /** @use HasBuilder<OrganizationBuilder<self>> */
+    use HasBuilder;
 
     /** @use HasFactory<OrganizationFactory> */
     use HasFactory;
