@@ -426,8 +426,6 @@ it('unarchives and updates an archived organization with the same name and links
 });
 
 it('links unaffiliated contacts on the new domain when an import unarchives an organization and changes its domains', function () use ($runOrganizationImport): void {
-    OrganizationArchivingFeature::activate();
-
     $organization = Organization::factory()->archived()->create([
         'name' => 'Archived College',
         'domains' => [['domain' => 'old-college.test']],
