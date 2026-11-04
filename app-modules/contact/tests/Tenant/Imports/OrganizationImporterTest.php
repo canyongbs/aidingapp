@@ -35,10 +35,12 @@
 */
 
 use AidingApp\Contact\Imports\OrganizationImporter;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Support\OrganizationDomainsLock;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\Import;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Illuminate\Support\Str;
@@ -396,4 +398,51 @@ it('preserves the existing industry and type when the columns are blank on updat
 
     expect($organization->industry->is($industry))->toBeTrue()
         ->and($organization->type->is($type))->toBeTrue();
+});
+
+it('unarchives and updates an archived organization with the same name and links unaffiliated contacts', function () use ($runOrganizationImport): void {
+    OrganizationArchivingFeature::activate();
+
+    $organization = Organization::factory()->archived()->create([
+        'name' => 'Archived College',
+        'city' => 'Old City',
+        'domains' => [['domain' => 'archived-college.test']],
+    ]);
+
+    $contact = Contact::factory()->create([
+        'email' => 'student@archived-college.test',
+        'organization_id' => null,
+    ]);
+
+    $runOrganizationImport([
+        'name' => 'Archived College',
+        'city' => 'New City',
+    ]);
+
+    $organization->refresh();
+
+    expect(Organization::query()->where('name', 'Archived College')->count())->toBe(1)
+        ->and($organization->isArchived())->toBeFalse()
+        ->and($organization->city)->toBe('New City')
+        ->and($contact->refresh()->organization_id)->toBe($organization->getKey());
+});
+
+it('updates but does not unarchive an archived organization when the organization archiving feature is inactive', function () use ($runOrganizationImport): void {
+    OrganizationArchivingFeature::deactivate();
+
+    $organization = Organization::factory()->archived()->create([
+        'name' => 'Archived College',
+        'city' => 'Old City',
+    ]);
+
+    $runOrganizationImport([
+        'name' => 'Archived College',
+        'city' => 'New City',
+    ]);
+
+    $organization->refresh();
+
+    expect(Organization::query()->where('name', 'Archived College')->count())->toBe(1)
+        ->and($organization->isArchived())->toBeTrue()
+        ->and($organization->city)->toBe('New City');
 });
