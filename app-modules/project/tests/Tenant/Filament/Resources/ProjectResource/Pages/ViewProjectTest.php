@@ -318,14 +318,13 @@ it('omits archived organizations from the project access widget guests when arch
 
     $project = Project::factory()->create();
     $activeOrganization = Organization::factory()->create();
-    $archivedOrganization = Organization::factory()->create();
-    $archivedOrganization->archive();
+    $archivedOrganization = Organization::factory()->archived()->create();
     $project->guestOrganizations()->attach([$activeOrganization->getKey(), $archivedOrganization->getKey()]);
 
     $guestKeys = Livewire::test(ProjectAccessWidget::class, ['record' => $project])
         ->instance()
         ->guests()
-        ->map(fn (Organization $guest) => $guest->getKey());
+        ->map(fn (Organization $guest): string => $guest->getKey());
 
     expect($guestKeys->all())->toBe([$activeOrganization->getKey()]);
 });
@@ -337,14 +336,13 @@ it('keeps archived organizations in the project access widget guests when archiv
 
     $project = Project::factory()->create();
     $activeOrganization = Organization::factory()->create();
-    $archivedOrganization = Organization::factory()->create();
-    $archivedOrganization->archive();
+    $archivedOrganization = Organization::factory()->archived()->create();
     $project->guestOrganizations()->attach([$activeOrganization->getKey(), $archivedOrganization->getKey()]);
 
     $guestKeys = Livewire::test(ProjectAccessWidget::class, ['record' => $project])
         ->instance()
         ->guests()
-        ->map(fn (Organization $guest) => $guest->getKey());
+        ->map(fn (Organization $guest): string => $guest->getKey());
 
     expect($guestKeys->all())->toEqualCanonicalizing([$activeOrganization->getKey(), $archivedOrganization->getKey()]);
 });
