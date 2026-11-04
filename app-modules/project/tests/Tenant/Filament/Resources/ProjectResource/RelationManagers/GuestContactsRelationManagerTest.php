@@ -38,6 +38,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageGuests;
 use AidingApp\Project\Filament\Resources\Projects\RelationManagers\GuestContactsRelationManager;
 use AidingApp\Project\Models\Project;
+use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
@@ -70,6 +71,39 @@ it('can attach a guest contact to a project', function (): void {
     $project = Project::factory()->create();
 
     $contact = Contact::factory()->create();
+
+    Livewire::test(GuestContactsRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManageGuests::class,
+    ])
+        ->callAction(TestAction::make(AttachAction::class)->table(), data: [
+            'recordId' => $contact->getKey(),
+        ])
+        ->assertHasNoFormErrors();
+
+    expect($project->guestContacts()->where('contacts.id', $contact->getKey())->exists())->toBeTrue();
+});
+
+it('does not offer archived contacts to attach', function (): void {
+    ContactArchivingFeature::activate();
+
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $contact = Contact::factory()->create();
+    $archivedContact = Contact::factory()->archived()->create();
+
+    Livewire::test(GuestContactsRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManageGuests::class,
+    ])
+        ->callAction(TestAction::make(AttachAction::class)->table(), data: [
+            'recordId' => $archivedContact->getKey(),
+        ])
+        ->assertHasFormErrors(['recordId']);
+
+    expect($project->guestContacts()->where('contacts.id', $archivedContact->getKey())->exists())->toBeFalse();
 
     Livewire::test(GuestContactsRelationManager::class, [
         'ownerRecord' => $project,

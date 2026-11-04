@@ -52,6 +52,7 @@ class CreateServiceRequestContactsTable
     {
         return $table
             ->query(fn (): Builder => Contact::query()
+                ->withoutArchived()
                 ->with(['type', 'organization'])
                 ->withCount([
                     'serviceRequests',
