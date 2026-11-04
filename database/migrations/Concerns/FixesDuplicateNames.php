@@ -106,6 +106,9 @@ trait FixesDuplicateNames
 
     private function fixDuplicates(): void
     {
+        // Holds for the rest of the migration's transaction so a concurrent insert can't land a fresh duplicate before the unique constraint is added.
+        DB::statement("LOCK TABLE {$this->table} IN ACCESS EXCLUSIVE MODE");
+
         /** @var array<int, string> $groupByColumns */
         $groupByColumns = $this->groupByColumns ?? []; // @phpstan-ignore property.notFound
 
@@ -199,7 +202,7 @@ trait FixesDuplicateNames
             $originalName = $record->{$this->column};
             $newName = $this->buildDeduplicatedValue($originalName, $counter);
 
-            while (isset($existingNames[Str::lower($newName)]) || $this->isTruncatedValueTaken($originalName, $newName, $groupValues, $groupByColumns, true)) {
+            while (isset($existingNames[Str::lower($newName)]) || $this->isValueTaken($newName, $groupValues, $groupByColumns, true)) {
                 $counter++;
                 $newName = $this->buildDeduplicatedValue($originalName, $counter);
             }
@@ -220,19 +223,14 @@ trait FixesDuplicateNames
     }
 
     /**
-     * The length a base value is truncated to shrinks as the counter gains digits, so the prefix
-     * match used to pre-load existing names can miss a stored name truncated for a longer suffix.
-     * Confirm truncated candidates against the table.
+     * Exact, case-insensitive check against the table: the prefix match used to pre-load existing
+     * names can miss a stored name truncated to a different length for a longer counter suffix.
      *
      * @param  array<string, mixed>  $groupValues
      * @param  array<int, string>  $groupByColumns
      */
-    private function isTruncatedValueTaken(string $originalName, string $newName, array $groupValues, array $groupByColumns, bool $liveRowsOnly): bool
+    private function isValueTaken(string $newName, array $groupValues, array $groupByColumns, bool $liveRowsOnly): bool
     {
-        if (str_starts_with($newName, $originalName)) {
-            return false;
-        }
-
         $query = DB::table($this->table)
             ->whereRaw("LOWER({$this->column}) = ?", [Str::lower($newName)]);
 
@@ -416,7 +414,7 @@ trait FixesDuplicateNames
             $originalName = $record->{$this->column};
             $newName = $this->buildDeduplicatedValue($originalName, $counter);
 
-            while (isset($existingNames[Str::lower($newName)]) || $this->isTruncatedValueTaken($originalName, $newName, $groupValues, $groupByColumns, false)) {
+            while (isset($existingNames[Str::lower($newName)]) || $this->isValueTaken($newName, $groupValues, $groupByColumns, false)) {
                 $counter++;
                 $newName = $this->buildDeduplicatedValue($originalName, $counter);
             }

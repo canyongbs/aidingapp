@@ -61,9 +61,6 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function (): void {
-            // Block concurrent writes so no duplicate can appear between the repair and the unique index.
-            DB::statement("LOCK TABLE {$this->table} IN ACCESS EXCLUSIVE MODE");
-
             $this->fixDuplicates();
 
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
