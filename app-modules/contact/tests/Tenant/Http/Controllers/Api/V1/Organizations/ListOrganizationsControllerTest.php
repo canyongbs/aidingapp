@@ -37,6 +37,7 @@
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\SystemUser;
 use Laravel\Sanctum\Sanctum;
 
@@ -311,4 +312,19 @@ it('rejects filters and sorts that are not allowed', function (): void {
 
     getJson(route('api.v1.organizations.index', ['sort' => 'description'], false))
         ->assertBadRequest();
+});
+
+it('does not return archived organizations', function (): void {
+    OrganizationArchivingFeature::activate();
+
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    Sanctum::actingAs($user, ['api']);
+
+    $organization = Organization::factory()->create();
+    Organization::factory()->archived()->create();
+
+    getJson(route('api.v1.organizations.index', [], false))
+        ->assertJsonPath('meta.total', 1)
+        ->assertJsonPath('data.0.id', $organization->getKey());
 });

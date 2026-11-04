@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Http\Controllers\Api\V1\Organizations;
 
 use AidingApp\Contact\Http\Resources\Api\V1\OrganizationResource;
 use AidingApp\Contact\Models\Organization;
+use App\Features\OrganizationArchivingFeature;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
@@ -52,6 +53,10 @@ class ViewOrganizationController
     {
         Gate::authorize('viewAny', Organization::class);
         Gate::authorize('view', $organization);
+
+        if (OrganizationArchivingFeature::active() && $organization->isArchived()) {
+            abort(404);
+        }
 
         $organization->loadMissing(['industry', 'type']);
 

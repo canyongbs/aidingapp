@@ -38,6 +38,7 @@ use AidingApp\Contact\Http\Requests\Api\V1\Organizations\UpdateOrganizationReque
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\SystemUser;
 use Laravel\Sanctum\Sanctum;
 
@@ -350,4 +351,42 @@ it('does not change the industry and type when they are not provided or when ide
         ->assertOk();
 
     expect($organization->refresh()->only(['industry_id', 'type_id']))->toBe($original);
+});
+
+it('returns not found for an archived organization before validating the request', function () use ($actingAsOrganizationUpdater): void {
+    OrganizationArchivingFeature::activate();
+
+    $actingAsOrganizationUpdater();
+
+    $organization = Organization::factory()->archived()->create(['name' => 'Original']);
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => ''])
+        ->assertNotFound();
+
+    expect($organization->refresh()->name)->toBe('Original');
+});
+
+it('checks permissions before returning not found for an archived organization', function (): void {
+    OrganizationArchivingFeature::activate();
+
+    $organization = Organization::factory()->archived()->create();
+
+    $user = SystemUser::factory()->create();
+    Sanctum::actingAs($user, ['api']);
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => 'Changed'])
+        ->assertForbidden();
+});
+
+it('explains that an archived organization reserves the name', function () use ($actingAsOrganizationUpdater): void {
+    OrganizationArchivingFeature::activate();
+
+    $actingAsOrganizationUpdater();
+
+    Organization::factory()->archived()->create(['name' => 'Archived Org']);
+    $organization = Organization::factory()->create();
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => 'ARCHIVED ORG'])
+        ->assertUnprocessable()
+        ->assertJsonPath('errors.name', ['An archived organization with this name already exists.']);
 });

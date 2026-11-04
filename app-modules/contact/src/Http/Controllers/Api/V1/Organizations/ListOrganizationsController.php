@@ -79,7 +79,7 @@ class ListOrganizationsController
         Gate::authorize('viewAny', Organization::class);
 
         return QueryBuilder::for(
-            Organization::query()->with(['industry', 'type'])
+            Organization::query()->withoutArchived()->with(['industry', 'type'])
         )
             ->allowedFilters(
                 AllowedFilter::partial('name'),
