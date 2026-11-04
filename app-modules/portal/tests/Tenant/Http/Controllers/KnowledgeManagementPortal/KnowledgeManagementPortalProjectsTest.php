@@ -38,6 +38,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\Project\Models\Project;
+use App\Features\OrganizationArchivingFeature;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\URL;
 
@@ -93,6 +94,23 @@ it('returns `has_projects` as true when the contact organization is a project gu
 
     $response->assertSuccessful();
     $response->assertJsonPath('has_projects', true);
+});
+
+it('returns `has_projects` as false when the only access is through an archived organization', function (): void {
+    OrganizationArchivingFeature::activate();
+
+    $organization = Organization::factory()->create();
+    $contact = Contact::factory()->for($organization)->create();
+    $project = Project::factory()->create();
+    $project->guestOrganizations()->attach($organization);
+    $organization->archive();
+
+    actingAs($contact, 'contact');
+
+    $response = get(URL::signedRoute(name: 'api.portal.define', absolute: false));
+
+    $response->assertSuccessful();
+    $response->assertJsonPath('has_projects', false);
 });
 
 it('returns `has_projects` as false when Project Management is not licensed', function (): void {

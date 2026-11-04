@@ -43,6 +43,7 @@ use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
+use App\Features\OrganizationArchivingFeature;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
@@ -169,6 +170,64 @@ it('lists organization projects once when the contact is also a direct guest', f
     $project = Project::factory()->create();
     $project->guestContacts()->attach($contact);
     $project->guestOrganizations()->attach($organization);
+
+    actingAs($contact, 'contact');
+
+    getJson(route('api.portal.projects.index'))
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.id', $project->getKey());
+});
+
+it('does not list a project reached only through an archived organization', function (): void {
+    OrganizationArchivingFeature::activate();
+
+    $organization = Organization::factory()->create();
+    $contact = Contact::factory()->for($organization)->create();
+    $project = Project::factory()->create();
+    $project->guestOrganizations()->attach($organization);
+    $organization->archive();
+
+    actingAs($contact, 'contact');
+
+    getJson(route('api.portal.projects.index'))
+        ->assertOk()
+        ->assertJsonPath('data', []);
+
+    $organization->unarchive();
+
+    getJson(route('api.portal.projects.index'))
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.id', $project->getKey());
+});
+
+it('still lists a project through a direct guest assignment when the organization is archived', function (): void {
+    OrganizationArchivingFeature::activate();
+
+    $organization = Organization::factory()->create();
+    $contact = Contact::factory()->for($organization)->create();
+    $project = Project::factory()->create();
+    $project->guestContacts()->attach($contact);
+    $project->guestOrganizations()->attach($organization);
+    $organization->archive();
+
+    actingAs($contact, 'contact');
+
+    getJson(route('api.portal.projects.index'))
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.id', $project->getKey());
+});
+
+it('lists a project through an archived organization while organization archiving is inactive', function (): void {
+    OrganizationArchivingFeature::deactivate();
+
+    $organization = Organization::factory()->create();
+    $contact = Contact::factory()->for($organization)->create();
+    $project = Project::factory()->create();
+    $project->guestOrganizations()->attach($organization);
+    $organization->archive();
 
     actingAs($contact, 'contact');
 
