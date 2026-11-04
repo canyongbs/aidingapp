@@ -38,6 +38,7 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageGuests;
 use AidingApp\Project\Filament\Resources\Projects\RelationManagers\GuestOrganizationsRelationManager;
 use AidingApp\Project\Models\Project;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
@@ -81,6 +82,61 @@ it('can attach a guest organization to a project', function (): void {
         ->assertHasNoFormErrors();
 
     expect($project->guestOrganizations()->where('organizations.id', $organization->getKey())->exists())->toBeTrue();
+});
+
+it('does not offer archived organizations to attach', function (): void {
+    OrganizationArchivingFeature::activate();
+
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $organization = Organization::factory()->create();
+    $archivedOrganization = Organization::factory()->archived()->create();
+
+    Livewire::test(GuestOrganizationsRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManageGuests::class,
+    ])
+        ->callAction(TestAction::make(AttachAction::class)->table(), data: [
+            'recordId' => $archivedOrganization->getKey(),
+        ])
+        ->assertHasFormErrors(['recordId']);
+
+    expect($project->guestOrganizations()->where('organizations.id', $archivedOrganization->getKey())->exists())->toBeFalse();
+
+    Livewire::test(GuestOrganizationsRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManageGuests::class,
+    ])
+        ->callAction(TestAction::make(AttachAction::class)->table(), data: [
+            'recordId' => $organization->getKey(),
+        ])
+        ->assertHasNoFormErrors();
+
+    expect($project->guestOrganizations()->where('organizations.id', $organization->getKey())->exists())->toBeTrue();
+});
+
+it('still lists and can detach an already attached archived organization', function (): void {
+    OrganizationArchivingFeature::activate();
+
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $archivedOrganization = Organization::factory()->archived()->create();
+
+    $project->guestOrganizations()->attach($archivedOrganization->getKey());
+
+    Livewire::test(GuestOrganizationsRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManageGuests::class,
+    ])
+        ->assertCanSeeTableRecords([$archivedOrganization])
+        ->callAction(TestAction::make(DetachAction::class)->table($archivedOrganization))
+        ->assertHasNoFormErrors();
+
+    expect($project->guestOrganizations()->where('organizations.id', $archivedOrganization->getKey())->exists())->toBeFalse();
 });
 
 it('can detach a guest organization from a project', function (): void {
