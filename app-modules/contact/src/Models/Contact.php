@@ -37,9 +37,11 @@
 namespace AidingApp\Contact\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Actions\MatchContactToOrganization;
 use AidingApp\Contact\Database\Factories\ContactFactory;
 use AidingApp\Contact\Enums\EmailHealthStatus;
 use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Models\Builders\ContactBuilder;
 use AidingApp\Contact\Observers\ContactObserver;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagementResponses;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagements;
@@ -56,17 +58,21 @@ use AidingApp\Project\Models\ProjectGuest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use AidingApp\Timeline\Models\Timeline;
+use App\Features\ContactArchivingFeature;
 use App\Models\Authenticatable;
 use App\Models\Concerns\HasPresence;
 use App\Models\Contracts\Educatable;
 use App\Models\User;
+use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Filament\Models\Contracts\HasName;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -74,6 +80,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Cache;
 use Laravel\Sanctum\HasApiTokens;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
@@ -84,9 +91,14 @@ use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
  * @mixin IdeHelperContact
  */
 #[ObservedBy([ContactObserver::class])]
+#[UseEloquentBuilder(ContactBuilder::class)]
 class Contact extends Authenticatable implements Auditable, Educatable, HasFilamentResource, CanBeNotified, HasName
 {
     use AuditableTrait;
+    use CanBeArchived;
+
+    /** @use HasBuilder<ContactBuilder<self>> */
+    use HasBuilder;
 
     /** @use HasFactory<ContactFactory> */
     use HasFactory;
@@ -156,6 +168,11 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     public function canReceiveEmail(): bool
     {
         return ! $this->email_bounce;
+    }
+
+    public function isSuppressedByArchival(): bool
+    {
+        return $this->isArchived() && ContactArchivingFeature::active();
     }
 
     /**
@@ -308,6 +325,18 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
             )
             ->using(ProjectGuest::class)
             ->withTimestamps();
+    }
+
+    protected static function booted(): void
+    {
+        static::archived(fn () => Cache::tags('{contacts}')->flush());
+        static::archived(function (Contact $contact): void {
+            if (ContactArchivingFeature::active()) {
+                $contact->tokens()->delete();
+            }
+        });
+        static::unarchived(fn () => Cache::tags('{contacts}')->flush());
+        static::unarchived(fn (Contact $contact) => app(MatchContactToOrganization::class)($contact));
     }
 
     protected function serializeDate(DateTimeInterface $date): string

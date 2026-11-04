@@ -123,3 +123,25 @@ it('advances processed_engagements but not successful_engagements for a bounced 
     expect($batch->processed_engagements)->toBe(1);
     expect($batch->successful_engagements)->toBe(0);
 });
+
+it('advances processed_engagements but not successful_engagements for an archived recipient in a batch', function (): void {
+    $contact = Contact::factory()->archived()->create();
+
+    $batch = EngagementBatch::factory()->create([
+        'processed_engagements' => 0,
+        'successful_engagements' => 0,
+    ]);
+
+    $engagement = Engagement::factory()->email()->create([
+        'recipient_type' => $contact->getMorphClass(),
+        'recipient_id' => $contact->getKey(),
+        'engagement_batch_id' => $batch->getKey(),
+    ]);
+
+    $contact->notify(new EngagementNotification($engagement));
+
+    $batch->refresh();
+
+    expect($batch->processed_engagements)->toBe(1);
+    expect($batch->successful_engagements)->toBe(0);
+});

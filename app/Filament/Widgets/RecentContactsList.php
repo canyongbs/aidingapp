@@ -69,7 +69,7 @@ class RecentContactsList extends BaseWidget
         return $table
             ->heading('Latest Contacts (5)')
             ->query(
-                Contact::latest()->limit(5)
+                Contact::query()->withoutArchived()->latest()->limit(5)
             )
             ->columns([
                 IdColumn::make(),

@@ -136,6 +136,39 @@ test('it allows registration flow when email domain matches an organization doma
 
     expect($response->json('authentication_url'))->toContain('/api/portal/register/');
 
+    parse_str((string) parse_url($response->json('authentication_url'), PHP_URL_QUERY), $query);
+
+    expect($query['email'] ?? null)->toBe('new.user@EXAMPLE.com');
+
+    $authentication = PortalAuthentication::query()->latest('id')->first();
+
+    expect($authentication)
+        ->not->toBeNull()
+        ->and($authentication?->educatable_id)->toBeNull();
+});
+
+test('it offers registration to an archived contact when the organization domain matches', function (): void {
+    Organization::factory()->create([
+        'is_contact_generation_enabled' => true,
+        'domains' => [
+            ['domain' => 'example.com'],
+        ],
+    ]);
+
+    Contact::factory()->archived()->create(['email' => 'archived@example.com']);
+
+    $url = URL::signedRoute(name: 'api.portal.request-authentication', absolute: false);
+
+    $response = postJson($url, [
+        'email' => 'archived@example.com',
+    ]);
+
+    $response
+        ->assertStatus(404)
+        ->assertJsonPath('registrationAllowed', true);
+
+    expect($response->json('authentication_url'))->toContain('/api/portal/register/');
+
     $authentication = PortalAuthentication::query()->latest('id')->first();
 
     expect($authentication)

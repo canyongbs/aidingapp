@@ -205,6 +205,11 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return true;
     }
 
+    public function isSuppressedByArchival(): bool
+    {
+        return false;
+    }
+
     /**
      * @return HasManyDeep<Model, $this>
      */

@@ -42,7 +42,9 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactFormSche
 use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactInfolist;
 use AidingApp\Contact\Models\Contact;
 use App\Enums\PresenceStatus;
+use App\Features\ContactArchivingFeature;
 use App\Features\ContactTrackingFeature;
+use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -234,7 +236,7 @@ class ViewContact extends ViewRecord
         }
 
         return [
-            DeleteAction::make(),
+            ContactArchivingFeature::active() ? ArchiveAction::make() : DeleteAction::make(),
         ];
     }
 

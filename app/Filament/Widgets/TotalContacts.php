@@ -46,7 +46,7 @@ class TotalContacts extends StatsOverviewWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('Total Contacts', Number::abbreviate(Contact::count())),
+            Stat::make('Total Contacts', Number::abbreviate(Contact::query()->withoutArchived()->count())),
         ];
     }
 }

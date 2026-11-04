@@ -34,13 +34,19 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\ManageProductLicenses;
 use AidingApp\LicenseManagement\Models\Product;
+use AidingApp\LicenseManagement\Models\ProductLicense;
+use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Forms\Components\Select;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
+use function Tests\asSuperAdmin;
 
 it('is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
@@ -73,4 +79,68 @@ it('is gated with proper access control', function (): void {
     $user->givePermissionTo('product_license.view-any');
 
     get(ManageProductLicenses::getUrl(['record' => $product]))->assertSuccessful();
+});
+
+test('ManageProductLicenses does not offer archived contacts as the license assignee', function (): void {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->licenseManagement = true;
+    $settings->save();
+
+    asSuperAdmin();
+
+    $activeContact = Contact::factory()->create();
+    $archivedContact = Contact::factory()->archived()->create();
+
+    $product = Product::factory()->create();
+
+    Livewire::test(ManageProductLicenses::class, ['record' => $product->getRouteKey()])
+        ->mountTableAction('create')
+        ->assertFormFieldExists('assigned_to', 'mountedActionSchema0', function (Select $field) use ($activeContact, $archivedContact): bool {
+            $options = $field->getOptions();
+
+            return array_key_exists($activeContact->getKey(), $options)
+                && ! array_key_exists($archivedContact->getKey(), $options);
+        });
+});
+
+test('ManageProductLicenses keeps an archived contact that is already assigned to the license', function (): void {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->licenseManagement = true;
+    $settings->save();
+
+    asSuperAdmin();
+
+    $archivedContact = Contact::factory()->archived()->create();
+
+    $productLicense = ProductLicense::factory()->for($archivedContact, 'contact')->create();
+
+    Livewire::test(ManageProductLicenses::class, ['record' => $productLicense->product->getRouteKey()])
+        ->mountTableAction('edit', $productLicense)
+        ->assertFormFieldExists('assigned_to', 'mountedActionSchema0', function (Select $field) use ($archivedContact): bool {
+            return array_key_exists($archivedContact->getKey(), $field->getOptions());
+        })
+        ->callMountedTableAction()
+        ->assertHasNoFormErrors();
+
+    expect($productLicense->refresh()->assigned_to)->toBe($archivedContact->getKey());
+});
+
+test('ManageProductLicenses offers every contact as the license assignee when the contact archiving feature is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->licenseManagement = true;
+    $settings->save();
+
+    asSuperAdmin();
+
+    $archivedContact = Contact::factory()->archived()->create();
+
+    $product = Product::factory()->create();
+
+    Livewire::test(ManageProductLicenses::class, ['record' => $product->getRouteKey()])
+        ->mountTableAction('create')
+        ->assertFormFieldExists('assigned_to', 'mountedActionSchema0', function (Select $field) use ($archivedContact): bool {
+            return array_key_exists($archivedContact->getKey(), $field->getOptions());
+        });
 });

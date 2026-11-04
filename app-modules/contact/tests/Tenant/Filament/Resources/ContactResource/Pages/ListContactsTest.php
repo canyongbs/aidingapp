@@ -40,9 +40,14 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use App\Settings\PresenceSettings;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
+use Filament\Notifications\Livewire\Notifications;
+use Filament\Notifications\Notification;
+use Filament\Notifications\NotificationMailbox;
 
 use function Filament\Support\generate_icon_html;
 
@@ -377,7 +382,43 @@ describe('search and filters', function (): void {
     })->with(['Searchable Contact', 'searchable-contact@example.com']);
 });
 
-it('only shows the bulk delete action to a user with the contact.delete permission', function (): void {
+describe('archived contacts', function (): void {
+    it('does not list archived contacts', function (): void {
+        actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view'));
+
+        $contact = Contact::factory()->create();
+        $archivedContact = Contact::factory()->archived()->create();
+
+        Livewire::test(ListContacts::class)
+            ->assertCanSeeTableRecords([$contact])
+            ->assertCanNotSeeTableRecords([$archivedContact]);
+    });
+
+    it('does not find archived contacts in global search', function (): void {
+        actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view'));
+
+        $contact = Contact::factory()->create(['full_name' => 'Searchable Contact']);
+        $archivedContact = Contact::factory()->archived()->create(['full_name' => 'Searchable Contact']);
+
+        $resultUrls = ContactResource::getGlobalSearchResults($archivedContact->full_name)->pluck('url');
+
+        expect($resultUrls)->toContain(ContactResource::getUrl('view', ['record' => $contact]));
+        expect($resultUrls)->not->toContain(ContactResource::getUrl('view', ['record' => $archivedContact]));
+    });
+});
+
+it('lists archived contacts while contact archiving is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view'));
+
+    $archivedContact = Contact::factory()->archived()->create();
+
+    Livewire::test(ListContacts::class)
+        ->assertCanSeeTableRecords([$archivedContact]);
+});
+
+it('only shows the bulk archive action to a user with the contact.delete permission', function (): void {
     Contact::factory(15)->create();
 
     $user = User::factory()
@@ -387,10 +428,90 @@ it('only shows the bulk delete action to a user with the contact.delete permissi
     actingAs($user);
 
     Livewire::test(ListContacts::class)
-        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+        ->assertActionHidden(TestAction::make('archive')->table()->bulk());
 
     $user->givePermissionTo('contact.*.delete');
 
     Livewire::test(ListContacts::class)
-        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+        ->assertActionVisible(TestAction::make('archive')->table()->bulk());
+});
+
+it('can sort contacts by name', function (): void {
+    actingAs(
+        User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view')
+    );
+
+    $contacts = collect(['Charlie Brown', 'Alice Smith', 'Bob Jones'])
+        ->map(fn (string $name): Contact => Contact::factory()->create(['full_name' => $name]));
+
+    Livewire::test(ListContacts::class)
+        ->sortTable('full_name')
+        ->assertCanSeeTableRecords($contacts->sortBy('full_name')->values(), inOrder: true)
+        ->sortTable('full_name', 'desc')
+        ->assertCanSeeTableRecords($contacts->sortByDesc('full_name')->values(), inOrder: true);
+});
+
+it('hides the created at and updated at columns by default and allows sorting them', function (string $column): void {
+    actingAs(
+        User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view')
+    );
+
+    $contacts = Contact::factory()->count(3)->create();
+
+    Livewire::test(ListContacts::class)
+        ->assertTableColumnExists($column, fn (TextColumn $column): bool => $column->isToggleable() && $column->isToggledHiddenByDefault() && $column->isSortable())
+        ->assertCanNotRenderTableColumn($column)
+        ->toggleAllTableColumns()
+        ->assertCanRenderTableColumn($column)
+        ->sortTable($column)
+        ->assertCanSeeTableRecords($contacts);
+})->with(['created_at', 'updated_at']);
+
+describe('archiving', function (): void {
+    it('bulk archives contacts and skips managed ones', function (): void {
+        actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.delete'));
+
+        $contact = Contact::factory()->create();
+        $managed = Contact::factory()->for(User::factory(), 'managedByUser')->create();
+
+        Livewire::test(ListContacts::class)
+            ->selectTableRecords([$contact->getKey(), $managed->getKey()])
+            ->callAction(TestAction::make('archive')->table()->bulk());
+
+        app(NotificationMailbox::class)->flush();
+
+        $notifications = new Notifications();
+        $notifications->mount();
+        $notifications->pullNotificationsFromSession();
+
+        expect($notifications->notifications->map(fn (Notification $notification): string => (string) $notification->getBody())->all())
+            ->toContain('<p>One of the selected contacts is managed and cannot be archived.</p>');
+
+        expect($contact->refresh()->isArchived())->toBeTrue()
+            ->and($managed->refresh()->isArchived())->toBeFalse();
+    });
+});
+
+it('shows the bulk delete action when the contact archiving feature is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.delete'));
+
+    Livewire::test(ListContacts::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk())
+        ->assertActionDoesNotExist(TestAction::make('archive')->table()->bulk());
+});
+
+it('bulk deletes managed contacts when the contact archiving feature is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.delete'));
+
+    $managed = Contact::factory()->for(User::factory(), 'managedByUser')->create();
+
+    Livewire::test(ListContacts::class)
+        ->selectTableRecords([$managed->getKey()])
+        ->callAction(TestAction::make(DeleteBulkAction::class)->table()->bulk());
+
+    expect(Contact::find($managed->getKey()))->toBeNull();
 });

@@ -37,8 +37,10 @@
 namespace AidingApp\Contact\Providers;
 
 use AidingApp\Contact\ContactPlugin;
+use AidingApp\Contact\Listeners\CancelNotificationsToArchivedContacts;
 use AidingApp\Contact\Listeners\FlushOrganizationImportDomainClaims;
 use AidingApp\Contact\Listeners\SaveBouncedContactEmail;
+use AidingApp\Contact\Models\Builders\ContactBuilder;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
@@ -47,7 +49,13 @@ use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\IntegrationAwsSesEventHandling\Events\SesBounceEvent;
 use Filament\Actions\Imports\Events\ImportCompleted;
 use Filament\Panel;
+use Illuminate\Auth\EloquentUserProvider;
+use Illuminate\Contracts\Auth\UserProvider;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Notifications\Events\NotificationSending;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -77,5 +85,14 @@ class ContactServiceProvider extends ServiceProvider
         Event::listen(ImportCompleted::class, FlushOrganizationImportDomainClaims::class);
 
         Event::listen(SesBounceEvent::class, SaveBouncedContactEmail::class);
+
+        Event::listen(NotificationSending::class, CancelNotificationsToArchivedContacts::class);
+
+        Auth::provider('contacts', fn (Application $app, array $config): UserProvider => (new EloquentUserProvider($app['hash'], $config['model']))
+            ->withQuery(function (Builder $query): Builder {
+                assert($query instanceof ContactBuilder);
+
+                return $query->withoutArchived();
+            }));
     }
 }

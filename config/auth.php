@@ -119,7 +119,7 @@ return [
         ],
 
         'contacts' => [
-            'driver' => 'eloquent',
+            'driver' => 'contacts',
             'model' => Contact::class,
         ],
     ],

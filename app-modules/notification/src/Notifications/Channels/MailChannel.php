@@ -95,6 +95,31 @@ class MailChannel extends BaseMailChannel
 
         $emailMessage->save();
 
+        // An on-demand notification is routed to a bare address, so its archival state comes from the recipient it identified.
+        $archivalSubject = $notifiable instanceof CanBeNotified ? $notifiable : $emailMessage->recipient;
+
+        if ($archivalSubject instanceof CanBeNotified && $archivalSubject->isSuppressedByArchival()) {
+            $result = new EmailChannelResultData(
+                success: false,
+            );
+
+            try {
+                $emailMessage->events()->create([
+                    'type' => EmailMessageEventType::SuppressedByArchived,
+                    'payload' => $result->toArray(),
+                    'occurred_at' => now(),
+                ]);
+
+                if ($notification instanceof HasAfterSendHook) {
+                    $notification->afterSend($notifiable, $emailMessage, $result);
+                }
+            } catch (Throwable $exception) {
+                report($exception);
+            }
+
+            return;
+        }
+
         if ($notifiable instanceof CanBeNotified && (! $notifiable->canReceiveEmail())) {
             $result = new EmailChannelResultData(
                 success: false,

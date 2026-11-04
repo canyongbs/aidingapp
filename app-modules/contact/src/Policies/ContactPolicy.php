@@ -37,6 +37,7 @@
 namespace AidingApp\Contact\Policies;
 
 use AidingApp\Contact\Models\Contact;
+use App\Features\ContactArchivingFeature;
 use App\Models\Authenticatable;
 use Filament\Support\Authorization\DenyResponse;
 use Illuminate\Auth\Access\Response;
@@ -106,6 +107,27 @@ class ContactPolicy
 
     public function delete(Authenticatable $authenticatable, Contact $contact): Response
     {
+        if (ContactArchivingFeature::active() && $contact->isManaged()) {
+            return DenyResponse::make(
+                'managed_contact',
+                message: function (int $failureCount, int $totalCount): string {
+                    if ($failureCount === 1 && $totalCount === 1) {
+                        return 'This contact is managed and synchronized from a user, so it cannot be archived.';
+                    }
+
+                    if ($failureCount === $totalCount) {
+                        return 'All of the selected contacts are managed and cannot be archived.';
+                    }
+
+                    if ($failureCount === 1) {
+                        return 'One of the selected contacts is managed and cannot be archived.';
+                    }
+
+                    return "{$failureCount} of the selected contacts are managed and cannot be archived.";
+                },
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['contact.*.delete'],
             denyResponse: 'You do not have permission to delete this contact.'

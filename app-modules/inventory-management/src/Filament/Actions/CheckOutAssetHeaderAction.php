@@ -73,7 +73,7 @@ class CheckOutAssetHeaderAction extends Action
         $this->schema([
             Select::make('checked_out_to_id')
                 ->label('Select Contact')
-                ->options(Contact::all()->pluck('full_name', 'id'))
+                ->options(Contact::query()->withoutArchived()->get()->pluck('full_name', 'id'))
                 ->searchable()
                 ->required(),
             Textarea::make('notes')

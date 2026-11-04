@@ -48,6 +48,7 @@ class ResolveSubmissionAuthorFromEmail
 
         /** @var Contact|null $contact */
         $contact = Contact::query()
+            ->withoutArchived()
             ->where('email', $email)
             ->first();
 

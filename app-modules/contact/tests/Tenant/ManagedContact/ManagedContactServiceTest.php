@@ -37,6 +37,7 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Services\ManagedContactService;
+use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -345,6 +346,38 @@ it('restores a soft-deleted contact when linking by email', function (): void {
     expect($contact->getKey())->toBe($existing->getKey())
         ->and($contact->trashed())->toBeFalse()
         ->and($contact->user_id)->toBe($user->getKey());
+});
+
+it('unarchives an archived contact when linking by email', function (): void {
+    $type = ContactType::factory()->create();
+
+    $existing = Contact::factory()->archived()->create(['email' => 'archived@example.com']);
+
+    $user = User::factory()->create(['email' => 'archived@example.com']);
+
+    $contact = app(ManagedContactService::class)->enable($user, $type->getKey());
+
+    expect($contact->getKey())->toBe($existing->getKey())
+        ->and($contact->isArchived())->toBeFalse()
+        ->and($contact->fresh()->isArchived())->toBeFalse()
+        ->and($contact->user_id)->toBe($user->getKey())
+        ->and($contact->audits()->where('event', 'unarchived')->exists())->toBeTrue();
+});
+
+it('enables a contact when the contact archiving feature is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    $type = ContactType::factory()->create();
+
+    $existing = Contact::factory()->archived()->create(['email' => 'archived@example.com']);
+
+    $user = User::factory()->create(['email' => 'archived@example.com']);
+
+    $contact = app(ManagedContactService::class)->enable($user, $type->getKey());
+
+    expect($contact->getKey())->toBe($existing->getKey())
+        ->and($contact->user_id)->toBe($user->getKey())
+        ->and($contact->fresh()->isArchived())->toBeTrue();
 });
 
 it('does not reassign a contact managed by a different user', function (): void {
