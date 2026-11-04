@@ -461,6 +461,22 @@ describe('section edit actions', function (): void {
             ])
                 ->assertCanSeeTableRecords([$archivedOrganization]);
         });
+
+        it('lists archived organizations alongside the linked organization while organization archiving is inactive', function (): void {
+            OrganizationArchivingFeature::deactivate();
+
+            $linkedOrganization = Organization::factory()->create();
+            $archivedOrganization = Organization::factory()->archived()->create();
+            $contact = Contact::factory()->create(['organization_id' => $linkedOrganization->getKey()]);
+
+            Livewire::test(TableSelectLivewireComponent::class, [
+                'tableConfiguration' => base64_encode(OrganizationsTable::class),
+                'tableArguments' => ['selectedOrganizationId' => $contact->organization_id],
+                'model' => Contact::class,
+                'relationshipName' => 'organization',
+            ])
+                ->assertCanSeeTableRecords([$linkedOrganization, $archivedOrganization]);
+        });
     });
 
     test('the contact information section keeps its own email but rejects another contact\'s email case-insensitively', function (): void {
