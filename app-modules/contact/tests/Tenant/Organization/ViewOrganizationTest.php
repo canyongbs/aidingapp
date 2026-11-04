@@ -37,9 +37,11 @@
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
 test('View Organization is gated with proper access control', function (): void {
     $user = User::factory()->create();
@@ -62,4 +64,15 @@ test('View Organization is gated with proper access control', function (): void 
                 'record' => $organization,
             ])
         )->assertSuccessful();
+});
+
+it('returns not found for an archived organization', function (): void {
+    OrganizationArchivingFeature::activate();
+
+    actingAs(User::factory()->create()->givePermissionTo('organization.view-any', 'organization.*.view'));
+
+    $organization = Organization::factory()->archived()->create();
+
+    get(OrganizationResource::getUrl('view', ['record' => $organization]))
+        ->assertNotFound();
 });

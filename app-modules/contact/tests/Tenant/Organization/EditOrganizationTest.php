@@ -40,11 +40,13 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Support\OrganizationDomainsLock;
 use AidingApp\Contact\Tests\Tenant\Organization\RequestFactories\EditOrganizationRequestFactory;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 use function Pest\Laravel\mock;
 
 test('Edit Organization is gated with proper access control', function (): void {
@@ -470,4 +472,15 @@ test('an organization can keep its own name when editing', function (): void {
         ->assertHasNoFormErrors();
 
     $undoRepeaterFake();
+});
+
+it('returns not found for an archived organization', function (): void {
+    OrganizationArchivingFeature::activate();
+
+    actingAs(User::factory()->create()->givePermissionTo('organization.view-any', 'organization.*.update'));
+
+    $organization = Organization::factory()->archived()->create();
+
+    get(OrganizationResource::getUrl('edit', ['record' => $organization]))
+        ->assertNotFound();
 });
