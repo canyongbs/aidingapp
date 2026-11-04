@@ -138,6 +138,48 @@ it('still lists and can detach an already attached archived organization', funct
     expect($project->guestOrganizations()->where('organizations.id', $archivedOrganization->getKey())->exists())->toBeFalse();
 });
 
+it('marks only archived guest organizations with the archived indicator', function (): void {
+    OrganizationArchivingFeature::activate();
+
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $organization = Organization::factory()->create();
+    $archivedOrganization = Organization::factory()->archived()->create();
+
+    $project->guestOrganizations()->attach([$organization->getKey(), $archivedOrganization->getKey()]);
+
+    $html = Livewire::test(GuestOrganizationsRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManageGuests::class,
+    ])
+        ->assertCanSeeTableRecords([$organization, $archivedOrganization])
+        ->html();
+
+    expect(substr_count($html, 'This organization is archived.'))->toBe(substr_count(view('filament.tables.columns.organization.archived-name', ['name' => 'x'])->render(), 'This organization is archived.'))
+        ->toBeGreaterThan(0);
+});
+
+it('does not mark archived guest organizations while organization archiving is inactive', function (): void {
+    OrganizationArchivingFeature::deactivate();
+
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $archivedOrganization = Organization::factory()->archived()->create();
+
+    $project->guestOrganizations()->attach($archivedOrganization->getKey());
+
+    Livewire::test(GuestOrganizationsRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManageGuests::class,
+    ])
+        ->assertCanSeeTableRecords([$archivedOrganization])
+        ->assertDontSee('This organization is archived.');
+});
+
 it('can detach a guest organization from a project', function (): void {
     asSuperAdmin();
 

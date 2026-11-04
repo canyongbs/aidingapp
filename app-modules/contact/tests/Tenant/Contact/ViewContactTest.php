@@ -444,6 +444,32 @@ describe('section edit actions', function (): void {
                 ->assertCanNotSeeTableRecords([$otherArchivedOrganization]);
         });
 
+        it('marks only the archived selection with the archived indicator in the picker', function (): void {
+            OrganizationArchivingFeature::activate();
+
+            $linkedOrganization = Organization::factory()->archived()->create();
+            $activeOrganization = Organization::factory()->create();
+            $contact = Contact::factory()->create(['organization_id' => $linkedOrganization->getKey()]);
+
+            $component = Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+                ->mountAction(TestAction::make('editCustomerInformation')->schemaComponent('customerInformation'));
+
+            $field = (fn () => $this->getMountedActionSchema())->call($component->instance())->getFlatComponents()['organization_id'] ?? null;
+
+            assert($field instanceof TableSelect);
+
+            $html = Livewire::test(TableSelectLivewireComponent::class, [
+                'tableConfiguration' => base64_encode(OrganizationsTable::class),
+                'tableArguments' => $field->getTableArguments(),
+                'model' => Contact::class,
+                'relationshipName' => 'organization',
+            ])
+                ->assertCanSeeTableRecords([$linkedOrganization, $activeOrganization])
+                ->html();
+
+            expect(substr_count($html, 'This organization is archived.'))->toBe(substr_count(view('filament.tables.columns.organization.archived-name', ['name' => 'x'])->render(), 'This organization is archived.'));
+        });
+
         it('keeps the archived organization when the section is saved unchanged', function (): void {
             OrganizationArchivingFeature::activate();
 
