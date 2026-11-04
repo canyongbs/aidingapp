@@ -40,7 +40,6 @@ use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\PipelineEntry;
-use App\Models\Tenant;
 use App\Models\User;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
@@ -68,21 +67,21 @@ class PipelineEntryAssignedToUserNotification extends Notification implements Sh
     {
         return MailMessage::make()
             ->subject('You have been assigned a new Project Task')
-            ->line($this->getMessage());
+            ->line($this->getMessage($notifiable));
     }
 
     /**
      * @return array<string, mixed>
      */
-    public function toDatabase(object $notifiable): array
+    public function toDatabase(User $notifiable): array
     {
         return FilamentNotification::make()
             ->success()
-            ->title($this->getMessage(limitTaskName: true)->toHtml())
+            ->title($this->getMessage($notifiable, limitTaskName: true)->toHtml())
             ->getDatabaseMessage();
     }
 
-    protected function getMessage(bool $limitTaskName = false): HtmlString
+    protected function getMessage(User $notifiable, bool $limitTaskName = false): HtmlString
     {
         $pipeline = $this->pipelineEntry->pipelineStage->pipeline;
 
@@ -102,7 +101,7 @@ class PipelineEntryAssignedToUserNotification extends Notification implements Sh
             return new HtmlString("For the project {$projectLink} you have been assigned a new task to {$taskLink}. There was no assigned due date at task creation.");
         }
 
-        $due = e($this->pipelineEntry->due->copy()->setTimezone(Tenant::current()->getTimezone())->format('M j, Y g:i a (T)'));
+        $due = e($this->pipelineEntry->due->copy()->setTimezone($notifiable->getTimezone())->format('M j, Y g:i a'));
 
         return new HtmlString("For the project {$projectLink} you have been assigned a new task: {$taskLink} with a due date of {$due}.");
     }

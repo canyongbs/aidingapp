@@ -191,6 +191,26 @@ it('renders the due date assigned message with linked project and task names', f
     expect($notification->toMail($user)->introLines[0]->toHtml())->toContain('with a due date of May 6, 2030');
 });
 
+it('renders the due date in the notified user timezone without a timezone abbreviation', function (): void {
+    $user = User::factory()->create(['timezone' => 'Asia/Kolkata']);
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->id,
+        'due' => '2030-05-06 15:30:00',
+    ]);
+
+    $notification = new PipelineEntryAssignedToUserNotification($entry);
+
+    expect($notification->toDatabase($user)['title'])
+        ->toContain('with a due date of May 6, 2030 9:00 pm.')
+        ->not()->toContain('UTC');
+});
+
 it('renders the no due date message with linked project and task names', function (): void {
     $user = User::factory()->create();
 
