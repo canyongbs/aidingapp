@@ -39,13 +39,14 @@ namespace AidingApp\Portal\Models;
 use AidingApp\Portal\Database\Factories\PortalAuthenticationFactory;
 use AidingApp\Portal\Enums\PortalType;
 use App\Models\Attributes\NoPermissions;
-use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @property Carbon|null $created_at
@@ -53,8 +54,10 @@ use Illuminate\Support\Carbon;
  * @mixin IdeHelperPortalAuthentication
  */
 #[NoPermissions]
-class PortalAuthentication extends BaseModel
+class PortalAuthentication extends Model
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
     use MassPrunable;
 
     /** @use HasFactory<PortalAuthenticationFactory> */

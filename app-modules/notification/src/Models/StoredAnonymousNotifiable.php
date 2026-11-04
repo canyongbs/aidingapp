@@ -37,13 +37,18 @@
 namespace AidingApp\Notification\Models;
 
 use AidingApp\Notification\Enums\NotificationChannel;
-use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
+use Illuminate\Database\Eloquent\Model;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperStoredAnonymousNotifiable
  */
-class StoredAnonymousNotifiable extends BaseModel
+class StoredAnonymousNotifiable extends Model
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
+
     protected $fillable = [
         'type',
         'route',

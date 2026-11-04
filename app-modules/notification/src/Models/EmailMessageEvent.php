@@ -38,15 +38,20 @@ namespace AidingApp\Notification\Models;
 
 use AidingApp\Notification\Database\Factories\EmailMessageEventFactory;
 use AidingApp\Notification\Enums\EmailMessageEventType;
-use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperEmailMessageEvent
  */
-class EmailMessageEvent extends BaseModel
+class EmailMessageEvent extends Model
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
+
     /** @use HasFactory<EmailMessageEventFactory> */
     use HasFactory;
 
