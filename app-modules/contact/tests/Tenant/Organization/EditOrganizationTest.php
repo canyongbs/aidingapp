@@ -48,6 +48,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Pest\Laravel\mock;
+use function Tests\asSuperAdmin;
 
 test('Edit Organization is gated with proper access control', function (): void {
     $user = User::factory()->create();
@@ -483,4 +484,34 @@ it('returns not found for an archived organization', function (): void {
 
     get(OrganizationResource::getUrl('edit', ['record' => $organization]))
         ->assertNotFound();
+});
+
+describe('archiving', function (): void {
+    it('archives the organization', function (): void {
+        OrganizationArchivingFeature::activate();
+
+        asSuperAdmin();
+
+        $organization = Organization::factory()->create();
+
+        expect($organization->isArchived())->toBeFalse();
+
+        Livewire::test(EditOrganization::class, ['record' => $organization->getRouteKey()])
+            ->callAction('archive')
+            ->assertRedirect(OrganizationResource::getUrl('index'));
+
+        expect($organization->refresh()->isArchived())->toBeTrue();
+    });
+});
+
+it('shows the delete action when the organization archiving feature is inactive', function (): void {
+    OrganizationArchivingFeature::deactivate();
+
+    asSuperAdmin();
+
+    $organization = Organization::factory()->create();
+
+    Livewire::test(EditOrganization::class, ['record' => $organization->getRouteKey()])
+        ->assertActionVisible('delete')
+        ->assertActionDoesNotExist('archive');
 });

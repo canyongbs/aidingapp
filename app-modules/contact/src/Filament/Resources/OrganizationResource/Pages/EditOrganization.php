@@ -42,7 +42,9 @@ use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
 use AidingApp\Contact\Support\OrganizationDomainsLock;
+use App\Features\OrganizationArchivingFeature;
 use App\Filament\Forms\Components\AddressInput;
+use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Repeater;
@@ -197,7 +199,7 @@ class EditOrganization extends EditRecord
     {
         return [
             ViewAction::make(),
-            DeleteAction::make(),
+            OrganizationArchivingFeature::active() ? ArchiveAction::make() : DeleteAction::make(),
         ];
     }
 
