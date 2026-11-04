@@ -74,7 +74,10 @@ it('bulk archives organizations', function (): void {
         ->selectTableRecords($organizations->modelKeys())
         ->callAction(TestAction::make('archive')->table()->bulk());
 
-    $organizations->each(fn (Organization $organization) => expect($organization->refresh()->isArchived())->toBeTrue());
+    [$first, $second] = $organizations->all();
+
+    expect($first->refresh()->isArchived())->toBeTrue()
+        ->and($second->refresh()->isArchived())->toBeTrue();
 });
 
 it('shows the bulk delete action when the organization archiving feature is inactive', function (): void {
