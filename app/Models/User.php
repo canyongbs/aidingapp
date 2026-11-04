@@ -70,7 +70,6 @@ use CanyonGBS\Common\BrowserNotifications\Concerns\HasBrowserNotificationSubscri
 use CanyonGBS\Common\BrowserNotifications\Contracts\ReceivesBrowserNotifications;
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
-use DateTimeInterface;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasName;
@@ -450,11 +449,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
             ->using(GroupUser::class)
             ->withPivot('id')
             ->withTimestamps();
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 
     /**

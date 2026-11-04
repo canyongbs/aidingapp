@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Models;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestStatusPeriodFactory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use App\Models\BaseModel;
-use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -83,10 +82,5 @@ class ServiceRequestStatusPeriod extends BaseModel
             'classification' => SystemServiceRequestClassification::class,
             'started_at' => 'immutable_datetime',
         ];
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 }

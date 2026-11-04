@@ -43,7 +43,6 @@ use AidingApp\ServiceManagement\Observers\ServiceRequestStatusObserver;
 use App\Models\BaseModel;
 use CanyonGBS\Common\Enums\Color;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
-use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -128,10 +127,5 @@ class ServiceRequestStatus extends BaseModel implements Auditable
             'is_system_protected' => 'boolean',
             'sort' => 'integer',
         ];
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 }

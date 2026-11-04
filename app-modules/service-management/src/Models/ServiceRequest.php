@@ -54,7 +54,6 @@ use App\Models\Media;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Closure;
-use DateTimeInterface;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -611,11 +610,6 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         static::addGlobalScope('excludeDrafts', function (Builder $builder): void {
             $builder->where('is_draft', false);
         });
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 
     private function responseSecondsBetween(CarbonInterface $start, CarbonInterface $end): int

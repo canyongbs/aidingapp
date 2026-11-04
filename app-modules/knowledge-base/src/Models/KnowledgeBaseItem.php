@@ -48,7 +48,6 @@ use App\Models\Contracts\HasTags;
 use App\Models\Media;
 use App\Models\User;
 use CanyonGBS\Common\Filament\Forms\RichContentPlugins\VideoRichContentPlugin;
-use DateTimeInterface;
 use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
@@ -290,10 +289,5 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
                     && $this->no_broken_images;
             },
         );
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 }

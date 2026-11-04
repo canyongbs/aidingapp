@@ -65,7 +65,6 @@ use App\Models\Contracts\Educatable;
 use App\Models\User;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use Carbon\Carbon;
-use DateTimeInterface;
 use Filament\Models\Contracts\HasName;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
@@ -337,11 +336,6 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         });
         static::unarchived(fn () => Cache::tags('{contacts}')->flush());
         static::unarchived(fn (Contact $contact) => app(MatchContactToOrganization::class)($contact));
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 
     /**
