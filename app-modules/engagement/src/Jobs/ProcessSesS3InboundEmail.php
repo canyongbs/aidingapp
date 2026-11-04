@@ -39,6 +39,7 @@ namespace AidingApp\Engagement\Jobs;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Support\OrganizationEmailDomainLookup;
 use AidingApp\Engagement\Enums\EngagementResponseType;
 use AidingApp\Engagement\Exceptions\SesS3InboundServiceRequestTypeNotFound;
 use AidingApp\Engagement\Exceptions\SesS3InboundSpamOrVirusDetected;
@@ -58,6 +59,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
+use App\Features\ContactArchivingFeature;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV3;
 use Aws\Kms\KmsClient;
@@ -505,6 +507,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
             $effectiveNotificationBody = $forwarded['body'] ?? $parser->getMessageBody('htmlEmbedded');
 
             $contacts = Contact::query()
+                ->withoutArchived()
                 ->where('email', $effectiveSender)
                 ->get();
 
@@ -522,11 +525,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 $organization = null;
 
                 if ($serviceRequestType->email_automatic_creation_contact_create_condition === EmailAutomaticCreationContactCreateCondition::IfEligible) {
-                    $domain = Str::afterLast($effectiveSender, '@');
-
-                    $organization = Organization::query()
-                        ->whereRaw('LOWER(?) = ANY (SELECT LOWER(value) FROM jsonb_array_elements_text(domains))', [mb_strtolower($domain)])
-                        ->first();
+                    $organization = app(OrganizationEmailDomainLookup::class)->find($effectiveSender);
 
                     if (! $organization) {
                         Notification::route('mail', $effectiveSender)
@@ -539,7 +538,12 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                     }
                 }
 
-                $contacts = $contacts->add($this->buildContactFromSender($effectiveSender, $effectiveSenderName, $organization));
+                $contacts = $contacts->add($this->buildContactFromSender(
+                    $effectiveSender,
+                    $effectiveSenderName,
+                    $organization,
+                    restoredContactSenderName: $forwarded === null ? $effectiveSenderName : $forwarded['senderName'],
+                ));
             }
 
             $serviceRequestStatus = ServiceRequestStatus::query()
@@ -696,12 +700,27 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
         return trim(implode("\n", array_slice($lines, $index)));
     }
 
-    protected function buildContactFromSender(string $sender, ?string $senderName, ?Organization $organization = null): Contact
+    /**
+     * @param ?string $restoredContactSenderName The name to give a restored archived contact. Unlike `$senderName`, it never falls back to a forwarder's name.
+     */
+    protected function buildContactFromSender(string $sender, ?string $senderName, ?Organization $organization = null, ?string $restoredContactSenderName = null): Contact
     {
         $senderName = trim((string) $senderName);
 
-        $firstName = Str::before($senderName, ' ') ?: 'Unknown';
-        $lastName = Str::after($senderName, ' ') ?: 'Unknown';
+        // Archived contacts are included here, and another worker may have unarchived this one since the caller's lookup.
+        $existingContact = ContactArchivingFeature::active()
+            ? Contact::query()->where('email', $sender)->first()
+            : null;
+
+        if ($existingContact !== null) {
+            if (! $existingContact->isArchived()) {
+                return $existingContact;
+            }
+
+            return $this->restoreArchivedContact($existingContact, $sender, trim((string) $restoredContactSenderName), $organization);
+        }
+
+        [$firstName, $lastName] = $this->splitSenderName($senderName);
 
         $contact = Contact::query()->make([
             'email' => $sender,
@@ -721,6 +740,38 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
         $contact->save();
 
         return $contact;
+    }
+
+    protected function restoreArchivedContact(Contact $contact, string $sender, string $senderName, ?Organization $organization): Contact
+    {
+        // A bare From address is parsed with the address itself as its display name.
+        if ($senderName !== '' && Str::lower($senderName) !== Str::lower($sender)) {
+            [$firstName, $lastName] = $this->splitSenderName($senderName);
+
+            $contact->first_name = $firstName;
+            $contact->last_name = $lastName;
+            $contact->full_name = $firstName . ' ' . $lastName;
+        }
+
+        if ($organization !== null && blank($contact->organization_id)) {
+            $contact->organization()->associate($organization);
+        }
+
+        $contact->save();
+        $contact->unarchive();
+
+        return $contact;
+    }
+
+    /**
+     * @return array{string, string}
+     */
+    protected function splitSenderName(string $senderName): array
+    {
+        return [
+            Str::before($senderName, ' ') ?: 'Unknown',
+            Str::after($senderName, ' ') ?: 'Unknown',
+        ];
     }
 
     protected function handleLegacyAddress(Tenant $tenant, Parser $parser, string $sender): void
