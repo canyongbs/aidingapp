@@ -45,8 +45,12 @@ use AidingApp\Contact\Models\Organization;
 use App\Enums\NavigationGroup;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
+/**
+ * @extends Resource<Organization>
+ */
 class OrganizationResource extends Resource
 {
     protected static ?string $model = Organization::class;
@@ -54,6 +58,14 @@ class OrganizationResource extends Resource
     protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Clients;
 
     protected static ?int $navigationSort = 10;
+
+    /**
+     * @return Builder<Organization>
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->withoutArchived();
+    }
 
     public static function getPages(): array
     {

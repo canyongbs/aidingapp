@@ -36,6 +36,7 @@
 
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ListOrganizations;
 use AidingApp\Contact\Models\Organization;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Livewire\Livewire;
@@ -76,4 +77,31 @@ it('only shows the import and export actions to a user with the `organization.im
     Livewire::test(ListOrganizations::class)
         ->assertActionVisible('import')
         ->assertActionVisible('export');
+});
+
+describe('archived organizations', function (): void {
+    beforeEach(function (): void {
+        OrganizationArchivingFeature::activate();
+
+        actingAs(User::factory()->create()->givePermissionTo('organization.view-any', 'organization.*.view'));
+    });
+
+    it('does not list archived organizations', function (): void {
+        $organization = Organization::factory()->create();
+        $archivedOrganization = Organization::factory()->archived()->create();
+
+        Livewire::test(ListOrganizations::class)
+            ->assertCanSeeTableRecords([$organization])
+            ->assertCanNotSeeTableRecords([$archivedOrganization]);
+    });
+
+    it('does not find archived organizations in table search', function (): void {
+        $organization = Organization::factory()->create(['name' => 'Searchable Active']);
+        $archivedOrganization = Organization::factory()->archived()->create(['name' => 'Searchable Archived']);
+
+        Livewire::test(ListOrganizations::class)
+            ->searchTable('Searchable')
+            ->assertCanSeeTableRecords([$organization])
+            ->assertCanNotSeeTableRecords([$archivedOrganization]);
+    });
 });
