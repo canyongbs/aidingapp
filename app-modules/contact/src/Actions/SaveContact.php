@@ -168,6 +168,7 @@ class SaveContact
         if (is_string($data->organization)) {
             // `organizations.name` is `citext` with a unique index, so a plain comparison is case-insensitive and indexed.
             $organization = Organization::query()
+                ->withoutArchived()
                 ->where('name', $data->organization)
                 ->first();
 

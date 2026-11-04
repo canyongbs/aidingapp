@@ -38,6 +38,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use App\Features\ContactArchivingFeature;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\SystemUser;
 use Laravel\Sanctum\Sanctum;
 
@@ -205,6 +206,38 @@ it('does not resolve deleted relationships by name', function (string $field) us
 
     assertDatabaseMissing(Contact::class, ['first_name' => 'Jane']);
 })->with(['type', 'organization']);
+
+it('does not resolve an archived organization by name', function () use ($actingAsContactCreator): void {
+    $actingAsContactCreator();
+
+    $organization = Organization::factory()->archived()->create(['name' => 'Acme']);
+
+    postJson(route('api.v1.contacts.store', [], false), [
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+        'type' => ContactType::factory()->create()->name,
+        'organization' => $organization->name,
+    ])->assertUnprocessable()
+        ->assertJsonValidationErrors(['organization']);
+
+    assertDatabaseMissing(Contact::class, ['first_name' => 'Jane']);
+});
+
+it('resolves an archived organization by name while organization archiving is inactive', function () use ($actingAsContactCreator): void {
+    $actingAsContactCreator();
+
+    OrganizationArchivingFeature::deactivate();
+
+    $organization = Organization::factory()->archived()->create(['name' => 'Acme']);
+
+    postJson(route('api.v1.contacts.store', [], false), [
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+        'type' => ContactType::factory()->create()->name,
+        'organization' => $organization->name,
+    ])->assertCreated()
+        ->assertJsonPath('data.organization.id', $organization->getKey());
+});
 
 it('requires a contact type when no default is available', function () use ($actingAsContactCreator): void {
     $actingAsContactCreator();
