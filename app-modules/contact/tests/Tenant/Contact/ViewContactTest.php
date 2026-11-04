@@ -128,6 +128,50 @@ test('ViewContact renders successfully when optional fields have no value', func
         ->assertSuccessful();
 });
 
+describe('archived organization indicator', function (): void {
+    it('marks an archived organization while still showing its name', function (): void {
+        OrganizationArchivingFeature::activate();
+
+        asSuperAdmin();
+
+        $contact = Contact::factory()
+            ->for(Organization::factory()->archived()->state(['name' => 'Acme Inc']), 'organization')
+            ->create();
+
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+            ->assertSee('Acme Inc')
+            ->assertSee('This organization is archived.');
+    });
+
+    it('does not mark an active organization', function (): void {
+        OrganizationArchivingFeature::activate();
+
+        asSuperAdmin();
+
+        $contact = Contact::factory()
+            ->for(Organization::factory()->state(['name' => 'Acme Inc']), 'organization')
+            ->create();
+
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+            ->assertSee('Acme Inc')
+            ->assertDontSee('This organization is archived.');
+    });
+
+    it('does not mark an archived organization when the feature is inactive', function (): void {
+        OrganizationArchivingFeature::deactivate();
+
+        asSuperAdmin();
+
+        $contact = Contact::factory()
+            ->for(Organization::factory()->archived()->state(['name' => 'Acme Inc']), 'organization')
+            ->create();
+
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+            ->assertSee('Acme Inc')
+            ->assertDontSee('This organization is archived.');
+    });
+});
+
 it('returns not found for an archived contact', function (): void {
     asSuperAdmin();
 
