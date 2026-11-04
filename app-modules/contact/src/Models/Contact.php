@@ -112,8 +112,6 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     use HasApiTokens;
     use HasPresence;
 
-    public bool $shouldAutomaticallyMatchOrganization = true;
-
     protected $fillable = [
         'first_name',
         'last_name',
@@ -124,7 +122,6 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         'email_bounce',
         'status_id',
         'type_id',
-        'organization_id',
         'phone',
         'address',
         'address_2',
@@ -338,11 +335,7 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
             }
         });
         static::unarchived(fn () => Cache::tags('{contacts}')->flush());
-        static::unarchived(function (Contact $contact): void {
-            if ($contact->shouldAutomaticallyMatchOrganization) {
-                app(MatchContactToOrganization::class)($contact);
-            }
-        });
+        static::unarchived(fn (Contact $contact) => app(MatchContactToOrganization::class)($contact));
     }
 
     /**

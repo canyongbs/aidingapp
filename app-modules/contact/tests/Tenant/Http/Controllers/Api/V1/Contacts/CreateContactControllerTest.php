@@ -324,7 +324,7 @@ it('rejects an email used by an archived contact while contact archiving is inac
         ->assertJsonPath('errors.email', ['The email has already been taken.']);
 });
 
-it('matches an organization only when the organization field is omitted', function (bool $omitOrganization) use ($actingAsContactCreator): void {
+it('matches an organization by email domain when none is provided', function (bool $omitOrganization) use ($actingAsContactCreator): void {
     $actingAsContactCreator();
 
     $organization = Organization::factory()->create(['domains' => [['domain' => 'example.com']]]);
@@ -341,14 +341,11 @@ it('matches an organization only when the organization field is omitted', functi
 
     $response = postJson(route('api.v1.contacts.store', [], false), $payload)
         ->assertCreated()
-        ->assertJsonPath('data.organization', $omitOrganization ? [
-            'id' => $organization->getKey(),
-            'name' => $organization->name,
-        ] : null);
+        ->assertJsonPath('data.organization.id', $organization->getKey());
 
     assertDatabaseHas(Contact::class, [
         'id' => $response['data']['id'],
-        'organization_id' => $omitOrganization ? $organization->getKey() : null,
+        'organization_id' => $organization->getKey(),
     ]);
 })->with([
     'omitted organization' => [true],

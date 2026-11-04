@@ -65,9 +65,7 @@ class ContactObserver
 
     public function saved(Contact $contact): void
     {
-        if ($contact->shouldAutomaticallyMatchOrganization) {
-            ($this->matchContactToOrganization)($contact);
-        }
+        ($this->matchContactToOrganization)($contact);
     }
 
     public function created(): void

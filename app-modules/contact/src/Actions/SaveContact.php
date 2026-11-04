@@ -84,10 +84,6 @@ class SaveContact
                     $contact->organization()->associate($organization);
                 }
 
-                // When updating, an unrelated change must not assign an organization, so matching is only attempted
-                // for a new contact, or when the email address is changing.
-                $contact->shouldAutomaticallyMatchOrganization = $data->organization instanceof Optional
-                    && ($existing === null || $contact->isDirty('email'));
                 $contact->save();
 
                 return $contact;

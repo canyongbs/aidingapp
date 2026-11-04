@@ -50,8 +50,7 @@ class CreateContactController
      * When `type` is omitted or null, the configured default contact type is used.
      * Unknown names and ambiguous contact type names return validation errors.
      * The combined first and last name, including the separating space, must not exceed 255 characters.
-     * When `organization` is omitted, the contact is matched to an organization by its email domain.
-     * Providing `organization: null` leaves the contact unaffiliated.
+     * A contact without an organization is matched to one by its email domain.
      * An `email` used by an archived contact is rejected.
      *
      * @response ContactResource

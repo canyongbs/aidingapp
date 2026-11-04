@@ -51,7 +51,7 @@ class UpdateContactController
      * Managed contacts, which are synchronized from a user, cannot be updated, and archived contacts are not found.
      * Relationships accept exact, case-insensitive names in `type` and `organization`.
      * Unknown names and ambiguous contact type names return validation errors.
-     * Providing `organization: null` clears the organization without automatic email-domain matching on that request.
+     * A contact without an organization is matched to one by its email domain, including after `organization: null`.
      * The combined first and last name, including unchanged components and the separating space,
      * must not exceed 255 characters.
      *

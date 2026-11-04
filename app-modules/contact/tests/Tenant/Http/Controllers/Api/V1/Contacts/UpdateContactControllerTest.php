@@ -341,10 +341,10 @@ it('cannot update an archived contact', function () use ($actingAsContactUpdater
     expect($contact->refresh()->job_title)->toBe('Original');
 });
 
-it('clears an organization even when the email domain matches', function () use ($actingAsContactUpdater): void {
+it('clears the organization when no other organization matches the email domain', function () use ($actingAsContactUpdater): void {
     $actingAsContactUpdater();
 
-    $organization = Organization::factory()->create(['domains' => [['domain' => 'example.com']]]);
+    $organization = Organization::factory()->create(['domains' => []]);
     $contact = Contact::factory()->for($organization, 'organization')->create(['email' => 'jane@example.com']);
 
     patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['organization' => null])
@@ -354,22 +354,20 @@ it('clears an organization even when the email domain matches', function () use 
     expect($contact->refresh()->organization_id)->toBeNull();
 });
 
-it('does not assign an organization when an unrelated attribute is updated', function () use ($actingAsContactUpdater): void {
+it('matches the organization by email domain again after it is cleared', function () use ($actingAsContactUpdater): void {
     $actingAsContactUpdater();
 
-    Organization::factory()->create(['domains' => [['domain' => 'example.com']]]);
-    $contact = Contact::factory()->createQuietly(['email' => 'jane@example.com', 'organization_id' => null]);
+    $organization = Organization::factory()->create(['domains' => [['domain' => 'example.com']]]);
+    $contact = Contact::factory()->for($organization, 'organization')->create(['email' => 'jane@example.com']);
 
-    expect($contact->refresh()->organization_id)->toBeNull();
-
-    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['job_title' => 'Updated'])
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['organization' => null])
         ->assertOk()
-        ->assertJsonPath('data.organization', null);
+        ->assertJsonPath('data.organization.id', $organization->getKey());
 
-    expect($contact->refresh()->organization_id)->toBeNull();
+    expect($contact->refresh()->organization_id)->toBe($organization->getKey());
 });
 
-it('matches an organization on email change only when the organization field is omitted', function (bool $omitOrganization) use ($actingAsContactUpdater): void {
+it('matches an organization by email domain when the email changes', function (bool $omitOrganization) use ($actingAsContactUpdater): void {
     $actingAsContactUpdater();
 
     $organization = Organization::factory()->create(['domains' => [['domain' => 'example.com']]]);
@@ -385,12 +383,9 @@ it('matches an organization on email change only when the organization field is 
 
     patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), $payload)
         ->assertOk()
-        ->assertJsonPath('data.organization', $omitOrganization ? [
-            'id' => $organization->getKey(),
-            'name' => $organization->name,
-        ] : null);
+        ->assertJsonPath('data.organization.id', $organization->getKey());
 
-    expect($contact->refresh()->organization_id)->toBe($omitOrganization ? $organization->getKey() : null);
+    expect($contact->refresh()->organization_id)->toBe($organization->getKey());
 })->with([
     'omitted organization' => [true],
     'explicitly null organization' => [false],
