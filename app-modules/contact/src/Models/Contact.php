@@ -40,6 +40,7 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Database\Factories\ContactFactory;
 use AidingApp\Contact\Enums\EmailHealthStatus;
 use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Models\Builders\ContactBuilder;
 use AidingApp\Contact\Observers\ContactObserver;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagementResponses;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagements;
@@ -60,13 +61,16 @@ use App\Models\Authenticatable;
 use App\Models\Concerns\HasPresence;
 use App\Models\Contracts\Educatable;
 use App\Models\User;
+use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Filament\Models\Contracts\HasName;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -84,9 +88,14 @@ use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
  * @mixin IdeHelperContact
  */
 #[ObservedBy([ContactObserver::class])]
+#[UseEloquentBuilder(ContactBuilder::class)]
 class Contact extends Authenticatable implements Auditable, Educatable, HasFilamentResource, CanBeNotified, HasName
 {
     use AuditableTrait;
+    use CanBeArchived;
+
+    /** @use HasBuilder<ContactBuilder<self>> */
+    use HasBuilder;
 
     /** @use HasFactory<ContactFactory> */
     use HasFactory;

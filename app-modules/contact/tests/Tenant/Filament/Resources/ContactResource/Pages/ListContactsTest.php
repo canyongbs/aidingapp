@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use App\Settings\PresenceSettings;
 use Filament\Actions\Testing\TestAction;
@@ -375,6 +376,46 @@ describe('search and filters', function (): void {
             ->assertCanSeeTableRecords([$matchingContact])
             ->assertCanNotSeeTableRecords([$otherContact]);
     })->with(['Searchable Contact', 'searchable-contact@example.com']);
+});
+
+describe('archived contacts', function (): void {
+    beforeEach(function (): void {
+        ContactArchivingFeature::activate();
+    });
+
+    it('does not list archived contacts', function (): void {
+        actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view'));
+
+        $contact = Contact::factory()->create();
+        $archivedContact = Contact::factory()->archived()->create();
+
+        Livewire::test(ListContacts::class)
+            ->assertCanSeeTableRecords([$contact])
+            ->assertCanNotSeeTableRecords([$archivedContact]);
+    });
+
+    it('does not find archived contacts in global search', function (): void {
+        actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view'));
+
+        $contact = Contact::factory()->create(['full_name' => 'Searchable Contact']);
+        $archivedContact = Contact::factory()->archived()->create(['full_name' => 'Searchable Contact']);
+
+        $resultUrls = ContactResource::getGlobalSearchResults($archivedContact->full_name)->pluck('url');
+
+        expect($resultUrls)->toContain(ContactResource::getUrl('view', ['record' => $contact]));
+        expect($resultUrls)->not->toContain(ContactResource::getUrl('view', ['record' => $archivedContact]));
+    });
+});
+
+it('lists archived contacts while contact archiving is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view'));
+
+    $archivedContact = Contact::factory()->archived()->create();
+
+    Livewire::test(ListContacts::class)
+        ->assertCanSeeTableRecords([$archivedContact]);
 });
 
 it('only shows the bulk delete action to a user with the contact.delete permission', function (): void {

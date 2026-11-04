@@ -45,6 +45,7 @@ use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\EditContactRequestFactory;
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers\EngagementFilesRelationManager;
+use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use Dom\HTMLDocument;
 use Dom\Node;
@@ -121,6 +122,17 @@ test('ViewContact renders successfully when optional fields have no value', func
 
     Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
         ->assertSuccessful();
+});
+
+it('returns not found for an archived contact', function (): void {
+    ContactArchivingFeature::activate();
+
+    asSuperAdmin();
+
+    $contact = Contact::factory()->archived()->create();
+
+    \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
+        ->assertNotFound();
 });
 
 // Permission Tests
