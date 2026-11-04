@@ -1408,6 +1408,28 @@ describe('2026_11_04_120000_convert_contract_types_name_to_citext_and_enforce_un
         });
     });
 
+    it('does not rename a duplicate onto an existing name truncated for a longer suffix', function () use ($migrationName, $migrationPath, $insertContractType): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertContractType): void {
+            // The ninth rename uses "-10", which truncates the base to 252 characters and lands on the existing name.
+            $ids = [];
+
+            foreach (range(0, 9) as $index) {
+                $ids[] = $insertContractType(str_repeat('A', 255 - $index) . str_repeat('a', $index), now()->subMinutes(20 - $index));
+            }
+
+            $existingId = $insertContractType(str_repeat('a', 252) . '-10', now()->subMinutes(30));
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $names = DB::table('contract_types')->pluck('name')->map(fn (string $name): string => Str::lower($name));
+
+            expect($names->unique())->toHaveCount($names->count())
+                ->and(DB::table('contract_types')->where('id', $existingId)->value('name'))->toBe(str_repeat('a', 252) . '-10')
+                ->and(DB::table('contract_types')->where('id', $ids[9])->value('name'))->toBe(str_repeat('A', 246) . str_repeat('a', 6) . '-11');
+        });
+    });
+
     it('keeps repaired names and deactivates the feature flag on rollback', function () use ($migrationName, $migrationPath, $insertContractType): void {
         isolatedMigration($migrationName, function () use ($migrationPath, $insertContractType): void {
             $firstId = $insertContractType('Software License', now()->subMinutes(2));
@@ -1509,6 +1531,28 @@ describe('2026_11_04_120100_convert_contracts_name_to_citext_and_enforce_unique'
             $reusedId = $insertContract('MASTER AGREEMENT', now());
 
             expect(DB::table('contracts')->where('id', $reusedId)->value('name'))->toBe('MASTER AGREEMENT');
+        });
+    });
+
+    it('does not rename a duplicate onto an existing name truncated for a longer suffix', function () use ($migrationName, $migrationPath, $insertContract): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertContract): void {
+            // The ninth rename uses "-10", which truncates the base to 252 characters and lands on the existing name.
+            $ids = [];
+
+            foreach (range(0, 9) as $index) {
+                $ids[] = $insertContract(str_repeat('A', 255 - $index) . str_repeat('a', $index), now()->subMinutes(20 - $index));
+            }
+
+            $existingId = $insertContract(str_repeat('a', 252) . '-10', now()->subMinutes(30));
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $names = DB::table('contracts')->pluck('name')->map(fn (string $name): string => Str::lower($name));
+
+            expect($names->unique())->toHaveCount($names->count())
+                ->and(DB::table('contracts')->where('id', $existingId)->value('name'))->toBe(str_repeat('a', 252) . '-10')
+                ->and(DB::table('contracts')->where('id', $ids[9])->value('name'))->toBe(str_repeat('A', 246) . str_repeat('a', 6) . '-11');
         });
     });
 

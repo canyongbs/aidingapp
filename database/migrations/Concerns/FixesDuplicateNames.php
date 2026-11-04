@@ -199,7 +199,7 @@ trait FixesDuplicateNames
             $originalName = $record->{$this->column};
             $newName = $this->buildDeduplicatedValue($originalName, $counter);
 
-            while (isset($existingNames[Str::lower($newName)])) {
+            while (isset($existingNames[Str::lower($newName)]) || $this->isTruncatedValueTaken($originalName, $newName, $groupValues, $groupByColumns, true)) {
                 $counter++;
                 $newName = $this->buildDeduplicatedValue($originalName, $counter);
             }
@@ -217,6 +217,34 @@ trait FixesDuplicateNames
         if (! empty($updates)) {
             $this->batchUpdate($updates);
         }
+    }
+
+    /**
+     * The length a base value is truncated to shrinks as the counter gains digits, so the prefix
+     * match used to pre-load existing names can miss a stored name truncated for a longer suffix.
+     * Confirm truncated candidates against the table.
+     *
+     * @param  array<string, mixed>  $groupValues
+     * @param  array<int, string>  $groupByColumns
+     */
+    private function isTruncatedValueTaken(string $originalName, string $newName, array $groupValues, array $groupByColumns, bool $liveRowsOnly): bool
+    {
+        if (str_starts_with($newName, $originalName)) {
+            return false;
+        }
+
+        $query = DB::table($this->table)
+            ->whereRaw("LOWER({$this->column}) = ?", [Str::lower($newName)]);
+
+        foreach ($groupByColumns as $col) {
+            $query->where($col, $groupValues[$col]);
+        }
+
+        if ($liveRowsOnly && $this->usesSoftDeletes) {
+            $query->whereNull('deleted_at');
+        }
+
+        return $query->exists();
     }
 
     /**
@@ -388,7 +416,7 @@ trait FixesDuplicateNames
             $originalName = $record->{$this->column};
             $newName = $this->buildDeduplicatedValue($originalName, $counter);
 
-            while (isset($existingNames[Str::lower($newName)])) {
+            while (isset($existingNames[Str::lower($newName)]) || $this->isTruncatedValueTaken($originalName, $newName, $groupValues, $groupByColumns, false)) {
                 $counter++;
                 $newName = $this->buildDeduplicatedValue($originalName, $counter);
             }
