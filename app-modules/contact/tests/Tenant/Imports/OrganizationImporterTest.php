@@ -427,6 +427,28 @@ it('unarchives and updates an archived organization with the same name and links
         ->and($contact->refresh()->organization_id)->toBe($organization->getKey());
 });
 
+it('links unaffiliated contacts on the new domain when an import unarchives an organization and changes its domains', function () use ($runOrganizationImport): void {
+    OrganizationArchivingFeature::activate();
+
+    $organization = Organization::factory()->archived()->create([
+        'name' => 'Archived College',
+        'domains' => [['domain' => 'old-college.test']],
+    ]);
+
+    $contact = Contact::factory()->create([
+        'email' => 'student@new-college.test',
+        'organization_id' => null,
+    ]);
+
+    $runOrganizationImport([
+        'name' => 'Archived College',
+        'domains' => 'new-college.test',
+    ]);
+
+    expect($organization->refresh()->isArchived())->toBeFalse()
+        ->and($contact->refresh()->organization_id)->toBe($organization->getKey());
+});
+
 it('updates but does not unarchive an archived organization when the organization archiving feature is inactive', function () use ($runOrganizationImport): void {
     OrganizationArchivingFeature::deactivate();
 
