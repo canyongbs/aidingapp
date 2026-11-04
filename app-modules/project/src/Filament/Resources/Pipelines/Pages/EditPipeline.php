@@ -66,7 +66,13 @@ class EditPipeline extends EditRecord
     {
         return $schema
             ->components([
-                PipelineNameInput::make(ignoreRecord: true),
+                PipelineNameInput::make(function (): ?string {
+                    $pipeline = $this->getRecord();
+
+                    assert($pipeline instanceof Pipeline);
+
+                    return $pipeline->project_id;
+                }, ignoreRecord: true),
                 Textarea::make('description')
                     ->required()
                     ->maxLength(65535),

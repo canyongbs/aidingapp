@@ -170,7 +170,7 @@ describe('name uniqueness', function (): void {
         'upper case' => 'ADMISSIONS',
     ]);
 
-    it('rejects a pipeline name that is already used by a pipeline in another project', function (): void {
+    it('allows a pipeline name that is already used by a pipeline in another project', function (): void {
         asSuperAdmin();
 
         Pipeline::factory()->create(['name' => 'Admissions']);
@@ -179,7 +179,9 @@ describe('name uniqueness', function (): void {
         Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
             ->fillForm(CreatePipelineRequestFactory::new()->state(['name' => 'admissions'])->create())
             ->call('create')
-            ->assertHasFormErrors(['name' => 'unique']);
+            ->assertHasNoFormErrors();
+
+        expect(Pipeline::query()->where('project_id', $project->getKey())->value('name'))->toBe('admissions');
     });
 
     it('keeps the name of an archived pipeline reserved', function (): void {

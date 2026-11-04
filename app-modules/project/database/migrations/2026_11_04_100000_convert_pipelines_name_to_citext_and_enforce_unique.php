@@ -44,7 +44,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     /*
      * TODO: Cleanup Task (pipeline-name-uniqueness): after PipelineNameUniquenessFeature is removed:
-     * - remove the `FixesDuplicateNames` trait, the `$chunkSize` and `$usesSoftDeletes` properties, and the `fixDuplicates()` call
+     * - remove the `FixesDuplicateNames` trait, the `$chunkSize`, `$usesSoftDeletes` and `$groupByColumns` properties, and the `fixDuplicates()` call
      * - keep the citext column conversion and the unique index, they are permanent
      */
     use FixesDuplicateNames;
@@ -52,6 +52,9 @@ return new class () extends Migration {
     private string $table = 'pipelines';
 
     private string $column = 'name';
+
+    /** @var array<int, string> */
+    private array $groupByColumns = ['project_id'];
 
     private int $chunkSize = 500;
 
@@ -68,7 +71,7 @@ return new class () extends Migration {
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
 
             Schema::table($this->table, function (Blueprint $table): void {
-                $table->uniqueIndex($this->column, 'pipelines_name_unique');
+                $table->uniqueIndex(['project_id', $this->column], 'pipelines_name_unique');
             });
 
             PipelineNameUniquenessFeature::activate();

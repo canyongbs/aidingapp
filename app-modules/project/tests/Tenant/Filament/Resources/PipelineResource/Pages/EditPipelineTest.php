@@ -202,6 +202,21 @@ describe('name uniqueness', function (): void {
         'upper case' => 'ADMISSIONS',
     ]);
 
+    it('allows a pipeline name that is already used by a pipeline in another project', function (): void {
+        asSuperAdmin();
+
+        Pipeline::factory()->create(['name' => 'Admissions']);
+        $project = Project::factory()->create();
+        $pipeline = Pipeline::factory()->for($project)->has(PipelineStage::factory(), 'stages')->create(['name' => 'Retention']);
+
+        Livewire::test(EditPipeline::class, ['record' => $pipeline->getKey(), 'parentRecord' => $project])
+            ->fillForm(['name' => 'admissions'])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        expect($pipeline->refresh()->name)->toBe('admissions');
+    });
+
     it('allows a pipeline to keep or change the case of its own name', function (string $name): void {
         asSuperAdmin();
 

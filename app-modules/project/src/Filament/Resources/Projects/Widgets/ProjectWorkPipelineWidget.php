@@ -613,7 +613,7 @@ class ProjectWorkPipelineWidget extends TableWidget
     protected function pipelineFormSchema(): array
     {
         return [
-            PipelineNameInput::make(),
+            PipelineNameInput::make(fn (): string => $this->record->getKey()),
             Textarea::make('description')
                 ->required()
                 ->maxLength(65535),

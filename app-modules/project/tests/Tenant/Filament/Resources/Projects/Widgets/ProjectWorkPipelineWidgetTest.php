@@ -390,6 +390,21 @@ describe('create pipeline action name uniqueness', function (): void {
         expect(Pipeline::query()->count())->toBe(1);
     });
 
+    it('allows a pipeline name that is already used in another project', function (): void {
+        Pipeline::factory()->create(['name' => 'Admissions']);
+        $project = Project::factory()->create();
+
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->callAction('createPipeline', [
+                'name' => 'admissions',
+                'description' => 'Other project',
+                'stages' => [['name' => 'Planning', 'classification' => PipelineStageClassification::Planning->value]],
+            ])
+            ->assertHasNoActionErrors();
+
+        expect(Pipeline::query()->where('project_id', $project->getKey())->exists())->toBeTrue();
+    });
+
     it('rejects stage names that differ only by case', function (): void {
         $project = Project::factory()->create();
 

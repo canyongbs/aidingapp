@@ -60,7 +60,7 @@ class CreatePipeline extends CreateRecord
     {
         return $schema
             ->components([
-                PipelineNameInput::make(),
+                PipelineNameInput::make(fn (): string => $this->getParentRecord()->getKey()),
                 Textarea::make('description')
                     ->required()
                     ->maxLength(65535),

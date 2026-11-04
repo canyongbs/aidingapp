@@ -41,6 +41,7 @@ use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
+use AidingApp\Project\Models\Project;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\EmailTemplateNameUniquenessFeature;
 use App\Features\MaintenanceProviderNameUniquenessFeature;
@@ -708,12 +709,16 @@ describe('2026_11_04_100000_convert_pipelines_name_to_citext_and_enforce_unique'
     $migrationName = '2026_11_04_100000_convert_pipelines_name_to_citext_and_enforce_unique';
     $migrationPath = "app-modules/project/database/migrations/{$migrationName}.php";
 
-    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest and activates the feature flag', function () use ($migrationName, $migrationPath): void {
+    it('rewrites case-insensitive duplicate names within a project with a numeric suffix, keeps the oldest and leaves other projects untouched', function () use ($migrationName, $migrationPath): void {
         isolatedMigration($migrationName, function () use ($migrationPath): void {
-            $first = Pipeline::factory()->create(['name' => 'Admissions', 'created_at' => now()->subMinutes(3)]);
-            $second = Pipeline::factory()->create(['name' => 'admissions', 'created_at' => now()->subMinutes(2)]);
-            $third = Pipeline::factory()->create(['name' => 'ADMISSIONS', 'created_at' => now()->subMinute()]);
-            $unique = Pipeline::factory()->create(['name' => 'Retention', 'created_at' => now()->subMinutes(4)]);
+            $project = Project::factory()->create();
+            $otherProject = Project::factory()->create();
+
+            $first = Pipeline::factory()->for($project)->create(['name' => 'Admissions', 'created_at' => now()->subMinutes(3)]);
+            $second = Pipeline::factory()->for($project)->create(['name' => 'admissions', 'created_at' => now()->subMinutes(2)]);
+            $third = Pipeline::factory()->for($project)->create(['name' => 'ADMISSIONS', 'created_at' => now()->subMinute()]);
+            $unique = Pipeline::factory()->for($project)->create(['name' => 'Retention', 'created_at' => now()->subMinutes(4)]);
+            $other = Pipeline::factory()->for($otherProject)->create(['name' => 'admissions', 'created_at' => now()->subMinutes(5)]);
 
             expect(PipelineNameUniquenessFeature::active())->toBeFalse();
 
@@ -724,14 +729,16 @@ describe('2026_11_04_100000_convert_pipelines_name_to_citext_and_enforce_unique'
                 ->and($second->refresh()->name)->toBe('admissions-2')
                 ->and($third->refresh()->name)->toBe('ADMISSIONS-3')
                 ->and($unique->refresh()->name)->toBe('Retention')
+                ->and($other->refresh()->name)->toBe('admissions')
                 ->and(PipelineNameUniquenessFeature::active())->toBeTrue();
         });
     });
 
     it('treats archived pipelines as regular rows when repairing duplicates', function () use ($migrationName, $migrationPath): void {
         isolatedMigration($migrationName, function () use ($migrationPath): void {
-            $kept = Pipeline::factory()->create(['name' => 'Admissions', 'created_at' => now()->subMinutes(2)]);
-            $archived = Pipeline::factory()->create(['name' => 'admissions', 'created_at' => now()->subMinute()]);
+            $project = Project::factory()->create();
+            $kept = Pipeline::factory()->for($project)->create(['name' => 'Admissions', 'created_at' => now()->subMinutes(2)]);
+            $archived = Pipeline::factory()->for($project)->create(['name' => 'admissions', 'created_at' => now()->subMinute()]);
             $archived->archive();
 
             $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
@@ -742,23 +749,29 @@ describe('2026_11_04_100000_convert_pipelines_name_to_citext_and_enforce_unique'
         });
     });
 
-    it('enforces case-insensitive uniqueness at the database level', function () use ($migrationName, $migrationPath): void {
+    it('enforces case-insensitive uniqueness within a project at the database level but not across projects', function () use ($migrationName, $migrationPath): void {
         isolatedMigration($migrationName, function () use ($migrationPath): void {
             $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
             expect($migrate)->toBe(Command::SUCCESS);
 
-            Pipeline::factory()->create(['name' => 'Admissions']);
+            $project = Project::factory()->create();
+            Pipeline::factory()->for($project)->create(['name' => 'Admissions']);
 
-            expect(fn () => Pipeline::factory()->create(['name' => 'ADMISSIONS']))
+            expect(fn () => Pipeline::factory()->for($project)->create(['name' => 'ADMISSIONS']))
                 ->toThrow(UniqueConstraintViolationException::class);
+
+            $other = Pipeline::factory()->for(Project::factory()->create())->create(['name' => 'ADMISSIONS']);
+
+            expect($other->refresh()->name)->toBe('ADMISSIONS');
         });
     });
 
     it('keeps names untouched on rollback, including legitimate names that end in a numeric suffix', function () use ($migrationName, $migrationPath): void {
         isolatedMigration($migrationName, function () use ($migrationPath): void {
-            Pipeline::factory()->create(['name' => 'Admissions', 'created_at' => now()->subMinutes(3)]);
-            $renamed = Pipeline::factory()->create(['name' => 'admissions', 'created_at' => now()->subMinutes(2)]);
-            $legitimate = Pipeline::factory()->create(['name' => 'Release-2026', 'created_at' => now()->subMinute()]);
+            $project = Project::factory()->create();
+            Pipeline::factory()->for($project)->create(['name' => 'Admissions', 'created_at' => now()->subMinutes(3)]);
+            $renamed = Pipeline::factory()->for($project)->create(['name' => 'admissions', 'created_at' => now()->subMinutes(2)]);
+            $legitimate = Pipeline::factory()->for($project)->create(['name' => 'Release-2026', 'created_at' => now()->subMinute()]);
 
             $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
             expect($migrate)->toBe(Command::SUCCESS);
@@ -770,7 +783,7 @@ describe('2026_11_04_100000_convert_pipelines_name_to_citext_and_enforce_unique'
                 ->and($legitimate->refresh()->name)->toBe('Release-2026')
                 ->and(PipelineNameUniquenessFeature::active())->toBeFalse();
 
-            Pipeline::factory()->create(['name' => 'ADMISSIONS']);
+            Pipeline::factory()->for($project)->create(['name' => 'ADMISSIONS']);
         });
     });
 });
