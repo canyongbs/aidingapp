@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\CreateOrganizationController;
+use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\DeleteOrganizationController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\ListOrganizationsController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\UpdateOrganizationController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\ViewOrganizationController;
@@ -48,5 +49,6 @@ Route::api(majorVersion: 1, routes: function (): void {
             Route::post('/', CreateOrganizationController::class)->name('store');
             Route::get('/{organization}', ViewOrganizationController::class)->name('show');
             Route::patch('/{organization}', UpdateOrganizationController::class)->name('update');
+            Route::delete('/{organization}', DeleteOrganizationController::class)->name('destroy');
         });
 });
