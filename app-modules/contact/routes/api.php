@@ -39,6 +39,7 @@ use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\DeleteOrganizationCo
 use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\ListOrganizationsController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\UpdateOrganizationController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\ViewOrganizationController;
+use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\ArchiveContactController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\CreateContactController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\ListContactsController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\UpdateContactController;
@@ -63,5 +64,6 @@ Route::api(majorVersion: 1, routes: function (): void {
             Route::post('/', CreateContactController::class)->name('store');
             Route::get('/{contact}', ViewContactController::class)->name('show');
             Route::patch('/{contact}', UpdateContactController::class)->name('update');
+            Route::delete('/{contact}', ArchiveContactController::class)->name('archive');
         });
 });

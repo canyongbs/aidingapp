@@ -62,18 +62,17 @@ class CreateContactRequest extends SaveContactRequest
     {
         return [
             ...$this->contactRules(),
-            'type_id' => [
+            'type' => [
                 Rule::requiredIf(fn (): bool => ContactType::resolveDefault() === null),
                 'nullable',
-                'uuid:4',
-                Rule::exists(ContactType::class, 'id')->whereNull('deleted_at'),
+                'string',
+                'max:255',
             ],
         ];
     }
 
     /**
-     * The full name is derived from the first and last name, and the contact
-     * type falls back to the configured default when none is provided.
+     * The full name is derived from the first and last name.
      *
      * @return array<string, mixed>
      */
@@ -82,7 +81,6 @@ class CreateContactRequest extends SaveContactRequest
         $attributes = parent::contactAttributes();
 
         $attributes['full_name'] = "{$attributes['first_name']} {$attributes['last_name']}";
-        $attributes['type_id'] ??= ContactType::resolveDefault()?->getKey();
 
         return $attributes;
     }

@@ -46,13 +46,28 @@ class UpdateContactController
 {
     /**
      * Update a contact. Only the attributes included in the request are changed.
-     * Managed contacts, which are synchronized from a user, cannot be updated.
+     * Managed contacts, which are synchronized from a user, cannot be updated, and archived contacts are not found.
+     * Relationships accept exact, case-insensitive names in `type` and `organization`.
+     * Unknown names and ambiguous contact type names return validation errors.
+     * Providing `organization: null` clears the organization without automatic email-domain matching.
+     * UUID relationship fields are not accepted.
+     * The combined first and last name, including unchanged components and the separating space,
+     * must not exceed 255 characters.
      *
      * @response ContactResource
      */
     #[Group('Contacts')]
     public function __invoke(UpdateContactRequest $request, Contact $contact): JsonResource
     {
+        if ($request->exists('type')) {
+            $contact->type()->associate($request->getResolvedType());
+        }
+
+        if ($request->exists('organization')) {
+            $contact->organization()->associate($request->getResolvedOrganization());
+        }
+
+        $contact->shouldAutomaticallyMatchOrganization = ! $request->exists('organization');
         $contact->update($request->contactAttributes());
 
         return $contact

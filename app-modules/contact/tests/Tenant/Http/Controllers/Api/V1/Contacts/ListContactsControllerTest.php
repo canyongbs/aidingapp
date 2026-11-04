@@ -92,6 +92,21 @@ it('does not include deleted contacts', function (): void {
         ->and($response['data'][0]['id'])->toBe($contact->getKey());
 });
 
+it('does not include archived contacts', function (): void {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    Sanctum::actingAs($user, ['api']);
+
+    $contact = Contact::factory()->create();
+    Contact::factory()->archived()->create();
+
+    $response = getJson(route('api.v1.contacts.index', [], false));
+    $response->assertOk();
+
+    expect($response['data'])->toHaveCount(1)
+        ->and($response['data'][0]['id'])->toBe($contact->getKey());
+});
+
 it('can filter contacts by name, email, type, and organization', function (string $filter): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('contact.view-any');

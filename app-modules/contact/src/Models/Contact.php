@@ -112,6 +112,8 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     use HasApiTokens;
     use HasPresence;
 
+    public bool $shouldAutomaticallyMatchOrganization = true;
+
     protected $fillable = [
         'first_name',
         'last_name',

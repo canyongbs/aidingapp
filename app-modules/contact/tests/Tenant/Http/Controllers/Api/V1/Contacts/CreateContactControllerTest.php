@@ -58,7 +58,7 @@ beforeEach(function (): void {
 });
 
 it('is gated with proper access control', function () use ($actingAsContactCreator): void {
-    $payload = ['first_name' => 'Jane', 'last_name' => 'Doe', 'type_id' => ContactType::factory()->create()->getKey()];
+    $payload = ['first_name' => 'Jane', 'last_name' => 'Doe', 'type' => ContactType::factory()->create()->name];
 
     postJson(route('api.v1.contacts.store', [], false), $payload)
         ->assertUnauthorized();
@@ -106,8 +106,8 @@ it('creates a contact with the provided attributes', function () use ($actingAsC
         'last_name' => 'Doe',
         'preferred_name' => 'JD',
         'email' => 'jane.doe@example.com',
-        'type_id' => $type->getKey(),
-        'organization_id' => $organization->getKey(),
+        'type' => $type->name,
+        'organization' => $organization->name,
         'postal_code' => '12345',
         'job_title' => 'Engineer',
     ]);
@@ -141,12 +141,76 @@ it('uses the default contact type when none is provided', function () use ($acti
         ->assertJsonPath('data.type.id', $default->getKey());
 });
 
+it('resolves relationship names case-insensitively without wildcard matching', function () use ($actingAsContactCreator): void {
+    $actingAsContactCreator();
+
+    ContactType::factory()->create(['name' => 'VIPXContact']);
+    $type = ContactType::factory()->create(['name' => 'VIP_Contact']);
+    Organization::factory()->create(['name' => '100 Percent Extra']);
+    $organization = Organization::factory()->create(['name' => '100% Company']);
+
+    $response = postJson(route('api.v1.contacts.store', [], false), [
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+        'type' => 'vip_contact',
+        'organization' => '100% company',
+    ])->assertCreated()
+        ->assertJsonPath('data.type.id', $type->getKey())
+        ->assertJsonPath('data.organization.id', $organization->getKey());
+
+    assertDatabaseHas(Contact::class, [
+        'id' => $response['data']['id'],
+        'type_id' => $type->getKey(),
+        'organization_id' => $organization->getKey(),
+    ]);
+});
+
+it('rejects ambiguous contact type names', function () use ($actingAsContactCreator): void {
+    $actingAsContactCreator();
+
+    ContactType::factory()->create(['name' => 'Customer']);
+    ContactType::factory()->create(['name' => 'CUSTOMER']);
+
+    postJson(route('api.v1.contacts.store', [], false), [
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+        'type' => 'customer',
+    ])->assertUnprocessable()
+        ->assertJsonValidationErrors(['type'])
+        ->assertJsonPath('errors.type.0', 'The specified contact type name is ambiguous.');
+
+    assertDatabaseMissing(Contact::class, ['first_name' => 'Jane']);
+});
+
+it('does not resolve deleted relationships by name', function (string $field) use ($actingAsContactCreator): void {
+    $actingAsContactCreator();
+
+    $type = ContactType::factory()->create(['name' => 'Customer']);
+    $organization = Organization::factory()->create(['name' => 'Acme']);
+
+    if ($field === 'type') {
+        $type->delete();
+    } else {
+        $organization->delete();
+    }
+
+    postJson(route('api.v1.contacts.store', [], false), [
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+        'type' => $type->name,
+        'organization' => $organization->name,
+    ])->assertUnprocessable()
+        ->assertJsonValidationErrors([$field]);
+
+    assertDatabaseMissing(Contact::class, ['first_name' => 'Jane']);
+})->with(['type', 'organization']);
+
 it('requires a contact type when no default is available', function () use ($actingAsContactCreator): void {
     $actingAsContactCreator();
 
     postJson(route('api.v1.contacts.store', [], false), ['first_name' => 'Jane', 'last_name' => 'Doe'])
         ->assertUnprocessable()
-        ->assertJsonValidationErrors(['type_id']);
+        ->assertJsonValidationErrors(['type']);
 
     assertDatabaseMissing(Contact::class, ['first_name' => 'Jane']);
 });
@@ -157,7 +221,7 @@ it('validates the request', function (array $payload, array $errors) use ($actin
     $existing = Contact::factory()->create(['email' => 'taken@example.com']);
     Contact::factory()->create()->delete();
 
-    $payload = array_merge(['first_name' => 'Jane', 'last_name' => 'Doe', 'type_id' => ContactType::factory()->create()->getKey()], $payload);
+    $payload = array_merge(['first_name' => 'Jane', 'last_name' => 'Doe', 'type' => ContactType::factory()->create()->name], $payload);
 
     postJson(route('api.v1.contacts.store', [], false), $payload)
         ->assertUnprocessable()
@@ -170,8 +234,12 @@ it('validates the request', function (array $payload, array $errors) use ($actin
     'last name is required' => [['last_name' => null], ['last_name']],
     'email must be valid' => [['email' => 'not-an-email'], ['email']],
     'email must be unique' => [['email' => 'taken@example.com'], ['email']],
-    'type must exist' => [['type_id' => '2f7b2f5e-7a43-4a0c-8d3f-4d2f9a3b7c11'], ['type_id']],
-    'organization must exist' => [['organization_id' => '2f7b2f5e-7a43-4a0c-8d3f-4d2f9a3b7c11'], ['organization_id']],
+    'type must exist' => [['type' => 'Unknown type'], ['type']],
+    'organization must exist' => [['organization' => 'Unknown organization'], ['organization']],
+    'type must be a string' => [['type' => ['Invalid']], ['type']],
+    'organization must be a string' => [['organization' => ['Invalid']], ['organization']],
+    'type UUID field is not accepted' => [['type_id' => '2f7b2f5e-7a43-4a0c-8d3f-4d2f9a3b7c11'], ['type_id']],
+    'organization UUID field is not accepted' => [['organization_id' => '2f7b2f5e-7a43-4a0c-8d3f-4d2f9a3b7c11'], ['organization_id']],
     'attributes are limited to 255 characters' => [['job_title' => str_repeat('a', 256)], ['job_title']],
 ]);
 
@@ -184,6 +252,77 @@ it('allows an email address belonging to a deleted contact', function () use ($a
         'first_name' => 'Jane',
         'last_name' => 'Doe',
         'email' => 'reused@example.com',
-        'type_id' => ContactType::factory()->create()->getKey(),
+        'type' => ContactType::factory()->create()->name,
     ])->assertCreated();
 });
+
+it('matches an organization only when the organization field is omitted', function (bool $omitOrganization) use ($actingAsContactCreator): void {
+    $actingAsContactCreator();
+
+    $organization = Organization::factory()->create(['domains' => [['domain' => 'example.com']]]);
+    $payload = [
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+        'email' => 'jane@example.com',
+        'type' => ContactType::factory()->create()->name,
+    ];
+
+    if (! $omitOrganization) {
+        $payload['organization'] = null;
+    }
+
+    $response = postJson(route('api.v1.contacts.store', [], false), $payload)
+        ->assertCreated()
+        ->assertJsonPath('data.organization', $omitOrganization ? [
+            'id' => $organization->getKey(),
+            'name' => $organization->name,
+        ] : null);
+
+    assertDatabaseHas(Contact::class, [
+        'id' => $response['data']['id'],
+        'organization_id' => $omitOrganization ? $organization->getKey() : null,
+    ]);
+})->with([
+    'omitted organization' => [true],
+    'explicitly null organization' => [false],
+]);
+
+it('creates a contact at the combined name length boundary', function (int $firstNameLength) use ($actingAsContactCreator): void {
+    $actingAsContactCreator();
+
+    $firstName = str_repeat("\u{00E9}", $firstNameLength);
+    $lastName = str_repeat('b', 127);
+
+    $response = postJson(route('api.v1.contacts.store', [], false), [
+        'first_name' => $firstName,
+        'last_name' => $lastName,
+        'type' => ContactType::factory()->create()->name,
+    ])->assertCreated()
+        ->assertJsonPath('data.name', "{$firstName} {$lastName}");
+
+    assertDatabaseHas(Contact::class, [
+        'id' => $response['data']['id'],
+        'full_name' => "{$firstName} {$lastName}",
+    ]);
+})->with([
+    '254 characters' => [126],
+    '255 characters' => [127],
+]);
+
+it('rejects a combined name longer than the column allows', function (int $lastNameLength) use ($actingAsContactCreator): void {
+    $actingAsContactCreator();
+
+    postJson(route('api.v1.contacts.store', [], false), [
+        'first_name' => str_repeat('a', 128),
+        'last_name' => str_repeat('b', $lastNameLength),
+        'type' => ContactType::factory()->create()->name,
+    ])->assertUnprocessable()
+        ->assertJsonValidationErrors(['first_name', 'last_name'])
+        ->assertJsonPath('errors.first_name.0', 'The full name may not be greater than 255 characters.')
+        ->assertJsonPath('errors.last_name.0', 'The full name may not be greater than 255 characters.');
+
+    expect(Contact::query()->count())->toBe(0);
+})->with([
+    '256 characters' => [127],
+    '257 characters' => [128],
+]);

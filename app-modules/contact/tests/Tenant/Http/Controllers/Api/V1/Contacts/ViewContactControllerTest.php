@@ -108,3 +108,23 @@ it('returns not found for a deleted contact', function (): void {
     getJson(route('api.v1.contacts.show', ['contact' => $contact], false))
         ->assertNotFound();
 });
+
+it('returns not found for an archived contact', function (): void {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['contact.view-any', 'contact.*.view']);
+    Sanctum::actingAs($user, ['api']);
+
+    $contact = Contact::factory()->archived()->create();
+
+    getJson(route('api.v1.contacts.show', ['contact' => $contact], false))
+        ->assertNotFound();
+});
+
+it('returns not found for an identifier that is not a UUID', function (): void {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['contact.view-any', 'contact.*.view']);
+    Sanctum::actingAs($user, ['api']);
+
+    getJson(route('api.v1.contacts.show', ['contact' => 'not-a-uuid'], false))
+        ->assertNotFound();
+});

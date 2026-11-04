@@ -37,9 +37,14 @@
 namespace AidingApp\Contact\Http\Requests\Api\V1\Contacts;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
+use Closure;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 abstract class SaveContactRequest extends FormRequest
 {
@@ -53,6 +58,10 @@ abstract class SaveContactRequest extends FormRequest
         'postal_code' => 'postal',
     ];
 
+    protected ?ContactType $resolvedType = null;
+
+    protected ?Organization $resolvedOrganization = null;
+
     /**
      * @return array<string, mixed>
      */
@@ -61,10 +70,92 @@ abstract class SaveContactRequest extends FormRequest
         $attributes = [];
 
         foreach ($this->validated() as $key => $value) {
+            if (in_array($key, ['type', 'organization'], true)) {
+                continue;
+            }
+
             $attributes[static::COLUMN_NAMES[$key] ?? $key] = $value;
         }
 
         return $attributes;
+    }
+
+    public function getResolvedType(): ?ContactType
+    {
+        return $this->resolvedType;
+    }
+
+    public function getResolvedOrganization(): ?Organization
+    {
+        return $this->resolvedOrganization;
+    }
+
+    /**
+     * @return array<Closure(Validator): void>
+     */
+    public function after(): array
+    {
+        return [
+            function (Validator $validator): void {
+                foreach (['type_id' => 'type', 'organization_id' => 'organization'] as $field => $replacement) {
+                    if ($this->exists($field)) {
+                        $validator->errors()->add($field, "The {$field} field is not supported. Provide the {$replacement} name in the {$replacement} field instead.");
+                    }
+                }
+            },
+            function (Validator $validator): void {
+                $type = $this->input('type');
+
+                if (! $validator->errors()->has('type') && is_string($type)) {
+                    $types = ContactType::query()
+                        ->where(new Expression('lower(name)'), '=', Str::lower($type))
+                        ->limit(2)
+                        ->get();
+
+                    if ($types->isEmpty()) {
+                        $validator->errors()->add('type', 'The specified contact type does not exist.');
+                    } elseif ($types->count() > 1) {
+                        $validator->errors()->add('type', 'The specified contact type name is ambiguous.');
+                    } else {
+                        $this->resolvedType = $types->first();
+                    }
+                }
+
+                $organization = $this->input('organization');
+
+                if (! $validator->errors()->has('organization') && is_string($organization)) {
+                    $this->resolvedOrganization = Organization::query()
+                        ->where(new Expression('lower(name)'), '=', Str::lower($organization))
+                        ->first();
+
+                    if ($this->resolvedOrganization === null) {
+                        $validator->errors()->add('organization', 'The specified organization does not exist.');
+                    }
+                }
+            },
+            function (Validator $validator): void {
+                if ($validator->errors()->has('first_name') || $validator->errors()->has('last_name')) {
+                    return;
+                }
+
+                $contact = $this->route('contact');
+                $firstName = $this->input('first_name', $contact instanceof Contact ? $contact->first_name : null);
+                $lastName = $this->input('last_name', $contact instanceof Contact ? $contact->last_name : null);
+
+                if (! is_string($firstName) || ! is_string($lastName) || Str::length("{$firstName} {$lastName}") <= 255) {
+                    return;
+                }
+
+                foreach (['first_name', 'last_name'] as $field) {
+                    if ($this->exists($field)) {
+                        $validator->errors()->add($field, __('validation.max.string', [
+                            'attribute' => 'full name',
+                            'max' => 255,
+                        ]));
+                    }
+                }
+            },
+        ];
     }
 
     /**
@@ -84,7 +175,7 @@ abstract class SaveContactRequest extends FormRequest
             ],
             'mobile' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:255'],
-            'organization_id' => ['nullable', 'uuid:4', Rule::exists(Organization::class, 'id')->whereNull('deleted_at')],
+            'organization' => ['nullable', 'string', 'max:255'],
             'job_title' => ['nullable', 'string', 'max:255'],
             'employee_id' => ['nullable', 'string', 'max:255'],
             'work_number' => ['nullable', 'string', 'max:255'],

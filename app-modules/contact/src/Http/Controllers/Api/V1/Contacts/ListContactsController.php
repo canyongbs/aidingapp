@@ -51,6 +51,8 @@ use Spatie\QueryBuilder\QueryBuilder;
 class ListContactsController
 {
     /**
+     * List contacts. Archived contacts are not included.
+     *
      * @response AnonymousResourceCollection<LengthAwarePaginator<ContactResource>>
      */
     #[Group('Contacts')]
@@ -70,7 +72,7 @@ class ListContactsController
         Gate::authorize('viewAny', Contact::class);
 
         return QueryBuilder::for(
-            Contact::query()->with(['type', 'organization'])
+            Contact::query()->withoutArchived()->with(['type', 'organization'])
         )
             ->allowedFilters(
                 AllowedFilter::partial('name', 'full_name'),

@@ -37,9 +37,7 @@
 namespace AidingApp\Contact\Http\Requests\Api\V1\Contacts;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactType;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Validation\Rule;
 
 class UpdateContactRequest extends SaveContactRequest
 {
@@ -70,7 +68,7 @@ class UpdateContactRequest extends SaveContactRequest
 
         $rules = [
             ...$this->contactRules($contact instanceof Contact ? $contact : null),
-            'type_id' => ['required', 'uuid:4', Rule::exists(ContactType::class, 'id')->whereNull('deleted_at')],
+            'type' => ['required', 'string', 'max:255'],
         ];
 
         return array_map(fn (array $fieldRules): array => ['sometimes', ...$fieldRules], $rules);

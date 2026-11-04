@@ -45,6 +45,8 @@ use Illuminate\Support\Facades\Gate;
 class ViewContactController
 {
     /**
+     * Show a contact. Archived contacts are not found.
+     *
      * @response ContactResource
      */
     #[Group('Contacts')]

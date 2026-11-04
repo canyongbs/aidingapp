@@ -39,21 +39,30 @@ namespace AidingApp\Contact\Http\Controllers\Api\V1\Contacts;
 use AidingApp\Contact\Http\Requests\Api\V1\Contacts\CreateContactRequest;
 use AidingApp\Contact\Http\Resources\Api\V1\ContactResource;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactType;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 
 class CreateContactController
 {
     /**
-     * Create a contact. When `type_id` is omitted, the configured default contact type is used.
-     * Unless `organization_id` is provided, the contact is matched to an organization by its email domain.
+     * Create a contact. Relationships accept exact, case-insensitive names in `type` and `organization`.
+     * When `type` is omitted or null, the configured default contact type is used.
+     * Unknown names and ambiguous contact type names return validation errors.
+     * The combined first and last name, including the separating space, must not exceed 255 characters.
+     * When `organization` is omitted, the contact is matched to an organization by its email domain.
+     * Providing `organization: null` leaves the contact unaffiliated. UUID relationship fields are not accepted.
      *
      * @response ContactResource
      */
     #[Group('Contacts')]
     public function __invoke(CreateContactRequest $request): JsonResponse
     {
-        $contact = Contact::create($request->contactAttributes());
+        $contact = new Contact($request->contactAttributes());
+        $contact->type()->associate($request->getResolvedType() ?? ContactType::resolveDefault());
+        $contact->organization()->associate($request->getResolvedOrganization());
+        $contact->shouldAutomaticallyMatchOrganization = ! $request->exists('organization');
+        $contact->save();
 
         $contact->refresh()->load(['type', 'organization']);
 
