@@ -43,7 +43,11 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use App\Settings\PresenceSettings;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
+use Filament\Notifications\Livewire\Notifications;
+use Filament\Notifications\Notification;
+use Filament\Notifications\NotificationMailbox;
 
 use function Filament\Support\generate_icon_html;
 
@@ -466,3 +470,42 @@ it('hides the created at and updated at columns by default and allows sorting th
         ->sortTable($column)
         ->assertCanSeeTableRecords($contacts);
 })->with(['created_at', 'updated_at']);
+
+it('skips managed contacts when bulk deleting while the contact archiving feature is active', function (): void {
+    ContactArchivingFeature::activate();
+
+    actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.delete'));
+
+    $contact = Contact::factory()->create();
+    $managed = Contact::factory()->for(User::factory(), 'managedByUser')->create();
+
+    Livewire::test(ListContacts::class)
+        ->selectTableRecords([$contact->getKey(), $managed->getKey()])
+        ->callAction(TestAction::make(DeleteBulkAction::class)->table()->bulk());
+
+    app(NotificationMailbox::class)->flush();
+
+    $notifications = new Notifications();
+    $notifications->mount();
+    $notifications->pullNotificationsFromSession();
+
+    expect($notifications->notifications->map(fn (Notification $notification): string => (string) $notification->getBody())->all())
+        ->toContain('<p>One of the selected contacts is managed and cannot be archived.</p>');
+
+    expect(Contact::find($contact->getKey()))->toBeNull()
+        ->and(Contact::find($managed->getKey()))->not->toBeNull();
+});
+
+it('bulk deletes managed contacts when the contact archiving feature is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.delete'));
+
+    $managed = Contact::factory()->for(User::factory(), 'managedByUser')->create();
+
+    Livewire::test(ListContacts::class)
+        ->selectTableRecords([$managed->getKey()])
+        ->callAction(TestAction::make(DeleteBulkAction::class)->table()->bulk());
+
+    expect(Contact::find($managed->getKey()))->toBeNull();
+});
