@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Database\Factories\OrganizationFactory;
+use AidingApp\Contact\Jobs\MatchUnaffiliatedContactsJob;
 use AidingApp\Contact\Models\Builders\OrganizationBuilder;
 use AidingApp\Contact\Observers\OrganizationObserver;
 use AidingApp\Project\Models\Project;
@@ -166,5 +167,12 @@ class Organization extends Model implements HasMedia, Auditable
             )
             ->using(ProjectGuest::class)
             ->withTimestamps();
+    }
+
+    protected static function booted(): void
+    {
+        static::unarchived(function (Organization $organization): void {
+            dispatch((new MatchUnaffiliatedContactsJob((string) $organization->getKey()))->afterCommit());
+        });
     }
 }
