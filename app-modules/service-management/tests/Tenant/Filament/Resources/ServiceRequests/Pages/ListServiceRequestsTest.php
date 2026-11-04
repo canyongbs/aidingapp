@@ -1236,7 +1236,7 @@ it('offers every organization in the organization filter when archiving is inact
     asSuperAdmin();
 
     $organization = Organization::factory()->create();
-    $otherOrganization = Organization::factory()->create();
+    $archivedOrganization = Organization::factory()->archived()->create();
 
     $select = Livewire::test(ListServiceRequests::class)
         ->instance()
@@ -1249,5 +1249,5 @@ it('offers every organization in the organization filter when archiving is inact
 
     expect($options)
         ->toHaveKey($organization->getKey())
-        ->toHaveKey($otherOrganization->getKey());
+        ->toHaveKey($archivedOrganization->getKey());
 });
