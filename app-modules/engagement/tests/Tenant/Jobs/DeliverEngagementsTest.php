@@ -39,6 +39,7 @@ use AidingApp\Engagement\Jobs\DeliverEngagements;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Notifications\EngagementNotification;
 use AidingApp\Notification\Enums\EmailMessageEventType;
+use App\Features\ContactArchivingFeature;
 use Illuminate\Support\Facades\Notification;
 
 it('will send engagements that have been scheduled for a past date and have not been dispatched', function (): void {
@@ -124,6 +125,36 @@ it('suppresses a scheduled engagement when the recipient bounces before delivery
 
     expect($events->count())->toBe(1);
     expect($events->first()->type)->toBe(EmailMessageEventType::SuppressedByBounced);
+
+    expect($engagement->user->notifications()->count())->toBe(0);
+});
+
+it('suppresses a scheduled engagement when the recipient is archived before delivery and still marks it dispatched', function (): void {
+    ContactArchivingFeature::activate();
+
+    $engagement = Engagement::factory()->create([
+        'scheduled_at' => now()->subMinute(),
+    ]);
+
+    $contact = $engagement->recipient;
+
+    assert($contact instanceof Contact);
+
+    $contact->archive();
+
+    expect($engagement->dispatched_at)->toBeNull();
+
+    dispatch(app(DeliverEngagements::class));
+
+    $engagement->refresh();
+
+    expect($engagement->dispatched_at)->not()->toBeNull();
+    expect($engagement->dispatch_failed_at)->toBeNull();
+
+    $events = $engagement->latestEmailMessage->events;
+
+    expect($events->count())->toBe(1);
+    expect($events->first()->type)->toBe(EmailMessageEventType::SuppressedByArchived);
 
     expect($engagement->user->notifications()->count())->toBe(0);
 });
