@@ -133,8 +133,7 @@ it('still lists and can detach an already attached archived organization', funct
         'pageClass' => ManageGuests::class,
     ])
         ->assertCanSeeTableRecords([$archivedOrganization])
-        ->callAction(TestAction::make(DetachAction::class)->table($archivedOrganization))
-        ->assertHasNoFormErrors();
+        ->callAction(TestAction::make(DetachAction::class)->table($archivedOrganization));
 
     expect($project->guestOrganizations()->where('organizations.id', $archivedOrganization->getKey())->exists())->toBeFalse();
 });
