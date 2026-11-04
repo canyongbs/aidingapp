@@ -37,6 +37,8 @@
 namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
 use AidingApp\Project\Enums\PipelineStageClassification;
+use AidingApp\Project\Filament\Resources\Pipelines\Forms\Components\PipelineNameInput;
+use AidingApp\Project\Filament\Resources\Pipelines\Forms\Components\PipelineStageNameInput;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
@@ -47,7 +49,6 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
@@ -62,9 +63,7 @@ class EditPipeline extends EditRecord
     {
         return $schema
             ->components([
-                TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
+                PipelineNameInput::make(ignoreRecord: true),
                 Textarea::make('description')
                     ->required()
                     ->maxLength(65535),
@@ -75,10 +74,7 @@ class EditPipeline extends EditRecord
                         TableColumn::make('Classification'),
                     ])
                     ->schema([
-                        TextInput::make('name')
-                            ->label('Stage')
-                            ->distinct()
-                            ->required(),
+                        PipelineStageNameInput::make(),
                         Select::make('classification')
                             ->label('Classification')
                             ->options(PipelineStageClassification::class)

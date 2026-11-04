@@ -36,10 +36,13 @@
 
 use AidingApp\Project\Filament\Resources\Pipelines\Pages\CreatePipeline;
 use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Tests\Tenant\Filament\Resources\PipelineResource\RequestFactory\CreatePipelineRequestFactory;
+use App\Features\PipelineNameUniquenessFeature;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -145,4 +148,107 @@ it('defaults new pipeline stages to planning', function (): void {
     ]);
 
     $undoRepeaterFake();
+});
+
+// TODO: Cleanup Task (pipeline-name-uniqueness): keep these tests, but remove the feature flag describe block below
+describe('name uniqueness', function (): void {
+    it('rejects a pipeline name that differs only by case', function (string $name): void {
+        asSuperAdmin();
+
+        $project = Project::factory()->create();
+        Pipeline::factory()->for($project)->create(['name' => 'Admissions']);
+
+        Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
+            ->fillForm(CreatePipelineRequestFactory::new()->state(['name' => $name])->create())
+            ->call('create')
+            ->assertHasFormErrors(['name' => 'unique']);
+
+        expect(Pipeline::query()->count())->toBe(1);
+    })->with([
+        'exact' => 'Admissions',
+        'lower case' => 'admissions',
+        'upper case' => 'ADMISSIONS',
+    ]);
+
+    it('rejects a pipeline name that is already used by a pipeline in another project', function (): void {
+        asSuperAdmin();
+
+        Pipeline::factory()->create(['name' => 'Admissions']);
+        $project = Project::factory()->create();
+
+        Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
+            ->fillForm(CreatePipelineRequestFactory::new()->state(['name' => 'admissions'])->create())
+            ->call('create')
+            ->assertHasFormErrors(['name' => 'unique']);
+    });
+
+    it('keeps the name of an archived pipeline reserved', function (): void {
+        asSuperAdmin();
+
+        $project = Project::factory()->create();
+        Pipeline::factory()->for($project)->create(['name' => 'Admissions'])->archive();
+
+        Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
+            ->fillForm(CreatePipelineRequestFactory::new()->state(['name' => 'admissions'])->create())
+            ->call('create')
+            ->assertHasFormErrors(['name' => 'unique']);
+    });
+
+    it('rejects stage names within the pipeline that differ only by case', function (): void {
+        $undoRepeaterFake = Repeater::fake();
+
+        asSuperAdmin();
+
+        $project = Project::factory()->create();
+
+        Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
+            ->fillForm(CreatePipelineRequestFactory::new()->state([
+                'stages' => [
+                    ['name' => 'Review', 'classification' => 'planning'],
+                    ['name' => 'review', 'classification' => 'planning'],
+                ],
+            ])->create())
+            ->call('create')
+            ->assertHasFormErrors(['stages.0.name', 'stages.1.name']);
+
+        expect(Pipeline::query()->count())->toBe(0);
+
+        $undoRepeaterFake();
+    });
+
+    it('allows a stage name already used by another pipeline', function (): void {
+        $undoRepeaterFake = Repeater::fake();
+
+        asSuperAdmin();
+
+        $project = Project::factory()->create();
+        Pipeline::factory()->for($project)->has(PipelineStage::factory()->state(['name' => 'Review']), 'stages')->create();
+
+        Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
+            ->fillForm(CreatePipelineRequestFactory::new()->state([
+                'stages' => [['name' => 'review', 'classification' => 'planning']],
+            ])->create())
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        expect(PipelineStage::query()->where('name', 'review')->count())->toBe(2);
+
+        $undoRepeaterFake();
+    });
+
+    describe('feature flag', function (): void {
+        it('does not apply the unique form rule when the feature is disabled', function (): void {
+            PipelineNameUniquenessFeature::deactivate();
+
+            asSuperAdmin();
+
+            $project = Project::factory()->create();
+            Pipeline::factory()->for($project)->create(['name' => 'Admissions']);
+
+            expect(fn () => Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
+                ->fillForm(CreatePipelineRequestFactory::new()->state(['name' => 'Admissions'])->create())
+                ->call('create'))
+                ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
 });
