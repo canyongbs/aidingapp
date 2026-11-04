@@ -40,6 +40,7 @@ use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
+use AidingApp\Contact\Support\OrganizationDomainsLock;
 use App\Filament\Forms\Components\AddressInput;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
@@ -57,6 +58,8 @@ use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 class CreateOrganization extends CreateRecord
 {
     protected static string $resource = OrganizationResource::class;
+
+    protected ?bool $hasDatabaseTransactions = true;
 
     public function form(Schema $schema): Schema
     {
@@ -179,5 +182,15 @@ class CreateOrganization extends CreateRecord
                             ->url(),
                     ]),
             ]);
+    }
+
+    /**
+     * Taken before validation so the domain uniqueness rule runs while the lock is held.
+     */
+    protected function beforeValidate(): void
+    {
+        if (filled($this->data['domains'] ?? null)) {
+            app(OrganizationDomainsLock::class)->acquire();
+        }
     }
 }

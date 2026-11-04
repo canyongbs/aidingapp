@@ -38,12 +38,14 @@ use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\EditOrganization;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Support\OrganizationDomainsLock;
 use AidingApp\Contact\Tests\Tenant\Organization\RequestFactories\EditOrganizationRequestFactory;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\mock;
 
 test('Edit Organization is gated with proper access control', function (): void {
     $user = User::factory()->create();
@@ -370,6 +372,56 @@ test('check if the provided domain is valid', function (string $domain): void {
         'test-domain-123.com',
         'subdomain.example.org',
     ]);
+
+test('the organization domains lock is taken when domains are saved', function (): void {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    $organization = Organization::factory()->create();
+
+    actingAs($user);
+
+    mock(OrganizationDomainsLock::class)->shouldReceive('acquire')->once();
+
+    Livewire::test(EditOrganization::class, [
+        'record' => $organization->getRouteKey(),
+    ])
+        ->fillForm(['domains' => [['domain' => 'updated.edu']]])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($organization->refresh()->domains)->toBe([['domain' => 'updated.edu']]);
+
+    $undoRepeaterFake();
+});
+
+test('the organization domains lock is not taken when no domains are saved', function (): void {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    $organization = Organization::factory()->create();
+
+    actingAs($user);
+
+    mock(OrganizationDomainsLock::class)->shouldNotReceive('acquire');
+
+    Livewire::test(EditOrganization::class, [
+        'record' => $organization->getRouteKey(),
+    ])
+        ->fillForm(['domains' => []])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $undoRepeaterFake();
+});
 
 test('the organization name must be unique among other non-trashed organizations', function (): void {
     $undoRepeaterFake = Repeater::fake();

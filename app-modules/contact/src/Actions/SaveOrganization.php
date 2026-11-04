@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
+use AidingApp\Contact\Support\OrganizationDomainsLock;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -48,11 +49,7 @@ use Spatie\LaravelData\Optional;
 
 class SaveOrganization
 {
-    /**
-     * Every writer of organization domains must hold this lock while checking and saving them. Advisory locks are
-     * scoped to the database, so each tenant gets its own lock.
-     */
-    private const string DOMAINS_LOCK_KEY = 'organization-domains';
+    public function __construct(protected OrganizationDomainsLock $domainsLock) {}
 
     /**
      * Creates the given organization, or updates it when an existing one is provided.
@@ -96,10 +93,9 @@ class SaveOrganization
             return $organization;
         }
 
-        // A transaction alone does not stop two requests from both passing the domain check before either saves,
-        // so the check is repeated under a lock that is held until the organization has been committed.
+        // The request was validated before the lock was taken, so the domains are checked again while holding it.
         DB::transaction(function () use ($organization, $attributes): void {
-            DB::selectOne('SELECT pg_advisory_xact_lock(hashtext(?))', [self::DOMAINS_LOCK_KEY]);
+            $this->domainsLock->acquire();
 
             $this->ensureDomainsAreUnclaimed($organization, $attributes['domains']);
 

@@ -38,11 +38,14 @@ use AidingApp\Contact\Imports\OrganizationImporter;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\Contact\Support\OrganizationDomainsLock;
 use App\Models\Import;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+
+use function Pest\Laravel\mock;
 
 /**
  * @param  array<string, mixed>  $row
@@ -321,6 +324,27 @@ it('does not reject a domain claimed by a different import', function () use ($r
 
     expect(Organization::query()->where('name', 'New College')->firstOrFail()->domains)
         ->toBe([['domain' => 'shared.edu']]);
+});
+
+it('takes the organization domains lock when the domains column is mapped', function () use ($runOrganizationImport): void {
+    mock(OrganizationDomainsLock::class)->shouldReceive('acquire')->once();
+
+    $runOrganizationImport([
+        'name' => 'New College',
+        'domains' => 'new.edu',
+    ]);
+
+    expect(Organization::query()->where('name', 'New College')->exists())->toBeTrue();
+});
+
+it('does not take the organization domains lock when the domains column is not mapped', function () use ($runOrganizationImport): void {
+    mock(OrganizationDomainsLock::class)->shouldNotReceive('acquire');
+
+    $runOrganizationImport([
+        'name' => 'New College',
+    ]);
+
+    expect(Organization::query()->where('name', 'New College')->exists())->toBeTrue();
 });
 
 it('fails the row when the industry does not exist', function () use ($runOrganizationImport): void {

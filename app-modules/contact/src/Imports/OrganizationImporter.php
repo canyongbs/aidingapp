@@ -39,6 +39,7 @@ namespace AidingApp\Contact\Imports;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\Contact\Support\OrganizationDomainsLock;
 use Closure;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
@@ -211,6 +212,11 @@ class OrganizationImporter extends Importer
     public function resolveRecord(): ?Model
     {
         $name = $this->data['name'];
+
+        // Taken before the name lock on every row so all chunk workers acquire the two locks in the same order and cannot deadlock.
+        if (filled($this->columnMap['domains'] ?? null)) {
+            app(OrganizationDomainsLock::class)->acquire();
+        }
 
         // Serialize concurrent chunk workers importing the same name so the unique index cannot abort a chunk transaction.
         DB::selectOne('SELECT pg_advisory_xact_lock(hashtext(?))', [Str::lower(trim((string) $name))]);

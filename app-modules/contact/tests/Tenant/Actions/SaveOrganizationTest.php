@@ -38,20 +38,25 @@ use AidingApp\Contact\Actions\SaveOrganization;
 use AidingApp\Contact\DataTransferObjects\OrganizationDataObject;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
-use Illuminate\Support\Facades\DB;
+use AidingApp\Contact\Support\OrganizationDomainsLock;
 use Illuminate\Validation\ValidationException;
 
-it('takes the shared domains lock while saving organization domains', function (): void {
-    $heldLocks = fn (): int => (int) DB::selectOne(
-        "SELECT count(*) AS total FROM pg_locks WHERE locktype = 'advisory' AND pid = pg_backend_pid() AND objid::bigint = (hashtext('organization-domains')::bigint & 4294967295)",
-    )->total;
+use function Pest\Laravel\mock;
 
-    expect($heldLocks())->toBe(0);
+it('takes the organization domains lock when saving domains', function (): void {
+    mock(OrganizationDomainsLock::class)->shouldReceive('acquire')->once();
 
     app(SaveOrganization::class)(OrganizationDataObject::fromData(['name' => 'Acme', 'domains' => ['acme.test']]));
 
-    // The lock is transaction scoped, and the test itself runs inside a transaction that has not yet ended.
-    expect($heldLocks())->toBe(1);
+    expect(Organization::query()->where('name', 'Acme')->exists())->toBeTrue();
+});
+
+it('does not take the organization domains lock when no domains are saved', function (): void {
+    mock(OrganizationDomainsLock::class)->shouldNotReceive('acquire');
+
+    app(SaveOrganization::class)(OrganizationDataObject::fromData(['name' => 'Acme']));
+
+    expect(Organization::query()->where('name', 'Acme')->exists())->toBeTrue();
 });
 
 it('revalidates the domains under the lock and does not save a domain claimed by another organization', function (): void {
