@@ -377,3 +377,16 @@ it('checks permissions before returning not found for an archived organization',
     patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => 'Changed'])
         ->assertForbidden();
 });
+
+it('explains that an archived organization reserves the name', function () use ($actingAsOrganizationUpdater): void {
+    OrganizationArchivingFeature::activate();
+
+    $actingAsOrganizationUpdater();
+
+    Organization::factory()->archived()->create(['name' => 'Archived Org']);
+    $organization = Organization::factory()->create();
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => 'ARCHIVED ORG'])
+        ->assertUnprocessable()
+        ->assertJsonPath('errors.name', ['An archived organization with this name already exists.']);
+});

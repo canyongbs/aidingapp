@@ -39,6 +39,7 @@ namespace AidingApp\Contact\Http\Requests\Api\V1\Organizations;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\Contact\Rules\OrganizationNameNotArchived;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
 use App\Features\OrganizationArchivingFeature;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -76,7 +77,15 @@ class UpdateOrganizationRequest extends FormRequest
         $organizationId = $organization instanceof Organization ? $organization->getKey() : null;
 
         return [
-            'name' => ['sometimes', 'required', 'string', 'max:255', Rule::unique(Organization::class, 'name')->ignore($organizationId)->withoutTrashed()],
+            'name' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:255',
+                // Stops at the first failure, so an archived match shows its own message instead of the generic unique one.
+                Rule::when(fn (): bool => OrganizationArchivingFeature::active(), ['bail', new OrganizationNameNotArchived(ignore: $organization instanceof Organization ? $organization : null)]),
+                Rule::unique(Organization::class, 'name')->ignore($organizationId)->withoutTrashed(),
+            ],
             'email' => ['nullable', 'string', 'email', 'max:255'],
             'phone_number' => ['nullable', 'string', 'max:255'],
             'website' => ['nullable', 'string', 'url', 'max:255'],
