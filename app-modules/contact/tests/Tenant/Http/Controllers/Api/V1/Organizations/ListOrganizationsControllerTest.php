@@ -312,3 +312,16 @@ it('rejects filters and sorts that are not allowed', function (): void {
     getJson(route('api.v1.organizations.index', ['sort' => 'description'], false))
         ->assertBadRequest();
 });
+
+it('does not return archived organizations', function (): void {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    Sanctum::actingAs($user, ['api']);
+
+    $organization = Organization::factory()->create();
+    Organization::factory()->archived()->create();
+
+    getJson(route('api.v1.organizations.index', [], false))
+        ->assertJsonPath('meta.total', 1)
+        ->assertJsonPath('data.0.id', $organization->getKey());
+});

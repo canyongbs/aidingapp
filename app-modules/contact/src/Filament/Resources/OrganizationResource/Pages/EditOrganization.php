@@ -40,9 +40,12 @@ use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\Contact\Rules\OrganizationNameNotArchived;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
 use AidingApp\Contact\Support\OrganizationDomainsLock;
+use App\Features\OrganizationArchivingFeature;
 use App\Filament\Forms\Components\AddressInput;
+use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Repeater;
@@ -84,6 +87,12 @@ class EditOrganization extends EditRecord
                             ->maxLength(255)
                             ->required()
                             ->string()
+                            // Stops at the first failure, so an archived match shows its own message instead of the generic unique one.
+                            ->rule('bail', fn (): bool => OrganizationArchivingFeature::active())
+                            ->rule(
+                                fn (?Organization $record): OrganizationNameNotArchived => new OrganizationNameNotArchived(ignore: $record),
+                                fn (): bool => OrganizationArchivingFeature::active(),
+                            )
                             ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
                         TextInput::make('email')
                             ->label('Organization Email')
@@ -197,7 +206,7 @@ class EditOrganization extends EditRecord
     {
         return [
             ViewAction::make(),
-            DeleteAction::make(),
+            OrganizationArchivingFeature::active() ? ArchiveAction::make() : DeleteAction::make(),
         ];
     }
 

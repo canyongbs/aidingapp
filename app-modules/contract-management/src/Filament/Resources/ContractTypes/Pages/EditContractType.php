@@ -38,12 +38,14 @@ namespace AidingApp\ContractManagement\Filament\Resources\ContractTypes\Pages;
 
 use AidingApp\ContractManagement\Filament\Resources\ContractTypes\ContractTypeResource;
 use AidingApp\ContractManagement\Models\ContractType;
+use App\Features\ContractTypeNameUniquenessFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Unique;
 
 class EditContractType extends EditRecord
 {
@@ -57,7 +59,13 @@ class EditContractType extends EditRecord
             ->components([
                 TextInput::make('name')
                     ->string()
-                    ->required(),
+                    ->required()
+                    ->maxLength(255)
+                    // TODO: Cleanup Task (contract-name-uniqueness): replace this `when()` with `->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed())` once the flag is removed.
+                    ->when(
+                        ContractTypeNameUniquenessFeature::active(),
+                        fn (TextInput $field): TextInput => $field->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed()),
+                    ),
                 Toggle::make('is_default')
                     ->label('Default')
                     ->live()

@@ -266,6 +266,7 @@ class ContactFormSchema
                 ->label('Organization')
                 ->relationship('organization')
                 ->tableConfiguration(OrganizationsTable::class)
+                ->tableArguments(fn (?Contact $record): array => ['selectedOrganizationId' => $record?->organization_id])
                 ->columnSpanFull(),
         ];
     }

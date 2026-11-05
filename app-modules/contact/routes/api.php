@@ -34,7 +34,13 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\CreateContactController;
+use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\DeleteContactController;
+use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\ListContactsController;
+use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\UpdateContactController;
+use AidingApp\Contact\Http\Controllers\Api\V1\Contacts\ViewContactController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\CreateOrganizationController;
+use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\DeleteOrganizationController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\ListOrganizationsController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\UpdateOrganizationController;
 use AidingApp\Contact\Http\Controllers\Api\V1\Organizations\ViewOrganizationController;
@@ -48,5 +54,16 @@ Route::api(majorVersion: 1, routes: function (): void {
             Route::post('/', CreateOrganizationController::class)->name('store');
             Route::get('/{organization}', ViewOrganizationController::class)->name('show');
             Route::patch('/{organization}', UpdateOrganizationController::class)->name('update');
+            Route::delete('/{organization}', DeleteOrganizationController::class)->name('delete');
+        });
+
+    Route::name('contacts.')
+        ->prefix('contacts')
+        ->group(function (): void {
+            Route::get('/', ListContactsController::class)->name('index');
+            Route::post('/', CreateContactController::class)->name('store');
+            Route::get('/{contact}', ViewContactController::class)->name('show');
+            Route::patch('/{contact}', UpdateContactController::class)->name('update');
+            Route::delete('/{contact}', DeleteContactController::class)->name('delete');
         });
 });

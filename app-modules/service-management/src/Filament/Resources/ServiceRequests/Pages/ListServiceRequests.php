@@ -210,7 +210,7 @@ class ListServiceRequests extends ListRecords
                         )
                     )),
                 SelectFilter::make('organization')
-                    ->options(Organization::pluck('name', 'id')->toArray())
+                    ->options(Organization::query()->withoutArchived()->pluck('name', 'id')->all())
                     ->modifyQueryUsing(fn (Builder $query, $state): Builder => $query->when(
                         ! empty($state['value']),
                         fn (Builder $query) => $query->whereHas(

@@ -36,14 +36,50 @@
 
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ListOrganizations;
 use AidingApp\Contact\Models\Organization;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-it('only shows the bulk delete action to a user with the organization.delete permission', function (): void {
+it('only shows the bulk archive action to a user with the organization.delete permission', function (): void {
     Organization::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('organization.view-any', 'organization.*.view');
+
+    actingAs($user);
+
+    Livewire::test(ListOrganizations::class)
+        ->assertActionHidden(TestAction::make('archive')->table()->bulk());
+
+    $user->givePermissionTo('organization.*.delete');
+
+    Livewire::test(ListOrganizations::class)
+        ->assertActionVisible(TestAction::make('archive')->table()->bulk());
+});
+
+it('bulk archives organizations', function (): void {
+    actingAs(User::factory()->create()->givePermissionTo('organization.view-any', 'organization.*.view', 'organization.*.delete'));
+
+    $organizations = Organization::factory(2)->create();
+
+    Livewire::test(ListOrganizations::class)
+        ->selectTableRecords($organizations->modelKeys())
+        ->callAction(TestAction::make('archive')->table()->bulk());
+
+    [$first, $second] = $organizations->all();
+
+    expect($first->refresh()->isArchived())->toBeTrue()
+        ->and($second->refresh()->isArchived())->toBeTrue();
+});
+
+it('shows the bulk delete action when the organization archiving feature is inactive', function (): void {
+    OrganizationArchivingFeature::deactivate();
+
+    Organization::factory(3)->create();
 
     $user = User::factory()
         ->create()
@@ -57,7 +93,8 @@ it('only shows the bulk delete action to a user with the organization.delete per
     $user->givePermissionTo('organization.*.delete');
 
     Livewire::test(ListOrganizations::class)
-        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk())
+        ->assertActionDoesNotExist(TestAction::make('archive')->table()->bulk());
 });
 
 it('only shows the import and export actions to a user with the `organization.import` permission', function (): void {
@@ -76,4 +113,29 @@ it('only shows the import and export actions to a user with the `organization.im
     Livewire::test(ListOrganizations::class)
         ->assertActionVisible('import')
         ->assertActionVisible('export');
+});
+
+describe('archived organizations', function (): void {
+    beforeEach(function (): void {
+        actingAs(User::factory()->create()->givePermissionTo('organization.view-any', 'organization.*.view'));
+    });
+
+    it('does not list archived organizations', function (): void {
+        $organization = Organization::factory()->create();
+        $archivedOrganization = Organization::factory()->archived()->create();
+
+        Livewire::test(ListOrganizations::class)
+            ->assertCanSeeTableRecords([$organization])
+            ->assertCanNotSeeTableRecords([$archivedOrganization]);
+    });
+
+    it('does not find archived organizations in table search', function (): void {
+        $organization = Organization::factory()->create(['name' => 'Searchable Active']);
+        $archivedOrganization = Organization::factory()->archived()->create(['name' => 'Searchable Archived']);
+
+        Livewire::test(ListOrganizations::class)
+            ->searchTable('Searchable')
+            ->assertCanSeeTableRecords([$organization])
+            ->assertCanNotSeeTableRecords([$archivedOrganization]);
+    });
 });

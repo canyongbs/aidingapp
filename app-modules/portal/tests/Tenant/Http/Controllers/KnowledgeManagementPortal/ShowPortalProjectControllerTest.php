@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Models\Pipeline;
@@ -316,6 +317,19 @@ it('denies access when Project Management is not licensed', function (): void {
 it('does not disclose an inaccessible project', function (): void {
     $contact = Contact::factory()->create();
     $project = Project::factory()->create();
+
+    actingAs($contact, 'contact');
+
+    getJson(route('api.portal.projects.show', ['portalProject' => $project->getKey()]))
+        ->assertNotFound();
+});
+
+it('does not disclose a project reached only through an archived organization', function (): void {
+    $organization = Organization::factory()->create();
+    $contact = Contact::factory()->for($organization)->create();
+    $project = Project::factory()->create();
+    $project->guestOrganizations()->attach($organization);
+    $organization->archive();
 
     actingAs($contact, 'contact');
 

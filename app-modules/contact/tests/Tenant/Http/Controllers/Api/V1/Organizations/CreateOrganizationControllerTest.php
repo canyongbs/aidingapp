@@ -317,3 +317,13 @@ it('can use the name of an industry or type that shares its name with a deleted 
         ->assertCreated()
         ->assertJsonPath('data.industry.id', $industry->getKey());
 });
+
+it('explains that an archived organization reserves the name', function () use ($actingAsOrganizationCreator): void {
+    $actingAsOrganizationCreator();
+
+    Organization::factory()->archived()->create(['name' => 'Archived Org']);
+
+    postJson(route('api.v1.organizations.store', [], false), ['name' => 'ARCHIVED ORG'])
+        ->assertUnprocessable()
+        ->assertJsonPath('errors.name', ['An archived organization with this name already exists.']);
+});

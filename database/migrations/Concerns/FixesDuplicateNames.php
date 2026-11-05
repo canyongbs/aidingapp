@@ -106,6 +106,9 @@ trait FixesDuplicateNames
 
     private function fixDuplicates(): void
     {
+        // Holds for the rest of the migration's transaction so a concurrent insert can't land a fresh duplicate before the unique constraint is added.
+        DB::statement("LOCK TABLE {$this->table} IN ACCESS EXCLUSIVE MODE");
+
         /** @var array<int, string> $groupByColumns */
         $groupByColumns = $this->groupByColumns ?? []; // @phpstan-ignore property.notFound
 
@@ -199,7 +202,7 @@ trait FixesDuplicateNames
             $originalName = $record->{$this->column};
             $newName = $this->buildDeduplicatedValue($originalName, $counter);
 
-            while (isset($existingNames[Str::lower($newName)])) {
+            while (isset($existingNames[Str::lower($newName)]) || $this->isValueTaken($newName, $groupValues, $groupByColumns, true)) {
                 $counter++;
                 $newName = $this->buildDeduplicatedValue($originalName, $counter);
             }
@@ -217,6 +220,29 @@ trait FixesDuplicateNames
         if (! empty($updates)) {
             $this->batchUpdate($updates);
         }
+    }
+
+    /**
+     * Exact, case-insensitive check against the table: the prefix match used to pre-load existing
+     * names can miss a stored name truncated to a different length for a longer counter suffix.
+     *
+     * @param  array<string, mixed>  $groupValues
+     * @param  array<int, string>  $groupByColumns
+     */
+    private function isValueTaken(string $newName, array $groupValues, array $groupByColumns, bool $liveRowsOnly): bool
+    {
+        $query = DB::table($this->table)
+            ->whereRaw("LOWER({$this->column}) = ?", [Str::lower($newName)]);
+
+        foreach ($groupByColumns as $col) {
+            $query->where($col, $groupValues[$col]);
+        }
+
+        if ($liveRowsOnly && $this->usesSoftDeletes) {
+            $query->whereNull('deleted_at');
+        }
+
+        return $query->exists();
     }
 
     /**
@@ -388,7 +414,7 @@ trait FixesDuplicateNames
             $originalName = $record->{$this->column};
             $newName = $this->buildDeduplicatedValue($originalName, $counter);
 
-            while (isset($existingNames[Str::lower($newName)])) {
+            while (isset($existingNames[Str::lower($newName)]) || $this->isValueTaken($newName, $groupValues, $groupByColumns, false)) {
                 $counter++;
                 $newName = $this->buildDeduplicatedValue($originalName, $counter);
             }

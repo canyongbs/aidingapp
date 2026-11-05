@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
 use AidingApp\Contact\Support\OrganizationDomainsLock;
+use App\Features\OrganizationArchivingFeature;
 use Closure;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
@@ -238,6 +239,17 @@ class OrganizationImporter extends Importer
         }
 
         return $body;
+    }
+
+    public function afterSave(): void
+    {
+        $record = $this->record;
+
+        assert($record instanceof Organization);
+
+        if (OrganizationArchivingFeature::active() && $record->isArchived()) {
+            $record->unarchive();
+        }
     }
 
     /**

@@ -145,3 +145,15 @@ it('returns not found for a soft deleted organization', function (): void {
     getJson(route('api.v1.organizations.show', ['organization' => $organization], false))
         ->assertNotFound();
 });
+
+it('returns not found for an archived organization', function (): void {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.view');
+    Sanctum::actingAs($user, ['api']);
+
+    $organization = Organization::factory()->archived()->create();
+
+    getJson(route('api.v1.organizations.show', ['organization' => $organization], false))
+        ->assertNotFound();
+});

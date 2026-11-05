@@ -288,3 +288,21 @@ it('links live contacts but not archived contacts to an organization', function 
         ->and($liveContact->refresh()->organization_id)->toBe($organization->getKey())
         ->and($queries->filter(fn (string $query): bool => str_contains($query, 'for update')))->toHaveCount(1);
 });
+
+it('does not match contacts to an archived organization', function (bool $targeted): void {
+    $organization = Organization::factory()->archived()->create([
+        'domains' => [['domain' => 'example.com']],
+    ]);
+    $contact = Contact::factory()->create([
+        'email' => 'person@example.com',
+        'organization_id' => null,
+    ]);
+
+    (new MatchUnaffiliatedContactsJob($targeted ? (string) $organization->getKey() : null))
+        ->handle(app(MatchContactToOrganization::class), app(OrganizationEmailDomainLookup::class));
+
+    expect($contact->refresh()->organization_id)->toBeNull();
+})->with([
+    'targeted' => [true],
+    'reconciliation' => [false],
+]);

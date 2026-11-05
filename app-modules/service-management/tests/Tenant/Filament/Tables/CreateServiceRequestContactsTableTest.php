@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\ServiceManagement\Filament\Tables\CreateServiceRequestContactsTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TableSelect\Livewire\TableSelectLivewireComponent;
 use Filament\Tables\Columns\TextColumn;
 use Livewire\Features\SupportTesting\Testable;
@@ -230,4 +231,24 @@ describe('filters', function (): void {
             ->assertCanSeeTableRecords([$matchingContact])
             ->assertCanNotSeeTableRecords([$otherContact]);
     });
+});
+
+it('does not offer archived organizations in the organization filter', function (): void {
+    asSuperAdmin();
+
+    $organization = Organization::factory()->create();
+    $archivedOrganization = Organization::factory()->archived()->create();
+
+    $select = liveCreateServiceRequestContactsTable()
+        ->instance()
+        ->getTableFiltersForm()
+        ->getComponentByStatePath('organization_id.value');
+
+    assert($select instanceof Select);
+
+    $options = $select->getOptions();
+
+    expect($options)
+        ->toHaveKey($organization->getKey())
+        ->not()->toHaveKey($archivedOrganization->getKey());
 });

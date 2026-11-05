@@ -351,3 +351,35 @@ it('does not change the industry and type when they are not provided or when ide
 
     expect($organization->refresh()->only(['industry_id', 'type_id']))->toBe($original);
 });
+
+it('returns not found for an archived organization before validating the request', function () use ($actingAsOrganizationUpdater): void {
+    $actingAsOrganizationUpdater();
+
+    $organization = Organization::factory()->archived()->create(['name' => 'Original']);
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => ''])
+        ->assertNotFound();
+
+    expect($organization->refresh()->name)->toBe('Original');
+});
+
+it('checks permissions before returning not found for an archived organization', function (): void {
+    $organization = Organization::factory()->archived()->create();
+
+    $user = SystemUser::factory()->create();
+    Sanctum::actingAs($user, ['api']);
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => 'Changed'])
+        ->assertForbidden();
+});
+
+it('explains that an archived organization reserves the name', function () use ($actingAsOrganizationUpdater): void {
+    $actingAsOrganizationUpdater();
+
+    Organization::factory()->archived()->create(['name' => 'Archived Org']);
+    $organization = Organization::factory()->create();
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => 'ARCHIVED ORG'])
+        ->assertUnprocessable()
+        ->assertJsonPath('errors.name', ['An archived organization with this name already exists.']);
+});
