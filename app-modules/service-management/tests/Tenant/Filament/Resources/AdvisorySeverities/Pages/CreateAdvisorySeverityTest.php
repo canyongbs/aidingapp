@@ -134,6 +134,7 @@ test('CreateAdvisorySeverity allows the name of a soft deleted advisory severity
     expect(AdvisorySeverity::query()->where('name', 'Critical')->count())->toBe(1);
 });
 
+// TODO: Cleanup Task (advisory-status-and-severity-name-uniqueness): delete this describe and the test within
 describe('name uniqueness feature flag', function (): void {
     it('does not apply the unique form rule when the feature is disabled', function (): void {
         AdvisorySeverityNameUniquenessFeature::deactivate();
