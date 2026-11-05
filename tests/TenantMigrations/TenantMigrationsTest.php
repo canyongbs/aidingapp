@@ -62,6 +62,7 @@ use App\Features\ProductNameUniquenessFeature;
 use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Features\ServiceRequestFileUploadTypeFeature;
 use App\Features\ServiceRequestTypeCategoryNameUniquenessFeature;
+use App\Features\SlaNameUniquenessFeature;
 use App\Features\SystemUserNameUniquenessFeature;
 use App\Models\SystemUser;
 use App\Models\User;
@@ -383,6 +384,128 @@ describe('2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique',
 
             expect($second->refresh()->name)->toBe('aiding app')
                 ->and(ProductNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+});
+
+// TODO: Cleanup Task (sla-name-uniqueness): delete this describe and the tests within
+describe('2026_10_26_083011_convert_slas_name_to_citext_and_enforce_unique', function (): void {
+    $migrationName = '2026_10_26_083011_convert_slas_name_to_citext_and_enforce_unique';
+    $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
+
+    $insertSla = function (string $name, CarbonInterface $createdAt, ?CarbonInterface $deletedAt = null): string {
+        $id = (string) Str::uuid();
+
+        DB::table('slas')->insert([
+            'id' => $id,
+            'name' => $name,
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+            'deleted_at' => $deletedAt,
+        ]);
+
+        return $id;
+    };
+
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates the feature flag', function () use ($migrationName, $migrationPath, $insertSla): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertSla): void {
+            $firstId = $insertSla('Gold Support', now()->subMinutes(3));
+            $secondId = $insertSla('gold support', now()->subMinutes(2));
+            $thirdId = $insertSla('GOLD SUPPORT', now()->subMinute());
+            $existingSuffixedId = $insertSla('Gold Support-2', now()->subMinutes(4));
+            $uniqueId = $insertSla('Silver Support', now()->subMinutes(5));
+
+            expect(SlaNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table('slas')->where('id', $id)->value('name');
+
+            expect($name($firstId))->toBe('Gold Support')
+                ->and($name($secondId))->toBe('gold support-3')
+                ->and($name($thirdId))->toBe('GOLD SUPPORT-4')
+                ->and($name($existingSuffixedId))->toBe('Gold Support-2')
+                ->and($name($uniqueId))->toBe('Silver Support')
+                ->and(SlaNameUniquenessFeature::active())->toBeTrue();
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched', function () use ($migrationName, $migrationPath, $insertSla): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertSla): void {
+            $keptId = $insertSla('Gold Support', now()->subMinutes(2));
+            $trashedId = $insertSla('gold support', now()->subMinute(), now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('slas')->where('id', $keptId)->value('name'))->toBe('Gold Support')
+                ->and(DB::table('slas')->where('id', $trashedId)->value('name'))->toBe('gold support');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness among non-trashed SLAs at the database level', function () use ($migrationName, $migrationPath, $insertSla): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertSla): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertSla('Gold Support', now());
+
+            expect(fn (): string => $insertSla('GOLD SUPPORT', now()))
+                ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+
+    it('allows a non-trashed SLA to reuse a soft-deleted name once the migration has run', function () use ($migrationName, $migrationPath, $insertSla): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertSla): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertSla('Gold Support', now(), now());
+
+            $liveId = $insertSla('Gold Support', now());
+
+            expect(DB::table('slas')->where('id', $liveId)->value('name'))->toBe('Gold Support');
+        });
+    });
+
+    it('leaves deduplicated and pre-existing suffixed names unchanged on rollback', function () use ($migrationName, $migrationPath, $insertSla): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertSla): void {
+            $firstId = $insertSla('Gold Support', now()->subMinutes(2));
+            $secondId = $insertSla('gold support', now()->subMinute());
+            // A pre-existing, user-authored name ending in `-2` with no matching `Silver Support`. The migration must
+            // not touch it on the way up, and rollback must not strip its suffix either.
+            $preExistingSuffixedId = $insertSla('Silver Support-2', now()->subMinutes(3));
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('slas')->where('id', $secondId)->value('name'))->toBe('gold support-2')
+                ->and(DB::table('slas')->where('id', $preExistingSuffixedId)->value('name'))->toBe('Silver Support-2');
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect(DB::table('slas')->where('id', $firstId)->value('name'))->toBe('Gold Support')
+                ->and(DB::table('slas')->where('id', $secondId)->value('name'))->toBe('gold support-2')
+                ->and(DB::table('slas')->where('id', $preExistingSuffixedId)->value('name'))->toBe('Silver Support-2')
+                ->and(SlaNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+
+    it('restores the case-insensitive varchar column on rollback', function () use ($migrationName, $migrationPath, $insertSla): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertSla): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            $firstId = $insertSla('Gold Support', now());
+            $secondId = $insertSla('gold support', now());
+
+            expect(DB::table('slas')->where('id', $firstId)->value('name'))->toBe('Gold Support')
+                ->and(DB::table('slas')->where('id', $secondId)->value('name'))->toBe('gold support');
         });
     });
 });
