@@ -982,18 +982,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckIn.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:checkOuts\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckOut\\:\\:status\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Casts\\\\Attribute does not specify its types\\: TGet, TSet$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:maintenanceActivities\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,
@@ -1778,36 +1766,6 @@ $ignoreErrors[] = [
     'identifier' => 'Common.actionClassMustBeInvokable',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Actions/UpdateServiceRequestAction.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter name "close_details" is not in camelCase\\.$#',
-    'identifier' => 'MeliorStan.parameterNameNotCamelCase',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/DataTransferObjects/ServiceRequestDataObject.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter name "priority_id" is not in camelCase\\.$#',
-    'identifier' => 'MeliorStan.parameterNameNotCamelCase',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/DataTransferObjects/ServiceRequestDataObject.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter name "respondent_id" is not in camelCase\\.$#',
-    'identifier' => 'MeliorStan.parameterNameNotCamelCase',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/DataTransferObjects/ServiceRequestDataObject.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter name "status_id" is not in camelCase\\.$#',
-    'identifier' => 'MeliorStan.parameterNameNotCamelCase',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/DataTransferObjects/ServiceRequestDataObject.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter name "type_id" is not in camelCase\\.$#',
-    'identifier' => 'MeliorStan.parameterNameNotCamelCase',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/DataTransferObjects/ServiceRequestDataObject.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\:\\:withTrashed\\(\\)\\.$#',

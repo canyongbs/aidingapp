@@ -140,22 +140,29 @@ class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
 
     public static function getTimelineData(Model $forModel): Collection
     {
+        assert($forModel instanceof Asset);
+
         return $forModel->checkOuts()->get();
     }
 
+    /**
+     * @return Attribute<AssetCheckOutStatus, never>
+     */
     protected function status(): Attribute
     {
-        return Attribute::get(function (): AssetCheckOutStatus {
-            if ($this->checkIn()->exists()) {
-                return AssetCheckOutStatus::Returned;
-            }
+        return new Attribute(
+            get: function (): AssetCheckOutStatus {
+                if ($this->checkIn()->exists()) {
+                    return AssetCheckOutStatus::Returned;
+                }
 
-            if ($this->expected_check_in_at?->isPast()) {
-                return AssetCheckOutStatus::PastDue;
-            }
+                if ($this->expected_check_in_at?->isPast()) {
+                    return AssetCheckOutStatus::PastDue;
+                }
 
-            return AssetCheckOutStatus::Active;
-        });
+                return AssetCheckOutStatus::Active;
+            },
+        );
     }
 
     /**

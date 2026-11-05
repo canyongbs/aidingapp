@@ -37,19 +37,22 @@
 namespace AidingApp\ServiceManagement\DataTransferObjects;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use Spatie\LaravelData\Attributes\MapOutputName;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 use Spatie\LaravelData\Optional;
 
+#[MapOutputName(SnakeCaseMapper::class)]
 class ServiceRequestDataObject extends Data
 {
     public function __construct(
-        public string|Optional $status_id,
-        public string $type_id,
-        public string|Optional $priority_id,
+        public string|Optional $statusId,
+        public string $typeId,
+        public string|Optional $priorityId,
         public string|Optional $title,
-        public string|Optional $close_details,
-        public string $respondent_id,
-        public ServiceRequestCategory|Optional $category, // @phpstan-ignore MeliorStan.parameterNameNotCamelCase
+        public string|Optional $closeDetails,
+        public string $respondentId,
+        public ServiceRequestCategory|Optional $category,
     ) {}
 
     /**
@@ -58,12 +61,12 @@ class ServiceRequestDataObject extends Data
     public static function fromData(array $data): self
     {
         return new self(
-            status_id: $data['status_id'] ?? Optional::create(),
-            type_id: $data['type_id'],
-            priority_id: $data['priority_id'] ?? Optional::create(),
+            statusId: $data['status_id'] ?? Optional::create(),
+            typeId: $data['type_id'],
+            priorityId: $data['priority_id'] ?? Optional::create(),
             title: $data['title'] ?? Optional::create(),
-            close_details: $data['close_details'] ?? Optional::create(),
-            respondent_id: $data['respondent_id'],
+            closeDetails: $data['close_details'] ?? Optional::create(),
+            respondentId: $data['respondent_id'],
             category: isset($data['category'])
                 ? ($data['category'] instanceof ServiceRequestCategory
                     ? $data['category']
