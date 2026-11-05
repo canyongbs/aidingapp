@@ -36,10 +36,15 @@
 
 namespace AidingApp\Notification\Models;
 
+use AidingApp\Notification\Collections\EmailMessageEventCollection;
 use AidingApp\Notification\Database\Factories\EmailMessageEventFactory;
 use AidingApp\Notification\Enums\EmailMessageEventType;
+use AidingApp\Notification\Models\Builders\EmailMessageEventBuilder;
+use Illuminate\Database\Eloquent\Attributes\CollectedBy;
+use Illuminate\Database\Eloquent\Attributes\UseEloquentBuilder;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\HasBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
@@ -47,13 +52,20 @@ use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 /**
  * @mixin IdeHelperEmailMessageEvent
  */
+#[CollectedBy(EmailMessageEventCollection::class)]
+#[UseEloquentBuilder(EmailMessageEventBuilder::class)]
 class EmailMessageEvent extends Model
 {
+    /** @use HasBuilder<EmailMessageEventBuilder<self>> */
+    use HasBuilder;
+
     use HasVersion4Uuids;
     use UsesTenantConnection;
 
     /** @use HasFactory<EmailMessageEventFactory> */
     use HasFactory;
+
+    protected $dateFormat = 'Y-m-d H:i:s.u';
 
     protected $fillable = [
         'type',

@@ -262,7 +262,7 @@ it('can create an SLA from the service request priority form', function (): void
     expect(Sla::query()->where('name', 'Gold Support')->exists())->toBeTrue();
 });
 
-it('validates the SLA name is unique case-insensitively when creating an SLA from the service request priority form', function (): void {
+it('validates the SLA name is unique when creating an SLA from the service request priority form', function (string $name): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     Sla::query()->create(['name' => 'Gold Support']);
@@ -275,10 +275,32 @@ it('validates the SLA name is unique case-insensitively when creating an SLA fro
         ->callAction([
             TestAction::make('create')->table(),
             TestAction::make('createOption')->schemaComponent('sla_id'),
-        ], data: ['name' => 'GOLD SUPPORT'])
+        ], data: ['name' => $name])
         ->assertHasFormErrors(['name' => 'unique']);
 
     expect(Sla::query()->count())->toBe(1);
+})->with([
+    'same case' => ['Gold Support'],
+    'different case' => ['GOLD SUPPORT'],
+]);
+
+it('allows reusing the name of a soft-deleted SLA when creating an SLA from the service request priority form', function (): void {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    Sla::query()->create(['name' => 'Gold Support'])->delete();
+
+    asSuperAdmin();
+
+    Livewire::test(ManageServiceRequestTypePriorities::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->callAction([
+            TestAction::make('create')->table(),
+            TestAction::make('createOption')->schemaComponent('sla_id'),
+        ], data: ['name' => 'gold support'])
+        ->assertHasNoFormErrors();
+
+    expect(Sla::query()->where('name', 'gold support')->exists())->toBeTrue();
 });
 
 test('ManageServiceRequestTypePriorities is gated with proper access control', function (): void {

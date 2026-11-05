@@ -37,12 +37,20 @@
 use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ContractManagement\Models\ContractType;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\LicenseManagement\Models\Product;
+use AidingApp\Notification\Enums\EmailMessageEventType;
+use AidingApp\Notification\Models\EmailMessage;
+use AidingApp\Notification\Models\EmailMessageEvent;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\ChangeRequestStatusNameUniquenessFeature;
+use App\Features\ChangeRequestTypeNameUniquenessFeature;
+use App\Features\ContractNameUniquenessFeature;
+use App\Features\ContractTypeNameUniquenessFeature;
 use App\Features\EmailTemplateNameUniquenessFeature;
 use App\Features\KnowledgeBaseCategoryNameUniquenessFeature;
 use App\Features\MaintenanceProviderNameUniquenessFeature;
@@ -51,10 +59,12 @@ use App\Features\PipelineStageNameUniquenessFeature;
 use App\Features\ProductNameUniquenessFeature;
 use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Features\ServiceRequestFileUploadTypeFeature;
+use App\Features\ServiceRequestTypeCategoryNameUniquenessFeature;
 use App\Features\SlaNameUniquenessFeature;
 use App\Features\SystemUserNameUniquenessFeature;
 use App\Models\SystemUser;
 use App\Models\User;
+use App\Support\AbstractFeatureFlag;
 use Carbon\CarbonInterface;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
@@ -419,7 +429,7 @@ describe('2026_10_26_083011_convert_slas_name_to_citext_and_enforce_unique', fun
         });
     });
 
-    it('leaves soft-deleted duplicates untouched and allows their names to be reused', function () use ($migrationName, $migrationPath, $insertSla): void {
+    it('leaves soft-deleted duplicates untouched', function () use ($migrationName, $migrationPath, $insertSla): void {
         isolatedMigration($migrationName, function () use ($migrationPath, $insertSla): void {
             $keptId = $insertSla('Gold Support', now()->subMinutes(2));
             $trashedId = $insertSla('gold support', now()->subMinute(), now());
@@ -444,23 +454,56 @@ describe('2026_10_26_083011_convert_slas_name_to_citext_and_enforce_unique', fun
         });
     });
 
-    it('strips the numeric suffix on rollback once the original name is no longer taken', function () use ($migrationName, $migrationPath, $insertSla): void {
+    it('allows a non-trashed SLA to reuse a soft-deleted name once the migration has run', function () use ($migrationName, $migrationPath, $insertSla): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertSla): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertSla('Gold Support', now(), now());
+
+            $liveId = $insertSla('Gold Support', now());
+
+            expect(DB::table('slas')->where('id', $liveId)->value('name'))->toBe('Gold Support');
+        });
+    });
+
+    it('leaves deduplicated and pre-existing suffixed names unchanged on rollback', function () use ($migrationName, $migrationPath, $insertSla): void {
         isolatedMigration($migrationName, function () use ($migrationPath, $insertSla): void {
             $firstId = $insertSla('Gold Support', now()->subMinutes(2));
             $secondId = $insertSla('gold support', now()->subMinute());
+            // A pre-existing, user-authored name ending in `-2` with no matching `Silver Support`. The migration must
+            // not touch it on the way up, and rollback must not strip its suffix either.
+            $preExistingSuffixedId = $insertSla('Silver Support-2', now()->subMinutes(3));
 
             $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
             expect($migrate)->toBe(Command::SUCCESS);
 
-            expect(DB::table('slas')->where('id', $secondId)->value('name'))->toBe('gold support-2');
-
-            DB::table('slas')->where('id', $firstId)->update(['deleted_at' => now()]);
+            expect(DB::table('slas')->where('id', $secondId)->value('name'))->toBe('gold support-2')
+                ->and(DB::table('slas')->where('id', $preExistingSuffixedId)->value('name'))->toBe('Silver Support-2');
 
             $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
             expect($rollback)->toBe(Command::SUCCESS);
 
-            expect(DB::table('slas')->where('id', $secondId)->value('name'))->toBe('gold support')
+            expect(DB::table('slas')->where('id', $firstId)->value('name'))->toBe('Gold Support')
+                ->and(DB::table('slas')->where('id', $secondId)->value('name'))->toBe('gold support-2')
+                ->and(DB::table('slas')->where('id', $preExistingSuffixedId)->value('name'))->toBe('Silver Support-2')
                 ->and(SlaNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+
+    it('restores the case-insensitive varchar column on rollback', function () use ($migrationName, $migrationPath, $insertSla): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertSla): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            $firstId = $insertSla('Gold Support', now());
+            $secondId = $insertSla('gold support', now());
+
+            expect(DB::table('slas')->where('id', $firstId)->value('name'))->toBe('Gold Support')
+                ->and(DB::table('slas')->where('id', $secondId)->value('name'))->toBe('gold support');
         });
     });
 });
@@ -829,6 +872,130 @@ describe('2026_11_02_120000_convert_knowledge_base_categories_name_to_citext_and
     });
 });
 
+// TODO: Cleanup Task (service-request-type-category-name-uniqueness): delete this describe and the tests within
+describe('2026_11_02_120000_convert_service_request_type_categories_name_to_citext_and_enforce_unique', function (): void {
+    $migrationName = '2026_11_02_120000_convert_service_request_type_categories_name_to_citext_and_enforce_unique';
+    $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
+
+    $insertCategory = function (string $name, CarbonInterface $createdAt, ?CarbonInterface $deletedAt = null): string {
+        $id = (string) Str::uuid();
+
+        DB::table('service_request_type_categories')->insert([
+            'id' => $id,
+            'name' => $name,
+            'parent_id' => null,
+            'sort' => null,
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+            'deleted_at' => $deletedAt,
+        ]);
+
+        return $id;
+    };
+
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates the feature flag', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $firstId = $insertCategory('Support', now()->subMinutes(3));
+            $secondId = $insertCategory('support', now()->subMinutes(2));
+            $thirdId = $insertCategory('SUPPORT', now()->subMinute());
+            $existingSuffixedId = $insertCategory('Support-2', now()->subMinutes(4));
+            $uniqueId = $insertCategory('Billing', now()->subMinutes(5));
+
+            expect(ServiceRequestTypeCategoryNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table('service_request_type_categories')->where('id', $id)->value('name');
+
+            expect($name($firstId))->toBe('Support')
+                ->and($name($secondId))->toBe('support-3')
+                ->and($name($thirdId))->toBe('SUPPORT-4')
+                ->and($name($existingSuffixedId))->toBe('Support-2')
+                ->and($name($uniqueId))->toBe('Billing')
+                ->and(ServiceRequestTypeCategoryNameUniquenessFeature::active())->toBeTrue();
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $keptId = $insertCategory('Support', now()->subMinutes(2));
+            $trashedId = $insertCategory('support', now()->subMinute(), now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('service_request_type_categories')->where('id', $keptId)->value('name'))->toBe('Support')
+                ->and(DB::table('service_request_type_categories')->where('id', $trashedId)->value('name'))->toBe('support');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness among non-trashed service request type categories at the database level', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertCategory('Support', now());
+
+            expect(fn (): string => $insertCategory('SUPPORT', now()))
+                ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+
+    it('allows a non-trashed service request type category to reuse a soft-deleted name once the migration has run', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertCategory('Support', now(), now());
+
+            $liveId = $insertCategory('Support', now());
+
+            expect(DB::table('service_request_type_categories')->where('id', $liveId)->value('name'))->toBe('Support');
+        });
+    });
+
+    it('leaves deduplicated and pre-existing suffixed names unchanged on rollback', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $firstId = $insertCategory('Support', now()->subMinutes(2));
+            $secondId = $insertCategory('support', now()->subMinute());
+            // A pre-existing, user-authored name ending in `-2` with no matching `Level`. The migration must
+            // not touch it on the way up, and rollback must not strip its suffix either.
+            $preExistingSuffixedId = $insertCategory('Level-2', now()->subMinutes(3));
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('service_request_type_categories')->where('id', $secondId)->value('name'))->toBe('support-2')
+                ->and(DB::table('service_request_type_categories')->where('id', $preExistingSuffixedId)->value('name'))->toBe('Level-2');
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect(DB::table('service_request_type_categories')->where('id', $firstId)->value('name'))->toBe('Support')
+                ->and(DB::table('service_request_type_categories')->where('id', $secondId)->value('name'))->toBe('support-2')
+                ->and(DB::table('service_request_type_categories')->where('id', $preExistingSuffixedId)->value('name'))->toBe('Level-2')
+                ->and(ServiceRequestTypeCategoryNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+
+    it('restores the case-insensitive varchar column on rollback', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            $firstId = $insertCategory('Support', now());
+            $secondId = $insertCategory('support', now());
+
+            expect(DB::table('service_request_type_categories')->where('id', $firstId)->value('name'))->toBe('Support')
+                ->and(DB::table('service_request_type_categories')->where('id', $secondId)->value('name'))->toBe('support');
+        });
+    });
+});
+
 // TODO: Cleanup Task (maintenance-provider-name-uniqueness): delete this describe and the tests within
 describe('2026_10_29_112040_convert_maintenance_providers_name_to_citext_and_enforce_unique', function (): void {
     $migrationName = '2026_10_29_112040_convert_maintenance_providers_name_to_citext_and_enforce_unique';
@@ -1163,6 +1330,496 @@ describe('2026_11_04_100100_convert_pipeline_stages_name_to_citext_and_enforce_u
 
             expect(fn () => PipelineStage::factory()->for($pipeline)->create(['name' => 'REVIEW']))
                 ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+});
+
+describe('2026_10_30_002949_increase_occurred_at_precision_on_email_message_events_table', function (): void {
+    it('keeps fractional seconds on occurred_at', function (): void {
+        isolatedMigration('2026_10_30_002949_increase_occurred_at_precision_on_email_message_events_table', function (): void {
+            $message = EmailMessage::factory()->create();
+
+            // New code writes microseconds before the migration has run; Postgres rounds them away.
+            $eventBefore = $message->events()->save(EmailMessageEvent::factory()->make(['occurred_at' => '2026-01-01 10:00:00.123456']));
+
+            expect($eventBefore->refresh()->occurred_at->format('Y-m-d H:i:s.u'))->toBe('2026-01-01 10:00:00.000000');
+
+            $migrate = Artisan::call('migrate', [
+                '--path' => 'app-modules/notification/database/migrations/2026_10_30_002949_increase_occurred_at_precision_on_email_message_events_table.php',
+            ]);
+
+            $eventAfter = $message->events()->save(EmailMessageEvent::factory()->make(['occurred_at' => '2026-01-01 10:00:00.123456']));
+
+            expect($migrate)->toBe(Command::SUCCESS)
+                ->and($eventAfter->refresh()->occurred_at->format('Y-m-d H:i:s.u'))->toBe('2026-01-01 10:00:00.123456');
+        });
+    });
+});
+
+// TODO: Cleanup Task (email-message-events-occurred-at-backfill): delete this describe and the tests within
+describe('2026_10_30_003135_tmp_backfill_email_message_events_occurred_at', function (): void {
+    it('backfills occurred_at from the event\'s own payload timestamp', function (EmailMessageEventType $type, ?string $path, string $expected): void {
+        isolatedMigration('2026_10_30_003135_tmp_backfill_email_message_events_occurred_at', function () use ($type, $path, $expected): void {
+            $payload = ['mail' => ['timestamp' => '2016-10-19T23:20:52.240Z']];
+
+            if ($path !== null) {
+                $payload[$path] = ['timestamp' => '2016-10-19T23:21:04.133Z'];
+            }
+
+            $event = EmailMessage::factory()->create()->events()->save(EmailMessageEvent::factory()->make([
+                'type' => $type,
+                'payload' => $payload,
+                'occurred_at' => '2026-05-06 07:08:09',
+            ]));
+
+            $migrate = Artisan::call('migrate', ['--path' => 'database/migrations/2026_10_30_003135_tmp_backfill_email_message_events_occurred_at.php']);
+
+            expect($migrate)->toBe(Command::SUCCESS)
+                ->and($event->refresh()->occurred_at->format('Y-m-d H:i:s.v'))->toBe($expected);
+        });
+    })->with([
+        'send' => [EmailMessageEventType::Send, null, '2016-10-19 23:20:52.240'],
+        'reject' => [EmailMessageEventType::Reject, null, '2016-10-19 23:20:52.240'],
+        'rendering failure' => [EmailMessageEventType::RenderingFailure, null, '2016-10-19 23:20:52.240'],
+        'bounce' => [EmailMessageEventType::Bounce, 'bounce', '2016-10-19 23:21:04.133'],
+        'complaint' => [EmailMessageEventType::Complaint, 'complaint', '2016-10-19 23:21:04.133'],
+        'delivery' => [EmailMessageEventType::Delivery, 'delivery', '2016-10-19 23:21:04.133'],
+        'open' => [EmailMessageEventType::Open, 'open', '2016-10-19 23:21:04.133'],
+        'click' => [EmailMessageEventType::Click, 'click', '2016-10-19 23:21:04.133'],
+        'subscription' => [EmailMessageEventType::Subscription, 'subscription', '2016-10-19 23:21:04.133'],
+        'delivery delay' => [EmailMessageEventType::DeliveryDelay, 'deliveryDelay', '2016-10-19 23:21:04.133'],
+    ]);
+
+    it('leaves occurred_at unchanged when the payload has no usable timestamp', function (EmailMessageEventType $type, array $payload): void {
+        isolatedMigration('2026_10_30_003135_tmp_backfill_email_message_events_occurred_at', function () use ($type, $payload): void {
+            $event = EmailMessage::factory()->create()->events()->save(EmailMessageEvent::factory()->make([
+                'type' => $type,
+                'payload' => $payload,
+                'occurred_at' => '2026-05-06 07:08:09',
+            ]));
+
+            $migrate = Artisan::call('migrate', ['--path' => 'database/migrations/2026_10_30_003135_tmp_backfill_email_message_events_occurred_at.php']);
+
+            expect($migrate)->toBe(Command::SUCCESS)
+                ->and($event->refresh()->occurred_at->format('Y-m-d H:i:s.v'))->toBe('2026-05-06 07:08:09.000');
+        });
+    })->with([
+        'type without a provider timestamp' => [EmailMessageEventType::Dispatched, ['mail' => ['timestamp' => '2016-10-19T23:20:52.240Z']]],
+        'missing event object' => [EmailMessageEventType::DeliveryDelay, ['mail' => ['timestamp' => '2016-10-19T23:20:52.240Z']]],
+        'unparseable timestamp' => [EmailMessageEventType::Delivery, ['delivery' => ['timestamp' => 'not-a-date']]],
+    ]);
+});
+
+// TODO: Cleanup Task (change-request-type-name-uniqueness): delete the helper below, the two describes that follow, and the tests within
+// TODO: Cleanup Task (change-request-status-name-uniqueness): delete the helper below, the two describes that follow, and the tests within
+$defineChangeRequestNameUniquenessTests = function (string $migrationName, string $table, array $extraColumns, string $featureClass, string $otherFeatureClass): void {
+    assert(is_subclass_of($featureClass, AbstractFeatureFlag::class));
+    assert(is_subclass_of($otherFeatureClass, AbstractFeatureFlag::class));
+    $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
+
+    $insertRecord = function (string $name, CarbonInterface $createdAt, ?CarbonInterface $deletedAt = null) use ($table, $extraColumns): string {
+        $id = (string) Str::uuid();
+
+        DB::table($table)->insert([
+            'id' => $id,
+            'name' => $name,
+            ...$extraColumns,
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+            'deleted_at' => $deletedAt,
+        ]);
+
+        return $id;
+    };
+
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates only its own feature flag', function () use ($migrationName, $migrationPath, $insertRecord, $table, $featureClass, $otherFeatureClass): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table, $featureClass, $otherFeatureClass): void {
+            $firstId = $insertRecord('Major Change', now()->subMinutes(3));
+            $secondId = $insertRecord('major change', now()->subMinutes(2));
+            $thirdId = $insertRecord('MAJOR CHANGE', now()->subMinute());
+            $existingSuffixedId = $insertRecord('Major Change-2', now()->subMinutes(4));
+            $uniqueId = $insertRecord('Minor Change', now()->subMinutes(5));
+
+            $featureClass::deactivate();
+            $otherFeatureClass::deactivate();
+
+            expect($featureClass::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table($table)->where('id', $id)->value('name');
+
+            expect($name($firstId))->toBe('Major Change')
+                ->and($name($secondId))->toBe('major change-3')
+                ->and($name($thirdId))->toBe('MAJOR CHANGE-4')
+                ->and($name($existingSuffixedId))->toBe('Major Change-2')
+                ->and($name($uniqueId))->toBe('Minor Change')
+                ->and($featureClass::active())->toBeTrue()
+                ->and($otherFeatureClass::active())->toBeFalse();
+        });
+    });
+
+    it('treats backslashes in names literally when choosing a numeric suffix', function () use ($migrationName, $migrationPath, $insertRecord, $table): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table): void {
+            $firstId = $insertRecord('Ops\\Change', now()->subMinutes(3));
+            $secondId = $insertRecord('ops\\change', now()->subMinutes(2));
+            $existingSuffixedId = $insertRecord('Ops\\Change-2', now()->subMinutes(4));
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table($table)->where('id', $id)->value('name');
+
+            expect($name($firstId))->toBe('Ops\\Change')
+                ->and($name($secondId))->toBe('ops\\change-3')
+                ->and($name($existingSuffixedId))->toBe('Ops\\Change-2');
+        });
+    });
+
+    it('keeps renamed duplicates within the 255 character column limit', function () use ($migrationName, $migrationPath, $insertRecord, $table): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table): void {
+            $firstId = $insertRecord(str_repeat('A', 255), now()->subMinutes(2));
+            $secondId = $insertRecord(str_repeat('a', 255), now()->subMinute());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $secondName = DB::table($table)->where('id', $secondId)->value('name');
+
+            expect(DB::table($table)->where('id', $firstId)->value('name'))->toBe(str_repeat('A', 255))
+                ->and($secondName)->toBe(str_repeat('a', 253) . '-2')
+                ->and(mb_strlen($secondName))->toBe(255);
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched', function () use ($migrationName, $migrationPath, $insertRecord, $table): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table): void {
+            $keptId = $insertRecord('Major Change', now()->subMinutes(2));
+            $trashedId = $insertRecord('major change', now()->subMinute(), now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table($table)->where('id', $keptId)->value('name'))->toBe('Major Change')
+                ->and(DB::table($table)->where('id', $trashedId)->value('name'))->toBe('major change');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness among non-trashed records at the database level', function () use ($migrationName, $migrationPath, $insertRecord): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertRecord('Major Change', now());
+
+            expect(fn (): string => $insertRecord('MAJOR CHANGE', now()))
+                ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+
+    it('allows a name freed by a soft-deleted record to be reused at the database level', function () use ($migrationName, $migrationPath, $insertRecord, $table): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertRecord('Major Change', now()->subMinute(), now());
+            $insertRecord('MAJOR CHANGE', now());
+
+            expect(DB::table($table)->count())->toBe(2);
+        });
+    });
+
+    it('drops the unique index and deactivates its feature flag on rollback without altering stored names', function () use ($migrationName, $migrationPath, $insertRecord, $table, $featureClass): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table, $featureClass): void {
+            $insertRecord('Major Change', now()->subMinutes(2));
+            $secondId = $insertRecord('major change', now()->subMinute());
+            $legitimateId = $insertRecord('Phase-2', now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect(DB::table($table)->where('id', $secondId)->value('name'))->toBe('major change-2')
+                ->and(DB::table($table)->where('id', $legitimateId)->value('name'))->toBe('Phase-2')
+                ->and($featureClass::active())->toBeFalse();
+
+            $insertRecord('Major Change', now());
+
+            expect(DB::table($table)->where('name', 'Major Change')->count())->toBe(2);
+        });
+    });
+};
+
+describe('2026_11_03_100000_convert_change_request_types_name_to_citext_and_enforce_unique', function () use ($defineChangeRequestNameUniquenessTests): void {
+    $defineChangeRequestNameUniquenessTests(
+        '2026_11_03_100000_convert_change_request_types_name_to_citext_and_enforce_unique',
+        'change_request_types',
+        ['number_of_required_approvals' => 1],
+        ChangeRequestTypeNameUniquenessFeature::class,
+        ChangeRequestStatusNameUniquenessFeature::class,
+    );
+});
+
+describe('2026_11_03_100001_convert_change_request_statuses_name_to_citext_and_enforce_unique', function () use ($defineChangeRequestNameUniquenessTests): void {
+    $defineChangeRequestNameUniquenessTests(
+        '2026_11_03_100001_convert_change_request_statuses_name_to_citext_and_enforce_unique',
+        'change_request_statuses',
+        ['classification' => 'new'],
+        ChangeRequestStatusNameUniquenessFeature::class,
+        ChangeRequestTypeNameUniquenessFeature::class,
+    );
+});
+
+// TODO: Cleanup Task (contract-name-uniqueness): delete this describe and the tests within
+describe('2026_11_04_120000_convert_contract_types_name_to_citext_and_enforce_unique', function (): void {
+    $migrationName = '2026_11_04_120000_convert_contract_types_name_to_citext_and_enforce_unique';
+    $migrationPath = "app-modules/contract-management/database/migrations/{$migrationName}.php";
+
+    $insertContractType = function (string $name, CarbonInterface $createdAt, ?CarbonInterface $deletedAt = null): string {
+        $id = (string) Str::uuid();
+
+        DB::table('contract_types')->insert([
+            'id' => $id,
+            'name' => $name,
+            'is_default' => false,
+            'order' => DB::table('contract_types')->max('order') + 1,
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+            'deleted_at' => $deletedAt,
+        ]);
+
+        return $id;
+    };
+
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates the feature flag', function () use ($migrationName, $migrationPath, $insertContractType): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertContractType): void {
+            $firstId = $insertContractType('Software License', now()->subMinutes(3));
+            $secondId = $insertContractType('software license', now()->subMinutes(2));
+            $thirdId = $insertContractType('SOFTWARE LICENSE', now()->subMinute());
+            $existingSuffixedId = $insertContractType('Software License-2', now()->subMinutes(4));
+            $uniqueId = $insertContractType('Hardware Lease', now()->subMinutes(5));
+
+            expect(ContractTypeNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table('contract_types')->where('id', $id)->value('name');
+
+            expect($name($firstId))->toBe('Software License')
+                ->and($name($secondId))->toBe('software license-3')
+                ->and($name($thirdId))->toBe('SOFTWARE LICENSE-4')
+                ->and($name($existingSuffixedId))->toBe('Software License-2')
+                ->and($name($uniqueId))->toBe('Hardware Lease')
+                ->and(ContractTypeNameUniquenessFeature::active())->toBeTrue();
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched', function () use ($migrationName, $migrationPath, $insertContractType): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertContractType): void {
+            $keptId = $insertContractType('Software License', now()->subMinutes(2));
+            $trashedId = $insertContractType('software license', now()->subMinute(), now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('contract_types')->where('id', $keptId)->value('name'))->toBe('Software License')
+                ->and(DB::table('contract_types')->where('id', $trashedId)->value('name'))->toBe('software license');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness among non-trashed contract types at the database level', function () use ($migrationName, $migrationPath, $insertContractType): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertContractType): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertContractType('Software License', now());
+
+            expect(fn (): string => $insertContractType('SOFTWARE LICENSE', now()))
+                ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+
+    it('allows a name freed by a soft-deleted contract type to be reused at the database level', function () use ($migrationName, $migrationPath, $insertContractType): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertContractType): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertContractType('Software License', now()->subMinute(), now());
+
+            $reusedId = $insertContractType('SOFTWARE LICENSE', now());
+
+            expect(DB::table('contract_types')->where('id', $reusedId)->value('name'))->toBe('SOFTWARE LICENSE');
+        });
+    });
+
+    it('does not rename a duplicate onto an existing name truncated for a longer suffix', function () use ($migrationName, $migrationPath, $insertContractType): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertContractType): void {
+            // The ninth rename uses "-10", which truncates the base to 252 characters and lands on the existing name.
+            $ids = [];
+
+            foreach (range(0, 9) as $index) {
+                $ids[] = $insertContractType(str_repeat('A', 255 - $index) . str_repeat('a', $index), now()->subMinutes(20 - $index));
+            }
+
+            $existingId = $insertContractType(str_repeat('a', 252) . '-10', now()->subMinutes(30));
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $names = DB::table('contract_types')->pluck('name')->map(fn (string $name): string => Str::lower($name));
+
+            expect($names->unique())->toHaveCount($names->count())
+                ->and(DB::table('contract_types')->where('id', $existingId)->value('name'))->toBe(str_repeat('a', 252) . '-10')
+                ->and(DB::table('contract_types')->where('id', $ids[9])->value('name'))->toBe(str_repeat('A', 246) . str_repeat('a', 6) . '-11');
+        });
+    });
+
+    it('keeps repaired names and deactivates the feature flag on rollback', function () use ($migrationName, $migrationPath, $insertContractType): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertContractType): void {
+            $firstId = $insertContractType('Software License', now()->subMinutes(2));
+            $secondId = $insertContractType('software license', now()->subMinute());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('contract_types')->where('id', $secondId)->value('name'))->toBe('software license-2');
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect(DB::table('contract_types')->where('id', $firstId)->value('name'))->toBe('Software License')
+                ->and(DB::table('contract_types')->where('id', $secondId)->value('name'))->toBe('software license-2')
+                ->and(ContractTypeNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+});
+
+describe('2026_11_04_120100_convert_contracts_name_to_citext_and_enforce_unique', function (): void {
+    $migrationName = '2026_11_04_120100_convert_contracts_name_to_citext_and_enforce_unique';
+    $migrationPath = "app-modules/contract-management/database/migrations/{$migrationName}.php";
+
+    $insertContract = function (string $name, CarbonInterface $createdAt, ?CarbonInterface $deletedAt = null): string {
+        $id = (string) Str::uuid();
+
+        DB::table('contracts')->insert([
+            'id' => $id,
+            'name' => $name,
+            'contract_type_id' => ContractType::factory()->create()->getKey(),
+            'vendor_name' => 'Acme',
+            'start_date' => '2026-01-01',
+            'end_date' => '2026-12-31',
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+            'deleted_at' => $deletedAt,
+        ]);
+
+        return $id;
+    };
+
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates the feature flag', function () use ($migrationName, $migrationPath, $insertContract): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertContract): void {
+            $firstId = $insertContract('Master Agreement', now()->subMinutes(3));
+            $secondId = $insertContract('master agreement', now()->subMinutes(2));
+            $thirdId = $insertContract('MASTER AGREEMENT', now()->subMinute());
+            $existingSuffixedId = $insertContract('Master Agreement-2', now()->subMinutes(4));
+            $uniqueId = $insertContract('Service Agreement', now()->subMinutes(5));
+
+            expect(ContractNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table('contracts')->where('id', $id)->value('name');
+
+            expect($name($firstId))->toBe('Master Agreement')
+                ->and($name($secondId))->toBe('master agreement-3')
+                ->and($name($thirdId))->toBe('MASTER AGREEMENT-4')
+                ->and($name($existingSuffixedId))->toBe('Master Agreement-2')
+                ->and($name($uniqueId))->toBe('Service Agreement')
+                ->and(ContractNameUniquenessFeature::active())->toBeTrue();
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched', function () use ($migrationName, $migrationPath, $insertContract): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertContract): void {
+            $keptId = $insertContract('Master Agreement', now()->subMinutes(2));
+            $trashedId = $insertContract('master agreement', now()->subMinute(), now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('contracts')->where('id', $keptId)->value('name'))->toBe('Master Agreement')
+                ->and(DB::table('contracts')->where('id', $trashedId)->value('name'))->toBe('master agreement');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness among non-trashed contracts at the database level', function () use ($migrationName, $migrationPath, $insertContract): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertContract): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertContract('Master Agreement', now());
+
+            expect(fn (): string => $insertContract('MASTER AGREEMENT', now()))
+                ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+
+    it('allows a name freed by a soft-deleted contract to be reused at the database level', function () use ($migrationName, $migrationPath, $insertContract): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertContract): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertContract('Master Agreement', now()->subMinute(), now());
+
+            $reusedId = $insertContract('MASTER AGREEMENT', now());
+
+            expect(DB::table('contracts')->where('id', $reusedId)->value('name'))->toBe('MASTER AGREEMENT');
+        });
+    });
+
+    it('does not rename a duplicate onto an existing name truncated for a longer suffix', function () use ($migrationName, $migrationPath, $insertContract): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertContract): void {
+            // The ninth rename uses "-10", which truncates the base to 252 characters and lands on the existing name.
+            $ids = [];
+
+            foreach (range(0, 9) as $index) {
+                $ids[] = $insertContract(str_repeat('A', 255 - $index) . str_repeat('a', $index), now()->subMinutes(20 - $index));
+            }
+
+            $existingId = $insertContract(str_repeat('a', 252) . '-10', now()->subMinutes(30));
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $names = DB::table('contracts')->pluck('name')->map(fn (string $name): string => Str::lower($name));
+
+            expect($names->unique())->toHaveCount($names->count())
+                ->and(DB::table('contracts')->where('id', $existingId)->value('name'))->toBe(str_repeat('a', 252) . '-10')
+                ->and(DB::table('contracts')->where('id', $ids[9])->value('name'))->toBe(str_repeat('A', 246) . str_repeat('a', 6) . '-11');
+        });
+    });
+
+    it('keeps repaired names and deactivates the feature flag on rollback', function () use ($migrationName, $migrationPath, $insertContract): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertContract): void {
+            $firstId = $insertContract('Master Agreement', now()->subMinutes(2));
+            $secondId = $insertContract('master agreement', now()->subMinute());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('contracts')->where('id', $secondId)->value('name'))->toBe('master agreement-2');
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect(DB::table('contracts')->where('id', $firstId)->value('name'))->toBe('Master Agreement')
+                ->and(DB::table('contracts')->where('id', $secondId)->value('name'))->toBe('master agreement-2')
+                ->and(ContractNameUniquenessFeature::active())->toBeFalse();
         });
     });
 });

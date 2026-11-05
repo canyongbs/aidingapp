@@ -39,6 +39,9 @@ use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\Engage
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementResponse;
+use AidingApp\Notification\Enums\EmailMessageEventType;
+use AidingApp\Notification\Models\EmailMessage;
+use AidingApp\Notification\Models\EmailMessageEvent;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Listeners\AddRecordToTimeline;
 use App\Models\User;
@@ -227,4 +230,40 @@ describe('authorization', function (): void {
 
         expect(EngagementsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeTrue();
     });
+});
+
+it('lists message events newest first, breaking ties by id', function (): void {
+    asSuperAdmin();
+
+    $contact = Contact::factory()->create();
+
+    $engagement = Engagement::factory()->email()->state([
+        'recipient_id' => $contact->getKey(),
+        'recipient_type' => $contact->getMorphClass(),
+    ])->createQuietly();
+
+    app(AddRecordToTimeline::class)->handle(
+        new TimelineableRecordCreated($contact, $engagement),
+    );
+
+    $message = EmailMessage::factory()->for($engagement, 'related')->create();
+
+    // Inserted in the opposite order to the expected one, so insertion order would list Send first.
+    $message->events()->save(EmailMessageEvent::factory()->make([
+        'id' => '00000000-0000-4000-8000-000000000000',
+        'type' => EmailMessageEventType::Send,
+        'occurred_at' => '2025-03-14 10:15:00',
+    ]));
+    $message->events()->save(EmailMessageEvent::factory()->make([
+        'id' => 'ffffffff-ffff-4fff-bfff-ffffffffffff',
+        'type' => EmailMessageEventType::Delivery,
+        'occurred_at' => '2025-03-14 10:15:00',
+    ]));
+
+    Livewire::test(EngagementsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ViewContact::class,
+    ])
+        ->mountAction(TestAction::make('view')->table($engagement->refresh()->timelineRecord))
+        ->assertSchemaComponentStateSet('message_events.0.type', EmailMessageEventType::Delivery->getLabel(), 'mountedActionSchema0');
 });

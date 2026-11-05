@@ -116,6 +116,7 @@ it('validates the inputs', function (SlaRequestFactory $data, array $errors): vo
     ],
 ]);
 
+// TODO: Cleanup Task (sla-name-uniqueness): delete this describe and the test within
 describe('name uniqueness feature flag', function (): void {
     it('does not apply the unique form rule when the feature is disabled', function (): void {
         SlaNameUniquenessFeature::deactivate();

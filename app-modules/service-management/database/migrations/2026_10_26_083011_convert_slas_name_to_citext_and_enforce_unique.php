@@ -45,7 +45,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     /*
      * TODO: Cleanup Task (sla-name-uniqueness): after SlaNameUniquenessFeature is removed:
-     * - remove the `FixesDuplicateNames` trait, the `$chunkSize` and `$usesSoftDeletes` properties, and the `fixDuplicates()` / `revertDuplicates()` calls
+     * - remove the `FixesDuplicateNames` trait, the `$chunkSize` and `$usesSoftDeletes` properties, and the `fixDuplicates()` call
      * - keep the citext column conversion and the unique index, they are permanent
      */
     use FixesDuplicateNames;
@@ -61,6 +61,9 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function (): void {
+            // Blocks concurrent writes from code that predates the unique index until the index exists.
+            DB::statement("LOCK TABLE {$this->table} IN ACCESS EXCLUSIVE MODE");
+
             $this->fixDuplicates();
 
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
@@ -81,9 +84,8 @@ return new class () extends Migration {
 
             DB::statement("DROP INDEX IF EXISTS {$this->table}_name_unique");
 
+            // Names rewritten by `fixDuplicates()` are kept: the `-N` suffix cannot be told apart from a genuine name.
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
-
-            $this->revertDuplicates();
         });
     }
 };

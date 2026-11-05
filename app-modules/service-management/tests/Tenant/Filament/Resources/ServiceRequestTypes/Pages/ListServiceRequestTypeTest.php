@@ -43,14 +43,17 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Features\ServiceRequestTypeCategoryNameUniquenessFeature;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\assertNotSoftDeleted;
 use function Pest\Laravel\assertSoftDeleted;
@@ -259,6 +262,82 @@ it('renames an area', function (): void {
         ->call('renameCategory', $category->getKey(), 'New Cat Name');
 
     expect($category->refresh()->name)->toBe('New Cat Name');
+});
+
+it('does not create an area whose name matches another area case-insensitively', function (): void {
+    asSuperAdmin();
+
+    ServiceRequestTypeCategory::factory()->create(['name' => 'Support']);
+
+    Livewire::test(ListServiceRequestTypes::class)
+        ->call('createCategory', 'support')
+        ->assertReturned(fn (array $result): bool => $result['saved'] === false)
+        ->assertNotified('Unable to save changes');
+
+    expect(ServiceRequestTypeCategory::query()->whereRaw('LOWER(name) = ?', ['support'])->count())->toBe(1);
+});
+
+it('allows creating an area whose name is freed up by a soft-deleted area case-insensitively', function (): void {
+    asSuperAdmin();
+
+    ServiceRequestTypeCategory::factory()->create(['name' => 'Support'])->delete();
+
+    Livewire::test(ListServiceRequestTypes::class)
+        ->call('createCategory', 'support');
+
+    assertDatabaseHas(ServiceRequestTypeCategory::class, [
+        'name' => 'support',
+        'deleted_at' => null,
+    ]);
+});
+
+it('does not rename an area to a name matching another area case-insensitively', function (): void {
+    asSuperAdmin();
+
+    ServiceRequestTypeCategory::factory()->create(['name' => 'Support']);
+    $category = ServiceRequestTypeCategory::factory()->create(['name' => 'Billing']);
+
+    Livewire::test(ListServiceRequestTypes::class)
+        ->call('renameCategory', $category->getKey(), 'support')
+        ->assertReturned(fn (array $result): bool => $result['saved'] === false)
+        ->assertNotified('Unable to save changes');
+
+    expect($category->refresh()->name)->toBe('Billing');
+});
+
+it('allows renaming an area to its own name with different capitalization', function (): void {
+    asSuperAdmin();
+
+    $category = ServiceRequestTypeCategory::factory()->create(['name' => 'Support']);
+
+    Livewire::test(ListServiceRequestTypes::class)
+        ->call('renameCategory', $category->getKey(), 'SUPPORT');
+
+    expect($category->refresh()->name)->toBe('SUPPORT');
+});
+
+describe('service request type category name uniqueness feature flag', function (): void {
+    it('does not apply the unique form rule when the feature is disabled', function (): void {
+        ServiceRequestTypeCategoryNameUniquenessFeature::deactivate();
+
+        asSuperAdmin();
+
+        ServiceRequestTypeCategory::factory()->create(['name' => 'Support']);
+
+        // With the form rule bypassed, the database's partial unique index is the only backstop, so the
+        // duplicate is rejected by the constraint violation path rather than by case-insensitive validation.
+        Livewire::test(ListServiceRequestTypes::class)
+            ->call('createCategory', 'support')
+            ->assertReturned(fn (array $result): bool => $result['saved'] === false)
+            ->assertNotified(
+                Notification::make()
+                    ->title('Unable to save changes')
+                    ->body('The same name is already in use by another service request type. Please select a different name.')
+                    ->danger()
+            );
+
+        expect(ServiceRequestTypeCategory::query()->whereRaw('LOWER(name) = ?', ['support'])->count())->toBe(1);
+    });
 });
 
 it('renames a type', function (): void {
