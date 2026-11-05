@@ -87,7 +87,7 @@ class ServiceMonitoringReportJob implements ShouldQueue, ShouldBeUnique
             ->where('is_active', true)
             // A soft-deleted target leaves its configuration row behind; skip it rather than dispatch a notify job with no target
             ->whereHas('serviceMonitoringTarget', fn (Builder $query) => $query->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class))
-            ->chunkById(100, function (Collection $configurations) {
+            ->chunkById(100, function (Collection $configurations): void {
                 foreach ($configurations as $configuration) {
                     dispatch(new ServiceMonitoringReportNotifyJob($configuration));
                 }

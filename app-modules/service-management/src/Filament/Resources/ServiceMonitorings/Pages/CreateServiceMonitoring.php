@@ -56,6 +56,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Co
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Rules\ValidServiceMonitoringKeywordValues;
+use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Rules\ValidUrl;
 use Filament\Forms\Components\Select;
@@ -67,6 +68,7 @@ use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
 class CreateServiceMonitoring extends CreateRecord
 {
@@ -86,6 +88,11 @@ class CreateServiceMonitoring extends CreateRecord
                             ->string()
                             ->required()
                             ->maxLength(255)
+                            // TODO: Cleanup Task (service-monitoring-target-name-uniqueness): replace this `when()` with `->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())` once the flag is removed.
+                            ->when(
+                                ServiceMonitoringTargetNameUniquenessFeature::active(),
+                                fn (TextInput $input): TextInput => $input->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
+                            )
                             ->columnSpanFull(),
                         Textarea::make('description')
                             ->label('Description')
@@ -110,7 +117,7 @@ class CreateServiceMonitoring extends CreateRecord
                         TextEntry::make('helperText')
                             ->hiddenLabel()
                             ->state('Spaces may be used within a string. Use quotes when a string contains a comma or double quotes.')
-                            ->visible(fn (Get $get) => $get('monitor_type') === MonitorType::KeywordMatch)
+                            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::KeywordMatch)
                             ->columnSpanFull(),
                         TextInput::make('should_contain')
                             ->label('Should Contain')
@@ -118,7 +125,7 @@ class CreateServiceMonitoring extends CreateRecord
                                 ...($get('monitor_type') === MonitorType::KeywordMatch ? ['required_without:data.should_not_contain'] : []),
                                 new ValidServiceMonitoringKeywordValues(),
                             ])
-                            ->visible(fn (Get $get) => $get('monitor_type') === MonitorType::KeywordMatch)
+                            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::KeywordMatch)
                             ->hintIcon('heroicon-m-question-mark-circle', 'Enter one or more required strings separated by commas. Every string must appear in the response. Matching is case-insensitive.'),
                         TextInput::make('should_not_contain')
                             ->label('Should Not Contain')
@@ -126,7 +133,7 @@ class CreateServiceMonitoring extends CreateRecord
                                 ...($get('monitor_type') === MonitorType::KeywordMatch ? ['required_without:data.should_contain'] : []),
                                 new ValidServiceMonitoringKeywordValues(),
                             ])
-                            ->visible(fn (Get $get) => $get('monitor_type') === MonitorType::KeywordMatch)
+                            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::KeywordMatch)
                             ->hintIcon('heroicon-m-question-mark-circle', 'Enter one or more prohibited strings separated by commas. The check fails if any string appears in the response. Matching is case-insensitive.'),
                         SuccessfulStatusCodesSelect::make(),
                         MaxLatencyToggle::make(),

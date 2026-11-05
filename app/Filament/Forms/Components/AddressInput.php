@@ -65,7 +65,7 @@ class AddressInput
 
                     session()->forget('has_aws_geo_places_error_notification_sent');
 
-                    return collect($results)->map(function (AutocompletedAddress $addressDto) {
+                    return collect($results)->map(function (AutocompletedAddress $addressDto): SearchResult {
                         return SearchResult::make($addressDto->label)->withData('data', $addressDto);
                     })->toArray();
                 } catch (Throwable $exception) {
@@ -75,7 +75,7 @@ class AddressInput
                 }
             })
             /** @phpstan-ignore argument.type */
-            ->onItemSelected(function (Set $set, SearchResult $item) use ($fields) {
+            ->onItemSelected(function (Set $set, SearchResult $item) use ($fields): void {
                 try {
                     $data = $item->get('data');
 

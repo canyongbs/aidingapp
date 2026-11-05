@@ -37,8 +37,9 @@
 use AidingApp\Contact\Actions\MatchContactToOrganization;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
+use App\Features\ContactArchivingFeature;
 
-it('associates an unaffiliated contact with the matching organization', function () {
+it('associates an unaffiliated contact with the matching organization', function (): void {
     $organization = Organization::factory()->create([
         'domains' => [],
     ]);
@@ -57,7 +58,7 @@ it('associates an unaffiliated contact with the matching organization', function
     expect($contact->refresh()->organization_id)->toBe($organization->getKey());
 });
 
-it('does not associate a contact with an invalid email address', function () {
+it('does not associate a contact with an invalid email address', function (): void {
     Organization::factory()->create([
         'domains' => [['domain' => 'example.com']],
     ]);
@@ -71,7 +72,7 @@ it('does not associate a contact with an invalid email address', function () {
     expect($contact->refresh()->organization_id)->toBeNull();
 });
 
-it('does not associate a contact when no organization domain matches', function () {
+it('does not associate a contact when no organization domain matches', function (): void {
     Organization::factory()->create([
         'domains' => [['domain' => 'example.com']],
     ]);
@@ -85,7 +86,7 @@ it('does not associate a contact when no organization domain matches', function 
     expect($contact->refresh()->organization_id)->toBeNull();
 });
 
-it('preserves a contact organization that was already assigned', function () {
+it('preserves a contact organization that was already assigned', function (): void {
     $organization = Organization::factory()->create([
         'domains' => [['domain' => 'example.com']],
     ]);
@@ -101,7 +102,7 @@ it('preserves a contact organization that was already assigned', function () {
     expect($contact->refresh()->organization_id)->toBe($otherOrganization->getKey());
 });
 
-it('preserves an organization assigned after a stale contact was loaded', function () {
+it('preserves an organization assigned after a stale contact was loaded', function (): void {
     $organization = Organization::factory()->create([
         'domains' => [],
     ]);
@@ -126,7 +127,7 @@ it('preserves an organization assigned after a stale contact was loaded', functi
     expect($contact->refresh()->organization_id)->toBe($otherOrganization->getKey());
 });
 
-it('matches the current email when a stale contact is passed', function (?string $currentEmail, bool $targeted, bool $matches) {
+it('matches the current email when a stale contact is passed', function (?string $currentEmail, bool $targeted, bool $matches): void {
     $oldOrganization = Organization::factory()->create(['domains' => []]);
     $currentOrganization = Organization::factory()->create(['domains' => []]);
     $contact = Contact::factory()->create([
@@ -154,3 +155,54 @@ it('matches the current email when a stale contact is passed', function (?string
     'cleared' => [null, false, false],
     'changed away from the targeted organization' => ['person@current.example', true, false],
 ]);
+
+it('does not link an archived contact to an organization', function (): void {
+    Organization::factory()->create([
+        'domains' => [['domain' => 'example.com']],
+    ]);
+    $contact = Contact::factory()->archived()->create([
+        'email' => 'person@example.com',
+        'organization_id' => null,
+    ]);
+
+    expect($contact->refresh()->organization_id)->toBeNull();
+
+    app(MatchContactToOrganization::class)($contact->refresh());
+
+    expect($contact->refresh()->organization_id)->toBeNull();
+});
+
+it('links an archived contact to an organization while archiving is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    $organization = Organization::factory()->create([
+        'domains' => [],
+    ]);
+    $contact = Contact::factory()->archived()->create([
+        'email' => 'person@example.com',
+        'organization_id' => null,
+    ]);
+
+    $organization->domains = [['domain' => 'example.com']];
+    $organization->saveQuietly();
+
+    expect($contact->refresh()->organization_id)->toBeNull();
+
+    app(MatchContactToOrganization::class)($contact->refresh());
+
+    expect($contact->refresh()->organization_id)->toBe($organization->getKey());
+});
+
+it('does not associate a contact with an archived organization', function (): void {
+    Organization::factory()->archived()->create([
+        'domains' => [['domain' => 'example.com']],
+    ]);
+    $contact = Contact::factory()->create([
+        'email' => 'person@example.com',
+        'organization_id' => null,
+    ]);
+
+    app(MatchContactToOrganization::class)($contact->refresh());
+
+    expect($contact->refresh()->organization_id)->toBeNull();
+});

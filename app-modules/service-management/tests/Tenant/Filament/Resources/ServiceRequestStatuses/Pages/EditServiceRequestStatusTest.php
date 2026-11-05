@@ -54,7 +54,7 @@ use function Pest\Laravel\get;
 use function PHPUnit\Framework\assertEquals;
 use function Tests\asSuperAdmin;
 
-test('A successful action on the EditServiceRequestStatus page', function () {
+test('A successful action on the EditServiceRequestStatus page', function (): void {
     $serviceRequestStatus = ServiceRequestStatus::factory()->create();
 
     asSuperAdmin()
@@ -84,7 +84,7 @@ test('A successful action on the EditServiceRequestStatus page', function () {
     assertEquals($editRequest['color'], $serviceRequestStatus->fresh()->color);
 });
 
-test('EditServiceRequestStatus requires valid data', function (EditServiceRequestStatusRequestFactory $data, array $errors) {
+test('EditServiceRequestStatus requires valid data', function (EditServiceRequestStatusRequestFactory $data, array $errors): void {
     asSuperAdmin();
 
     $serviceRequestStatus = ServiceRequestStatus::factory()->create();
@@ -113,7 +113,7 @@ test('EditServiceRequestStatus requires valid data', function (EditServiceReques
 
 // Permission Tests
 
-test('EditServiceRequestStatus is gated with proper access control', function () {
+test('EditServiceRequestStatus is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $serviceRequestStatus = ServiceRequestStatus::factory()->create();
@@ -152,7 +152,7 @@ test('EditServiceRequestStatus is gated with proper access control', function ()
     assertEquals($request['name'], $serviceRequestStatus->fresh()->name);
 });
 
-test('EditServiceRequestStatus is gated with proper feature access control', function () {
+test('EditServiceRequestStatus is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -201,7 +201,7 @@ test('EditServiceRequestStatus is gated with proper feature access control', fun
     assertEquals($request['name'], $serviceRequestStatus->fresh()->name);
 });
 
-test('EditServiceRequestStatus allows modifying sort on system protected rows but blocks other columns', function (array $data, bool $shouldSucceed) {
+test('EditServiceRequestStatus allows modifying sort on system protected rows but blocks other columns', function (array $data, bool $shouldSucceed): void {
     /** @var ServiceRequestStatus $serviceRequestStatus */
     $serviceRequestStatus = ServiceRequestStatus::factory()
         ->systemProtected()
@@ -242,7 +242,7 @@ test('EditServiceRequestStatus allows modifying sort on system protected rows bu
     'modify sort and name' => [['sort' => 5, 'name' => 'New Name'], false],
 ]);
 
-test('EditServiceRequestStatus allows modifying all columns on non-system protected rows', function () {
+test('EditServiceRequestStatus allows modifying all columns on non-system protected rows', function (): void {
     $serviceRequestStatus = ServiceRequestStatus::factory()
         ->create();
 
@@ -261,7 +261,7 @@ test('EditServiceRequestStatus allows modifying all columns on non-system protec
 
 // Name Uniqueness Tests
 
-test('EditServiceRequestStatus prevents renaming to a case-insensitive duplicate name', function () {
+test('EditServiceRequestStatus prevents renaming to a case-insensitive duplicate name', function (): void {
     asSuperAdmin();
 
     ServiceRequestStatus::factory()->create(['name' => 'Backlog']);
@@ -277,7 +277,7 @@ test('EditServiceRequestStatus prevents renaming to a case-insensitive duplicate
     expect($serviceRequestStatus->fresh()->name)->toBe('Draft');
 });
 
-test('EditServiceRequestStatus allows saving a status without changing its name', function () {
+test('EditServiceRequestStatus allows saving a status without changing its name', function (): void {
     asSuperAdmin();
 
     $serviceRequestStatus = ServiceRequestStatus::factory()->create(['name' => 'Draft']);
@@ -290,8 +290,8 @@ test('EditServiceRequestStatus allows saving a status without changing its name'
         ->assertHasNoFormErrors();
 });
 
-describe('archiving', function () {
-    it('can archive a service request status', function () {
+describe('archiving', function (): void {
+    it('can archive a service request status', function (): void {
         asSuperAdmin();
 
         $serviceRequestStatus = ServiceRequestStatus::factory()->open()->create();
@@ -308,7 +308,7 @@ describe('archiving', function () {
             ->and($serviceRequestStatus->trashed())->toBeFalse();
     });
 
-    it('can unarchive an archived service request status', function () {
+    it('can unarchive an archived service request status', function (): void {
         asSuperAdmin();
 
         $serviceRequestStatus = ServiceRequestStatus::factory()->open()->archived()->create();
@@ -324,7 +324,7 @@ describe('archiving', function () {
         expect($serviceRequestStatus->refresh()->isArchived())->toBeFalse();
     });
 
-    it('cannot reach the edit page for a system protected service request status', function () {
+    it('cannot reach the edit page for a system protected service request status', function (): void {
         asSuperAdmin();
 
         $serviceRequestStatus = ServiceRequestStatus::factory()->open()->systemProtected()->create();
@@ -335,7 +335,7 @@ describe('archiving', function () {
             ->assertForbidden();
     });
 
-    it('hides the archive action for an already archived service request status', function () {
+    it('hides the archive action for an already archived service request status', function (): void {
         asSuperAdmin();
 
         $serviceRequestStatus = ServiceRequestStatus::factory()->open()->archived()->create();
@@ -346,7 +346,7 @@ describe('archiving', function () {
             ->assertActionHidden(TestAction::make('archive'));
     });
 
-    it('hides the unarchive action for a service request status that is not archived', function () {
+    it('hides the unarchive action for a service request status that is not archived', function (): void {
         asSuperAdmin();
 
         $serviceRequestStatus = ServiceRequestStatus::factory()->open()->create();
@@ -357,7 +357,7 @@ describe('archiving', function () {
             ->assertActionHidden(TestAction::make('unarchive'));
     });
 
-    it('warns that archiving will not stop a service request type automation', function () {
+    it('warns that archiving will not stop a service request type automation', function (): void {
         asSuperAdmin();
 
         $serviceRequestStatus = ServiceRequestStatus::factory()->create();
@@ -372,7 +372,7 @@ describe('archiving', function () {
             ->toBe('This status is used for automatic status changes by 1 service request type: VPN Access Request. Archiving will not stop that automation.');
     });
 
-    it('does not warn when no service request type automates the status', function () {
+    it('does not warn when no service request type automates the status', function (): void {
         asSuperAdmin();
 
         $serviceRequestStatus = ServiceRequestStatus::factory()->create();
@@ -385,7 +385,7 @@ describe('archiving', function () {
             ->not()->toContain('automatic status changes');
     });
 
-    it('does not offer the delete action', function () {
+    it('does not offer the delete action', function (): void {
         asSuperAdmin();
 
         $serviceRequestStatus = ServiceRequestStatus::factory()->open()->create();

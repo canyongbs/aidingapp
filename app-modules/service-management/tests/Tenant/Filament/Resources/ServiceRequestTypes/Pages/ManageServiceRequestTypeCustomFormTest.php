@@ -39,6 +39,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\Man
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\StepDescriptionFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Str;
@@ -68,14 +69,14 @@ $customFormContent = function (string $label = 'Your name'): array {
     ];
 };
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->data->addons->onlineForms = true;
     $settings->save();
 });
 
-it('is not accessible when the online forms feature is disabled', function () {
+it('is not accessible when the online forms feature is disabled', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->onlineForms = false;
     $settings->save();
@@ -87,7 +88,7 @@ it('is not accessible when the online forms feature is disabled', function () {
     expect(ManageServiceRequestTypeCustomForm::canAccess(['record' => $type]))->toBeFalse();
 });
 
-it('is forbidden for users without the required permissions', function () {
+it('is forbidden for users without the required permissions', function (): void {
     $user = User::factory()->create();
     $type = ServiceRequestType::factory()->create();
 
@@ -98,7 +99,7 @@ it('is forbidden for users without the required permissions', function () {
     ])->assertForbidden();
 });
 
-it('creates a form for a type that does not have one yet', function () use ($customFormContent) {
+it('creates a form for a type that does not have one yet', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -119,7 +120,7 @@ it('creates a form for a type that does not have one yet', function () use ($cus
         ->and($type->form->fields()->count())->toBe(1);
 });
 
-it('edits the form in place when it has no submissions', function () use ($customFormContent) {
+it('edits the form in place when it has no submissions', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -141,7 +142,7 @@ it('edits the form in place when it has no submissions', function () use ($custo
         ->and($type->form->fields()->where('label', 'Updated label')->exists())->toBeTrue();
 });
 
-it('archives the current form and creates a new version when submissions exist', function () use ($customFormContent) {
+it('archives the current form and creates a new version when submissions exist', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -168,7 +169,7 @@ it('archives the current form and creates a new version when submissions exist',
         ->and($type->form->fields()->where('label', 'New version field')->exists())->toBeTrue();
 });
 
-it('creates a new version when a non-submitted submission exists so its field references are preserved', function () use ($customFormContent) {
+it('creates a new version when a non-submitted submission exists so its field references are preserved', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -193,7 +194,7 @@ it('creates a new version when a non-submitted submission exists so its field re
         ->and($type->form->getKey())->not()->toBe($form->getKey());
 });
 
-it('only ever has one active form per type after repeated edits with submissions', function () use ($customFormContent) {
+it('only ever has one active form per type after repeated edits with submissions', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -218,7 +219,7 @@ it('only ever has one active form per type after repeated edits with submissions
     )->toBe(1);
 });
 
-it('keeps prior submissions rendering against their archived form version', function () use ($customFormContent) {
+it('keeps prior submissions rendering against their archived form version', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -245,7 +246,7 @@ it('keeps prior submissions rendering against their archived form version', func
         ->and($submission->submissible->isArchived())->toBeTrue();
 });
 
-it('preserves the field responses of a prior submission after a version bump', function () use ($customFormContent) {
+it('preserves the field responses of a prior submission after a version bump', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -287,7 +288,7 @@ it('preserves the field responses of a prior submission after a version bump', f
         ->and($submission->fields()->first()->pivot->getAttribute('response'))->toBe('Jane Doe');
 });
 
-it('saves the description', function () use ($customFormContent) {
+it('saves the description', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -306,7 +307,7 @@ it('saves the description', function () use ($customFormContent) {
     expect($type->form->description)->toBe('How to request access.');
 });
 
-it('saves the is_first_step_combined toggle', function () use ($customFormContent) {
+it('saves the is_first_step_combined toggle', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -325,7 +326,7 @@ it('saves the is_first_step_combined toggle', function () use ($customFormConten
     expect($type->form->is_first_step_combined)->toBeTrue();
 });
 
-it('hydrates the is_first_step_combined toggle from an existing form', function () {
+it('hydrates the is_first_step_combined toggle from an existing form', function (): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -340,7 +341,7 @@ it('hydrates the is_first_step_combined toggle from an existing form', function 
         ->assertSet('data.is_first_step_combined', true);
 });
 
-it('stores steps and clears top-level content for a multi-step form', function () use ($customFormContent) {
+it('stores steps and clears top-level content for a multi-step form', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -364,4 +365,116 @@ it('stores steps and clears top-level content for a multi-step form', function (
         ->and($type->form->content)->toBeNull()
         ->and($type->form->steps()->count())->toBe(1)
         ->and($type->form->steps()->first()->label)->toBe('Step One');
+});
+
+it('stores the step description for a multi-step form', function () use ($customFormContent): void {
+    asSuperAdmin();
+
+    $type = ServiceRequestType::factory()->create();
+
+    Livewire::test(ManageServiceRequestTypeCustomForm::class, [
+        'record' => $type->getKey(),
+    ])
+        ->set('data.is_wizard', true)
+        ->set('data.steps', [
+            [
+                'label' => 'Step One',
+                'description' => 'Tell us about yourself.',
+                'content' => $customFormContent('Step field'),
+            ],
+            [
+                'label' => 'Step Two',
+                'content' => $customFormContent('Other field'),
+            ],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $type->unsetRelation('form');
+
+    expect($type->form->steps()->pluck('description', 'label')->all())->toBe([
+        'Step One' => 'Tell us about yourself.',
+        'Step Two' => null,
+    ]);
+});
+
+it('hydrates the step description from an existing form', function (): void {
+    asSuperAdmin();
+
+    $type = ServiceRequestType::factory()->create();
+
+    $form = ServiceRequestForm::factory()
+        ->for($type, 'type')
+        ->create(['is_wizard' => true]);
+
+    $form->steps()->create([
+        'label' => 'Step One',
+        'description' => 'Tell us about yourself.',
+        'sort' => 0,
+        'content' => ['type' => 'doc', 'content' => []],
+    ]);
+
+    Livewire::test(ManageServiceRequestTypeCustomForm::class, [
+        'record' => $type->getKey(),
+    ])
+        ->assertSet('data.steps', fn (array $steps): bool => array_column($steps, 'description') === ['Tell us about yourself.']);
+});
+
+it('shows the step description field only when `StepDescriptionFeature` is active', function (bool $isFeatureActive): void {
+    asSuperAdmin();
+
+    if (! $isFeatureActive) {
+        StepDescriptionFeature::deactivate();
+    }
+
+    $type = ServiceRequestType::factory()->create();
+
+    $form = ServiceRequestForm::factory()
+        ->for($type, 'type')
+        ->create(['is_wizard' => true]);
+
+    $form->steps()->create([
+        'label' => 'Step One',
+        'sort' => 0,
+        'content' => ['type' => 'doc', 'content' => []],
+    ]);
+
+    $component = Livewire::test(ManageServiceRequestTypeCustomForm::class, [
+        'record' => $type->getKey(),
+    ]);
+
+    $stepKey = array_key_first($component->get('data.steps'));
+
+    $isFeatureActive
+        ? $component->assertFormFieldVisible("steps.{$stepKey}.description")
+        : $component->assertFormFieldHidden("steps.{$stepKey}.description");
+})->with([
+    'active' => true,
+    'inactive' => false,
+]);
+
+it('does not store the step description when `StepDescriptionFeature` is inactive', function () use ($customFormContent): void {
+    asSuperAdmin();
+
+    StepDescriptionFeature::deactivate();
+
+    $type = ServiceRequestType::factory()->create();
+
+    Livewire::test(ManageServiceRequestTypeCustomForm::class, [
+        'record' => $type->getKey(),
+    ])
+        ->set('data.is_wizard', true)
+        ->set('data.steps', [
+            [
+                'label' => 'Step One',
+                'description' => 'Tell us about yourself.',
+                'content' => $customFormContent('Step field'),
+            ],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $type->unsetRelation('form');
+
+    expect($type->form->steps()->first()->description)->toBeNull();
 });

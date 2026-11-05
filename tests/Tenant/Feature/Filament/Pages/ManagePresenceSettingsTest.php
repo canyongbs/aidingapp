@@ -40,7 +40,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);

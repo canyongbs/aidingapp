@@ -55,7 +55,7 @@ class KnowledgeManagementPortalCategoryController extends Controller
                     ->whereHas('knowledgeBaseItems', fn (Builder $query) => $query->public())
                     ->orderBy('sort')
                     ->get()
-                    ->map(function (KnowledgeBaseCategory $category) {
+                    ->map(function (KnowledgeBaseCategory $category): array {
                         return [
                             'slug' => $category->slug,
                             'name' => $category->name,
@@ -82,7 +82,7 @@ class KnowledgeManagementPortalCategoryController extends Controller
                 'name' => $article->title,
                 'tags' => $article->tags
                     ->sortBy('name')
-                    ->map(fn ($tag) => [
+                    ->map(fn ($tag): array => [
                         'id' => $tag->id,
                         'name' => $tag->name,
                     ])
@@ -99,10 +99,10 @@ class KnowledgeManagementPortalCategoryController extends Controller
             return $category->knowledgeBaseItems()
                 ->with('tags')
                 ->public()
-                ->when($filter === 'featured', function (Builder $query) {
+                ->when($filter === 'featured', function (Builder $query): void {
                     $query->where('is_featured', true);
                 })
-                ->when($filter === 'most-viewed', function (Builder $query) {
+                ->when($filter === 'most-viewed', function (Builder $query): void {
                     $query->where('portal_view_count', '>', 0)->orderBy('portal_view_count', 'desc');
                 })
                 ->paginate(5)
@@ -129,7 +129,7 @@ class KnowledgeManagementPortalCategoryController extends Controller
                     ->reorder()
                     ->orderBy('sort')
                     ->get()
-                    ->map(function (KnowledgeBaseCategory $subCategory) {
+                    ->map(function (KnowledgeBaseCategory $subCategory): KnowledgeBaseCategoryData {
                         return KnowledgeBaseCategoryData::from([
                             'slug' => $subCategory->slug,
                             'name' => $subCategory->name,

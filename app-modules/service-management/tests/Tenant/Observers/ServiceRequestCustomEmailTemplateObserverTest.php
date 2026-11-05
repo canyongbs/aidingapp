@@ -39,7 +39,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestCustomEmailTemplate;
 use function Tests\richContentText;
 use function Tests\richContentWith;
 
-it('converts a literal merge tag label when creating', function () {
+it('converts a literal merge tag label when creating', function (): void {
     $template = ServiceRequestCustomEmailTemplate::factory()->create([
         'body' => richContentText("Hello {{ recipient's name }}!"),
     ]);
@@ -51,7 +51,7 @@ it('converts a literal merge tag label when creating', function () {
     ]));
 });
 
-it('converts a literal merge tag identifier when updating', function () {
+it('converts a literal merge tag identifier when updating', function (): void {
     $template = ServiceRequestCustomEmailTemplate::factory()->create();
 
     $template->update([
@@ -63,7 +63,7 @@ it('converts a literal merge tag identifier when updating', function () {
     ]));
 });
 
-it('leaves text that does not match a merge tag untouched', function () {
+it('leaves text that does not match a merge tag untouched', function (): void {
     $body = richContentText('Hello {{ not a merge tag }}!');
 
     $template = ServiceRequestCustomEmailTemplate::factory()->create([

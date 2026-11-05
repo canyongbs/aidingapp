@@ -51,7 +51,7 @@ use function Pest\Laravel\actingAs;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
-it('can list pipelines', function () {
+it('can list pipelines', function (): void {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
@@ -70,8 +70,8 @@ it('can list pipelines', function () {
         ->assertCanSeeTableRecords($pipelines);
 });
 
-describe('authorization', function () {
-    it('allows a super admin to create a pipeline', function () {
+describe('authorization', function (): void {
+    it('allows a super admin to create a pipeline', function (): void {
         $undoRepeaterFake = Repeater::fake();
 
         asSuperAdmin();
@@ -97,7 +97,7 @@ describe('authorization', function () {
         $undoRepeaterFake();
     });
 
-    it('allows the project creator with the update permission to create a pipeline', function () {
+    it('allows the project creator with the update permission to create a pipeline', function (): void {
         $undoRepeaterFake = Repeater::fake();
 
         $user = User::factory()->create();
@@ -130,7 +130,7 @@ describe('authorization', function () {
         $undoRepeaterFake();
     });
 
-    it('allows an assigned project manager with the update permission to create a pipeline', function () {
+    it('allows an assigned project manager with the update permission to create a pipeline', function (): void {
         $undoRepeaterFake = Repeater::fake();
 
         $user = User::factory()->create();
@@ -165,7 +165,7 @@ describe('authorization', function () {
         $undoRepeaterFake();
     });
 
-    it('hides the create action when the user has no update permission', function () {
+    it('hides the create action when the user has no update permission', function (): void {
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');
@@ -183,7 +183,7 @@ describe('authorization', function () {
             ->assertActionHidden(TestAction::make(CreateAction::class)->table());
     });
 
-    it('hides the create action when the user has the update permission but is unrelated to the project', function () {
+    it('hides the create action when the user has the update permission but is unrelated to the project', function (): void {
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');

@@ -475,7 +475,7 @@ class StoreServiceRequestController extends Controller
         $files = collect($filesData);
 
         Bus::batch([
-            ...$files->map(function (array $file) use ($uploadsMediaCollection, $serviceRequest) {
+            ...$files->map(function (array $file) use ($uploadsMediaCollection, $serviceRequest): PersistServiceRequestUpload {
                 return new PersistServiceRequestUpload(
                     $serviceRequest,
                     $file['path'],

@@ -41,7 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
-it('returns correct category distribution within the given date range', function () {
+it('returns correct category distribution within the given date range', function (): void {
     $startDate = now()->subDays(10);
     $endDate = now()->subDays(5);
 
@@ -96,7 +96,7 @@ it('returns correct category distribution within the given date range', function
         ->and($counts[$requestIndex])->toBe(5);
 });
 
-it('returns correct category distribution when no date filters are applied', function () {
+it('returns correct category distribution when no date filters are applied', function (): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->id])->create();
     $status = ServiceRequestStatus::factory()->create();
@@ -131,7 +131,7 @@ it('returns correct category distribution when no date filters are applied', fun
         ->and($counts[$requestIndex])->toBe(7);
 });
 
-it('excludes zero-count categories from the chart', function () {
+it('excludes zero-count categories from the chart', function (): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->id])->create();
     $status = ServiceRequestStatus::factory()->create();

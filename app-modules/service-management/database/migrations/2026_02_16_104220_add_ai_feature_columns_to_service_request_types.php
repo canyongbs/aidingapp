@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('service_request_types', function (Blueprint $table) {
+        Schema::table('service_request_types', function (Blueprint $table): void {
             $table->boolean('is_ai_clarification_enabled')->default(false);
             $table->boolean('is_ai_resolution_enabled')->default(false);
         });
@@ -49,7 +49,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('service_request_types', function (Blueprint $table) {
+        Schema::table('service_request_types', function (Blueprint $table): void {
             $table->dropColumn([
                 'is_ai_clarification_enabled',
                 'is_ai_resolution_enabled',

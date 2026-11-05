@@ -67,7 +67,7 @@ class SyncTimelineData
             return Carbon::parse($record->timeline()->sortableBy())->timestamp;
         });
 
-        $aggregateRecords->each(function (Model $record) use ($recordModel) {
+        $aggregateRecords->each(function (Model $record) use ($recordModel): void {
             assert($record instanceof ProvidesATimeline);
 
             $timelineRecord = Timeline::firstOrCreate([

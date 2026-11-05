@@ -36,19 +36,19 @@
 
 use AidingApp\ServiceManagement\Services\ChallengePageDetector;
 
-it('detects Incapsula challenge pages', function () {
+it('detects Incapsula challenge pages', function (): void {
     $reason = (new ChallengePageDetector())->detect([], '<iframe src="/_Incapsula_Resource">Request unsuccessful. Incapsula</iframe>');
 
     expect($reason)->toBe('The response was blocked by an Incapsula challenge page.');
 });
 
-it('detects Cloudflare challenge pages from response headers', function () {
+it('detects Cloudflare challenge pages from response headers', function (): void {
     $reason = (new ChallengePageDetector())->detect(['cf-mitigated' => ['challenge']], '');
 
     expect($reason)->toBe('The response was blocked by a Cloudflare challenge page.');
 });
 
-it('does not detect an ordinary page as a challenge page', function () {
+it('does not detect an ordinary page as a challenge page', function (): void {
     $reason = (new ChallengePageDetector())->detect(['content-type' => ['text/html']], '<html><body>Service is healthy.</body></html>');
 
     expect($reason)->toBeNull();

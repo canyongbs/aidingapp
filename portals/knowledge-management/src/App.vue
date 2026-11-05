@@ -159,6 +159,7 @@
                 routeName: 'advisories',
                 icon: ShieldExclamationIcon,
                 visible: isAdvisoryEnabled.value && user.value !== null,
+                activeRoutes: ['advisories', 'view-advisory'],
             },
             {
                 label: 'Assets',

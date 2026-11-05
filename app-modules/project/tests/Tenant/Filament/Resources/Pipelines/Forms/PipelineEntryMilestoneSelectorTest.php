@@ -44,11 +44,11 @@ use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
 
-beforeEach(function () {
+beforeEach(function (): void {
     asSuperAdmin(User::factory()->create());
 });
 
-it('excludes archived milestones from the related-milestones picker', function () {
+it('excludes archived milestones from the related-milestones picker', function (): void {
     $project = Project::factory()->create();
     $active = ProjectMilestone::factory()->for($project)->create();
     $archived = ProjectMilestone::factory()->for($project)->create();

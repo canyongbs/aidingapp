@@ -38,6 +38,7 @@ namespace AidingApp\ContractManagement\Filament\Resources\Contracts\Pages;
 
 use AidingApp\ContractManagement\Filament\Resources\Contracts\ContractResource;
 use AidingApp\ContractManagement\Models\ContractType;
+use App\Features\ContractNameUniquenessFeature;
 use Cknow\Money\Money;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -49,6 +50,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\Rules\Unique;
 
 class CreateContract extends CreateRecord
 {
@@ -60,7 +62,13 @@ class CreateContract extends CreateRecord
             ->components([
                 TextInput::make('name')
                     ->string()
-                    ->required(),
+                    ->required()
+                    ->maxLength(255)
+                    // TODO: Cleanup Task (contract-name-uniqueness): replace this `when()` with `->unique(modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed())` once the flag is removed.
+                    ->when(
+                        ContractNameUniquenessFeature::active(),
+                        fn (TextInput $field): TextInput => $field->unique(modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed()),
+                    ),
                 Select::make('contract_type_id')
                     ->required()
                     ->label('Contract Type')
@@ -94,7 +102,7 @@ class CreateContract extends CreateRecord
                     ->native(false)
                     ->live(onBlur: true)
                     ->afterStateUpdated(
-                        fn (Get $get, Set $set) => $get('start_date') > $get('end_date') ? $set('end_date', '') : ''
+                        fn (Get $get, Set $set): mixed => $get('start_date') > $get('end_date') ? $set('end_date', '') : ''
                     )
                     ->closeOnDateSelection()
                     ->placeholder('Select start date')
@@ -103,7 +111,7 @@ class CreateContract extends CreateRecord
                     ->label('End Date')
                     ->native(false)
                     ->placeholder('Select end date')
-                    ->minDate(fn (Get $get) => $get('start_date'))
+                    ->minDate(fn (Get $get): mixed => $get('start_date'))
                     ->live(onBlur: true)
                     ->closeOnDateSelection()
                     ->required(),

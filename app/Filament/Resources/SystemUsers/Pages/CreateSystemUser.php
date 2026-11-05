@@ -36,10 +36,12 @@
 
 namespace App\Filament\Resources\SystemUsers\Pages;
 
+use App\Features\SystemUserNameUniquenessFeature;
 use App\Filament\Resources\SystemUsers\SystemUserResource;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
 class CreateSystemUser extends CreateRecord
 {
@@ -52,7 +54,12 @@ class CreateSystemUser extends CreateRecord
         return $schema->components([
             TextInput::make('name')
                 ->required()
-                ->string(),
+                ->string()
+                // TODO: Cleanup Task (system-user-name-uniqueness): replace this `when()` with `->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())` once the flag is removed.
+                ->when(
+                    SystemUserNameUniquenessFeature::active(),
+                    fn (TextInput $input): TextInput => $input->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
+                ),
         ]);
     }
 }

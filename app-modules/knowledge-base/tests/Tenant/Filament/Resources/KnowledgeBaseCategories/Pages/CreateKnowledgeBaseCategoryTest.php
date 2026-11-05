@@ -38,13 +38,16 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\Knowledge
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\Pages\CreateKnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseCategories\RequestFactories\CreateKnowledgeBaseCategoryRequestFactory;
+use App\Features\KnowledgeBaseCategoryNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertCount;
+use function Tests\asSuperAdmin;
 
 // TODO: Write CreateKnowledgeBaseCategory tests
 //test('A successful action on the CreateKnowledgeBaseCategory page', function () {});
@@ -53,7 +56,7 @@ use function PHPUnit\Framework\assertCount;
 
 // Permission Tests
 
-test('CreateKnowledgeBaseCategory is gated with proper access control', function () {
+test('CreateKnowledgeBaseCategory is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -84,7 +87,7 @@ test('CreateKnowledgeBaseCategory is gated with proper access control', function
     assertDatabaseHas(KnowledgeBaseCategory::class, $request->toArray());
 });
 
-test('CreateKnowledgeBaseCategory is gated with proper feature access control', function () {
+test('CreateKnowledgeBaseCategory is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = false;
@@ -123,4 +126,52 @@ test('CreateKnowledgeBaseCategory is gated with proper feature access control', 
     assertCount(1, KnowledgeBaseCategory::all());
 
     assertDatabaseHas(KnowledgeBaseCategory::class, $request->toArray());
+});
+
+it('does not allow creating a knowledge base category whose name matches another category case-insensitively', function (): void {
+    asSuperAdmin();
+
+    KnowledgeBaseCategory::factory()->create(['name' => 'Getting Started']);
+
+    $request = CreateKnowledgeBaseCategoryRequestFactory::new()->state(['name' => 'getting started'])->create();
+
+    Livewire::test(CreateKnowledgeBaseCategory::class)
+        ->fillForm($request)
+        ->call('create')
+        ->assertHasFormErrors(['name' => 'unique']);
+});
+
+it('allows creating a knowledge base category whose name is freed up by a soft-deleted category case-insensitively', function (): void {
+    asSuperAdmin();
+
+    KnowledgeBaseCategory::factory()->create(['name' => 'Getting Started'])->delete();
+
+    $request = CreateKnowledgeBaseCategoryRequestFactory::new()->state(['name' => 'getting started'])->create();
+
+    Livewire::test(CreateKnowledgeBaseCategory::class)
+        ->fillForm($request)
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(KnowledgeBaseCategory::class, [
+        'name' => 'getting started',
+        'deleted_at' => null,
+    ]);
+});
+
+describe('name uniqueness feature flag', function (): void {
+    it('does not apply the unique form rule when the feature is disabled', function (): void {
+        KnowledgeBaseCategoryNameUniquenessFeature::deactivate();
+
+        asSuperAdmin();
+
+        KnowledgeBaseCategory::factory()->create(['name' => 'Getting Started']);
+
+        $request = CreateKnowledgeBaseCategoryRequestFactory::new()->state(['name' => 'Getting Started'])->create();
+
+        expect(fn () => Livewire::test(CreateKnowledgeBaseCategory::class)
+            ->fillForm($request)
+            ->call('create'))
+            ->toThrow(UniqueConstraintViolationException::class);
+    });
 });

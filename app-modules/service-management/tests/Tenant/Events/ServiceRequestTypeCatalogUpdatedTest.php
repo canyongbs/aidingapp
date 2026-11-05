@@ -37,7 +37,7 @@
 use AidingApp\ServiceManagement\Events\ServiceRequestTypeCatalogUpdated;
 use Illuminate\Broadcasting\PrivateChannel;
 
-it('broadcasts on the private channel of its tenant', function () {
+it('broadcasts on the private channel of its tenant', function (): void {
     $channels = (new ServiceRequestTypeCatalogUpdated('tenant-id'))->broadcastOn();
 
     expect($channels)->toHaveCount(1)
@@ -45,7 +45,7 @@ it('broadcasts on the private channel of its tenant', function () {
         ->and($channels[0]->name)->toBe('private-service-request-type-catalog.tenant-id');
 });
 
-it('only exposes the socket of the user who made the change', function () {
+it('only exposes the socket of the user who made the change', function (): void {
     expect((new ServiceRequestTypeCatalogUpdated('tenant-id', '1234.5678'))->broadcastWith())
         ->toBe(['origin_socket_id' => '1234.5678']);
 });

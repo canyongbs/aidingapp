@@ -73,7 +73,7 @@ class ManagePresenceSettings extends SettingsPage
                     ->helperText('Minutes of inactivity before a user or contact is considered idle.')
                     ->numeric()
                     ->minValue(1)
-                    ->maxValue(fn (Get $get) => ($get('idle_threshold') ?? 2) - 1)
+                    ->maxValue(fn (Get $get): int|float => ($get('idle_threshold') ?? 2) - 1)
                     ->required()
                     ->live(onBlur: true)
                     ->suffix('minutes'),
@@ -81,8 +81,8 @@ class ManagePresenceSettings extends SettingsPage
                     ->label('Idle threshold')
                     ->helperText('Minutes of inactivity before a user or contact is considered inactive.')
                     ->numeric()
-                    ->minValue(fn (Get $get) => ($get('active_threshold') ?? 0) + 1)
-                    ->maxValue(fn (Get $get) => ($get('inactive_threshold') ?? 2) - 1)
+                    ->minValue(fn (Get $get): int|float => ($get('active_threshold') ?? 0) + 1)
+                    ->maxValue(fn (Get $get): int|float => ($get('inactive_threshold') ?? 2) - 1)
                     ->required()
                     ->live(onBlur: true)
                     ->suffix('minutes'),
@@ -90,7 +90,7 @@ class ManagePresenceSettings extends SettingsPage
                     ->label('Inactive threshold')
                     ->helperText('Minutes of inactivity before a user or contact is considered offline.')
                     ->numeric()
-                    ->minValue(fn (Get $get) => ($get('idle_threshold') ?? 0) + 1)
+                    ->minValue(fn (Get $get): int|float => ($get('idle_threshold') ?? 0) + 1)
                     ->required()
                     ->live(onBlur: true)
                     ->suffix('minutes'),

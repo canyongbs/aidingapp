@@ -36,7 +36,7 @@
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringStatus;
 
-it('resolves the status of a group of checks', function (int $checksCount, int $successfulChecksCount, ServiceMonitoringStatus $status) {
+it('resolves the status of a group of checks', function (int $checksCount, int $successfulChecksCount, ServiceMonitoringStatus $status): void {
     expect(ServiceMonitoringStatus::fromCheckCounts($checksCount, $successfulChecksCount))->toBe($status);
 })->with([
     'no checks' => [0, 0, ServiceMonitoringStatus::Unknown],

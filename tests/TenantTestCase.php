@@ -48,7 +48,7 @@ abstract class TenantTestCase extends TestCase
     {
         parent::setUp();
 
-        Event::listen(MadeTenantCurrentEvent::class, function () {
+        Event::listen(MadeTenantCurrentEvent::class, function (): void {
             $this->beginDatabaseTransactionOnConnection($this->tenantDatabaseConnectionName());
         });
 
@@ -65,7 +65,7 @@ abstract class TenantTestCase extends TestCase
             RefreshDatabaseState::$migrated = true;
         }
 
-        $beginLandlordTransaction = function () {
+        $beginLandlordTransaction = function (): void {
             $this->beginDatabaseTransactionOnConnection($this->landlordDatabaseConnectionName());
         };
 

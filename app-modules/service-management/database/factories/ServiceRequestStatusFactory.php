@@ -74,7 +74,7 @@ class ServiceRequestStatusFactory extends Factory
      */
     public function open(): Factory
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             return [
                 'classification' => SystemServiceRequestClassification::Open,
                 'name' => 'Open',
@@ -88,7 +88,7 @@ class ServiceRequestStatusFactory extends Factory
      */
     public function inProgress(): Factory
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             return [
                 'classification' => SystemServiceRequestClassification::InProgress,
                 'name' => 'In Progress',
@@ -102,7 +102,7 @@ class ServiceRequestStatusFactory extends Factory
      */
     public function closed(): Factory
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             return [
                 'classification' => SystemServiceRequestClassification::Closed,
                 'name' => 'Closed',
@@ -116,7 +116,7 @@ class ServiceRequestStatusFactory extends Factory
      */
     public function waiting(): Factory
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             return [
                 'classification' => SystemServiceRequestClassification::Waiting,
                 'name' => 'Waiting',

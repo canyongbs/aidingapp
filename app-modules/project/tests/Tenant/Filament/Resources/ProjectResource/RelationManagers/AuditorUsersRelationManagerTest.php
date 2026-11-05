@@ -47,7 +47,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-it('can list auditor users', function () {
+it('can list auditor users', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -63,7 +63,7 @@ it('can list auditor users', function () {
         ->assertCanSeeTableRecords($auditors);
 });
 
-it('can attach an auditor user to a project', function () {
+it('can attach an auditor user to a project', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -82,7 +82,7 @@ it('can attach an auditor user to a project', function () {
     expect($project->auditorUsers()->whereKey($auditor->getKey())->exists())->toBeTrue();
 });
 
-it('can detach an auditor user from a project', function () {
+it('can detach an auditor user from a project', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -101,7 +101,7 @@ it('can detach an auditor user from a project', function () {
     expect($project->auditorUsers()->whereKey($auditor->getKey())->exists())->toBeFalse();
 });
 
-it('can bulk detach auditor users from a project', function () {
+it('can bulk detach auditor users from a project', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -121,8 +121,8 @@ it('can bulk detach auditor users from a project', function () {
     expect($project->auditorUsers()->count())->toBe(0);
 });
 
-describe('authorization', function () {
-    it('allows a super admin to attach an auditor user', function () {
+describe('authorization', function (): void {
+    it('allows a super admin to attach an auditor user', function (): void {
         asSuperAdmin();
 
         $project = Project::factory()->create();
@@ -142,7 +142,7 @@ describe('authorization', function () {
         expect($project->auditorUsers()->whereKey($auditor->getKey())->exists())->toBeTrue();
     });
 
-    it('allows the project creator with the update permission to attach an auditor user', function () {
+    it('allows the project creator with the update permission to attach an auditor user', function (): void {
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');
@@ -168,7 +168,7 @@ describe('authorization', function () {
         expect($project->auditorUsers()->whereKey($auditor->getKey())->exists())->toBeTrue();
     });
 
-    it('allows an assigned project manager with the update permission to attach an auditor user', function () {
+    it('allows an assigned project manager with the update permission to attach an auditor user', function (): void {
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');
@@ -196,7 +196,7 @@ describe('authorization', function () {
         expect($project->auditorUsers()->whereKey($auditor->getKey())->exists())->toBeTrue();
     });
 
-    it('hides the attach action when the user is only an auditor, not a manager or creator', function () {
+    it('hides the attach action when the user is only an auditor, not a manager or creator', function (): void {
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');
@@ -216,7 +216,7 @@ describe('authorization', function () {
             ->assertActionHidden(TestAction::make(AttachAction::class)->table());
     });
 
-    it('hides the attach action when the user has no update permission', function () {
+    it('hides the attach action when the user has no update permission', function (): void {
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');
@@ -233,7 +233,7 @@ describe('authorization', function () {
             ->assertActionHidden(TestAction::make(AttachAction::class)->table());
     });
 
-    it('hides the attach action when the user has the update permission but is unrelated to the project', function () {
+    it('hides the attach action when the user has the update permission but is unrelated to the project', function (): void {
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');

@@ -44,7 +44,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::table('knowledge_base_articles')->chunkById(100, function (Collection $articles) {
+        DB::table('knowledge_base_articles')->chunkById(100, function (Collection $articles): void {
             foreach ($articles as $article) {
                 if (! blank($article->article_details)) {
                     try {
@@ -63,7 +63,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('knowledge_base_articles', function (Blueprint $table) {
+        Schema::table('knowledge_base_articles', function (Blueprint $table): void {
             DB::table('knowledge_base_articles')->update([
                 'article_details_fulltext' => null,
             ]);

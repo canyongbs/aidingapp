@@ -39,16 +39,16 @@
     import EmptyState from '@common/portal/EmptyState.vue';
     import HeroSearch from '@common/portal/HeroSearch.vue';
     import Page from '@common/portal/Page.vue';
-    import PageCard from '@common/portal/PageCard.vue';
     import Pagination from '@common/portal/Pagination.vue';
     import SearchResults from '@common/portal/SearchResults.vue';
     import Subheading from '@common/portal/Subheading.vue';
     import Tabs from '@common/portal/Tabs.vue';
     import { DocumentTextIcon } from '@heroicons/vue/24/outline';
-    import { useQuery } from '@pinia/colada';
-    import { computed, ref, watch } from 'vue';
+    import { computed, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
+    import LoadFailedState from '../Components/LoadFailedState.vue';
     import { useKnowledgeManagementSearch } from '../Composables/useKnowledgeManagementSearch.js';
+    import { usePaginatedEnvelope } from '../Composables/usePaginatedEnvelope.js';
     import { apiGet } from '../Services/api.js';
     import { articleRoute, categoryRoute } from '../Services/KnowledgeBaseRoutes.js';
     import { useCategoryData, useTagsData } from './loaders.js';
@@ -107,22 +107,12 @@
         })),
     );
 
-    // Tab filter for browsing a category's own articles. Page 1 of every filter tab
-    // arrives together via the route data loader; any other page is fetched client-side.
+    // Tab filter for browsing a category's own articles. Page 1 of every filter tab arrives together via the route data
+    // loader; any other page is fetched on demand. The filter and page live in the URL.
     const activeFilter = computed(() => route.query.filter || categoryTabs.value[0]?.value || 'all-articles');
-    const currentPage = computed(() => parseInt(route.query.page) || 1);
-
-    const pageQuery = useQuery({
-        key: () => [
-            'knowledge-management',
-            'category-articles',
-            String(route.params.categorySlug),
-            activeFilter.value,
-            currentPage.value,
-        ],
-        query: () =>
-            apiGet(`/categories/${route.params.categorySlug}`, { filter: activeFilter.value, page: currentPage.value }),
-        enabled: () => currentPage.value > 1,
+    const currentPage = computed({
+        get: () => parseInt(route.query.page) || 1,
+        set: (page) => pushArticlesQuery(page, activeFilter.value),
     });
 
     function firstPageFor(filter) {
@@ -136,25 +126,28 @@
         return categoryResponse.value?.[key] ?? null;
     }
 
-    const currentArticles = computed(() =>
-        currentPage.value > 1 ? (pageQuery.data.value?.articles ?? null) : firstPageFor(activeFilter.value),
-    );
-
-    // Keep the previously rendered page visible while a new page/filter loads so
-    // content never disappears mid-pagination.
-    const shownArticles = ref(null);
-    watch(
-        currentArticles,
-        (articles) => {
-            if (articles) {
-                shownArticles.value = articles;
-            }
-        },
-        { immediate: true },
-    );
-
-    const loadingArticles = computed(() => currentPage.value > 1 && pageQuery.isLoading.value);
-    const loadingPage = computed(() => (loadingArticles.value ? currentPage.value : null));
+    const {
+        shownEnvelope: shownArticles,
+        isFetching: isFetchingArticles,
+        loadFailed,
+        pagination,
+        refetch,
+    } = usePaginatedEnvelope({
+        initialEnvelope: computed(() => firstPageFor(activeFilter.value)),
+        usesInitialEnvelope: (page) => page === 1,
+        key: (page) => [
+            'knowledge-management',
+            'category-articles',
+            String(route.params.categorySlug),
+            activeFilter.value,
+            page,
+        ],
+        query: (page) =>
+            apiGet(`/categories/${route.params.categorySlug}`, { filter: activeFilter.value, page }).then(
+                (response) => response.articles,
+            ),
+        currentPage,
+    });
 
     const articlesWithRoutes = computed(() =>
         (shownArticles.value?.data ?? []).map((article) => ({
@@ -163,14 +156,6 @@
             to: articleRoute(article),
         })),
     );
-
-    const articlePagination = computed(() => ({
-        currentPage: shownArticles.value?.current_page ?? 1,
-        lastPage: shownArticles.value?.last_page ?? 1,
-        total: shownArticles.value?.total ?? 0,
-        from: shownArticles.value?.from ?? 0,
-        to: shownArticles.value?.to ?? 0,
-    }));
 
     const breadcrumbs = computed(() => {
         if (category.value?.parentCategory) {
@@ -203,26 +188,6 @@
     function changeFilter(value) {
         pushArticlesQuery(1, value);
     }
-
-    function goToPage(page) {
-        if (page === articlePagination.value.currentPage || loadingArticles.value) {
-            return;
-        }
-
-        pushArticlesQuery(page, activeFilter.value);
-    }
-
-    function fetchNextPage() {
-        if (articlePagination.value.currentPage < articlePagination.value.lastPage) {
-            goToPage(articlePagination.value.currentPage + 1);
-        }
-    }
-
-    function fetchPreviousPage() {
-        if (articlePagination.value.currentPage > 1) {
-            goToPage(articlePagination.value.currentPage - 1);
-        }
-    }
 </script>
 
 <template>
@@ -245,17 +210,15 @@
             <Breadcrumbs v-if="category && !isSearchActive" :currentCrumb="category.name" :breadcrumbs="breadcrumbs" />
         </template>
 
-        <PageCard v-if="!category">
-            <EmptyState>
-                <template #heading>Category Not Found</template>
-                <template #description>The category you are looking for does not exist or has been removed.</template>
-                <template #actions>
-                    <BaseButton :to="{ name: 'home' }" variant="outline"> Return to Home </BaseButton>
-                </template>
-            </EmptyState>
-        </PageCard>
+        <EmptyState v-if="!category">
+            <template #heading>Category Not Found</template>
+            <template #description>The category you are looking for does not exist or has been removed.</template>
+            <template #actions>
+                <BaseButton tag="router-link" :to="{ name: 'home' }" color="gray" size="md"> Return Home </BaseButton>
+            </template>
+        </EmptyState>
         <div v-else>
-            <main class="flex flex-col gap-8">
+            <div class="flex flex-col gap-8">
                 <div v-if="isSearchActive" class="flex flex-col gap-6">
                     <SearchResults
                         :searchQuery="searchQuery"
@@ -286,7 +249,7 @@
                             v-if="category.subCategories.length > 0"
                             :subCategories="subCategoriesWithRoutes"
                         ></SubCategories>
-                        <div class="flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
+                        <div class="flex flex-col overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-950/5">
                             <Tabs
                                 :tabs="categoryTabs"
                                 :modelValue="activeFilter"
@@ -294,7 +257,12 @@
                                 :contained="true"
                             />
 
-                            <div v-if="articlesWithRoutes.length > 0">
+                            <LoadFailedState v-if="loadFailed" heading="Could not load articles" @retry="refetch" />
+                            <div
+                                v-else-if="articlesWithRoutes.length > 0"
+                                :class="['transition-opacity', isFetchingArticles && 'opacity-60']"
+                                :aria-busy="isFetchingArticles ? 'true' : undefined"
+                            >
                                 <ul role="list" class="divide-y">
                                     <li v-for="article in articlesWithRoutes" :key="article.key">
                                         <Article
@@ -305,17 +273,7 @@
                                         />
                                     </li>
                                 </ul>
-                                <Pagination
-                                    :currentPage="articlePagination.currentPage"
-                                    :lastPage="articlePagination.lastPage"
-                                    :fromItem="articlePagination.from"
-                                    :toItem="articlePagination.to"
-                                    :totalItems="articlePagination.total"
-                                    :loadingPage="loadingPage"
-                                    @fetchNextPage="fetchNextPage"
-                                    @fetchPreviousPage="fetchPreviousPage"
-                                    @fetchPage="goToPage"
-                                />
+                                <Pagination v-bind="pagination" />
                             </div>
                             <section v-else class="px-6 py-4 flex items-start gap-x-4">
                                 <div class="flex size-12 items-center justify-center rounded-full bg-gray-100">
@@ -331,7 +289,7 @@
                         </div>
                     </div>
                 </div>
-            </main>
+            </div>
         </div>
     </Page>
 </template>

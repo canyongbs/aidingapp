@@ -50,7 +50,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('The correct details are displayed on the ViewAdvisory page', function () {
+test('The correct details are displayed on the ViewAdvisory page', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -76,7 +76,7 @@ test('The correct details are displayed on the ViewAdvisory page', function () {
     expect(\Tests\infolistState($component->instance(), array_keys($expected)))->toEqual($expected);
 });
 
-test('the Severity entry renders as a badge using the severity color', function () {
+test('the Severity entry renders as a badge using the severity color', function (): void {
     asSuperAdmin();
 
     $advisory = Advisory::factory()
@@ -97,7 +97,7 @@ test('the Severity entry renders as a badge using the severity color', function 
         ->and($entry->getColor($advisory->severity->name))->toBe(Color::Red->value);
 });
 
-test('the Tracking Details status refreshes when an advisory update changes the status', function () {
+test('the Tracking Details status refreshes when an advisory update changes the status', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -128,7 +128,7 @@ test('the Tracking Details status refreshes when an advisory update changes the 
         ->toBe(['status.name' => $newStatus->name]);
 });
 
-test('ViewAdvisory is gated with proper access control', function () {
+test('ViewAdvisory is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -143,7 +143,7 @@ test('ViewAdvisory is gated with proper access control', function () {
         )->assertSuccessful();
 });
 
-test('the Properties section edit action is gated with proper access control', function () {
+test('the Properties section edit action is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -166,7 +166,7 @@ test('the Properties section edit action is gated with proper access control', f
         ->assertActionVisible(TestAction::make('editProperties')->schemaComponent('properties'));
 });
 
-test('the Properties section can be updated', function () {
+test('the Properties section can be updated', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -189,7 +189,7 @@ test('the Properties section can be updated', function () {
     expect($advisory->fresh()->title)->toEqual('Updated Title')->and($advisory->fresh()->description)->toEqual('Updated Description');
 });
 
-test('the Properties section validates the inputs', function () {
+test('the Properties section validates the inputs', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -213,7 +213,7 @@ test('the Properties section validates the inputs', function () {
         ]);
 });
 
-test('the Tracking Details section edit action is gated with proper access control', function () {
+test('the Tracking Details section edit action is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -236,7 +236,7 @@ test('the Tracking Details section edit action is gated with proper access contr
         ->assertActionVisible(TestAction::make('editTrackingDetails')->schemaComponent('trackingDetails'));
 });
 
-test('the Tracking Details section can be updated', function () {
+test('the Tracking Details section can be updated', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -262,7 +262,7 @@ test('the Tracking Details section can be updated', function () {
     expect($advisory->fresh()->severity_id)->toEqual($severity->getKey())->and($advisory->fresh()->status_id)->toEqual($status->getKey());
 });
 
-test('the Status entry reflects the new value immediately after updating the Tracking Details section', function () {
+test('the Status entry reflects the new value immediately after updating the Tracking Details section', function (): void {
     $user = User::factory()->create();
 
     $oldStatus = AdvisoryStatus::factory()->create();
@@ -296,7 +296,7 @@ test('the Status entry reflects the new value immediately after updating the Tra
         ->assertDontSee($oldStatus->name);
 });
 
-test('the Tracking Details section validates the inputs', function (array $overrides, array $errors) {
+test('the Tracking Details section validates the inputs', function (array $overrides, array $errors): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -339,7 +339,7 @@ test('the Tracking Details section validates the inputs', function (array $overr
     ],
 ]);
 
-test('the Assignment section edit action is gated with proper access control', function () {
+test('the Assignment section edit action is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -362,7 +362,7 @@ test('the Assignment section edit action is gated with proper access control', f
         ->assertActionVisible(TestAction::make('editAssignment')->schemaComponent('assignment'));
 });
 
-test('the Assignment section can be updated', function () {
+test('the Assignment section can be updated', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -386,7 +386,7 @@ test('the Assignment section can be updated', function () {
     expect($advisory->fresh()->assigned_department_id)->toEqual($department->getKey());
 });
 
-test('the Assignment section validates the department exists', function () {
+test('the Assignment section validates the department exists', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -408,7 +408,7 @@ test('the Assignment section validates the department exists', function () {
         ]);
 });
 
-test('the advisory updates are only embedded for users who can view them', function () {
+test('the advisory updates are only embedded for users who can view them', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();

@@ -45,11 +45,11 @@ use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
 
-beforeEach(function () {
+beforeEach(function (): void {
     asSuperAdmin(User::factory()->create());
 });
 
-it('hides archived pipelines', function () {
+it('hides archived pipelines', function (): void {
     $project = Project::factory()->create();
     $active = Pipeline::factory()->for($project)->create(['created_by_id' => auth()->id()]);
     $archived = Pipeline::factory()->for($project)->create(['created_by_id' => auth()->id()]);
@@ -63,7 +63,7 @@ it('hides archived pipelines', function () {
         ->assertCanNotSeeTableRecords([$archived]);
 });
 
-it('archives a pipeline through the row action', function () {
+it('archives a pipeline through the row action', function (): void {
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()->for($project)->create(['created_by_id' => auth()->id()]);
 

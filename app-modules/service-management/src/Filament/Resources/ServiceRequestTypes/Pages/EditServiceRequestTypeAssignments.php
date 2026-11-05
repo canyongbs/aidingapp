@@ -119,14 +119,14 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             ->columnSpanFull()
                             ->relationship(
                                 name: 'assignmentTypeIndividual',
-                                modifyQueryUsing: function (Builder $query) {
+                                modifyQueryUsing: function (Builder $query): void {
                                     $query->tap(new ManagesServiceRequestType($this->record->getKey()));
                                 }
                             )
                             ->preload()
                             ->required()
-                            ->rules(fn (ServiceRequestType $record) => [new ServiceRequestTypeAssignmentsIndividualUserMustBeAManager($record)])
-                            ->visible(fn (Get $get) => $get('assignment_type') === ServiceRequestTypeAssignmentTypes::Individual),
+                            ->rules(fn (ServiceRequestType $record): array => [new ServiceRequestTypeAssignmentsIndividualUserMustBeAManager($record)])
+                            ->visible(fn (Get $get): bool => $get('assignment_type') === ServiceRequestTypeAssignmentTypes::Individual),
                         Toggle::make('is_automated_status_change_enabled')
                             ->label('Automated Status Change')
                             ->columnSpanFull()

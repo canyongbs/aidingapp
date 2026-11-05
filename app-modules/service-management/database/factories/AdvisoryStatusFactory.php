@@ -57,4 +57,14 @@ class AdvisoryStatusFactory extends Factory
             'classification' => $this->faker->randomElement(SystemAdvisoryStatusClassification::cases()),
         ];
     }
+
+    public function open(): static
+    {
+        return $this->state(['classification' => SystemAdvisoryStatusClassification::Open]);
+    }
+
+    public function resolved(): static
+    {
+        return $this->state(['classification' => SystemAdvisoryStatusClassification::Resolved]);
+    }
 }

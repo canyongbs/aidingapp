@@ -40,8 +40,13 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactEmailHealthCallout;
 use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactFormSchema;
 use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactInfolist;
+use AidingApp\Contact\Filament\Support\OrganizationArchivedName;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
+use App\Enums\PresenceStatus;
+use App\Features\ContactArchivingFeature;
 use App\Features\ContactTrackingFeature;
+use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -52,6 +57,7 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Contracts\View\View;
 
 class ViewContact extends ViewRecord
 {
@@ -89,11 +95,11 @@ class ViewContact extends ViewRecord
                                         TextEntry::make('presence_status')
                                             ->label('Presence')
                                             ->visible(fn (): bool => ContactTrackingFeature::active())
-                                            ->state(fn (Contact $record) => $record->presenceStatus())
+                                            ->state(fn (Contact $record): PresenceStatus => $record->presenceStatus())
                                             ->badge()
-                                            ->color(fn (Contact $record) => $record->presenceStatus()->getColor())
-                                            ->icon(fn (Contact $record) => $record->presenceStatus()->getIcon())
-                                            ->formatStateUsing(fn (Contact $record) => $record->presenceStatus()->getLabel()),
+                                            ->color(fn (Contact $record): string => $record->presenceStatus()->getColor())
+                                            ->icon(fn (Contact $record): string => $record->presenceStatus()->getIcon())
+                                            ->formatStateUsing(fn (Contact $record): string => $record->presenceStatus()->getLabel()),
                                         TextEntry::make('type.name')
                                             ->label('Type'),
                                     ])
@@ -191,7 +197,12 @@ class ViewContact extends ViewRecord
                                     ])
                                     ->schema([
                                         TextEntry::make('organization.name')
-                                            ->label('Organization'),
+                                            ->label('Organization')
+                                            ->formatStateUsing(function (Contact $record, string $state): string | View {
+                                                assert($record->organization instanceof Organization);
+
+                                                return OrganizationArchivedName::format($record->organization, $state);
+                                            }),
                                     ])
                                     ->columns(2),
                             ]),
@@ -233,7 +244,7 @@ class ViewContact extends ViewRecord
         }
 
         return [
-            DeleteAction::make(),
+            ContactArchivingFeature::active() ? ArchiveAction::make() : DeleteAction::make(),
         ];
     }
 

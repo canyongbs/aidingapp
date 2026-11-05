@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Models\Pipeline;
@@ -47,7 +48,7 @@ use App\Settings\LicenseSettings;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->save();
@@ -57,7 +58,7 @@ beforeEach(function () {
     $licenseSettings->save();
 });
 
-it('shows guest-visible pipeline tasks grouped by milestone', function () {
+it('shows guest-visible pipeline tasks grouped by milestone', function (): void {
     $contact = Contact::factory()->create();
     $project = Project::factory()->create(['name' => 'Office Renovation']);
     $project->guestContacts()->attach($contact);
@@ -135,7 +136,21 @@ it('shows guest-visible pipeline tasks grouped by milestone', function () {
         ->assertJsonMissing(['name' => 'Internal Review']);
 });
 
-it('paginates guest-visible tasks for the selected pipeline', function () {
+it('shows a project without any pipelines', function (): void {
+    $contact = Contact::factory()->create();
+    $project = Project::factory()->create(['name' => 'Office Renovation']);
+    $project->guestContacts()->attach($contact);
+
+    actingAs($contact, 'contact');
+
+    getJson(route('api.portal.projects.show', ['portalProject' => $project->getKey()]))
+        ->assertOk()
+        ->assertJsonPath('data.name', 'Office Renovation')
+        ->assertJsonPath('data.pipelines', [])
+        ->assertJsonPath('meta.total', 0);
+});
+
+it('paginates guest-visible tasks for the selected pipeline', function (): void {
     $contact = Contact::factory()->create();
     $project = Project::factory()->create();
     $project->guestContacts()->attach($contact);
@@ -172,7 +187,7 @@ it('paginates guest-visible tasks for the selected pipeline', function () {
         ->assertJsonPath('meta.per_page', 50);
 });
 
-it('does not report a milestone as empty when its tasks fall on a later page', function () {
+it('does not report a milestone as empty when its tasks fall on a later page', function (): void {
     $contact = Contact::factory()->create();
     $project = Project::factory()->create();
     $project->guestContacts()->attach($contact);
@@ -212,7 +227,7 @@ it('does not report a milestone as empty when its tasks fall on a later page', f
         ->assertJsonPath('data.pipelines.0.groups.0.entries.0.id', $laterPageEntry->getKey());
 });
 
-it('does not allow selecting a pipeline from another project', function () {
+it('does not allow selecting a pipeline from another project', function (): void {
     $contact = Contact::factory()->create();
     $project = Project::factory()->create();
     $project->guestContacts()->attach($contact);
@@ -226,7 +241,7 @@ it('does not allow selecting a pipeline from another project', function () {
     ]))->assertNotFound();
 });
 
-it('does not show archived pipeline tasks or milestones', function () {
+it('does not show archived pipeline tasks or milestones', function (): void {
     $contact = Contact::factory()->create();
     $project = Project::factory()->create();
     $project->guestContacts()->attach($contact);
@@ -265,7 +280,7 @@ it('does not show archived pipeline tasks or milestones', function () {
         ->assertJsonMissing(['name' => 'Archived Pipeline']);
 });
 
-it('does not disclose an archived project', function () {
+it('does not disclose an archived project', function (): void {
     $contact = Contact::factory()->create();
     $project = Project::factory()->create();
     $project->guestContacts()->attach($contact);
@@ -277,14 +292,14 @@ it('does not disclose an archived project', function () {
         ->assertNotFound();
 });
 
-it('requires contact authentication', function () {
+it('requires contact authentication', function (): void {
     $project = Project::factory()->create();
 
     getJson(route('api.portal.projects.show', ['portalProject' => $project->getKey()]))
         ->assertUnauthorized();
 });
 
-it('denies access when Project Management is not licensed', function () {
+it('denies access when Project Management is not licensed', function (): void {
     $licenseSettings = app(LicenseSettings::class);
     $licenseSettings->data->addons->projectManagement = false;
     $licenseSettings->save();
@@ -299,9 +314,22 @@ it('denies access when Project Management is not licensed', function () {
         ->assertForbidden();
 });
 
-it('does not disclose an inaccessible project', function () {
+it('does not disclose an inaccessible project', function (): void {
     $contact = Contact::factory()->create();
     $project = Project::factory()->create();
+
+    actingAs($contact, 'contact');
+
+    getJson(route('api.portal.projects.show', ['portalProject' => $project->getKey()]))
+        ->assertNotFound();
+});
+
+it('does not disclose a project reached only through an archived organization', function (): void {
+    $organization = Organization::factory()->create();
+    $contact = Contact::factory()->for($organization)->create();
+    $project = Project::factory()->create();
+    $project->guestOrganizations()->attach($organization);
+    $organization->archive();
 
     actingAs($contact, 'contact');
 

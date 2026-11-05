@@ -93,7 +93,7 @@ class ViewLiveChatTranscript extends Page
                     ->schema([
                         TextEntry::make('contact.full_name')
                             ->label('Contact'),
-                        TextEntry::make('user.name')
+                        TextEntry::make('user.full_name')
                             ->label('Agent'),
                         TextEntry::make('queued_at')
                             ->label('Queued')

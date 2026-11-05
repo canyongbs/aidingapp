@@ -67,7 +67,7 @@ class ServiceRequestConversationsRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('contact.full_name')
                     ->label('Contact'),
-                TextColumn::make('user.name')
+                TextColumn::make('user.full_name')
                     ->label('Agent'),
                 TextColumn::make('finished_at')
                     ->label('Finished')

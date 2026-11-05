@@ -77,7 +77,7 @@ class ServiceRequestHistoryViewAction extends ViewAction
                 ->label('Updates')
                 ->columnSpanFull()
                 ->visible(fn (ServiceRequestHistory $record): bool => ! $record->isCreatedEvent())
-                ->state(function (ServiceRequestHistory $record) {
+                ->state(function (ServiceRequestHistory $record): array {
                     return $record->getUpdates();
                 })
                 ->view('filament.infolists.components.update-entry'),

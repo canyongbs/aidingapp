@@ -51,11 +51,9 @@ class ServiceRequestFeedbackViewAction extends ViewAction
                 ->label('Submitted By')
                 ->state(fn (ServiceRequestFeedback $record): string => $record->contact()->withTrashed()->first()->full_name ?? 'Deleted user'),
             TextEntry::make('csat_answer')
-                ->label('CSAT')
-                ->default('N/A'),
+                ->label('CSAT'),
             TextEntry::make('nps_answer')
-                ->label('NPS')
-                ->default('N/A'),
+                ->label('NPS'),
             TextEntry::make('created_at')
                 ->label('Submitted At')
                 ->dateTime(),

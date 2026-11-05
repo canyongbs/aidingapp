@@ -43,13 +43,13 @@ use function Pest\Laravel\artisan;
 use function Pest\Laravel\assertModelExists;
 use function Pest\Laravel\assertModelMissing;
 
-it('hides its value from serialization', function () {
+it('hides its value from serialization', function (): void {
     $secret = Secret::factory()->create();
 
     expect($secret->toArray())->not->toHaveKey('value');
 });
 
-it('prunes only unattached secrets older than one day', function () {
+it('prunes only unattached secrets older than one day', function (): void {
     $expiredSecret = Secret::factory()->create([
         'updated_at' => now()->subDays(2),
     ]);
@@ -69,7 +69,7 @@ it('prunes only unattached secrets older than one day', function () {
     assertModelExists($attachedSecret);
 });
 
-it('prunes unattached stale secrets when the model pruning job runs', function () {
+it('prunes unattached stale secrets when the model pruning job runs', function (): void {
     $expiredSecret = Secret::factory()->create([
         'updated_at' => now()->subDays(2),
     ]);

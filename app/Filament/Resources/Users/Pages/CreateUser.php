@@ -52,7 +52,6 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
@@ -60,28 +59,14 @@ class CreateUser extends CreateRecord
 {
     protected static string $resource = UserResource::class;
 
+    protected ?bool $hasDatabaseTransactions = true;
+
     protected bool $isManagedContact = false;
 
     protected ?string $managedContactTypeId = null;
 
     public function form(Schema $schema): Schema
     {
-        $generateFullName = function (Get $get, Set $set) {
-            $firstName = trim($get('first_name'));
-
-            if (blank($firstName)) {
-                return;
-            }
-
-            $lastName = trim($get('last_name'));
-
-            if (blank($lastName)) {
-                return;
-            }
-
-            $set(User::displayNameKey(), "{$firstName} {$lastName}");
-        };
-
         return $schema
             ->components([
                 Section::make('Demographic Information')
@@ -89,26 +74,15 @@ class CreateUser extends CreateRecord
                         TextInput::make('first_name')
                             ->required()
                             ->string()
-                            ->maxLength(255)
-                            ->live(onBlur: true)
-                            ->afterStateUpdated($generateFullName),
+                            ->maxLength(User::NAME_PART_MAX_LENGTH),
                         TextInput::make('last_name')
                             ->required()
                             ->string()
-                            ->maxLength(255)
-                            ->live(onBlur: true)
-                            ->afterStateUpdated($generateFullName),
-                        TextInput::make('name')
-                            ->label('Full Name')
-                            ->maxLength(255)
-                            ->disabled()
-                            ->dehydrated(),
-
+                            ->maxLength(User::NAME_PART_MAX_LENGTH),
                         TextInput::make('preferred_name')
                             ->string()
                             ->maxLength(255),
                     ])
-
                     ->columns(2),
                 Section::make('Employment Information')
                     ->schema([
@@ -219,7 +193,7 @@ class CreateUser extends CreateRecord
                             ->hiddenLabel()
                             ->relationship('department', 'name'),
                     ])
-                    ->hidden(fn (?User $record) => (bool) $record?->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
+                    ->hidden(fn (?User $record): bool => (bool) $record?->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
             ]);
     }
 

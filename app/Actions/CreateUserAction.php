@@ -53,8 +53,6 @@ class CreateUserAction
             assert(! ($data->firstName instanceof Optional));
             assert(! ($data->lastName instanceof Optional));
 
-            $userData['name'] = trim("{$data->firstName} {$data->lastName}");
-
             $user = User::create($userData);
 
             if (! ($data->roles instanceof Optional)) {

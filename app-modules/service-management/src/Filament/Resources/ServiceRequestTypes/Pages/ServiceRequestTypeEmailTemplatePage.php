@@ -173,7 +173,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
     /** @return array<int, RichEditor> */
     protected function getEmailTemplateFormSchema(ServiceRequestTypeEmailTemplateRole $role): array
     {
-        $normalizeEmptyContent = fn ($state) => $this->normalizeRichContent($state);
+        $normalizeEmptyContent = fn ($state): mixed => $this->normalizeRichContent($state);
 
         return [
             ServiceRequestTemplateSubjectInput::make($this->type)

@@ -36,17 +36,60 @@
 
 use AidingApp\Contact\Enums\EmailHealthStatus;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
+use App\Features\ContactArchivingFeature;
 
-it('reports a bounced email health status and cannot receive email when the email has bounced', function () {
+it('reports a bounced email health status and cannot receive email when the email has bounced', function (): void {
     $contact = Contact::factory()->create(['email_bounce' => true]);
 
     expect($contact->getEmailHealthStatus())->toBe(EmailHealthStatus::Bounced)
         ->and($contact->canReceiveEmail())->toBeFalse();
 });
 
-it('reports a healthy email health status and can receive email when the email has not bounced', function () {
+it('reports a healthy email health status and can receive email when the email has not bounced', function (): void {
     $contact = Contact::factory()->create(['email_bounce' => false]);
 
     expect($contact->getEmailHealthStatus())->toBe(EmailHealthStatus::Healthy)
         ->and($contact->canReceiveEmail())->toBeTrue();
+});
+
+it('links a contact to its domain organization when it is unarchived', function (): void {
+    $contact = Contact::factory()->archived()->create([
+        'email' => 'person@example.com',
+        'organization_id' => null,
+    ]);
+    $organization = Organization::factory()->create(['domains' => []]);
+    $organization->domains = [['domain' => 'example.com']];
+    $organization->saveQuietly();
+
+    $contact->unarchive();
+
+    expect($contact->refresh()->organization_id)->toBe($organization->getKey());
+});
+
+it('revokes tokens when archived', function (): void {
+    $contact = Contact::factory()->create();
+    $contact->createToken('first');
+    $contact->createToken('second');
+    $otherContact = Contact::factory()->create();
+    $otherContact->createToken('other');
+
+    expect($contact->tokens()->count())->toBe(2);
+
+    $contact->archive();
+
+    expect($contact->tokens()->count())->toBe(0)
+        ->and($otherContact->tokens()->count())->toBe(1);
+});
+
+it('keeps tokens when archived while the contact archiving feature is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    $contact = Contact::factory()->create();
+    $contact->createToken('first');
+    $contact->createToken('second');
+
+    $contact->archive();
+
+    expect($contact->tokens()->count())->toBe(2);
 });

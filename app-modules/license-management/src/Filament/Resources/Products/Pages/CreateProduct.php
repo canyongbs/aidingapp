@@ -37,10 +37,12 @@
 namespace AidingApp\LicenseManagement\Filament\Resources\Products\Pages;
 
 use AidingApp\LicenseManagement\Filament\Resources\Products\ProductResource;
+use App\Features\ProductNameUniquenessFeature;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
 class CreateProduct extends CreateRecord
 {
@@ -54,7 +56,11 @@ class CreateProduct extends CreateRecord
                     ->label('Product Name')
                     ->required()
                     ->string()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->when(
+                        ProductNameUniquenessFeature::active(),
+                        fn (TextInput $input): TextInput => $input->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
+                    ),
                 TextInput::make('url')
                     ->label('Product Link')
                     ->maxLength(255)

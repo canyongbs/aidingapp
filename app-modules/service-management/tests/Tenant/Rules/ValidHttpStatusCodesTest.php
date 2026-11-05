@@ -37,7 +37,7 @@
 use AidingApp\ServiceManagement\Rules\ValidHttpStatusCodes;
 use Illuminate\Support\Facades\Validator;
 
-test('a normal array of valid status codes passes', function () {
+test('a normal array of valid status codes passes', function (): void {
     $validator = Validator::make(
         ['successful_status_codes' => [200, 404]],
         ['successful_status_codes' => [new ValidHttpStatusCodes()]],
@@ -46,7 +46,7 @@ test('a normal array of valid status codes passes', function () {
     expect($validator->passes())->toBeTrue();
 });
 
-test('an invalid status code fails', function () {
+test('an invalid status code fails', function (): void {
     $validator = Validator::make(
         ['successful_status_codes' => [999]],
         ['successful_status_codes' => [new ValidHttpStatusCodes()]],
@@ -55,7 +55,7 @@ test('an invalid status code fails', function () {
     expect($validator->fails())->toBeTrue();
 });
 
-test('a scalar value is normalized into an array rather than crashing', function () {
+test('a scalar value is normalized into an array rather than crashing', function (): void {
     // A multiple() Select always submits an array from the browser, but a tampered Livewire
     // payload could submit a raw scalar for this field instead.
     $validator = Validator::make(
@@ -66,7 +66,7 @@ test('a scalar value is normalized into an array rather than crashing', function
     expect($validator->passes())->toBeTrue();
 });
 
-test('a non-numeric string masquerading as a status code fails rather than being silently truncated', function () {
+test('a non-numeric string masquerading as a status code fails rather than being silently truncated', function (): void {
     $validator = Validator::make(
         ['successful_status_codes' => ['200junk']],
         ['successful_status_codes' => [new ValidHttpStatusCodes()]],
@@ -75,7 +75,7 @@ test('a non-numeric string masquerading as a status code fails rather than being
     expect($validator->fails())->toBeTrue();
 });
 
-test('a float status code fails rather than being silently truncated', function () {
+test('a float status code fails rather than being silently truncated', function (): void {
     $validator = Validator::make(
         ['successful_status_codes' => [200.9]],
         ['successful_status_codes' => [new ValidHttpStatusCodes()]],

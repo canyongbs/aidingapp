@@ -43,7 +43,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->knowledgeManagement = false;
     $settings->save();
@@ -65,7 +65,7 @@ it('is gated with proper access control', function () {
     Livewire::test(ManageKnowledgeBasePortalSettings::class)->assertOk();
 });
 
-it('updates the category tab order', function () {
+it('updates the category tab order', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->knowledgeManagement = true;
     $settings->save();
@@ -84,7 +84,7 @@ it('updates the category tab order', function () {
         ->toBe(KnowledgeBaseCategoryTabOrder::FeaturedMostViewedAllArticles);
 });
 
-it('disables the form for users without update permission', function () {
+it('disables the form for users without update permission', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->knowledgeManagement = true;
     $settings->save();

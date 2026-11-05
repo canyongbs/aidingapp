@@ -38,7 +38,7 @@ use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use Illuminate\Support\Facades\Validator;
 
-it('allows an optional password to be cleared', function () {
+it('allows an optional password to be cleared', function (): void {
     $field = new ServiceRequestFormField([
         'type' => PasswordFormFieldBlock::type(),
         'is_required' => false,
@@ -52,7 +52,7 @@ it('allows an optional password to be cleared', function () {
     expect($validator->passes())->toBeTrue();
 });
 
-it('does not allow a required password to be cleared', function () {
+it('does not allow a required password to be cleared', function (): void {
     $field = new ServiceRequestFormField([
         'type' => PasswordFormFieldBlock::type(),
         'is_required' => true,

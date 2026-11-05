@@ -64,7 +64,7 @@ class ViewEngagementResponse extends ViewRecord
 
                                 return "{$sender->full_name} (Contact)";
                             })
-                            ->url(function (EngagementResponse $record) {
+                            ->url(function (EngagementResponse $record): string {
                                 /** @var Contact $sender */
                                 $sender = $record->sender;
 

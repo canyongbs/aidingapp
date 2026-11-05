@@ -39,13 +39,17 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 use AidingApp\LicenseManagement\Enums\ProductLicenseStatus;
 use AidingApp\LicenseManagement\Models\ProductLicense;
 use App\Http\Controllers\Controller;
+use App\Settings\LicenseSettings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class LicenseManagementPortalController extends Controller
 {
     public function __invoke(Request $request): JsonResponse
     {
+        abort_unless(resolve(LicenseSettings::class)->data?->addons->licenseManagement, Response::HTTP_FORBIDDEN);
+
         $licenses = auth('contact')->user()->productLicenses()
             ->withWhereHas('product:id,name,version')
             ->get();

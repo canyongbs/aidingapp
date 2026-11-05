@@ -44,7 +44,7 @@ use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
 
-test('EditChangeRequest end_time field is disabled', function () {
+test('EditChangeRequest end_time field is disabled', function (): void {
     asSuperAdmin();
 
     $changeRequestStatus = ChangeRequestStatus::factory()->create([
@@ -61,7 +61,7 @@ test('EditChangeRequest end_time field is disabled', function () {
         ->assertFormFieldIsDisabled('end_time');
 });
 
-test('EditChangeRequest recalculates end_time from start_time and duration and saves successfully', function () {
+test('EditChangeRequest recalculates end_time from start_time and duration and saves successfully', function (): void {
     asSuperAdmin();
 
     $changeRequestStatus = ChangeRequestStatus::factory()->create([
@@ -96,7 +96,7 @@ test('EditChangeRequest recalculates end_time from start_time and duration and s
         ->and($changeRequest->end_time->toDateTimeString())->toEqual($expectedEndTime);
 });
 
-test('EditChangeRequest hydrates duration from existing start_time and end_time', function () {
+test('EditChangeRequest hydrates duration from existing start_time and end_time', function (): void {
     asSuperAdmin();
 
     $changeRequestStatus = ChangeRequestStatus::factory()->create([

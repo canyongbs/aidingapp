@@ -37,6 +37,8 @@
 namespace AidingApp\Contact\Rules;
 
 use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Support\OrganizationEmailDomainLookup;
+use App\Features\OrganizationArchivingFeature;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Builder;
@@ -51,7 +53,7 @@ class UniqueOrganizationDomain implements ValidationRule
      *
      * @param  int|null  $ignoreId
      */
-    public function __construct($ignoreId = null)
+    public function __construct(int|string|null $ignoreId = null)
     {
         $this->ignoreId = $ignoreId;
     }
@@ -63,17 +65,44 @@ class UniqueOrganizationDomain implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (
-            Organization::whereJsonContains('domains', [['domain' => $value]])
-                ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
-                ->exists()
-        ) {
+        if (! is_string($value)) {
+            return;
+        }
+
+        if ($this->holders($value)->withoutArchived()->exists()) {
             $fail($this->message());
+
+            return;
+        }
+
+        if (OrganizationArchivingFeature::active() && $this->holders($value)->onlyArchived()->exists()) {
+            $fail('This domain is reserved by an archived organization.');
         }
     }
 
     public function message(): string
     {
         return 'This domain is already in use and may not be used a second time.';
+    }
+
+    /**
+     * @return Builder<Organization>
+     */
+    protected function holders(string $domain): Builder
+    {
+        $lookup = app(OrganizationEmailDomainLookup::class);
+        $storedDomain = $lookup->normalizedDomainSql("elem->>'domain'");
+        $givenDomain = $lookup->normalizedDomainSql('?::text');
+
+        return Organization::query()
+            ->when(! empty($this->ignoreId), fn (Builder $query) => $query->where('id', '!=', $this->ignoreId))
+            ->whereRaw(
+                "EXISTS (
+                    SELECT 1
+                    FROM jsonb_array_elements(domains) AS elem
+                    WHERE {$storedDomain} = {$givenDomain}
+                )",
+                [$domain],
+            );
     }
 }

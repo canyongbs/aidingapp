@@ -36,16 +36,19 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
+use AidingApp\Contact\Models\Builders\ContactBuilder;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Rules\ServiceMonitorNotificationRecipientsMustHaveConfidentialAccess;
 use AidingApp\ServiceManagement\Rules\ServiceMonitorReportRecipientsMustHaveConfidentialAccess;
+use App\Features\ContactArchivingFeature;
 use App\Filament\Forms\Components\UserSelect;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 
 class ConfidentialitySection
@@ -95,7 +98,7 @@ class ConfidentialitySection
                         $set('confidentialContacts', []);
                     }),
                 UserSelect::make('confidentialUsers')
-                    ->relationship('confidentialUsers', 'name')
+                    ->relationship('confidentialUsers')
                     ->label('Users')
                     ->multiple()
                     ->preload()
@@ -107,8 +110,16 @@ class ConfidentialitySection
                     ->preload()
                     ->searchable()
                     ->visible(fn (Get $get): bool => (bool) $get('is_confidential')),
+                // Filament also applies this query while loading the saved selection, when the field state is still empty,
+                // so the already attached contacts come from the record; otherwise an archived one would be dropped on save
                 Select::make('confidentialContacts')
-                    ->relationship('confidentialContacts', 'full_name')
+                    ->relationship(
+                        'confidentialContacts',
+                        'full_name',
+                        fn (ContactBuilder $query, ?Model $record): ContactBuilder => ContactArchivingFeature::active()
+                            ? $query->where(fn (ContactBuilder $query): ContactBuilder => $query->withoutArchived()->when($record instanceof ServiceMonitoringTarget && $record->exists ? $record : null, fn (ContactBuilder $query, ServiceMonitoringTarget $target): ContactBuilder => $query->orWhereIn('contacts.id', $target->confidentialContacts()->select('contacts.id'))))
+                            : $query,
+                    )
                     ->label('Contacts')
                     ->multiple()
                     ->preload()

@@ -38,21 +38,28 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\AdvisorySeverityFactory;
-use App\Models\BaseModel;
+use AidingApp\ServiceManagement\Observers\AdvisorySeverityObserver;
 use CanyonGBS\Common\Enums\Color;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperAdvisorySeverity
  */
-class AdvisorySeverity extends BaseModel implements Auditable
+#[ObservedBy([AdvisorySeverityObserver::class])]
+class AdvisorySeverity extends Model implements Auditable
 {
     use AuditableTrait;
     use SoftDeletes;
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
 
     /** @use HasFactory<AdvisorySeverityFactory> */
     use HasFactory;
@@ -60,6 +67,7 @@ class AdvisorySeverity extends BaseModel implements Auditable
     protected $fillable = [
         'name',
         'color',
+        'sort',
     ];
 
     protected $table = 'advisory_severities';
@@ -79,6 +87,7 @@ class AdvisorySeverity extends BaseModel implements Auditable
     {
         return [
             'color' => Color::class,
+            'sort' => 'integer',
         ];
     }
 

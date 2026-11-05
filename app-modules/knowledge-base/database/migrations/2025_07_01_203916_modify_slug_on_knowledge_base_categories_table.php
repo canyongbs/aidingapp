@@ -43,8 +43,8 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('knowledge_base_categories', function (Blueprint $table) {
-            DB::transaction(function () use ($table) {
+        Schema::table('knowledge_base_categories', function (Blueprint $table): void {
+            DB::transaction(function () use ($table): void {
                 $table->dropUnique('knowledge_base_categories_slug_unique');
 
                 $table->uniqueIndex('slug')
@@ -55,8 +55,8 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('knowledge_base_categories', function (Blueprint $table) {
-            DB::transaction(function () use ($table) {
+        Schema::table('knowledge_base_categories', function (Blueprint $table): void {
+            DB::transaction(function () use ($table): void {
                 $table->dropIndex('knowledge_base_categories_slug_unique');
 
                 $table->string('slug')->unique()->change();

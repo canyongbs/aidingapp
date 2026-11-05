@@ -47,10 +47,10 @@ return new class () extends Migration {
 
     public function up(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
 
-            Schema::table($this->table, function (Blueprint $table) {
+            Schema::table($this->table, function (Blueprint $table): void {
                 $table->uniqueIndex([$this->column, 'type_id'], 'service_request_priorities_name_type_id_unique')
                     ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
             });

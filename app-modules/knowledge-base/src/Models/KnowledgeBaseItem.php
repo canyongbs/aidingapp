@@ -42,13 +42,11 @@ use AidingApp\KnowledgeBase\Database\Factories\KnowledgeBaseItemFactory;
 use AidingApp\KnowledgeBase\Enums\ConcernStatus;
 use AidingApp\KnowledgeBase\Observers\KnowledgeBaseItemObserver;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
-use App\Models\BaseModel;
 use App\Models\Concerns\InteractsWithTags;
 use App\Models\Contracts\HasTags;
 use App\Models\Media;
 use App\Models\User;
 use CanyonGBS\Common\Filament\Forms\RichContentPlugins\VideoRichContentPlugin;
-use DateTimeInterface;
 use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
@@ -57,6 +55,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -64,13 +63,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperKnowledgeBaseItem
  */
 #[ObservedBy([KnowledgeBaseItemObserver::class])]
-class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia, HasRichContent, HasTags
+class KnowledgeBaseItem extends Model implements AiFile, Auditable, HasMedia, HasRichContent, HasTags
 {
+    use UsesTenantConnection;
     use AuditableTrait;
     use HasUuids;
 
@@ -205,7 +206,7 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
     protected function titleFilled(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => ! empty($attributes['title']),
+            get: fn (mixed $value, array $attributes): bool => ! empty($attributes['title']),
         );
     }
 
@@ -222,7 +223,7 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
 
                 if (($this->article_details['type'] ?? null) === 'doc'
                     && collect((array) ($this->article_details['content'] ?? []))
-                        ->every(fn (array $node) => empty($node['content'] ?? []) || $node['content'] === [['type' => 'text', 'text' => '']])
+                        ->every(fn (array $node): bool => empty($node['content'] ?? []) || $node['content'] === [['type' => 'text', 'text' => '']])
                 ) {
                     return false;
                 }
@@ -261,7 +262,7 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
     protected function noBrokenLinks(): Attribute
     {
         return Attribute::make(
-            get: fn () => ! $this->are_broken_links_detected,
+            get: fn (): bool => ! $this->are_broken_links_detected,
         );
     }
 
@@ -271,7 +272,7 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
     protected function noBrokenImages(): Attribute
     {
         return Attribute::make(
-            get: fn () => ! $this->are_broken_images_detected,
+            get: fn (): bool => ! $this->are_broken_images_detected,
         );
     }
 
@@ -290,10 +291,5 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
                     && $this->no_broken_images;
             },
         );
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 }

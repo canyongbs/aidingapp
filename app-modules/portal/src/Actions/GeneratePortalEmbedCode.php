@@ -45,7 +45,7 @@ class GeneratePortalEmbedCode
     public function handle(PortalType $portal): string
     {
         return match ($portal) {
-            PortalType::KnowledgeManagement => (function () {
+            PortalType::KnowledgeManagement => (function (): string {
                 // Read the Vite manifest for portal assets to get cache-busted URLs
                 $manifestPath = public_path('js/portals/knowledge-management/.vite/manifest.json');
                 $manifest = json_decode(File::get($manifestPath), true);

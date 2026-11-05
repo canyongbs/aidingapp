@@ -76,7 +76,7 @@ $grantServiceRequestsReportAccess = function (User $user): void {
     ]);
 };
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = false;
     $settings->save();
@@ -100,7 +100,7 @@ it('is gated with proper access control', function () {
     Livewire::test(ServiceRequests::class)->assertOk();
 });
 
-it('grants access to a user belonging to a department that has been granted access', function () {
+it('grants access to a user belonging to a department that has been granted access', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -121,7 +121,7 @@ it('grants access to a user belonging to a department that has been granted acce
     Livewire::test(ServiceRequests::class)->assertOk();
 });
 
-it('renders the service request types filter and quick-load controls', function () use ($grantServiceRequestsReportAccess) {
+it('renders the service request types filter and quick-load controls', function () use ($grantServiceRequestsReportAccess): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
 
     $grantServiceRequestsReportAccess($user);
@@ -135,7 +135,7 @@ it('renders the service request types filter and quick-load controls', function 
         ->assertActionVisible(TestAction::make('clearServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', schema: 'filtersForm'));
 });
 
-it('groups the type options by the service catalog hierarchy', function () use ($grantServiceRequestsReportAccess) {
+it('groups the type options by the service catalog hierarchy', function () use ($grantServiceRequestsReportAccess): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
 
     $grantServiceRequestsReportAccess($user);
@@ -177,7 +177,7 @@ it('groups the type options by the service catalog hierarchy', function () use (
         ->toHaveKey('name', 'Nested Type');
 });
 
-it('orders grouped type options by category sort and pivot sort', function () use ($grantServiceRequestsReportAccess) {
+it('orders grouped type options by category sort and pivot sort', function () use ($grantServiceRequestsReportAccess): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
 
     $grantServiceRequestsReportAccess($user);
@@ -227,7 +227,7 @@ it('orders grouped type options by category sort and pivot sort', function () us
     ]);
 });
 
-it('orders types within a category by pivot sort rather than the global sort', function () use ($grantServiceRequestsReportAccess) {
+it('orders types within a category by pivot sort rather than the global sort', function () use ($grantServiceRequestsReportAccess): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
 
     $grantServiceRequestsReportAccess($user);
@@ -255,7 +255,7 @@ it('orders types within a category by pivot sort rather than the global sort', f
     expect($typeNames)->toBe(['Global Second', 'Global First']);
 });
 
-it('excludes archived types from the filter options', function () use ($grantServiceRequestsReportAccess) {
+it('excludes archived types from the filter options', function () use ($grantServiceRequestsReportAccess): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
 
     $grantServiceRequestsReportAccess($user);
@@ -286,7 +286,7 @@ it('excludes archived types from the filter options', function () use ($grantSer
         ->not()->toContain($deletedType->getKey());
 });
 
-it('keeps archived types available to the service requests list filter', function () {
+it('keeps archived types available to the service requests list filter', function (): void {
     $activeType = ServiceRequestType::factory()->create(['name' => 'Active Type']);
 
     $archivedType = ServiceRequestType::factory()->create(['name' => 'Archived Type']);
@@ -304,7 +304,7 @@ it('keeps archived types available to the service requests list filter', functio
         ->toContain($archivedType->getKey());
 });
 
-it('resolves every type the user manages or audits as an affiliated type', function () use ($grantServiceRequestsReportAccess) {
+it('resolves every type the user manages or audits as an affiliated type', function () use ($grantServiceRequestsReportAccess): void {
     $department = Department::factory()->create();
 
     $user = User::factory()->create(['timezone' => 'UTC', 'department_id' => $department->getKey()]);
@@ -366,7 +366,7 @@ it('resolves every type the user manages or audits as an affiliated type', funct
         ->not()->toContain($unaffiliatedType->getKey());
 });
 
-it('populates the filter with affiliated types via the My Affiliated Types action', function () use ($grantServiceRequestsReportAccess) {
+it('populates the filter with affiliated types via the My Affiliated Types action', function () use ($grantServiceRequestsReportAccess): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
 
     $grantServiceRequestsReportAccess($user);
@@ -387,7 +387,7 @@ it('populates the filter with affiliated types via the My Affiliated Types actio
         ->assertSet('filters.serviceRequestTypes', [$affiliatedType->getKey()]);
 });
 
-it('warns instead of changing the filter when the user has no affiliated types', function () use ($grantServiceRequestsReportAccess) {
+it('warns instead of changing the filter when the user has no affiliated types', function () use ($grantServiceRequestsReportAccess): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
 
     $grantServiceRequestsReportAccess($user);
@@ -403,7 +403,7 @@ it('warns instead of changing the filter when the user has no affiliated types',
         ->assertSet('filters.serviceRequestTypes', [$type->getKey()]);
 });
 
-it('keeps the types selected by the My Affiliated Types action when the page is revisited', function () use ($grantServiceRequestsReportAccess) {
+it('keeps the types selected by the My Affiliated Types action when the page is revisited', function () use ($grantServiceRequestsReportAccess): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
 
     $grantServiceRequestsReportAccess($user);
@@ -421,7 +421,7 @@ it('keeps the types selected by the My Affiliated Types action when the page is 
         ->assertSet('filters.serviceRequestTypes', [$affiliatedType->getKey()]);
 });
 
-it('keeps the filter empty when the page is revisited after the Clear action', function () use ($grantServiceRequestsReportAccess) {
+it('keeps the filter empty when the page is revisited after the Clear action', function () use ($grantServiceRequestsReportAccess): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
 
     $grantServiceRequestsReportAccess($user);
@@ -439,7 +439,7 @@ it('keeps the filter empty when the page is revisited after the Clear action', f
         ->assertSet('filters.serviceRequestTypes', []);
 });
 
-it('disables clear action until at least one type is selected', function () use ($grantServiceRequestsReportAccess) {
+it('disables clear action until at least one type is selected', function () use ($grantServiceRequestsReportAccess): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
 
     $grantServiceRequestsReportAccess($user);
@@ -454,7 +454,7 @@ it('disables clear action until at least one type is selected', function () use 
         ->assertActionEnabled(TestAction::make('clearServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', 'filtersForm'));
 });
 
-it('clears the selected types via the Clear action', function () use ($grantServiceRequestsReportAccess) {
+it('clears the selected types via the Clear action', function () use ($grantServiceRequestsReportAccess): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
 
     $grantServiceRequestsReportAccess($user);
@@ -469,7 +469,7 @@ it('clears the selected types via the Clear action', function () use ($grantServ
         ->assertSet('filters.serviceRequestTypes', []);
 });
 
-it('filters the service requests table by the selected types', function () {
+it('filters the service requests table by the selected types', function (): void {
     $typeA = ServiceRequestType::factory()->create(['name' => 'Type A']);
     $typeB = ServiceRequestType::factory()->create(['name' => 'Type B']);
 
@@ -506,7 +506,7 @@ it('filters the service requests table by the selected types', function () {
         ->assertCanSeeTableRecords(collect([$requestA, $requestB]));
 });
 
-it('filters the request types table by the selected types', function () {
+it('filters the request types table by the selected types', function (): void {
     $typeA = ServiceRequestType::factory()->create(['name' => 'Type A']);
     $typeB = ServiceRequestType::factory()->create(['name' => 'Type B']);
 
@@ -518,7 +518,7 @@ it('filters the request types table by the selected types', function () {
         ->assertCanNotSeeTableRecords(collect([$typeB]));
 });
 
-it('respects the selected types in the service requests stats', function () {
+it('respects the selected types in the service requests stats', function (): void {
     $typeA = ServiceRequestType::factory()->create();
     $typeB = ServiceRequestType::factory()->create();
 
@@ -548,7 +548,7 @@ it('respects the selected types in the service requests stats', function () {
     expect($stats[0]->getValue())->toEqual('2');
 });
 
-it('respects the selected types in the status distribution chart', function () {
+it('respects the selected types in the status distribution chart', function (): void {
     $typeA = ServiceRequestType::factory()->create();
     $typeB = ServiceRequestType::factory()->create();
 
@@ -579,7 +579,7 @@ it('respects the selected types in the status distribution chart', function () {
     expect(array_sum($data['datasets'][0]['data']->all()))->toBe(2);
 });
 
-it('respects the selected types in the category distribution chart', function () {
+it('respects the selected types in the category distribution chart', function (): void {
     $typeA = ServiceRequestType::factory()->create();
     $typeB = ServiceRequestType::factory()->create();
 
@@ -612,7 +612,7 @@ it('respects the selected types in the category distribution chart', function ()
         ->and(array_sum($data['datasets'][0]['data']->all()))->toBe(2);
 });
 
-it('respects the selected types in the requests over time chart', function () {
+it('respects the selected types in the requests over time chart', function (): void {
     $typeA = ServiceRequestType::factory()->create();
     $typeB = ServiceRequestType::factory()->create();
 

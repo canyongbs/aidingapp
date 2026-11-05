@@ -64,7 +64,7 @@
         <x-timeline::timeline.labeled-field>
             <x-slot:label>Performed By</x-slot>
 
-            <x-timeline::timeline.related-person :person="$checkedOutBy" :name="$checkedOutBy?->name" />
+            <x-timeline::timeline.related-person :person="$checkedOutBy" :name="$checkedOutBy?->full_name" />
         </x-timeline::timeline.labeled-field>
 
         @if (is_null($record->asset_check_in_id))

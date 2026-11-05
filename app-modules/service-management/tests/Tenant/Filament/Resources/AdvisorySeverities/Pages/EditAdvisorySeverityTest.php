@@ -44,7 +44,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-test('EditAdvisorySeverity is gated with proper access control', function () {
+test('EditAdvisorySeverity is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $advisorySeverity = AdvisorySeverity::factory()->create();
@@ -83,7 +83,7 @@ test('EditAdvisorySeverity is gated with proper access control', function () {
     expect($advisorySeverity->fresh()->name)->toEqual($request->get('name'));
 });
 
-test('EditAdvisorySeverity validates the inputs', function (AdvisorySeverityRequestFactory $data, array $errors) {
+test('EditAdvisorySeverity validates the inputs', function (AdvisorySeverityRequestFactory $data, array $errors): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -122,7 +122,7 @@ test('EditAdvisorySeverity validates the inputs', function (AdvisorySeverityRequ
     ]
 );
 
-test('delete action visible with proper access control', function () {
+test('delete action visible with proper access control', function (): void {
     $user = User::factory()->create();
 
     $advisorySeverity = AdvisorySeverity::factory()->create();

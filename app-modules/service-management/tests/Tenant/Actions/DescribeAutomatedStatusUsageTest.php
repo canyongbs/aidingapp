@@ -44,13 +44,13 @@ $describeUsageOf = function (ServiceRequestStatus ...$statuses): ?string {
     );
 };
 
-it('does not warn when no service request type automates the status', function () use ($describeUsageOf) {
+it('does not warn when no service request type automates the status', function () use ($describeUsageOf): void {
     $status = ServiceRequestStatus::factory()->create();
 
     expect($describeUsageOf($status))->toBeNull();
 });
 
-it('names the single type automating one status', function () use ($describeUsageOf) {
+it('names the single type automating one status', function () use ($describeUsageOf): void {
     $status = ServiceRequestStatus::factory()->create();
 
     ServiceRequestType::factory()->for($status, 'automatedStatus')->create(['name' => 'VPN Access Request']);
@@ -60,7 +60,7 @@ it('names the single type automating one status', function () use ($describeUsag
     );
 });
 
-it('names every type automating one status in alphabetical order', function () use ($describeUsageOf) {
+it('names every type automating one status in alphabetical order', function () use ($describeUsageOf): void {
     $status = ServiceRequestStatus::factory()->create();
 
     ServiceRequestType::factory()->for($status, 'automatedStatus')->create(['name' => 'Password Reset']);
@@ -71,7 +71,7 @@ it('names every type automating one status in alphabetical order', function () u
     );
 });
 
-it('caps the named types and counts the remainder', function () use ($describeUsageOf) {
+it('caps the named types and counts the remainder', function () use ($describeUsageOf): void {
     $status = ServiceRequestStatus::factory()->create();
 
     foreach (['A Type', 'B Type', 'C Type', 'D Type', 'E Type'] as $name) {
@@ -83,7 +83,7 @@ it('caps the named types and counts the remainder', function () use ($describeUs
     );
 });
 
-it('uses the singular form when exactly one type is unnamed', function () use ($describeUsageOf) {
+it('uses the singular form when exactly one type is unnamed', function () use ($describeUsageOf): void {
     $status = ServiceRequestStatus::factory()->create();
 
     foreach (['A Type', 'B Type', 'C Type', 'D Type'] as $name) {
@@ -95,7 +95,7 @@ it('uses the singular form when exactly one type is unnamed', function () use ($
     );
 });
 
-it('counts how many of several statuses are automated', function () use ($describeUsageOf) {
+it('counts how many of several statuses are automated', function () use ($describeUsageOf): void {
     $automated = ServiceRequestStatus::factory()->create();
     $alsoAutomated = ServiceRequestStatus::factory()->create();
     $notAutomated = ServiceRequestStatus::factory()->create();
@@ -108,7 +108,7 @@ it('counts how many of several statuses are automated', function () use ($descri
     );
 });
 
-it('uses the singular verb when only one of several statuses is automated', function () use ($describeUsageOf) {
+it('uses the singular verb when only one of several statuses is automated', function () use ($describeUsageOf): void {
     $automated = ServiceRequestStatus::factory()->create();
     $notAutomated = ServiceRequestStatus::factory()->create();
 
@@ -119,7 +119,7 @@ it('uses the singular verb when only one of several statuses is automated', func
     );
 });
 
-it('does not warn when none of several statuses are automated', function () use ($describeUsageOf) {
+it('does not warn when none of several statuses are automated', function () use ($describeUsageOf): void {
     $statuses = ServiceRequestStatus::factory()->count(3)->create();
 
     expect($describeUsageOf(...$statuses->all()))->toBeNull();

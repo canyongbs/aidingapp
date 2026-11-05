@@ -64,7 +64,7 @@ class FormFieldBlockRegistry
             PasswordFormFieldBlock::class,
         ])->when(
             ! $internal,
-            fn (Collection $blocks) => $blocks->filter(fn (string $block) => ! $block::$internal)
+            fn (Collection $blocks) => $blocks->filter(fn (string $block): bool => ! $block::$internal)
         )->toArray();
     }
 

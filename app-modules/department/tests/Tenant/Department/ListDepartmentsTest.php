@@ -45,7 +45,7 @@ use function Pest\Laravel\actingAs;
 
 // Permission Tests
 
-test('ListDepartments is gated with proper access control', function () {
+test('ListDepartments is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -61,7 +61,7 @@ test('ListDepartments is gated with proper access control', function () {
         )->assertSuccessful();
 });
 
-it('only shows the bulk delete action to a user with the department.delete permission', function () {
+it('only shows the bulk delete action to a user with the department.delete permission', function (): void {
     Department::factory(15)->create();
 
     $user = User::factory()

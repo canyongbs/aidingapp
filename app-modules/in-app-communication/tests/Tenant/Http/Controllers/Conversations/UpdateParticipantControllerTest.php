@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Event;
 
 use function Pest\Laravel\actingAs;
 
-beforeEach(function () {
+beforeEach(function (): void {
     Event::fake();
 
     $settings = app(LicenseSettings::class);
@@ -50,7 +50,7 @@ beforeEach(function () {
     $settings->save();
 });
 
-it('validates request', function (array $data, array $expectedErrors) {
+it('validates request', function (array $data, array $expectedErrors): void {
     $user = User::factory()->create();
     $participant = User::factory()->create();
 

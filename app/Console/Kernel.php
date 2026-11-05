@@ -166,7 +166,7 @@ class Kernel extends ConsoleKernel
             ->onOneServer();
 
         // Registered last so it only records once a full schedule run has been dispatched.
-        $schedule->call(fn () => touch(storage_path('framework/schedule-heartbeat')))
+        $schedule->call(fn (): bool => touch(storage_path('framework/schedule-heartbeat')))
             ->everyMinute()
             ->name('Schedule Liveness Beacon')
             // @phpstan-ignore method.notFound (sentryMonitor is a macro registered by sentry/sentry-laravel)

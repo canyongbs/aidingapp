@@ -48,7 +48,7 @@ use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
 
-it('can notify a user if they belong to a department managing a service request type', function () {
+it('can notify a user if they belong to a department managing a service request type', function (): void {
     Notification::fake();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -96,7 +96,7 @@ it('can notify a user if they belong to a department managing a service request 
     Notification::assertNotSentTo($secondDepartment->users, ServiceRequestCreated::class);
 });
 
-it('can notify a user if they belong to a department auditing a service request type', function () {
+it('can notify a user if they belong to a department auditing a service request type', function (): void {
     Notification::fake();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -144,7 +144,7 @@ it('can notify a user if they belong to a department auditing a service request 
     Notification::assertNotSentTo($secondDepartment->users, ServiceRequestCreated::class);
 });
 
-it('does not notify a user if they belong to a department managing a service request type but departments do not recieve notifications', function () {
+it('does not notify a user if they belong to a department managing a service request type but departments do not recieve notifications', function (): void {
     Notification::fake();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -192,7 +192,7 @@ it('does not notify a user if they belong to a department managing a service req
     Notification::assertNotSentTo($secondDepartment->users, ServiceRequestCreated::class);
 });
 
-it('does not notify a user if they belong to a department auditing a service request type but departments do not recieve notifications', function () {
+it('does not notify a user if they belong to a department auditing a service request type but departments do not recieve notifications', function (): void {
     Notification::fake();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -240,7 +240,7 @@ it('does not notify a user if they belong to a department auditing a service req
     Notification::assertNotSentTo($secondDepartment->users, ServiceRequestCreated::class);
 });
 
-it('does not notify a user twice if they belong to a department managing and auditing a service request type', function () {
+it('does not notify a user twice if they belong to a department managing and auditing a service request type', function (): void {
     Notification::fake();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -291,7 +291,7 @@ it('does not notify a user twice if they belong to a department managing and aud
     Notification::assertNotSentTo($secondDepartment->users, ServiceRequestCreated::class);
 });
 
-it('can notify a direct user manager of a service request type', function () {
+it('can notify a direct user manager of a service request type', function (): void {
     Notification::fake();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -328,7 +328,7 @@ it('can notify a direct user manager of a service request type', function () {
     Notification::assertNotSentTo($nonManager, ServiceRequestCreated::class);
 });
 
-it('can notify a direct user auditor of a service request type', function () {
+it('can notify a direct user auditor of a service request type', function (): void {
     Notification::fake();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -365,7 +365,7 @@ it('can notify a direct user auditor of a service request type', function () {
     Notification::assertNotSentTo($nonAuditor, ServiceRequestCreated::class);
 });
 
-it('notifies manager and auditor group members once when assignments overlap', function () {
+it('notifies manager and auditor group members once when assignments overlap', function (): void {
     Notification::fake();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -403,7 +403,7 @@ it('notifies manager and auditor group members once when assignments overlap', f
     Notification::assertSentToTimes($auditor, ServiceRequestCreated::class, 1);
 });
 
-it('does not notify a direct user manager twice if they are also on a managing department', function () {
+it('does not notify a direct user manager twice if they are also on a managing department', function (): void {
     Notification::fake();
 
     $serviceRequestType = ServiceRequestType::factory()->create();

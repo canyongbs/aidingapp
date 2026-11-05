@@ -58,7 +58,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['web', 'auth'])
     ->name('in-app-communication.')
     ->prefix('api/chat')
-    ->group(function () {
+    ->group(function (): void {
         Route::get('/users/search', SearchUsersController::class)
             ->name('users.search');
 

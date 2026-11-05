@@ -68,7 +68,7 @@ class OtpLoginCodeFactory extends Factory
             throw new InvalidArgumentException('OTP code must be a 6-digit integer between 100000 and 999999.');
         }
 
-        return $this->state(function (array $attributes) use ($code) {
+        return $this->state(function (array $attributes) use ($code): array {
             return [
                 'code' => Hash::make((string) $code),
             ];
@@ -80,7 +80,7 @@ class OtpLoginCodeFactory extends Factory
      */
     public function used(?Carbon $when = null): Factory
     {
-        return $this->state(function (array $attributes) use ($when) {
+        return $this->state(function (array $attributes) use ($when): array {
             return [
                 'used_at' => $when ?? now(),
             ];

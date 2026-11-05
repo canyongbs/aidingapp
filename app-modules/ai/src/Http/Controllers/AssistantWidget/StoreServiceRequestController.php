@@ -47,6 +47,7 @@ use AidingApp\ServiceManagement\Actions\AttachServiceRequestSecrets;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
+use AidingApp\ServiceManagement\Enums\ServiceRequestFileUploadType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\Scopes\SelectableServiceRequestStatuses;
@@ -163,7 +164,7 @@ class StoreServiceRequestController extends Controller
             $this->handleAiResolution($data, $serviceRequest, $contact, $type, $updateUuids);
 
             $uploadJobs = array_map(
-                fn (array $file) => new PersistServiceRequestUpload(
+                fn (array $file): PersistServiceRequestUpload => new PersistServiceRequestUpload(
                     $serviceRequest,
                     $file['path'],
                     $file['original_file_name'],
@@ -325,6 +326,10 @@ class StoreServiceRequestController extends Controller
             $media = $serviceRequest
                 ->addMediaFromDisk($path)
                 ->usingName(pathinfo($originalFileName, PATHINFO_FILENAME))
+                ->createdBy($serviceRequest->respondent)
+                ->withCustomProperties([
+                    ServiceRequestFileUploadType::CUSTOM_PROPERTY => ServiceRequestFileUploadType::RequestSubmission->value,
+                ])
                 ->toMediaCollection($collection);
 
             Storage::delete($path);

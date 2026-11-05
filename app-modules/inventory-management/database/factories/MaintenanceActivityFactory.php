@@ -66,7 +66,7 @@ class MaintenanceActivityFactory extends Factory
 
     public function inProgress(): self
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             return [
                 'status' => MaintenanceActivityStatus::InProgress,
                 'completed_date' => null,
@@ -77,7 +77,7 @@ class MaintenanceActivityFactory extends Factory
 
     public function completed(): self
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             return [
                 'status' => MaintenanceActivityStatus::Completed,
                 'completed_date' => now(),
@@ -88,7 +88,7 @@ class MaintenanceActivityFactory extends Factory
 
     public function canceled(): self
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             return [
                 'status' => MaintenanceActivityStatus::Canceled,
                 'completed_date' => null,
@@ -99,7 +99,7 @@ class MaintenanceActivityFactory extends Factory
 
     public function delayed(): self
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             return [
                 'status' => MaintenanceActivityStatus::Delayed,
                 'completed_date' => null,

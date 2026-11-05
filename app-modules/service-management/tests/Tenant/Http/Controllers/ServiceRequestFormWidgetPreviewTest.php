@@ -44,13 +44,13 @@ use App\Settings\LicenseSettings;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 });
 
-it('redirects unauthenticated users to the login page when accessing the preview-entry endpoint', function () {
+it('redirects unauthenticated users to the login page when accessing the preview-entry endpoint', function (): void {
     $type = ServiceRequestType::factory()->create();
 
     $form = new ServiceRequestForm();
@@ -61,7 +61,7 @@ it('redirects unauthenticated users to the login page when accessing the preview
         ->assertRedirect();
 });
 
-it('is forbidden when service management is not enabled on the preview-entry endpoint', function () {
+it('is forbidden when service management is not enabled on the preview-entry endpoint', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = false;
     $settings->save();
@@ -79,7 +79,7 @@ it('is forbidden when service management is not enabled on the preview-entry end
         ->assertForbidden();
 });
 
-it('always returns is_authenticated as false in preview mode regardless of the form setting', function () {
+it('always returns is_authenticated as false in preview mode regardless of the form setting', function (): void {
     $user = User::factory()->create();
 
     $type = ServiceRequestType::factory()->create();
@@ -101,7 +101,7 @@ it('always returns is_authenticated as false in preview mode regardless of the f
     $response->assertJsonMissingPath('authentication_url');
 });
 
-it('does not include a submission_url in the preview-entry response', function () {
+it('does not include a submission_url in the preview-entry response', function (): void {
     $user = User::factory()->create();
 
     $type = ServiceRequestType::factory()->create();
@@ -118,7 +118,7 @@ it('does not include a submission_url in the preview-entry response', function (
         ->assertJsonMissingPath('submission_url');
 });
 
-it('inherits the rounding from the portal settings in the preview', function () {
+it('inherits the rounding from the portal settings in the preview', function (): void {
     $user = User::factory()->create();
 
     $type = ServiceRequestType::factory()->create();
@@ -137,7 +137,7 @@ it('inherits the rounding from the portal settings in the preview', function () 
         ->assertJsonPath('rounding', Rounding::Full->value);
 });
 
-it('falls back to a default rounding when the portal setting is not configured', function () {
+it('falls back to a default rounding when the portal setting is not configured', function (): void {
     $user = User::factory()->create();
 
     $type = ServiceRequestType::factory()->create();
@@ -156,7 +156,7 @@ it('falls back to a default rounding when the portal setting is not configured',
         ->assertJsonPath('rounding', 'md');
 });
 
-it('returns the schema in the preview-entry response and does not display the form name', function () {
+it('returns the schema in the preview-entry response and does not display the form name', function (): void {
     $user = User::factory()->create();
 
     $type = ServiceRequestType::factory()->create();

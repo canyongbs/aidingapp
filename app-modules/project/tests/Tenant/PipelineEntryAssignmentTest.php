@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
@@ -44,11 +46,11 @@ use Illuminate\Support\Facades\Notification;
 
 use function Tests\asSuperAdmin;
 
-beforeEach(function () {
+beforeEach(function (): void {
     Notification::fake();
 });
 
-it('sends notification to assigned user when pipeline entry is created with assigned_to', function () {
+it('sends notification to assigned user when pipeline entry is created with assigned_to', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -67,7 +69,7 @@ it('sends notification to assigned user when pipeline entry is created with assi
     Notification::assertSentTo($user, PipelineEntryAssignedToUserNotification::class);
 });
 
-it('does not send notification when pipeline entry is created without assigned_to', function () {
+it('does not send notification when pipeline entry is created without assigned_to', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -84,7 +86,7 @@ it('does not send notification when pipeline entry is created without assigned_t
     Notification::assertNothingSent();
 });
 
-it('sends notification to newly assigned user when assigned_to changes', function () {
+it('sends notification to newly assigned user when assigned_to changes', function (): void {
     asSuperAdmin();
 
     $originalUser = User::factory()->create();
@@ -115,7 +117,7 @@ it('sends notification to newly assigned user when assigned_to changes', functio
     Notification::assertNotSentTo($originalUser, PipelineEntryAssignedToUserNotification::class);
 });
 
-it('does not send notification when a non-assignment field changes', function () {
+it('does not send notification when a non-assignment field changes', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -134,7 +136,7 @@ it('does not send notification when a non-assignment field changes', function ()
     Notification::assertNothingSent();
 });
 
-it('does not send notification when assigned_to is unchanged on update', function () {
+it('does not send notification when assigned_to is unchanged on update', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -157,4 +159,77 @@ it('does not send notification when assigned_to is unchanged on update', functio
     $entry->fresh()->update(['assigned_to_id' => $user->id, 'name' => 'New name']);
 
     Notification::assertNotSentTo($user, PipelineEntryAssignedToUserNotification::class);
+});
+
+it('renders the due date assigned message with linked project and task names', function (): void {
+    $user = User::factory()->create();
+
+    $project = Project::factory()->create(['name' => 'Alpha <Project>']);
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $entry = PipelineEntry::factory()->create([
+        'name' => 'Build it',
+        'pipeline_stage_id' => $pipeline->stages->first()->id,
+        'due' => '2030-05-06 15:30:00',
+    ]);
+
+    $notification = new PipelineEntryAssignedToUserNotification($entry);
+
+    $title = $notification->toDatabase($user)['title'];
+
+    expect($title)
+        ->toContain('For the project <a href="' . ProjectResource::getUrl('view', ['record' => $project]) . '"')
+        ->toContain('Alpha &lt;Project&gt;</a>')
+        ->toContain('you have been assigned a new task: <a href="' . PipelineResource::getUrl('entries', ['record' => $pipeline, 'project' => $project]) . '"')
+        ->toContain('Build it</a> with a due date of May 6, 2030')
+        ->not()->toContain('no assigned due date');
+
+    expect($notification->toMail($user)->introLines[0]->toHtml())->toContain('with a due date of May 6, 2030');
+});
+
+it('renders the due date in the notified user timezone without a timezone abbreviation', function (): void {
+    $user = User::factory()->create(['timezone' => 'Asia/Kolkata']);
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->id,
+        'due' => '2030-05-06 15:30:00',
+    ]);
+
+    $notification = new PipelineEntryAssignedToUserNotification($entry);
+
+    expect($notification->toDatabase($user)['title'])
+        ->toContain('with a due date of May 6, 2030 9:00 pm.')
+        ->not()->toContain('UTC');
+});
+
+it('renders the no due date message with linked project and task names', function (): void {
+    $user = User::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create(['name' => 'Alpha']))
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $entry = PipelineEntry::factory()->create([
+        'name' => 'Build it',
+        'pipeline_stage_id' => $pipeline->stages->first()->id,
+        'due' => null,
+    ]);
+
+    $notification = new PipelineEntryAssignedToUserNotification($entry);
+
+    expect($notification->toDatabase($user)['title'])
+        ->toContain('Alpha</a> you have been assigned a new task to <a href=')
+        ->toContain('Build it</a>. There was no assigned due date at task creation.');
+
+    expect($notification->toMail($user)->introLines[0]->toHtml())->toContain('There was no assigned due date at task creation.');
 });

@@ -60,7 +60,7 @@ abstract class LandlordTestCase extends TestCase
         $this->refreshTestDatabase();
         $this->afterRefreshingDatabase();
 
-        $this->beforeApplicationDestroyed(function () {
+        $this->beforeApplicationDestroyed(function (): void {
             $this->restoreTenantTestingEnvironment();
         });
     }
@@ -75,7 +75,7 @@ abstract class LandlordTestCase extends TestCase
             RefreshDatabaseState::$migrated = true;
         }
 
-        $beginLandlordTransaction = function () {
+        $beginLandlordTransaction = function (): void {
             $this->beginDatabaseTransactionOnConnection($this->landlordDatabaseConnectionName());
         };
 

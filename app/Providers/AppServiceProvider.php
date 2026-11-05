@@ -98,7 +98,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ImportCsv::class, ImportCsvOverride::class);
         $this->app->bind(PrepareCsvExport::class, PrepareCsvExportOverride::class);
 
-        $this->app->scoped(StartSession::class, function (Application $app) {
+        $this->app->scoped(StartSession::class, function (Application $app): OverrideStartSession {
             return new OverrideStartSession($app->make(SessionManager::class), function () use ($app) {
                 return $app->make(CacheFactory::class);
             });
@@ -132,20 +132,20 @@ class AppServiceProvider extends ServiceProvider
             'email_settings_property' => EmailSettingsProperty::class,
         ]);
 
-        Feature::resolveScopeUsing(fn ($driver) => null);
+        Feature::resolveScopeUsing(fn ($driver): null => null);
 
         if (config('app.force_https')) {
             URL::forceScheme('https');
             $this->app['request']->server->set('HTTPS', true);
         }
 
-        Queue::looping(function () {
+        Queue::looping(function (): void {
             configureScope(function (Scope $scope): void {
                 $scope->removeUser();
             });
         });
 
-        $this->app->singleton('current-commit', function () {
+        $this->app->singleton('current-commit', function (): ?string {
             $commitProcess = Process::run('git log --pretty="%h" -n1 HEAD');
 
             if ($commitProcess->successful()) {
@@ -157,7 +157,7 @@ class AppServiceProvider extends ServiceProvider
             return null;
         });
 
-        $this->app->singleton('current-version', function () {
+        $this->app->singleton('current-version', function (): ?string {
             $gitVersion = Process::run('git describe --tags $(git rev-list --tags --max-count=1)');
 
             if ($gitVersion->successful()) {

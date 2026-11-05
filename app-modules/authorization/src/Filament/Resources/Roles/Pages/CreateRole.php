@@ -63,7 +63,7 @@ class CreateRole extends CreateRecord
                     ->unique(
                         table: 'roles',
                         column: 'name',
-                        modifyRuleUsing: function (Unique $rule, Get $get) {
+                        modifyRuleUsing: function (Unique $rule, Get $get): void {
                             $rule->where('guard_name', $get('guard_name'));
                         }
                     ),
@@ -75,7 +75,7 @@ class CreateRole extends CreateRecord
                     ])
                     ->default('web')
                     ->live()
-                    ->afterStateUpdated(fn (Set $set) => $set('permissions', [])),
+                    ->afterStateUpdated(fn (Set $set): mixed => $set('permissions', [])),
                 Textarea::make('description')
                     ->nullable()
                     ->maxLength(65535)

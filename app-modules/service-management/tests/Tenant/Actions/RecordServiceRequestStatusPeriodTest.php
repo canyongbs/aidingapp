@@ -41,7 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Notification;
 
-it('records a status period for the current status', function () {
+it('records a status period for the current status', function (): void {
     Notification::fake();
 
     $status = ServiceRequestStatus::factory()->open()->create();
@@ -61,7 +61,7 @@ it('records a status period for the current status', function () {
         ->and($period->started_at->toDateTimeString())->toBe($startedAt->toDateTimeString());
 });
 
-it('does not record a consecutive duplicate status period', function () {
+it('does not record a consecutive duplicate status period', function (): void {
     Notification::fake();
 
     $status = ServiceRequestStatus::factory()->open()->create();

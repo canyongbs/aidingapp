@@ -46,7 +46,7 @@ use function Pest\Laravel\assertDatabaseEmpty;
 use function Pest\Laravel\assertDatabaseHas;
 use function Tests\asSuperAdmin;
 
-test('it creates a ServiceRequestTypeEmailTemplate if it did not already exist', function () {
+test('it creates a ServiceRequestTypeEmailTemplate if it did not already exist', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     asSuperAdmin();
@@ -81,7 +81,7 @@ test('it creates a ServiceRequestTypeEmailTemplate if it did not already exist',
     ]);
 });
 
-test('it updates a ServiceRequestTypeEmailTemplate if it already exists', function () {
+test('it updates a ServiceRequestTypeEmailTemplate if it already exists', function (): void {
     $emailTemplate = ServiceRequestTypeEmailTemplate::factory()->create();
 
     asSuperAdmin();
@@ -106,7 +106,7 @@ test('it updates a ServiceRequestTypeEmailTemplate if it already exists', functi
         ->and($emailTemplate->body)->toEqualCanonicalizing($request['body']);
 });
 
-test('it keeps a template whose content consists only of merge tags', function () {
+test('it keeps a template whose content consists only of merge tags', function (): void {
     $content = [
         'type' => 'doc',
         'content' => [[
@@ -136,7 +136,7 @@ test('it keeps a template whose content consists only of merge tags', function (
         ->and($saved->body)->toEqual($content);
 });
 
-test('it disables the unsaved data changes alert to avoid false positives on this complex form', function () {
+test('it disables the unsaved data changes alert to avoid false positives on this complex form', function (): void {
     $page = new ServiceRequestTypeEmailTemplatePage();
 
     $hasUnsavedDataChangesAlert = (new ReflectionClass($page))

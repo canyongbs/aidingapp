@@ -43,8 +43,8 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('contacts', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('contacts', function (Blueprint $table): void {
                 $table->timestamp('last_activity_at')->nullable()->index();
             });
 
@@ -54,10 +54,10 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             ContactTrackingFeature::deactivate();
 
-            Schema::table('contacts', function (Blueprint $table) {
+            Schema::table('contacts', function (Blueprint $table): void {
                 $table->dropColumn('last_activity_at');
             });
         });

@@ -49,7 +49,7 @@
         @if (! $assignedUser)
             <x-filament::badge color="gray">Unassigned</x-filament::badge>
         @else
-            <span>{{ $assignedUser->name }}</span>
+            <span>{{ $assignedUser->full_name }}</span>
         @endif
     </div>
 

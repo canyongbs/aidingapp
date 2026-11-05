@@ -39,16 +39,19 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\Pages\Edi
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\RelationManagers\SubCategoriesRelationManager;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseCategories\RequestFactories\EditKnowledgeBaseCategoryRequestFactory;
+use App\Features\KnowledgeBaseCategoryNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\AssociateAction;
 use Filament\Actions\CreateAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\Select;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function PHPUnit\Framework\assertEquals;
+use function Tests\asSuperAdmin;
 
 // TODO: Write EditKnowledgeBaseCategory tests
 //test('A successful action on the EditKnowledgeBaseCategory page', function () {});
@@ -57,7 +60,7 @@ use function PHPUnit\Framework\assertEquals;
 
 // Permission Tests
 
-test('EditKnowledgeBaseCategory is gated with proper access control', function () {
+test('EditKnowledgeBaseCategory is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
@@ -96,7 +99,7 @@ test('EditKnowledgeBaseCategory is gated with proper access control', function (
     assertEquals($request['name'], $knowledgeBaseCategory->fresh()->name);
 });
 
-test('EditKnowledgeBaseCategory is gated with proper feature access control', function () {
+test('EditKnowledgeBaseCategory is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = false;
@@ -145,7 +148,7 @@ test('EditKnowledgeBaseCategory is gated with proper feature access control', fu
     assertEquals($request['name'], $knowledgeBaseCategory->fresh()->name);
 });
 
-test('can create subcategory', function () {
+test('can create subcategory', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
@@ -174,7 +177,7 @@ test('can create subcategory', function () {
         ->toEqual(1);
 });
 
-test('exclude already attached subcategories in search', function () {
+test('exclude already attached subcategories in search', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
@@ -197,14 +200,14 @@ test('exclude already attached subcategories in search', function () {
         'pageClass' => EditKnowledgeBaseCategory::class,
     ])
         ->mountTableAction(AssociateAction::class)
-        ->assertFormFieldExists('recordId', 'mountedActionSchema0', function (Select $select) use ($knowledgeBaseSubCategory, $newknowledgeBaseCategory) {
+        ->assertFormFieldExists('recordId', 'mountedActionSchema0', function (Select $select) use ($knowledgeBaseSubCategory, $newknowledgeBaseCategory): bool {
             $options = $select->getOptions();
 
             return in_array($newknowledgeBaseCategory->getKey(), array_keys($options)) && ! in_array($knowledgeBaseSubCategory->getKey(), array_keys($options));
         });
 });
 
-test('can attach subcategories into categories', function () {
+test('can attach subcategories into categories', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
@@ -231,7 +234,7 @@ test('can attach subcategories into categories', function () {
     expect($knowledgeBaseCategory->refresh()->subCategories->pluck('id'))->toContain($knowledgeBaseSubCategory->getKey());
 });
 
-test('only shows the subcategories bulk delete action to a user with the settings delete permission', function () {
+test('only shows the subcategories bulk delete action to a user with the settings delete permission', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any', 'settings.*.update');
@@ -258,4 +261,52 @@ test('only shows the subcategories bulk delete action to a user with the setting
         'pageClass' => EditKnowledgeBaseCategory::class,
     ])
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+});
+
+it('does not allow updating a knowledge base category to a name matching another category case-insensitively', function (): void {
+    asSuperAdmin();
+
+    KnowledgeBaseCategory::factory()->create(['name' => 'Getting Started']);
+    $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create(['name' => 'Billing']);
+
+    Livewire::test(EditKnowledgeBaseCategory::class, [
+        'record' => $knowledgeBaseCategory->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'getting started'])
+        ->call('save')
+        ->assertHasFormErrors(['name' => 'unique']);
+});
+
+it('allows updating a knowledge base category to a name freed up by a soft-deleted category case-insensitively', function (): void {
+    asSuperAdmin();
+
+    KnowledgeBaseCategory::factory()->create(['name' => 'Getting Started'])->delete();
+    $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create(['name' => 'Billing']);
+
+    Livewire::test(EditKnowledgeBaseCategory::class, [
+        'record' => $knowledgeBaseCategory->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'getting started'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($knowledgeBaseCategory->refresh()->name)->toBe('getting started');
+});
+
+describe('name uniqueness feature flag', function (): void {
+    it('does not apply the unique form rule when the feature is disabled', function (): void {
+        KnowledgeBaseCategoryNameUniquenessFeature::deactivate();
+
+        asSuperAdmin();
+
+        KnowledgeBaseCategory::factory()->create(['name' => 'Getting Started']);
+        $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create(['name' => 'Billing']);
+
+        expect(fn () => Livewire::test(EditKnowledgeBaseCategory::class, [
+            'record' => $knowledgeBaseCategory->getRouteKey(),
+        ])
+            ->fillForm(['name' => 'Getting Started'])
+            ->call('save'))
+            ->toThrow(UniqueConstraintViolationException::class);
+    });
 });

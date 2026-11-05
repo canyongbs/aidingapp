@@ -73,7 +73,7 @@ class AlertManagerConcernCreated extends Notification implements ShouldQueue
         $link = new HtmlString("<a href='{$url}' target='_blnk' class='underline'>{$knowledgeBaseItem->title}</a>");
 
         return FilamentNotification::make()
-            ->title("A concern has been raised by {$user->name}, {$user->job_title} about the knowledge base item {$link}.")
+            ->title("A concern has been raised by {$user->full_name}, {$user->job_title} about the knowledge base item {$link}.")
             ->getDatabaseMessage();
     }
 }

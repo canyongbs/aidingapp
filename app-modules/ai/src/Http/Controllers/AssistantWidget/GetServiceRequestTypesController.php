@@ -78,7 +78,7 @@ class GetServiceRequestTypesController extends Controller
                 'is_ai_resolution_enabled' => $aiResolutionGlobalEnabled && $type->is_ai_resolution_enabled,
                 'is_live_chat_enabled' => $type->is_live_chat_enabled,
                 'default_priority_id' => $type->defaultPriority?->getKey(),
-                'priorities' => $type->priorities->map(fn ($priority) => [
+                'priorities' => $type->priorities->map(fn ($priority): array => [
                     'id' => $priority->getKey(),
                     'name' => $priority->name,
                     'order' => $priority->order,

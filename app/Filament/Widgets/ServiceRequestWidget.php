@@ -90,7 +90,7 @@ class ServiceRequestWidget extends BaseWidget
         $currentOpenServiceRequests = ServiceRequest::whereIn('status_id', $openStatusIds)->count();
 
         $serviceRequestsCreatedBeforeIntervalStart = ServiceRequest::query()
-            ->with(['histories' => function ($query) use ($intervalStart) {
+            ->with(['histories' => function ($query) use ($intervalStart): void {
                 $query->whereBetween('created_at', [$intervalStart, now()])
                     ->whereRaw("original_values->>'status_id' IS NOT NULL")  // Checks if status_id was actually changed
                     ->orderBy('created_at', 'asc')
@@ -99,7 +99,7 @@ class ServiceRequestWidget extends BaseWidget
             ->where('created_at', '<=', $intervalStart)->get();
 
         $openServiceRequestsAtIntervalCount = Cache::remember("open_service_requests_{$intervalStart->year}_{$intervalStart->month}_{$intervalStart->day}", $this->secondsToCache, function () use ($serviceRequestsCreatedBeforeIntervalStart, $openStatusIds) {
-            return $serviceRequestsCreatedBeforeIntervalStart->filter(function (ServiceRequest $serviceRequest) use ($openStatusIds) {
+            return $serviceRequestsCreatedBeforeIntervalStart->filter(function (ServiceRequest $serviceRequest) use ($openStatusIds): bool {
                 return $this->wasOpenAtIntervalStart($serviceRequest, $openStatusIds);
             })->count();
         });
@@ -145,7 +145,7 @@ class ServiceRequestWidget extends BaseWidget
 
         $unassignedServiceRequestsAtIntervalCount = Cache::remember("unassigned_service_requests_{$intervalStart->year}_{$intervalStart->month}_{$intervalStart->day}", $this->secondsToCache, function () use ($intervalStart) {
             return ServiceRequest::query()
-                ->whereDoesntHave('assignments', function (Builder $query) use ($intervalStart) {
+                ->whereDoesntHave('assignments', function (Builder $query) use ($intervalStart): void {
                     $query->where('assigned_at', '<=', $intervalStart);
                 })
                 ->where('created_at', '<=', $intervalStart)

@@ -52,7 +52,7 @@ class UserExporter extends Exporter
                 ->label('First Name'),
             ExportColumn::make('last_name')
                 ->label('Last Name'),
-            ExportColumn::make('name')
+            ExportColumn::make('full_name')
                 ->label('Full Name'),
             ExportColumn::make('preferred_name')
                 ->label('Preferred Name'),

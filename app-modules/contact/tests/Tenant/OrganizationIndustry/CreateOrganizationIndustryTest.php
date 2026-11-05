@@ -48,7 +48,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertCount;
 
-test('Create Organization Industry is gated with proper access control', function () {
+test('Create Organization Industry is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -67,7 +67,7 @@ test('Create Organization Industry is gated with proper access control', functio
             OrganizationIndustryResource::getUrl('create')
         )->assertSuccessful();
 });
-test('Create New Organization Industry', function () {
+test('Create New Organization Industry', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
@@ -85,7 +85,7 @@ test('Create New Organization Industry', function () {
     assertDatabaseHas(OrganizationIndustry::class, $request->toArray());
 });
 
-test('the organization industry name must be unique among non-trashed industries', function () {
+test('the organization industry name must be unique among non-trashed industries', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
@@ -103,7 +103,7 @@ test('the organization industry name must be unique among non-trashed industries
         ->assertHasFormErrors(['name' => 'unique']);
 });
 
-test('the organization industry name uniqueness check is case-insensitive', function () {
+test('the organization industry name uniqueness check is case-insensitive', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
@@ -121,7 +121,7 @@ test('the organization industry name uniqueness check is case-insensitive', func
         ->assertHasFormErrors(['name' => 'unique']);
 });
 
-test('does not apply the unique form rule when the feature is disabled', function () {
+test('does not apply the unique form rule when the feature is disabled', function (): void {
     OrganizationTypeAndIndustryNameUniquenessFeature::deactivate();
 
     $user = User::factory()->create();

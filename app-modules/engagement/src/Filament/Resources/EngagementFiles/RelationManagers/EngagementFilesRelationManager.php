@@ -37,6 +37,7 @@
 namespace AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers;
 
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\EngagementFileResource;
+use App\Filament\Concerns\CanBeReadOnly;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -51,6 +52,8 @@ use Filament\Tables\Table;
 
 class EngagementFilesRelationManager extends RelationManager
 {
+    use CanBeReadOnly;
+
     protected static string $relationship = 'engagementFiles';
 
     protected static ?string $label = 'Files and Documents';

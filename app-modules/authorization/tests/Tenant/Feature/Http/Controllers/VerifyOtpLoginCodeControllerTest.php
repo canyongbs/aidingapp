@@ -44,7 +44,7 @@ use function Pest\Laravel\assertGuest;
 use function Pest\Laravel\post;
 use function Pest\Laravel\travelTo;
 
-it('requires a valid signed URL', function () {
+it('requires a valid signed URL', function (): void {
     $code = 123456;
 
     $otpCode = OtpLoginCode::factory()->withCode($code)->create();
@@ -55,7 +55,7 @@ it('requires a valid signed URL', function () {
         ->assertForbidden();
 });
 
-it('rejects an expired signed URL', function () {
+it('rejects an expired signed URL', function (): void {
     $code = 123456;
 
     $otpCode = OtpLoginCode::factory()->withCode($code)->create();
@@ -82,7 +82,7 @@ it('rejects an expired signed URL', function () {
     assertGuest($panel->getAuthGuard());
 });
 
-it('rejects an OTP code that has already been used', function () {
+it('rejects an OTP code that has already been used', function (): void {
     $code = 123456;
 
     $otpCode = OtpLoginCode::factory()->withCode($code)->used()->create();
@@ -103,7 +103,7 @@ it('rejects an OTP code that has already been used', function () {
     assertGuest($panel->getAuthGuard());
 });
 
-it('requires the code field', function () {
+it('requires the code field', function (): void {
     $otpCode = OtpLoginCode::factory()->create();
 
     post(URL::temporarySignedRoute(
@@ -116,7 +116,7 @@ it('requires the code field', function () {
         ->assertInvalid(['code' => 'required']);
 });
 
-it('requires the code to be exactly 6 digits', function (string $invalidCode, string $rule) {
+it('requires the code to be exactly 6 digits', function (string $invalidCode, string $rule): void {
     $otpCode = OtpLoginCode::factory()->create();
 
     post(URL::temporarySignedRoute(
@@ -136,7 +136,7 @@ it('requires the code to be exactly 6 digits', function (string $invalidCode, st
         'non-numeric' => ['abcdef', 'digits'],
     ]);
 
-it('returns an error when the OTP code is incorrect', function () {
+it('returns an error when the OTP code is incorrect', function (): void {
     $code = 123456;
 
     $otpCode = OtpLoginCode::factory()->withCode($code)->create();
@@ -162,7 +162,7 @@ it('returns an error when the OTP code is incorrect', function () {
     expect($otpCode->used_at)->toBeNull();
 });
 
-it('locks the OTP code after too many invalid attempts and rejects even the correct code', function () {
+it('locks the OTP code after too many invalid attempts and rejects even the correct code', function (): void {
     $code = 123456;
 
     $otpCode = OtpLoginCode::factory()->withCode($code)->create();
@@ -198,7 +198,7 @@ it('locks the OTP code after too many invalid attempts and rejects even the corr
     expect($otpCode->used_at)->toBeNull();
 });
 
-it('logs in the user and redirects to the admin panel home with a valid code', function () {
+it('logs in the user and redirects to the admin panel home with a valid code', function (): void {
     $code = 123456;
 
     $otpCode = OtpLoginCode::factory()->withCode($code)->create();
@@ -219,7 +219,7 @@ it('logs in the user and redirects to the admin panel home with a valid code', f
     assertAuthenticatedAs($otpCode->user, $panel->getAuthGuard());
 });
 
-it('marks the OTP code as used after successful verification', function () {
+it('marks the OTP code as used after successful verification', function (): void {
     $code = 123456;
 
     $otpCode = OtpLoginCode::factory()->withCode($code)->create();
@@ -242,7 +242,7 @@ it('marks the OTP code as used after successful verification', function () {
     expect($otpCode->used_at)->not->toBeNull();
 });
 
-it('does not mark the OTP code as used when the wrong code is entered', function () {
+it('does not mark the OTP code as used when the wrong code is entered', function (): void {
     $code = 123456;
 
     $otpCode = OtpLoginCode::factory()->withCode($code)->create();
@@ -262,7 +262,7 @@ it('does not mark the OTP code as used when the wrong code is entered', function
     expect($otpCode->used_at)->toBeNull();
 });
 
-it('prevents reuse of an OTP code after successful verification', function () {
+it('prevents reuse of an OTP code after successful verification', function (): void {
     $code = 123456;
 
     $otpCode = OtpLoginCode::factory()->withCode($code)->create();

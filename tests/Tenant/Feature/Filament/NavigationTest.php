@@ -45,7 +45,7 @@ use Illuminate\Support\Arr;
 use function Pest\Laravel\actingAs;
 use function PHPUnit\Framework\assertCount;
 
-test('there is only the Dashboard item for unlicensed users', function () {
+test('there is only the Dashboard item for unlicensed users', function (): void {
     actingAs(User::factory()->create());
 
     $navigation = Filament::getNavigation();
@@ -54,7 +54,7 @@ test('there is only the Dashboard item for unlicensed users', function () {
     assertCount(1, Arr::first($navigation)->getItems());
 });
 
-test('navigation groups with a label must have an icon, and the unlabeled home group must not', function () {
+test('navigation groups with a label must have an icon, and the unlabeled home group must not', function (): void {
     $user = User::factory()->create();
     $user->assignRole(Role::query()->where('name', Authenticatable::SUPER_ADMIN_ROLE)->firstOrFail());
 
@@ -79,7 +79,7 @@ test('navigation groups with a label must have an icon, and the unlabeled home g
     }
 });
 
-test('navigation items in labeled groups must not have an icon, while items in the home group must have one', function () {
+test('navigation items in labeled groups must not have an icon, while items in the home group must have one', function (): void {
     $user = User::factory()->create();
     $user->assignRole(Role::query()->where('name', Authenticatable::SUPER_ADMIN_ROLE)->firstOrFail());
 
@@ -108,7 +108,7 @@ test('navigation items in labeled groups must not have an icon, while items in t
     }
 });
 
-test('cluster sub-navigation groups must be defined via a dedicated enum, never a string literal', function () {
+test('cluster sub-navigation groups must be defined via a dedicated enum, never a string literal', function (): void {
     $clusters = Filament::getCurrentOrDefaultPanel()->getClusters();
 
     expect($clusters)->not()->toBeEmpty();
@@ -139,7 +139,7 @@ test('cluster sub-navigation groups must be defined via a dedicated enum, never 
     );
 });
 
-test('cluster sub-navigation must use a HasLabel-only enum, never an enum that carries icons', function () {
+test('cluster sub-navigation must use a HasLabel-only enum, never an enum that carries icons', function (): void {
     $clusters = Filament::getCurrentOrDefaultPanel()->getClusters();
 
     expect($clusters)->not()->toBeEmpty();
@@ -169,7 +169,7 @@ test('cluster sub-navigation must use a HasLabel-only enum, never an enum that c
     );
 });
 
-test('Dashboard subclasses inside clusters must explicitly declare $navigationIcon to suppress the Dashboard home-icon fallback', function () {
+test('Dashboard subclasses inside clusters must explicitly declare $navigationIcon to suppress the Dashboard home-icon fallback', function (): void {
     $clusters = Filament::getCurrentOrDefaultPanel()->getClusters();
 
     expect($clusters)->not()->toBeEmpty();

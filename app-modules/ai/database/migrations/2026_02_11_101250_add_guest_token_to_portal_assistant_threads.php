@@ -41,14 +41,14 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('portal_assistant_threads', function (Blueprint $table) {
+        Schema::table('portal_assistant_threads', function (Blueprint $table): void {
             $table->uuid('guest_token')->nullable();
         });
     }
 
     public function down(): void
     {
-        Schema::table('portal_assistant_threads', function (Blueprint $table) {
+        Schema::table('portal_assistant_threads', function (Blueprint $table): void {
             $table->dropColumn('guest_token');
         });
     }

@@ -33,18 +33,17 @@
 -->
 <script setup>
     import BaseButton from '@common/BaseButton.vue';
+    import BaseTable from '@common/BaseTable.vue';
+    import BaseTableBody from '@common/BaseTableBody.vue';
+    import BaseTableCell from '@common/BaseTableCell.vue';
+    import BaseTableCellText from '@common/BaseTableCellText.vue';
+    import BaseTableHeader from '@common/BaseTableHeader.vue';
+    import BaseTableHeaderCell from '@common/BaseTableHeaderCell.vue';
+    import BaseTableRow from '@common/BaseTableRow.vue';
     import { ArrowRightIcon } from '@heroicons/vue/16/solid';
     import { defineEmits, defineProps } from 'vue';
     import formatDateTime from '../../Services/FormatDateTime.js';
     import formatRelativeTime from '../../Services/FormatRelativeTime.js';
-    import BaseTable from '../ui/BaseTable.vue';
-    import BaseTableBody from '../ui/BaseTableBody.vue';
-    import BaseTableCell from '../ui/BaseTableCell.vue';
-    import BaseTableCellText from '../ui/BaseTableCellText.vue';
-    import BaseTableHeader from '../ui/BaseTableHeader.vue';
-    import BaseTableHeaderCell from '../ui/BaseTableHeaderCell.vue';
-    import BaseTableRow from '../ui/BaseTableRow.vue';
-    import BaseTableSortableHeaderCell from '../ui/BaseTableSortableHeaderCell.vue';
     import ServiceMonitorHistorySparkline from './ServiceMonitorHistorySparkline.vue';
     import ServiceMonitorStatusPill from './ServiceMonitorStatusPill.vue';
     import { formatUptimePercentage, getMonitorTypeIcon } from './serviceMonitorStatuses.js';
@@ -66,6 +65,10 @@
             type: Number,
             required: true,
         },
+        loading: {
+            type: Boolean,
+            default: false,
+        },
     });
 
     const emit = defineEmits(['sort']);
@@ -81,20 +84,31 @@
 </script>
 
 <template>
-    <BaseTable>
+    <BaseTable :loading="loading">
+        <template v-if="$slots.toolbar" #toolbar>
+            <slot name="toolbar" />
+        </template>
+
+        <template v-if="$slots.empty" #empty>
+            <slot name="empty" />
+        </template>
+
+        <template v-if="$slots.footer" #footer>
+            <slot name="footer" />
+        </template>
+
         <BaseTableHeader>
             <tr>
-                <BaseTableSortableHeaderCell
+                <BaseTableHeaderCell
                     v-for="sortableColumn in sortableColumns"
                     :key="sortableColumn.column"
-                    :column="sortableColumn.column"
-                    :sort="sort"
-                    :direction="direction"
+                    sortable
+                    :sort-direction="sort === sortableColumn.column ? direction : null"
                     :class="sortableColumn.class"
-                    @sort="emit('sort', $event)"
+                    @sort="emit('sort', sortableColumn.column)"
                 >
                     {{ sortableColumn.label }}
-                </BaseTableSortableHeaderCell>
+                </BaseTableHeaderCell>
                 <BaseTableHeaderCell class="whitespace-nowrap">30-day history</BaseTableHeaderCell>
                 <BaseTableHeaderCell>
                     <span class="sr-only">Actions</span>
@@ -106,7 +120,7 @@
                 <BaseTableCell>
                     <div class="flex items-center gap-3">
                         <span
-                            class="flex size-10 shrink-0 items-center justify-center rounded-[var(--rounding-md)] bg-gray-100 text-gray-700"
+                            class="flex size-10 shrink-0 items-center justify-center rounded-md bg-gray-100 text-gray-700"
                             :title="monitor.monitor_type_label"
                         >
                             <component
@@ -116,12 +130,7 @@
                             />
                             <span class="sr-only">{{ monitor.monitor_type_label }}</span>
                         </span>
-                        <BaseTableCellText
-                            class="min-w-0"
-                            :text="monitor.name"
-                            :sub-text="monitor.description"
-                            :sub-text-max-length="60"
-                        />
+                        <BaseTableCellText class="min-w-0" :text="monitor.name" :sub-text="monitor.description" />
                     </div>
                 </BaseTableCell>
 

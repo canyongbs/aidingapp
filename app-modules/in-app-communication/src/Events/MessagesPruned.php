@@ -86,7 +86,7 @@ class MessagesPruned implements ShouldBroadcast
             ->conversationParticipants()
             ->where('participant_type', app(User::class)->getMorphClass())
             ->pluck('participant_id')
-            ->map(fn (string $id) => new PrivateChannel("user.{$id}"))
+            ->map(fn (string $id): PrivateChannel => new PrivateChannel("user.{$id}"))
             ->all();
 
         $channels[] = new PrivateChannel("conversation.{$this->conversation->getKey()}");

@@ -42,7 +42,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('pipeline_stages', function (Blueprint $table) {
+        Schema::table('pipeline_stages', function (Blueprint $table): void {
             $table->string('classification')
                 ->default(PipelineStageClassification::Planning->value);
         });
@@ -50,7 +50,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('pipeline_stages', function (Blueprint $table) {
+        Schema::table('pipeline_stages', function (Blueprint $table): void {
             $table->dropColumn('classification');
         });
     }

@@ -37,6 +37,8 @@
 namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
 use AidingApp\Project\Enums\PipelineStageClassification;
+use AidingApp\Project\Filament\Resources\Pipelines\Forms\Components\PipelineNameInput;
+use AidingApp\Project\Filament\Resources\Pipelines\Forms\Components\PipelineStageNameInput;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
@@ -47,10 +49,10 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\DB;
 
 class EditPipeline extends EditRecord
 {
@@ -58,13 +60,19 @@ class EditPipeline extends EditRecord
 
     protected static ?string $navigationLabel = 'Edit';
 
+    protected ?bool $hasDatabaseTransactions = true;
+
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
+                PipelineNameInput::make(function (): ?string {
+                    $pipeline = $this->getRecord();
+
+                    assert($pipeline instanceof Pipeline);
+
+                    return $pipeline->project_id;
+                }, ignoreRecord: true),
                 Textarea::make('description')
                     ->required()
                     ->maxLength(65535),
@@ -75,10 +83,7 @@ class EditPipeline extends EditRecord
                         TableColumn::make('Classification'),
                     ])
                     ->schema([
-                        TextInput::make('name')
-                            ->label('Stage')
-                            ->distinct()
-                            ->required(),
+                        PipelineStageNameInput::make(),
                         Select::make('classification')
                             ->label('Classification')
                             ->options(PipelineStageClassification::class)
@@ -88,8 +93,8 @@ class EditPipeline extends EditRecord
                             ->default(PipelineStageClassification::Planning->value),
                     ])
                     ->deleteAction(
-                        function (Action $action) {
-                            $action->before(function (array $arguments, Repeater $component, Action $action) {
+                        function (Action $action): void {
+                            $action->before(function (array $arguments, Repeater $component, Action $action): void {
                                 $currentStage = $component->getRawItemState($arguments['item']);
 
                                 if (isset($currentStage['id'])) {
@@ -117,6 +122,13 @@ class EditPipeline extends EditRecord
                     ->minItems(1)
                     ->maxItems(5),
             ]);
+    }
+
+    protected function beforeSave(): void
+    {
+        // Stages are saved one at a time, so renames such as swapping or shifting names would otherwise
+        // collide with a stage that has not been updated yet. Uniqueness is checked once on commit instead.
+        DB::statement('SET CONSTRAINTS ALL DEFERRED');
     }
 
     protected function getHeaderActions(): array

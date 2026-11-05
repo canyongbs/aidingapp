@@ -52,7 +52,7 @@ testResourceRequiresPermissionForAccess(
     feature: 'changeManagement'
 );
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->changeManagement = false;
     $settings->save();
@@ -74,7 +74,7 @@ it('is gated with proper access control', function () {
     Livewire::test(ListChangeRequestTypes::class)->assertOk();
 });
 
-it('only shows the bulk delete action to a user with the change_request_type.delete permission', function () {
+it('only shows the bulk delete action to a user with the change_request_type.delete permission', function (): void {
     ChangeRequestType::factory(15)->create();
 
     $user = User::factory()

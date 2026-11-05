@@ -42,11 +42,11 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             // A milestone must always belong to a pipeline. The column is added nullable so it can
             // be back-filled, then tightened to NOT NULL below. Deleting a pipeline deletes its
             // milestones (cascade), since a milestone cannot exist without one.
-            Schema::table('project_milestones', function (Blueprint $table) {
+            Schema::table('project_milestones', function (Blueprint $table): void {
                 $table->foreignUuid('pipeline_id')->nullable()->index()->constrained('pipelines')->cascadeOnDelete();
             });
 
@@ -84,7 +84,7 @@ return new class () extends Migration {
 
             // Now that every remaining milestone has a pipeline, enforce the relationship at the
             // database level so a milestone can never be persisted without one.
-            Schema::table('project_milestones', function (Blueprint $table) {
+            Schema::table('project_milestones', function (Blueprint $table): void {
                 $table->foreignUuid('pipeline_id')->nullable(false)->change();
             });
         });
@@ -92,8 +92,8 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
-            Schema::table('project_milestones', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('project_milestones', function (Blueprint $table): void {
                 $table->dropForeign(['pipeline_id']);
                 $table->dropColumn('pipeline_id');
             });

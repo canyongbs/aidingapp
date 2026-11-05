@@ -38,14 +38,17 @@ use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\CreateOrganization;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Support\OrganizationDomainsLock;
 use AidingApp\Contact\Tests\Tenant\Organization\RequestFactories\CreateOrganizationRequestFactory;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\mock;
 
-test('Create Organization is gated with proper access control', function () {
+test('Create Organization is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -65,7 +68,7 @@ test('Create Organization is gated with proper access control', function () {
         )->assertSuccessful();
 });
 
-test('validating that domain is required', function () {
+test('validating that domain is required', function (): void {
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();
@@ -90,7 +93,7 @@ test('validating that domain is required', function () {
     $undoRepeaterFake();
 });
 
-test('validating that distinct domain is allowed', function () {
+test('validating that distinct domain is allowed', function (): void {
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();
@@ -116,7 +119,7 @@ test('validating that distinct domain is allowed', function () {
     $undoRepeaterFake();
 });
 
-test('if the domain is already in use then not be used second time.', function () {
+test('if the domain is already in use then not be used second time.', function (): void {
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();
@@ -151,7 +154,45 @@ test('if the domain is already in use then not be used second time.', function (
     $undoRepeaterFake();
 });
 
-test('check if the provided domain is invalid', function (string $domain) {
+test('a domain that only differs by case or www from one stored by another organization cannot be used', function (string $domain): void {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    Organization::factory()
+        ->state([
+            'domains' => [
+                ['domain' => 'Shared.edu'],
+            ],
+        ])->create();
+
+    $request = collect(CreateOrganizationRequestFactory::new()
+        ->state([
+            'domains' => [
+                ['domain' => $domain],
+            ],
+        ])->create());
+
+    actingAs($user);
+
+    Livewire::test(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors([
+            'domains.0.domain',
+        ]);
+
+    $undoRepeaterFake();
+})->with([
+    'lowercase' => 'shared.edu',
+    'uppercase' => 'SHARED.EDU',
+    'www prefix' => 'www.shared.edu',
+]);
+
+test('check if the provided domain is invalid', function (string $domain): void {
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();
@@ -189,9 +230,12 @@ test('check if the provided domain is invalid', function (string $domain) {
         'example.com::8080',
         'mydomain.com/path',
         '-mydomain.com',
+        'mydomain-.com',
+        'sub.-domain.com',
+        'sub-.domain.com',
     ]);
 
-test('check if the provided domain is valid', function (string $domain) {
+test('check if the provided domain is valid', function (string $domain): void {
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();
@@ -223,7 +267,51 @@ test('check if the provided domain is valid', function (string $domain) {
         'subdomain.example.org',
     ]);
 
-test('the organization name must be unique among non-trashed organizations', function () {
+test('the organization domains lock is taken when domains are saved', function (): void {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    $request = collect(CreateOrganizationRequestFactory::new()->create());
+
+    actingAs($user);
+
+    mock(OrganizationDomainsLock::class)->shouldReceive('acquire')->once();
+
+    Livewire::test(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $undoRepeaterFake();
+});
+
+test('the organization domains lock is not taken when no domains are saved', function (): void {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    $request = collect(CreateOrganizationRequestFactory::new()->create())->put('domains', []);
+
+    actingAs($user);
+
+    mock(OrganizationDomainsLock::class)->shouldNotReceive('acquire');
+
+    Livewire::test(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $undoRepeaterFake();
+});
+
+test('the organization name must be unique among non-trashed organizations', function (): void {
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();
@@ -247,7 +335,7 @@ test('the organization name must be unique among non-trashed organizations', fun
     $undoRepeaterFake();
 });
 
-test('the organization name uniqueness check is case-insensitive', function () {
+test('the organization name uniqueness check is case-insensitive', function (): void {
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();
@@ -271,7 +359,7 @@ test('the organization name uniqueness check is case-insensitive', function () {
     $undoRepeaterFake();
 });
 
-test('the organization name of a soft-deleted organization can be reused', function () {
+test('the organization name of a soft-deleted organization can be reused', function (): void {
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();
@@ -291,6 +379,135 @@ test('the organization name of a soft-deleted organization can be reused', funct
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
+
+    $undoRepeaterFake();
+});
+
+it('explains that an archived organization reserves the name', function (): void {
+    $user = User::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    Organization::factory()->archived()->create(['name' => 'Archived Org']);
+
+    $request = collect(CreateOrganizationRequestFactory::new()->state(['name' => 'ARCHIVED ORG', 'domains' => null])->create());
+
+    actingAs($user);
+
+    $component = Livewire::test(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors(['name' => 'An archived organization with this name already exists.']);
+
+    expect($component->errors()->get('data.name'))->toBe(['An archived organization with this name already exists.']);
+});
+
+it('keeps the unique message when an active organization has the name', function (): void {
+    $user = User::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    Organization::factory()->create(['name' => 'Active Org']);
+
+    $request = collect(CreateOrganizationRequestFactory::new()->state(['name' => 'Active Org', 'domains' => null])->create());
+
+    actingAs($user);
+
+    $component = Livewire::test(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors(['name' => 'unique']);
+
+    expect($component->errors()->get('data.name'))->not->toContain('An archived organization with this name already exists.');
+});
+
+it('uses the unique message for an archived organization name while organization archiving is inactive', function (): void {
+    OrganizationArchivingFeature::deactivate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    Organization::factory()->archived()->create(['name' => 'Archived Org']);
+
+    $request = collect(CreateOrganizationRequestFactory::new()->state(['name' => 'Archived Org', 'domains' => null])->create());
+
+    actingAs($user);
+
+    $component = Livewire::test(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors(['name' => 'unique']);
+
+    expect($component->errors()->get('data.name'))->not->toContain('An archived organization with this name already exists.');
+});
+
+it('explains that an archived organization reserves the domain', function (): void {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    Organization::factory()->archived()->create(['domains' => [['domain' => 'archived-domain.com']]]);
+
+    $request = collect(CreateOrganizationRequestFactory::new()->state(['domains' => [['domain' => 'archived-domain.com']]])->create());
+
+    actingAs($user);
+
+    $component = Livewire::test(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors(['domains.0.domain' => 'This domain is reserved by an archived organization.']);
+
+    expect($component->errors()->get('data.domains.0.domain'))->toBe(['This domain is reserved by an archived organization.']);
+
+    $undoRepeaterFake();
+});
+
+it('keeps the in-use message when an active organization has the domain', function (): void {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    Organization::factory()->create(['domains' => [['domain' => 'active-domain.com']]]);
+
+    $request = collect(CreateOrganizationRequestFactory::new()->state(['domains' => [['domain' => 'active-domain.com']]])->create());
+
+    actingAs($user);
+
+    $component = Livewire::test(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors(['domains.0.domain' => 'This domain is already in use and may not be used a second time.']);
+
+    expect($component->errors()->get('data.domains.0.domain'))->not->toContain('This domain is reserved by an archived organization.');
+
+    $undoRepeaterFake();
+});
+
+it('uses the in-use message for an archived organization domain while organization archiving is inactive', function (): void {
+    OrganizationArchivingFeature::deactivate();
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    Organization::factory()->archived()->create(['domains' => [['domain' => 'archived-domain.com']]]);
+
+    $request = collect(CreateOrganizationRequestFactory::new()->state(['domains' => [['domain' => 'archived-domain.com']]])->create());
+
+    actingAs($user);
+
+    $component = Livewire::test(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors(['domains.0.domain' => 'This domain is already in use and may not be used a second time.']);
+
+    expect($component->errors()->get('data.domains.0.domain'))->not->toContain('This domain is reserved by an archived organization.');
 
     $undoRepeaterFake();
 });

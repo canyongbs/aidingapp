@@ -43,7 +43,7 @@ class CreateContactStatusesTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('contact_statuses', function (Blueprint $table) {
+        Schema::create('contact_statuses', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
             $table->string('classification');

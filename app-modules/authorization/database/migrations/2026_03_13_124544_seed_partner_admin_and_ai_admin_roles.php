@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\DB;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             Role::create([
                 'name' => Authenticatable::PARTNER_ADMIN_ROLE,
                 'guard_name' => 'web',

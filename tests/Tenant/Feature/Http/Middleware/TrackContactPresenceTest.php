@@ -47,21 +47,21 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Pest\Laravel\getJson;
 
-it('updates contact last_activity_at on a standard page request', function () {
+it('updates contact last_activity_at on a standard page request', function (): void {
     $contact = Contact::factory()->create(['last_activity_at' => null]);
 
     $request = Request::create('/portal', 'GET');
     $request->setUserResolver(fn (?string $guard = null): ?Contact => $guard === 'contact' ? $contact : null);
 
     $middleware = new TrackContactPresence();
-    $middleware->handle($request, fn () => new Response());
+    $middleware->handle($request, fn (): Response => new Response());
 
     $contact->refresh();
 
     expect($contact->last_activity_at)->not->toBeNull();
 });
 
-it('tracks contacts on portal page requests', function () {
+it('tracks contacts on portal page requests', function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->save();
@@ -83,7 +83,7 @@ it('tracks contacts on portal page requests', function () {
     expect($portalContact->refresh()->last_activity_at)->not->toBeNull();
 });
 
-it('tracks the portal contact when both contact and web guards are authenticated', function () {
+it('tracks the portal contact when both contact and web guards are authenticated', function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->save();
@@ -109,7 +109,7 @@ it('tracks the portal contact when both contact and web guards are authenticated
     expect($portalContact->refresh()->last_activity_at)->not->toBeNull();
 });
 
-it('tracks contacts on authenticated portal API requests', function () {
+it('tracks contacts on authenticated portal API requests', function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->save();
@@ -124,7 +124,7 @@ it('tracks contacts on authenticated portal API requests', function () {
     expect($contact->refresh()->last_activity_at)->not->toBeNull();
 });
 
-it('does not update a managed contact when its user visits the admin panel', function () {
+it('does not update a managed contact when its user visits the admin panel', function (): void {
     $adminContact = Contact::factory()->create(['last_activity_at' => null]);
     $adminUser = User::factory()->create();
     $adminUser->managedContact()->save($adminContact);

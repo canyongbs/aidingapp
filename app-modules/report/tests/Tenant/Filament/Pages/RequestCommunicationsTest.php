@@ -75,7 +75,7 @@ $richContent = function (string $content): array {
     ];
 };
 
-it('displays the selected service request type communication configuration', function () use ($grantRequestCommunicationsReportAccess, $richContent) {
+it('displays the selected service request type communication configuration', function () use ($grantRequestCommunicationsReportAccess, $richContent): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
     $grantRequestCommunicationsReportAccess($user);
     actingAs($user);
@@ -109,7 +109,7 @@ it('displays the selected service request type communication configuration', fun
         ->assertSet('emailTemplates.created.manager.body', $richContent('The request is ready for review.'));
 });
 
-it('renders Filament email-template tabs for each event type', function () use ($grantRequestCommunicationsReportAccess) {
+it('renders Filament email-template tabs for each event type', function () use ($grantRequestCommunicationsReportAccess): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
     $grantRequestCommunicationsReportAccess($user);
     actingAs($user);
@@ -130,8 +130,8 @@ it('renders Filament email-template tabs for each event type', function () use (
         ->assertSee('Customers');
 });
 
-describe('authorization', function () use ($grantRequestCommunicationsReportAccess) {
-    it('denies access when the Service Management addon is disabled', function () {
+describe('authorization', function () use ($grantRequestCommunicationsReportAccess): void {
+    it('denies access when the Service Management addon is disabled', function (): void {
         $settings = app(LicenseSettings::class);
         $settings->data->addons->serviceManagement = false;
         $settings->save();
@@ -141,7 +141,7 @@ describe('authorization', function () use ($grantRequestCommunicationsReportAcce
         Livewire::test(RequestCommunications::class)->assertForbidden();
     });
 
-    it('denies access without an assignment to the report', function () {
+    it('denies access without an assignment to the report', function (): void {
         $settings = app(LicenseSettings::class);
         $settings->data->addons->serviceManagement = true;
         $settings->save();
@@ -151,7 +151,7 @@ describe('authorization', function () use ($grantRequestCommunicationsReportAcce
         Livewire::test(RequestCommunications::class)->assertForbidden();
     });
 
-    it('allows access with an assignment to the report', function () use ($grantRequestCommunicationsReportAccess) {
+    it('allows access with an assignment to the report', function () use ($grantRequestCommunicationsReportAccess): void {
         $user = User::factory()->create(['timezone' => 'UTC']);
         $grantRequestCommunicationsReportAccess($user);
         actingAs($user);

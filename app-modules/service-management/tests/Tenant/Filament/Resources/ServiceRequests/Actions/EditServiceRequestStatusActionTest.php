@@ -55,7 +55,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('editStatus action is visible for manager department member with update permission', function () {
+test('editStatus action is visible for manager department member with update permission', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -87,7 +87,7 @@ test('editStatus action is visible for manager department member with update per
         ->assertActionVisible(TestAction::make('editStatus')->schemaComponent('status.name'));
 });
 
-test('editStatus action is hidden for user without update permission', function () {
+test('editStatus action is hidden for user without update permission', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -119,7 +119,7 @@ test('editStatus action is hidden for user without update permission', function 
         ->assertActionDoesNotExist(TestAction::make('editStatus')->schemaComponent('status.name'));
 });
 
-test('editStatus action is hidden for a department auditor who is not a manager of the service request type', function () {
+test('editStatus action is hidden for a department auditor who is not a manager of the service request type', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -151,7 +151,7 @@ test('editStatus action is hidden for a department auditor who is not a manager 
         ->assertActionDoesNotExist(TestAction::make('editStatus')->schemaComponent('status.name'));
 });
 
-test('editStatus action is hidden for a direct auditor user who is not a manager of the service request type', function () {
+test('editStatus action is hidden for a direct auditor user who is not a manager of the service request type', function (): void {
     $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -179,7 +179,7 @@ test('editStatus action is hidden for a direct auditor user who is not a manager
         ->assertActionDoesNotExist(TestAction::make('editStatus')->schemaComponent('status.name'));
 });
 
-test('editStatus action is gated with proper feature access control', function () {
+test('editStatus action is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = false;
     $settings->save();
@@ -231,7 +231,7 @@ test('editStatus action is gated with proper feature access control', function (
     expect($serviceRequest->fresh()->status_id)->toBe($newStatus->getKey());
 });
 
-test('editStatus action is gated with proper feature access control for direct user manager', function () {
+test('editStatus action is gated with proper feature access control for direct user manager', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = false;
     $settings->save();
@@ -279,7 +279,7 @@ test('editStatus action is gated with proper feature access control for direct u
     expect($serviceRequest->fresh()->status_id)->toBe($newStatus->getKey());
 });
 
-test('editStatus requires status_id', function () {
+test('editStatus requires status_id', function (): void {
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
@@ -297,7 +297,7 @@ test('editStatus requires status_id', function () {
         ->assertHasFormErrors(['status_id' => 'required']);
 });
 
-test('can update the service request status', function () {
+test('can update the service request status', function (): void {
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
@@ -322,7 +322,7 @@ test('can update the service request status', function () {
     expect($serviceRequest->fresh()->status_id)->toBe($newStatus->getKey());
 });
 
-test('editStatus action is visible and can update away from a soft-deleted status', function () {
+test('editStatus action is visible and can update away from a soft-deleted status', function (): void {
     $trashedStatus = ServiceRequestStatus::factory()->create([
         'classification' => SystemServiceRequestClassification::Open,
     ]);
@@ -353,7 +353,7 @@ test('editStatus action is visible and can update away from a soft-deleted statu
     expect($serviceRequest->fresh()->status_id)->toBe($newStatus->getKey());
 });
 
-test('send feedback email if service request is closed', function () {
+test('send feedback email if service request is closed', function (): void {
     Notification::fake();
 
     $settings = app(LicenseSettings::class);
@@ -422,7 +422,7 @@ test('send feedback email if service request is closed', function () {
     );
 });
 
-test('send feedback email if service request is closed for direct user manager', function () {
+test('send feedback email if service request is closed for direct user manager', function (): void {
     Notification::fake();
 
     $settings = app(LicenseSettings::class);

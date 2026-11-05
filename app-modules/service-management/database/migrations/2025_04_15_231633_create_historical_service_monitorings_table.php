@@ -41,7 +41,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('historical_service_monitorings', function (Blueprint $table) {
+        Schema::create('historical_service_monitorings', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
             $table->integer('response');

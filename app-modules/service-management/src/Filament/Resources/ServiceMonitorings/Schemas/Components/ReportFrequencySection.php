@@ -36,10 +36,13 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
+use AidingApp\Contact\Models\Builders\ContactBuilder;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
+use App\Features\ContactArchivingFeature;
 use App\Filament\Forms\Components\UserSelect;
+use App\Models\Scopes\OrderByFullName;
 use App\Models\Scopes\WithoutAnyAdmin;
 use App\Models\User;
 use Filament\Forms\Components\CheckboxList;
@@ -73,15 +76,16 @@ class ReportFrequencySection
                                 $alreadySelected = array_map('strval', array_filter((array) $component->getState()));
 
                                 return User::query()
-                                    ->when($component->shouldFilterAdmins(), fn (Builder $query) => $query->where(function (Builder $query) use ($alreadySelected) {
+                                    ->when($component->shouldFilterAdmins(), fn (Builder $query) => $query->where(function (Builder $query) use ($alreadySelected): void {
                                         $query->tap(new WithoutAnyAdmin());
 
                                         if (filled($alreadySelected)) {
                                             $query->orWhereIn('id', $alreadySelected);
                                         }
                                     }))
-                                    ->orderBy('name')
-                                    ->pluck('name', 'id')
+                                    ->tap(new OrderByFullName())
+                                    ->get()
+                                    ->pluck('full_name', 'id')
                                     ->all();
                             }),
                         Select::make("{$prefix}.report_departments")
@@ -95,7 +99,11 @@ class ReportFrequencySection
                             ->multiple()
                             ->preload()
                             ->searchable()
-                            ->options(fn (): array => once(fn (): array => Contact::query()->orderBy('full_name')->pluck('full_name', 'id')->all())),
+                            ->options(fn (?array $state): array => Contact::query()
+                                ->when(ContactArchivingFeature::active(), fn (ContactBuilder $query): ContactBuilder => $query->where(fn (ContactBuilder $query): ContactBuilder => $query->withoutArchived()->orWhereKey($state ?? [])))
+                                ->orderBy('full_name')
+                                ->pluck('full_name', 'id')
+                                ->all()),
                         CheckboxList::make("{$prefix}.report_channels")
                             ->label('Channels')
                             ->options([

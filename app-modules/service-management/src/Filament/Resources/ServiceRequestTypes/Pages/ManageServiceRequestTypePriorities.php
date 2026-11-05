@@ -118,7 +118,7 @@ class ManageServiceRequestTypePriorities extends ManageRelatedRecords
                     ->relationship('sla', 'name')
                     ->searchable()
                     ->preload()
-                    ->createOptionForm(fn (Schema $schema) => SlaResource::form($schema)),
+                    ->createOptionForm(fn (Schema $schema): Schema => SlaResource::form($schema)),
             ]);
     }
 
@@ -169,7 +169,7 @@ class ManageServiceRequestTypePriorities extends ManageRelatedRecords
                             ->label('Enable')
                             ->live()
                             ->afterStateUpdated(
-                                fn (bool $state, Set $set) => $state
+                                fn (bool $state, Set $set): mixed => $state
                                     ? $set('default_priority_id', null)
                                     : null
                             ),

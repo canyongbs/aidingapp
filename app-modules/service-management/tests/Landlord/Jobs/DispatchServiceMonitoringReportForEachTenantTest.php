@@ -42,8 +42,8 @@ use App\Models\Tenant;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Queue;
 
-it('dispatches `ServiceMonitoringReportJob` with the given frequency for eligible tenants only', function (ServiceMonitoringReportFrequency $frequency) {
-    Tenant::query()->first()->execute(function () {
+it('dispatches `ServiceMonitoringReportJob` with the given frequency for eligible tenants only', function (ServiceMonitoringReportFrequency $frequency): void {
+    Tenant::query()->first()->execute(function (): void {
         $settings = app(LicenseSettings::class);
         $settings->data->addons->serviceMonitoring = true;
         $settings->save();
@@ -61,7 +61,7 @@ it('dispatches `ServiceMonitoringReportJob` with the given frequency for eligibl
 
     Queue::assertPushed(
         ServiceMonitoringReportJob::class,
-        fn (ServiceMonitoringReportJob $job) => $job->frequency === $frequency,
+        fn (ServiceMonitoringReportJob $job): bool => $job->frequency === $frequency,
     );
     Queue::assertPushed(ServiceMonitoringReportJob::class, 1);
 
@@ -69,8 +69,8 @@ it('dispatches `ServiceMonitoringReportJob` with the given frequency for eligibl
     $ineligibleTenant->delete();
 })->with(ServiceMonitoringReportFrequency::cases());
 
-it('does not dispatch when the serviceMonitoring addon is disabled', function () {
-    Tenant::query()->first()->execute(function () {
+it('does not dispatch when the serviceMonitoring addon is disabled', function (): void {
+    Tenant::query()->first()->execute(function (): void {
         $settings = app(LicenseSettings::class);
         $settings->data->addons->serviceMonitoring = false;
         $settings->save();

@@ -41,7 +41,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+        Schema::table('service_monitoring_targets', function (Blueprint $table): void {
             $table->boolean('is_confidential')->default(false);
             $table->nullableUuidMorphs('created_by');
         });
@@ -49,7 +49,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+        Schema::table('service_monitoring_targets', function (Blueprint $table): void {
             $table->dropColumn(['is_confidential', 'created_by_type', 'created_by_id']);
         });
     }

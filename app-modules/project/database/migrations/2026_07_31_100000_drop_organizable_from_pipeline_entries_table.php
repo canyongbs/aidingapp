@@ -41,14 +41,14 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('pipeline_entries', function (Blueprint $table) {
+        Schema::table('pipeline_entries', function (Blueprint $table): void {
             $table->dropMorphs('organizable');
         });
     }
 
     public function down(): void
     {
-        Schema::table('pipeline_entries', function (Blueprint $table) {
+        Schema::table('pipeline_entries', function (Blueprint $table): void {
             $table->uuidMorphs('organizable');
         });
     }

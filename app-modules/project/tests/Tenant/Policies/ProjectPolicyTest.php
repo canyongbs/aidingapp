@@ -40,7 +40,41 @@ use App\Models\User;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-it('does not throw when checking a permission whose project creator has been deleted', function (string $ability) {
+it('only allows creating a project with the create permission', function (): void {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    expect($user->can('create', Project::class))->toBeFalse();
+
+    $user->givePermissionTo('project.create');
+
+    expect($user->can('create', Project::class))->toBeTrue();
+});
+
+it('only allows the creator, a manager, or a super admin to update a project, and only with the update permission', function (): void {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $createdProject = Project::factory()->for($user, 'createdBy')->create();
+    $managedProject = Project::factory()
+        ->for(User::factory(), 'createdBy')
+        ->hasAttached($user, relationship: 'managerUsers')
+        ->create();
+    $otherProject = Project::factory()->for(User::factory(), 'createdBy')->create();
+
+    expect($user->can('update', $createdProject))->toBeFalse()
+        ->and($user->can('update', $managedProject))->toBeFalse();
+
+    $user->givePermissionTo('project.*.update');
+
+    expect($user->can('update', $createdProject))->toBeTrue()
+        ->and($user->can('update', $managedProject))->toBeTrue()
+        ->and($user->can('update', $otherProject))->toBeFalse();
+});
+
+it('does not throw when checking a permission whose project creator has been deleted', function (string $ability): void {
     $creator = User::factory()->create();
 
     $project = Project::factory()->for($creator, 'createdBy')->create();
@@ -61,7 +95,7 @@ it('does not throw when checking a permission whose project creator has been del
     'restore',
 ]);
 
-it('does not throw when checking the force-delete permission and the project creator has been deleted', function () {
+it('does not throw when checking the force-delete permission and the project creator has been deleted', function (): void {
     $creator = User::factory()->create();
 
     $project = Project::factory()->for($creator, 'createdBy')->create();
@@ -78,7 +112,7 @@ it('does not throw when checking the force-delete permission and the project cre
         ->and($user->can('forceDelete', $project))->toBeFalse();
 });
 
-it('allows a super admin to archive any project', function () {
+it('allows a super admin to archive any project', function (): void {
     $user = User::factory()->create();
 
     asSuperAdmin($user);
@@ -88,7 +122,7 @@ it('allows a super admin to archive any project', function () {
     expect($user->can('archive', $project))->toBeTrue();
 });
 
-it('allows a project manager with the delete permission to archive the project', function () {
+it('allows a project manager with the delete permission to archive the project', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('project.*.delete');
@@ -103,7 +137,7 @@ it('allows a project manager with the delete permission to archive the project',
     expect($user->can('archive', $project))->toBeTrue();
 });
 
-it('allows the project creator with the delete permission to archive the project', function () {
+it('allows the project creator with the delete permission to archive the project', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('project.*.delete');
@@ -115,7 +149,7 @@ it('allows the project creator with the delete permission to archive the project
     expect($user->can('archive', $project))->toBeTrue();
 });
 
-it('does not let a manager archive the project without the delete permission', function () {
+it('does not let a manager archive the project without the delete permission', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -128,7 +162,7 @@ it('does not let a manager archive the project without the delete permission', f
     expect($user->can('archive', $project))->toBeFalse();
 });
 
-it('does not fail when the project has no creator', function () {
+it('does not fail when the project has no creator', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('project.*.delete');
@@ -141,7 +175,7 @@ it('does not fail when the project has no creator', function () {
         ->and($user->can('archive', $project))->toBeFalse();
 });
 
-it('does not let a user with the delete permission archive a project they do not manage or create', function () {
+it('does not let a user with the delete permission archive a project they do not manage or create', function (): void {
     $creator = User::factory()->create();
 
     actingAs($creator);

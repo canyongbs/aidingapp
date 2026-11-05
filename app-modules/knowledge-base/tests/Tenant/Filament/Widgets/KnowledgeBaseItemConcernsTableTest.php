@@ -42,7 +42,7 @@ use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
 
-it('returns all new concerns for a given knowledge base item by default', function () {
+it('returns all new concerns for a given knowledge base item by default', function (): void {
     asSuperAdmin();
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
@@ -70,7 +70,7 @@ it('returns all new concerns for a given knowledge base item by default', functi
         ->assertCanNotSeeTableRecords($archivedConcerns->merge($resolvedConcerns));
 });
 
-it('can filter concerns by status', function () {
+it('can filter concerns by status', function (): void {
     asSuperAdmin();
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
@@ -102,7 +102,7 @@ it('can filter concerns by status', function () {
         ->assertCanNotSeeTableRecords($newConcerns->merge($archivedConcerns));
 });
 
-it('can change the status of a concern properly', function () {
+it('can change the status of a concern properly', function (): void {
     asSuperAdmin();
 
     $concern = KnowledgeBaseItemConcern::factory()->create(['status' => ConcernStatus::New]);

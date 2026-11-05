@@ -46,6 +46,7 @@ document.addEventListener('alpine:init', () => {
         isCreatingCategory: false,
         pendingRestore: null,
         collapsedCategories: {},
+        renderedTreeSignature: null,
         // Changes are saved one at a time, in order. While any are in flight (or a drag is in
         // progress) server trees are held back so they don't overwrite optimistic local changes.
         mutationQueue: Promise.resolve(),
@@ -62,6 +63,11 @@ document.addEventListener('alpine:init', () => {
             draggedId: null,
             draggedSourceCategoryId: null, // owning category of the dragged type placement
             ghostElement: null,
+            ghostListener: null,
+            dropLine: null,
+            dropLineTransform: null,
+            dropLineWidth: null,
+            nestTarget: null,
         },
 
         init() {
@@ -214,6 +220,10 @@ document.addEventListener('alpine:init', () => {
         },
 
         applyServerTree(tree) {
+            // After a save the server usually returns exactly what is already showing, so the
+            // markup only needs rebuilding when something visible differs.
+            const isAlreadyRendered = this.getTreeSignature(tree) === this.renderedTreeSignature;
+
             this.treeData = tree;
 
             // Drop UI state for anything that no longer exists, e.g. an input for an area that
@@ -256,7 +266,15 @@ document.addEventListener('alpine:init', () => {
                 }
             });
 
-            this.render();
+            if (!isAlreadyRendered) {
+                this.render();
+            }
+        },
+
+        // `sort` is excluded as the tree is rendered in array order, and optimistic local changes
+        // reorder nodes without renumbering them.
+        getTreeSignature(tree) {
+            return JSON.stringify(tree, (key, value) => (key === 'sort' ? undefined : value));
         },
 
         toggleCategory(categoryId) {
@@ -306,8 +324,12 @@ document.addEventListener('alpine:init', () => {
                     ? [activeElement.selectionStart, activeElement.selectionEnd]
                     : null;
 
-            this.renderCategories();
-            this.renderUncategorizedTypes();
+            const renderIndex = this.buildRenderIndex();
+
+            this.renderCategories(renderIndex);
+            this.renderUncategorizedTypes(renderIndex);
+
+            this.renderedTreeSignature = this.getTreeSignature(Alpine.raw(this.treeData));
 
             Object.entries(inputValues).forEach(([id, value]) => {
                 const input = document.getElementById(id);
@@ -444,7 +466,7 @@ document.addEventListener('alpine:init', () => {
             return searchCategories(data.categories);
         },
 
-        renderCategories() {
+        renderCategories(renderIndex) {
             const container = document.getElementById('root-categories');
             if (!container) return;
 
@@ -452,7 +474,7 @@ document.addEventListener('alpine:init', () => {
 
             if (this.treeData.categories && this.treeData.categories.length > 0) {
                 this.treeData.categories.forEach((category) => {
-                    const html = this.renderCategoryRecursive(category, 0);
+                    const html = this.renderCategoryRecursive(category, 0, renderIndex);
                     const wrapper = document.createElement('div');
                     wrapper.innerHTML = html.trim();
                     const element = wrapper.firstElementChild;
@@ -463,7 +485,7 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        renderUncategorizedTypes() {
+        renderUncategorizedTypes(renderIndex) {
             const container = document.getElementById('uncategorized-types');
 
             if (!container) return;
@@ -472,7 +494,7 @@ document.addEventListener('alpine:init', () => {
 
             if (this.treeData.uncategorized_types && this.treeData.uncategorized_types.length > 0) {
                 this.treeData.uncategorized_types.forEach((type) => {
-                    const html = this.renderType(type, null);
+                    const html = this.renderType(type, null, renderIndex);
                     const wrapper = document.createElement('div');
                     wrapper.innerHTML = html.trim();
                     const element = wrapper.firstElementChild;
@@ -483,9 +505,9 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        renderType(type, owningCategoryId = null) {
+        renderType(type, owningCategoryId, renderIndex) {
             const requestCount = typeof type.service_requests_count === 'number' ? type.service_requests_count : 0;
-            const occurrences = this.countTypeOccurrences(type.id);
+            const occurrences = renderIndex.typeOccurrences.get(type.id) || 0;
             const canRemove = occurrences > 1;
             const canDelete = !canRemove && requestCount === 0 && this.typePermissions.canDeleteTypes;
             const canArchive = !canRemove && requestCount > 0 && this.typePermissions.canDeleteTypes;
@@ -576,7 +598,7 @@ document.addEventListener('alpine:init', () => {
                     </div>`;
         },
 
-        renderCategoryRecursive(category, level) {
+        renderCategoryRecursive(category, level, renderIndex) {
             const indent = level * 24;
             const showCategoryInput = this.categoryInputs[category.id] || false;
             const showTypeInput = this.typeInputs[category.id] || false;
@@ -654,7 +676,9 @@ document.addEventListener('alpine:init', () => {
                                     : ''
                             }
                             ${
-                                this.canEdit && !isRenaming && this.collectPickableTypes(category.id).length > 0
+                                this.canEdit &&
+                                !isRenaming &&
+                                this.collectPickableTypes(category.id, renderIndex).length > 0
                                     ? `<button @click="showExistingTypeInput('${category.id}')" class="p-1.5 -m-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" x-tooltip.raw="Add existing type to area">
                                             <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
                                                 <path fill-rule="evenodd" d="M8.914 6.025a.75.75 0 0 1 1.06 0 3.5 3.5 0 0 1 0 4.95l-2 2a3.5 3.5 0 0 1-5.396-4.402.75.75 0 0 1 1.251.827 2 2 0 0 0 3.085 2.514l2-2a2 2 0 0 0 0-2.828.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
@@ -730,7 +754,7 @@ document.addEventListener('alpine:init', () => {
                                     <div id="existing-type-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
                                         <select id="existing-type-${category.id}" class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
                                             <option value="">Select an existing type…</option>
-                                            ${this.collectPickableTypes(category.id)
+                                            ${this.collectPickableTypes(category.id, renderIndex)
                                                 .map(
                                                     (pickable) =>
                                                         `<option value="${pickable.id}">${this.escapeHtml(pickable.name)}</option>`,
@@ -748,7 +772,7 @@ document.addEventListener('alpine:init', () => {
                             !isCollapsed && category.types && category.types.length > 0
                                 ? `
                                     <div data-sortable="types" data-category-id="${category.id}" class="mt-2 space-y-1 min-h-4 p-0.5 rounded transition-colors duration-150 ease-in-out" style="margin-left: ${indent + 24}px">
-                                        ${category.types.map((type) => this.renderType(type, category.id)).join('')}
+                                        ${category.types.map((type) => this.renderType(type, category.id, renderIndex)).join('')}
                                     </div>
                                 `
                                 : ''
@@ -758,7 +782,7 @@ document.addEventListener('alpine:init', () => {
                             !isCollapsed && category.children && category.children.length > 0
                                 ? `
                                     <div data-sortable="categories" data-parent-id="${category.id}" class="mt-2 space-y-2 min-h-5 p-0.5 rounded-md transition-colors duration-150 ease-in-out">
-                                        ${category.children.map((child) => this.renderCategoryRecursive(child, level + 1)).join('')}
+                                        ${category.children.map((child) => this.renderCategoryRecursive(child, level + 1, renderIndex)).join('')}
                                     </div>
                                 `
                                 : ''
@@ -951,7 +975,8 @@ document.addEventListener('alpine:init', () => {
 
             this.createDragGhost(event.target);
 
-            document.addEventListener('dragover', this.updateGhostPosition.bind(this));
+            this.dragData.ghostListener = (event) => this.updateGhostPosition(event);
+            document.addEventListener('dragover', this.dragData.ghostListener);
         },
 
         handleDragEnd(event) {
@@ -1008,24 +1033,25 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
-            const dropPosition = this.determineDropPosition(event.currentTarget, event);
-
-            if (dropPosition) {
-                event.dataTransfer.dropEffect = 'move';
-            } else {
-                event.dataTransfer.dropEffect = 'none';
+            // `dragover` bubbles from a type to its container, which listens too. The innermost
+            // target resolves the same drop position, so the outer listeners have nothing to add.
+            if (event.isHandledByServiceRequestTypeManager) {
+                return;
             }
 
-            this.updateGhostPosition(event);
+            event.isHandledByServiceRequestTypeManager = true;
 
-            this.updateDropIndicators(event);
+            const dropPosition = this.determineDropPosition(event.currentTarget, event);
+
+            event.dataTransfer.dropEffect = dropPosition ? 'move' : 'none';
+
+            this.updateDropIndicators(dropPosition);
         },
 
         handleDragEnter(event) {
+            // Required for the element to accept a drop. The indicators are drawn by the
+            // `dragover` event that immediately follows.
             event.preventDefault();
-            if (!this.dragData.isDragging) return;
-
-            this.updateDropIndicators(event);
         },
 
         handleDragLeave(event) {
@@ -1144,59 +1170,101 @@ document.addEventListener('alpine:init', () => {
                     font-size: 14px;
                     font-weight: 500;
                     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                    backdrop-filter: blur(4px);
-                    left: -9999px;
-                    top: -9999px;
+                    left: 0;
+                    top: 0;
+                    transform: translate(-9999px, -9999px);
+                    will-change: transform;
                 `;
 
-            document.body.appendChild(ghost);
+            this.mountDragOverlay(ghost);
             this.dragData.ghostElement = ghost;
+        },
+
+        // The panel's CSS has `:has()` rules that make Chrome restyle the whole document whenever
+        // anything inside `<body>` is inserted, removed, re-classed, or restyled. Overlays that
+        // move on every `dragover` are mounted outside `<body>` so updating them stays cheap.
+        mountDragOverlay(element) {
+            document.documentElement.appendChild(element);
         },
 
         updateGhostPosition(event) {
             if (this.dragData.ghostElement) {
                 const x = event.clientX + 15;
                 const y = event.clientY - 10;
-                this.dragData.ghostElement.style.left = x + 'px';
-                this.dragData.ghostElement.style.top = y + 'px';
+                this.dragData.ghostElement.style.transform = `translate(${x}px, ${y}px)`;
             }
         },
 
-        updateDropIndicators(event) {
-            this.cleanupDropIndicators();
+        // `dragover` fires continuously, so only touch elements inside `<body>` when the drop
+        // position actually changes (see `mountDragOverlay()`).
+        updateDropIndicators(dropPosition) {
+            const nestTarget =
+                dropPosition?.type === 'inside' && dropPosition.target.classList.contains('category-item')
+                    ? dropPosition.target
+                    : null;
 
-            const target = event.currentTarget;
-            const dropPosition = this.determineDropPosition(target, event);
+            this.setNestTarget(nestTarget);
 
-            if (!dropPosition) {
+            if (dropPosition?.type === 'insert') {
+                this.showInsertionLine(dropPosition.container, dropPosition.insertIndex);
+            } else {
+                this.hideInsertionLine();
+            }
+        },
+
+        setNestTarget(target) {
+            if (this.dragData.nestTarget === target) {
                 return;
             }
 
-            if (dropPosition.type === 'inside') {
-                if (dropPosition.target.classList.contains('category-item')) {
-                    dropPosition.target.classList.add(
-                        'nest-target',
-                        'bg-primary-500/10',
-                        'border-primary-500/50',
-                        'border-2',
-                        'rounded-lg',
-                        'relative',
-                    );
-                }
-            } else if (dropPosition.type === 'insert') {
-                this.showInsertionLine(dropPosition.container, dropPosition.insertIndex);
+            this.dragData.nestTarget?.classList.remove(
+                'nest-target',
+                'bg-primary-500/10',
+                'border-primary-500/50',
+                'border-2',
+                'relative',
+            );
+
+            target?.classList.add(
+                'nest-target',
+                'bg-primary-500/10',
+                'border-primary-500/50',
+                'border-2',
+                'rounded-lg',
+                'relative',
+            );
+
+            this.dragData.nestTarget = target;
+        },
+
+        // A single line is reused for the whole drag and moved with a transform.
+        getDropLine() {
+            if (!this.dragData.dropLine) {
+                const line = document.createElement('div');
+                line.className = 'drop-line';
+                line.style.visibility = 'hidden';
+                this.mountDragOverlay(line);
+
+                this.dragData.dropLine = line;
+                this.dragData.dropLineTransform = null;
+                this.dragData.dropLineWidth = null;
+            }
+
+            return this.dragData.dropLine;
+        },
+
+        hideInsertionLine() {
+            if (this.dragData.dropLine && this.dragData.dropLine.style.visibility !== 'hidden') {
+                this.dragData.dropLine.style.visibility = 'hidden';
             }
         },
 
         showInsertionLine(container, insertIndex) {
-            this.cleanupInsertionLines();
-
             let children = Array.from(container.children).filter(
                 (child) =>
-                    !child.classList.contains('insertion-line') &&
-                    (child.classList.contains('category-wrapper') ||
-                        child.classList.contains('category-item') ||
-                        child.classList.contains('type-item')),
+                    child.classList.contains('category-wrapper') ||
+                    child.classList.contains('category-item') ||
+                    child.classList.contains('type-item'),
             );
 
             const draggedElement = this.dragData.draggedElement;
@@ -1229,24 +1297,31 @@ document.addEventListener('alpine:init', () => {
                 yPosition = 10;
             }
 
-            const line = document.createElement('div');
-            line.className = 'insertion-line drop-line';
-            line.style.top = yPosition + 'px';
+            const line = this.getDropLine();
+            const transform = `translate(${containerRect.left}px, ${containerRect.top + yPosition}px)`;
+            const width = `${containerRect.width}px`;
 
-            container.appendChild(line);
-        },
+            if (this.dragData.dropLineTransform !== transform) {
+                line.style.transform = transform;
+                this.dragData.dropLineTransform = transform;
+            }
 
-        cleanupInsertionLines() {
-            document.querySelectorAll('.insertion-line').forEach((line) => line.remove());
+            if (this.dragData.dropLineWidth !== width) {
+                line.style.width = width;
+                this.dragData.dropLineWidth = width;
+            }
+
+            if (line.style.visibility === 'hidden') {
+                line.style.visibility = '';
+            }
         },
 
         calculateInsertionPosition(container, mouseY) {
             let children = Array.from(container.children).filter(
                 (child) =>
-                    !child.classList.contains('insertion-line') &&
-                    (child.classList.contains('category-wrapper') ||
-                        child.classList.contains('category-item') ||
-                        child.classList.contains('type-item')),
+                    child.classList.contains('category-wrapper') ||
+                    child.classList.contains('category-item') ||
+                    child.classList.contains('type-item'),
             );
 
             const draggedElement = this.dragData.draggedElement;
@@ -1438,21 +1513,20 @@ document.addEventListener('alpine:init', () => {
         },
 
         cleanupDropIndicators() {
-            this.cleanupInsertionLines();
-            document.querySelectorAll('.nest-target').forEach((target) => {
-                target.classList.remove(
-                    'nest-target',
-                    'bg-primary-500/10',
-                    'border-primary-500/50',
-                    'border-2',
-                    'relative',
-                );
-            });
+            this.setNestTarget(null);
+            this.hideInsertionLine();
         },
 
         cleanupDragVisuals() {
             this.cleanupDropIndicators();
-            document.removeEventListener('dragover', this.updateGhostPosition);
+
+            this.dragData.dropLine?.remove();
+            this.dragData.dropLine = null;
+
+            if (this.dragData.ghostListener) {
+                document.removeEventListener('dragover', this.dragData.ghostListener);
+                this.dragData.ghostListener = null;
+            }
         },
 
         getParentIdFromPosition(position) {
@@ -2048,15 +2122,18 @@ document.addEventListener('alpine:init', () => {
             return !!category && (category.types || []).some((type) => type.id === typeId);
         },
 
-        // Every distinct type currently in the tree, minus those already filed under the given
-        // category, for the "add existing" picker. Works on live (unsaved) state so freshly
-        // created types can be added to further areas before saving.
-        collectPickableTypes(excludeCategoryId) {
-            const seen = new Map();
+        // Counts and lists derived from the whole tree are built in one pass per render, as working
+        // them out again for every node makes rendering slow down quadratically as the tree grows.
+        buildRenderIndex() {
+            const tree = Alpine.raw(this.treeData);
+            const typeOccurrences = new Map();
+            const distinctTypes = new Map();
 
             const consider = (type) => {
-                if (!seen.has(type.id)) {
-                    seen.set(type.id, { id: type.id, name: type.name });
+                typeOccurrences.set(type.id, (typeOccurrences.get(type.id) || 0) + 1);
+
+                if (!distinctTypes.has(type.id)) {
+                    distinctTypes.set(type.id, { id: type.id, name: type.name });
                 }
             };
 
@@ -2067,15 +2144,23 @@ document.addEventListener('alpine:init', () => {
                 }
             };
 
-            walk(this.treeData.categories);
-            (this.treeData.uncategorized_types || []).forEach(consider);
+            walk(tree.categories);
+            (tree.uncategorized_types || []).forEach(consider);
 
+            return {
+                typeOccurrences,
+                sortedTypes: [...distinctTypes.values()].sort((a, b) => a.name.localeCompare(b.name)),
+            };
+        },
+
+        // Every distinct type currently in the tree, minus those already filed under the given
+        // category, for the "add existing" picker. Works on live (unsaved) state so freshly
+        // created types can be added to further areas before saving.
+        collectPickableTypes(excludeCategoryId, renderIndex) {
             const excludedCategory = excludeCategoryId ? this.findCategoryById(excludeCategoryId) : null;
             const excluded = new Set((excludedCategory?.types || []).map((type) => type.id));
 
-            return [...seen.values()]
-                .filter((type) => !excluded.has(type.id))
-                .sort((a, b) => a.name.localeCompare(b.name));
+            return renderIndex.sortedTypes.filter((type) => !excluded.has(type.id));
         },
 
         removeTypePlacement(typeId, owningCategoryId) {

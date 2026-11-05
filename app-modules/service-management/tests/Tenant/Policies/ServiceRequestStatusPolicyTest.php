@@ -72,7 +72,7 @@ $referenceServiceRequestStatus = function (string $reference, ServiceRequestStat
     };
 };
 
-it('allows archiving a service request status that is not in use', function () {
+it('allows archiving a service request status that is not in use', function (): void {
     $user = User::factory()->create();
 
     asSuperAdmin($user);
@@ -83,7 +83,7 @@ it('allows archiving a service request status that is not in use', function () {
         ->and($user->can('archive', $status))->toBeTrue();
 });
 
-it('allows archiving a service request status that is in use', function () {
+it('allows archiving a service request status that is in use', function (): void {
     $user = User::factory()->create();
 
     asSuperAdmin($user);
@@ -96,7 +96,7 @@ it('allows archiving a service request status that is in use', function () {
         ->and($user->can('archive', $status))->toBeTrue();
 });
 
-it('denies archiving a system protected service request status', function () {
+it('denies archiving a system protected service request status', function (): void {
     $user = User::factory()->create();
 
     asSuperAdmin($user);
@@ -106,7 +106,7 @@ it('denies archiving a system protected service request status', function () {
     expect($user->can('archive', $status))->toBeFalse();
 });
 
-it('denies archiving a service request status that is already archived', function () {
+it('denies archiving a service request status that is already archived', function (): void {
     $user = User::factory()->create();
 
     asSuperAdmin($user);
@@ -117,7 +117,7 @@ it('denies archiving a service request status that is already archived', functio
         ->and($user->can('archive', $status))->toBeFalse();
 });
 
-it('denies deleting a service request status that is in use', function (string $reference) use ($referenceServiceRequestStatus) {
+it('denies deleting a service request status that is in use', function (string $reference) use ($referenceServiceRequestStatus): void {
     $user = User::factory()->create();
 
     asSuperAdmin($user);
@@ -136,7 +136,7 @@ it('denies deleting a service request status that is in use', function (string $
     'status periods',
 ]);
 
-it('allows deleting a service request status that is not in use', function () {
+it('allows deleting a service request status that is not in use', function (): void {
     $user = User::factory()->create();
 
     asSuperAdmin($user);
@@ -147,7 +147,7 @@ it('allows deleting a service request status that is not in use', function () {
         ->and($user->can('forceDelete', $status))->toBeTrue();
 });
 
-it('denies deleting a system protected service request status', function () {
+it('denies deleting a system protected service request status', function (): void {
     $user = User::factory()->create();
 
     asSuperAdmin($user);
@@ -158,7 +158,7 @@ it('denies deleting a system protected service request status', function () {
         ->and($user->can('forceDelete', $status))->toBeFalse();
 });
 
-it('counts a soft deleted or draft record as still using the status', function (string $reference) use ($referenceServiceRequestStatus) {
+it('counts a soft deleted or draft record as still using the status', function (string $reference) use ($referenceServiceRequestStatus): void {
     $status = ServiceRequestStatus::factory()->open()->create();
 
     $referenceServiceRequestStatus($reference, $status);

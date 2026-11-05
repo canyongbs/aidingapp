@@ -59,7 +59,7 @@ class ServiceRequestPriorityFactory extends Factory
      */
     public function high(): Factory
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             return [
                 'name' => 'High',
                 'order' => 1,
@@ -72,7 +72,7 @@ class ServiceRequestPriorityFactory extends Factory
      */
     public function medium(): Factory
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             return [
                 'name' => 'Medium',
                 'order' => 2,
@@ -85,7 +85,7 @@ class ServiceRequestPriorityFactory extends Factory
      */
     public function low(): Factory
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             return [
                 'name' => 'Low',
                 'order' => 3,

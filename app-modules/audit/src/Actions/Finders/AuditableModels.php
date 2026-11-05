@@ -50,8 +50,8 @@ class AuditableModels
     {
         /** @var Collection<string, string> $collection */
         $collection = collect(Relation::morphMap())
-            ->filter(fn (string $class) => (new ReflectionClass($class))->implementsInterface(Auditable::class))
-            ->transform(fn (string $class) => (new ReflectionClass($class))->getShortName());
+            ->filter(fn (string $class): bool => (new ReflectionClass($class))->implementsInterface(Auditable::class))
+            ->transform(fn (string $class): string => (new ReflectionClass($class))->getShortName());
 
         return $collection;
     }

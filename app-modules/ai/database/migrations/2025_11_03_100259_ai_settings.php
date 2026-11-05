@@ -42,7 +42,7 @@ use Spatie\LaravelSettings\Migrations\SettingsMigration;
 return new class () extends SettingsMigration {
     public function up(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             try {
                 $this->migrator->add(
                     'ai.prompt_system_context',

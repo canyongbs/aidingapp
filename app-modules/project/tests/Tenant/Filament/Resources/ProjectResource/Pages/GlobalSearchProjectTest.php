@@ -45,11 +45,11 @@ use Illuminate\Contracts\Support\Htmlable;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('projects are globally searchable by name only', function () {
+test('projects are globally searchable by name only', function (): void {
     expect(ProjectResource::getGloballySearchableAttributes())->toBe(['name']);
 });
 
-test('global search returns projects created by the acting user', function () {
+test('global search returns projects created by the acting user', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -62,7 +62,7 @@ test('global search returns projects created by the acting user', function () {
     expect($results->first()->getKey())->toBe($project->getKey());
 });
 
-test('global search returns projects where the user is a manager user', function () {
+test('global search returns projects where the user is a manager user', function (): void {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
 
@@ -79,7 +79,7 @@ test('global search returns projects where the user is a manager user', function
     expect($results->first()->getKey())->toBe($project->getKey());
 });
 
-test('global search returns projects where the user is an auditor user', function () {
+test('global search returns projects where the user is an auditor user', function (): void {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
 
@@ -96,7 +96,7 @@ test('global search returns projects where the user is an auditor user', functio
     expect($results->first()->getKey())->toBe($project->getKey());
 });
 
-test('global search returns projects where the user is in a manager department', function () {
+test('global search returns projects where the user is in a manager department', function (): void {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
     $department = Department::factory()->create();
@@ -117,7 +117,7 @@ test('global search returns projects where the user is in a manager department',
     expect($results->first()->getKey())->toBe($project->getKey());
 });
 
-test('global search returns projects where the user is in an auditor department', function () {
+test('global search returns projects where the user is in an auditor department', function (): void {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
     $department = Department::factory()->create();
@@ -138,7 +138,7 @@ test('global search returns projects where the user is in an auditor department'
     expect($results->first()->getKey())->toBe($project->getKey());
 });
 
-test('global search returns all projects for a super admin', function () {
+test('global search returns all projects for a super admin', function (): void {
     $creator = User::factory()->create();
 
     actingAs($creator);
@@ -151,7 +151,7 @@ test('global search returns all projects for a super admin', function () {
     expect($results)->toHaveCount(2);
 });
 
-test('global search does not return archived projects', function () {
+test('global search does not return archived projects', function (): void {
     asSuperAdmin();
 
     $activeProject = Project::factory()->create();
@@ -164,7 +164,7 @@ test('global search does not return archived projects', function () {
     expect($results->first()->getKey())->toBe($activeProject->getKey());
 });
 
-test('global search does not return projects the user has no relation to', function () {
+test('global search does not return projects the user has no relation to', function (): void {
     $creator = User::factory()->create();
     $unrelatedUser = User::factory()->create();
 
@@ -178,7 +178,7 @@ test('global search does not return projects the user has no relation to', funct
     expect($results)->toHaveCount(0);
 });
 
-test('global search result URL points to the project view page', function () {
+test('global search result URL points to the project view page', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('project.view-any');
@@ -194,7 +194,7 @@ test('global search result URL points to the project view page', function () {
     expect($url)->not->toContain('/edit');
 });
 
-test('global search result details include department, start date, and target go-live', function () {
+test('global search result details include department, start date, and target go-live', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -216,7 +216,7 @@ test('global search result details include department, start date, and target go
     ]);
 });
 
-test('global search result details fall back to N/A and Indefinite when fields are empty', function () {
+test('global search result details fall back to N/A and Indefinite when fields are empty', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -236,7 +236,7 @@ test('global search result details fall back to N/A and Indefinite when fields a
     ]);
 });
 
-test('global search result title renders the project icon and name', function () {
+test('global search result title renders the project icon and name', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);

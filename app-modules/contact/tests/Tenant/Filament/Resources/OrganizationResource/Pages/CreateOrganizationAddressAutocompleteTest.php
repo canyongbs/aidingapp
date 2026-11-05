@@ -40,7 +40,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-it('populates the address fields when a suggestion is selected', function () {
+it('populates the address fields when a suggestion is selected', function (): void {
     actingAs(
         User::factory()
             ->create()

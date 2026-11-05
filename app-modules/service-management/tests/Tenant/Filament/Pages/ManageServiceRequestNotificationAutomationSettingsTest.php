@@ -46,21 +46,21 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-test('it prevents access when the user does not have permission', function () {
+test('it prevents access when the user does not have permission', function (): void {
     actingAs(User::factory()->create());
 
     get(ManageServiceRequestNotificationAutomationSettings::getUrl())
         ->assertForbidden();
 });
 
-test('it allows access for super admins', function () {
+test('it allows access for super admins', function (): void {
     asSuperAdmin();
 
     get(ManageServiceRequestNotificationAutomationSettings::getUrl())
         ->assertSuccessful();
 });
 
-test('it disables the unsaved data changes alert to avoid false positives on this complex form', function () {
+test('it disables the unsaved data changes alert to avoid false positives on this complex form', function (): void {
     $page = new ManageServiceRequestNotificationAutomationSettings();
 
     $hasUnsavedDataChangesAlert = (new ReflectionClass($page))
@@ -70,7 +70,7 @@ test('it disables the unsaved data changes alert to avoid false positives on thi
     expect($hasUnsavedDataChangesAlert)->toBeFalse();
 });
 
-test('it saves is_enabled, ai_prompt, and ai instructions without touching the example subject and body', function () {
+test('it saves is_enabled, ai_prompt, and ai instructions without touching the example subject and body', function (): void {
     asSuperAdmin();
 
     $existing = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
@@ -115,7 +115,7 @@ test('it saves is_enabled, ai_prompt, and ai instructions without touching the e
     expect($settings->ai_prompt)->toEqual($aiPrompt);
 });
 
-test('it leaves existing templates untouched when saving without changes', function () {
+test('it leaves existing templates untouched when saving without changes', function (): void {
     asSuperAdmin();
 
     $existing = collect([
@@ -144,7 +144,7 @@ test('it leaves existing templates untouched when saving without changes', funct
     }
 });
 
-test('it does not create empty templates when no ai instructions have been filled in', function () {
+test('it does not create empty templates when no ai instructions have been filled in', function (): void {
     asSuperAdmin();
 
     Livewire::test(ManageServiceRequestNotificationAutomationSettings::class)
@@ -155,7 +155,7 @@ test('it does not create empty templates when no ai instructions have been fille
     expect(ServiceRequestNotificationAutomationEmailTemplate::query()->exists())->toBeFalse();
 });
 
-test('it keeps a template with an example subject and body when the ai instructions are cleared', function () {
+test('it keeps a template with an example subject and body when the ai instructions are cleared', function (): void {
     asSuperAdmin();
 
     $existing = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([

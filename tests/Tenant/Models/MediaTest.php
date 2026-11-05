@@ -36,8 +36,8 @@
 
 use App\Models\Media;
 
-describe('attachmentContentDisposition', function () {
-    it('builds an ISO-8859-1 safe disposition for a file name that is not Latin-1 representable', function () {
+describe('attachmentContentDisposition', function (): void {
+    it('builds an ISO-8859-1 safe disposition for a file name that is not Latin-1 representable', function (): void {
         // macOS screenshots use a narrow no-break space (U+202F) before AM/PM, which S3 rejects in the header.
         $media = new Media();
         $media->file_name = "Screenshot-2026-09-08-at-7.48.39\u{202F}PM.jpg";
@@ -50,7 +50,7 @@ describe('attachmentContentDisposition', function () {
             ->and(rawurldecode($disposition))->toContain($media->file_name);
     });
 
-    it('builds a simple disposition for an ASCII file name', function () {
+    it('builds a simple disposition for an ASCII file name', function (): void {
         $media = new Media();
         $media->file_name = 'report.png';
 

@@ -42,12 +42,12 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             Schema::dropIfExists('prompt_upvotes');
             Schema::dropIfExists('prompt_uses');
 
             if (Schema::hasColumn('ai_messages', 'prompt_id')) {
-                Schema::table('ai_messages', function (Blueprint $table) {
+                Schema::table('ai_messages', function (Blueprint $table): void {
                     $table->dropForeign(['prompt_id']);
                     $table->dropColumn('prompt_id');
                 });

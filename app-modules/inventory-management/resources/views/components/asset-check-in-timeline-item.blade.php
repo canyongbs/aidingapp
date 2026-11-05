@@ -64,7 +64,7 @@
         <x-timeline::timeline.labeled-field>
             <x-slot:label>Performed By</x-slot>
 
-            <x-timeline::timeline.related-person :person="$checkedInBy" :name="$checkedInBy?->name" />
+            <x-timeline::timeline.related-person :person="$checkedInBy" :name="$checkedInBy?->full_name" />
         </x-timeline::timeline.labeled-field>
     </div>
 

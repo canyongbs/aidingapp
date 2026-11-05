@@ -41,7 +41,7 @@ use function Pest\Laravel\assertAuthenticatedAs;
 use function Pest\Laravel\assertGuest;
 use function Pest\Laravel\get;
 
-it('signs the user in through a signed URL', function () {
+it('signs the user in through a signed URL', function (): void {
     $user = User::factory()->create([
         'password' => null,
     ]);
@@ -58,7 +58,7 @@ it('signs the user in through a signed URL', function () {
     assertAuthenticatedAs($user);
 });
 
-it('does not sign the user in if the URL is not signed', function () {
+it('does not sign the user in if the URL is not signed', function (): void {
     $user = User::factory()->create([
         'password' => null,
     ]);
@@ -69,7 +69,7 @@ it('does not sign the user in if the URL is not signed', function () {
     assertGuest();
 });
 
-it('does not sign the user in if they have a password set', function () {
+it('does not sign the user in if they have a password set', function (): void {
     $user = User::factory()->create();
 
     get(route('login.one-time', ['user' => $user]))
@@ -78,7 +78,7 @@ it('does not sign the user in if they have a password set', function () {
     assertGuest();
 });
 
-it('does not sign the user in if they are external', function () {
+it('does not sign the user in if they are external', function (): void {
     $user = User::factory()->external()->create();
 
     get(route('login.one-time', ['user' => $user]))

@@ -144,7 +144,7 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->limitList(3)
                                     ->expandableLimitedList()
                                     ->visible(fn (ServiceMonitoringTarget $record) => $record->departments()->count()),
-                                TextEntry::make('users.name')
+                                TextEntry::make('users.full_name')
                                     ->label('Users')
                                     ->listWithLineBreaks()
                                     ->limitList(3)
@@ -172,7 +172,7 @@ class ViewServiceMonitoring extends ViewRecord
                                 IconEntry::make('is_confidential')
                                     ->label('Restricted Visibility')
                                     ->boolean(),
-                                TextEntry::make('confidentialUsers.name')
+                                TextEntry::make('confidentialUsers.full_name')
                                     ->label('Users')
                                     ->listWithLineBreaks()
                                     ->limitList(3)

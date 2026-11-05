@@ -41,7 +41,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('service_request_types', function (Blueprint $table) {
+        Schema::table('service_request_types', function (Blueprint $table): void {
             $table->boolean('is_email_automatic_creation_enabled')
                 ->default(false);
 
@@ -59,7 +59,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('service_request_types', function (Blueprint $table) {
+        Schema::table('service_request_types', function (Blueprint $table): void {
             $table->dropColumn([
                 'is_email_automatic_creation_enabled',
                 'is_email_automatic_creation_contact_create_enabled',

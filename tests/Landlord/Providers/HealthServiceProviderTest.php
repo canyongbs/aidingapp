@@ -41,11 +41,11 @@ use Spatie\Health\Checks\Checks\ScheduleCheck;
 use Spatie\Health\Facades\Health;
 use Spatie\Health\Jobs\HealthQueueJob;
 
-it('wires the schedule and queue heartbeats to the shared health cache store', function () {
+it('wires the schedule and queue heartbeats to the shared health cache store', function (): void {
     $checks = Health::registeredChecks();
 
-    $scheduleCheck = $checks->first(fn (Check $check) => $check instanceof ScheduleCheck);
-    $queueCheck = $checks->first(fn (Check $check) => $check instanceof QueueCheck);
+    $scheduleCheck = $checks->first(fn (Check $check): bool => $check instanceof ScheduleCheck);
+    $queueCheck = $checks->first(fn (Check $check): bool => $check instanceof QueueCheck);
 
     assert($scheduleCheck instanceof ScheduleCheck);
     assert($queueCheck instanceof QueueCheck);
@@ -54,7 +54,7 @@ it('wires the schedule and queue heartbeats to the shared health cache store', f
         ->and($queueCheck->getCacheStoreName())->toBe('health');
 });
 
-it('keeps the health cache store shared across tenant context', function () {
+it('keeps the health cache store shared across tenant context', function (): void {
     cache()->store('health')->put('probe', 'value', 60);
 
     $valueInTenantContext = Tenant::query()->first()->execute(
@@ -67,12 +67,12 @@ it('keeps the health cache store shared across tenant context', function () {
     cache()->store('health')->forget('probe');
 });
 
-it('processes the queue heartbeat job at the landlord level and writes the shared heartbeat', function () {
+it('processes the queue heartbeat job at the landlord level and writes the shared heartbeat', function (): void {
     // The scheduler dispatches `health:queue-check-heartbeat` with no current tenant, so the job
     // must be treated as not-tenant-aware; otherwise the worker deletes it before it can run.
     Tenant::forgetCurrent();
 
-    $queueCheck = Health::registeredChecks()->first(fn (Check $check) => $check instanceof QueueCheck);
+    $queueCheck = Health::registeredChecks()->first(fn (Check $check): bool => $check instanceof QueueCheck);
 
     assert($queueCheck instanceof QueueCheck);
 

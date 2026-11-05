@@ -43,13 +43,14 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\RoundRobinAssigner;
+use App\Models\Scopes\OrderByFullName;
 use App\Models\User;
 
 use function Pest\Laravel\travelBack;
 use function Pest\Laravel\travelTo;
 use function Tests\asSuperAdmin;
 
-test('round robin assigner distributes requests evenly across managers', function () {
+test('round robin assigner distributes requests evenly across managers', function (): void {
     asSuperAdmin();
 
     $department = Department::factory()
@@ -63,7 +64,7 @@ test('round robin assigner distributes requests evenly across managers', functio
         ])
         ->create();
 
-    $users = $department->users()->orderBy('name')->orderBy('id')->get();
+    $users = $department->users()->tap(new OrderByFullName())->orderBy('id')->get();
 
     travelTo(now()->subSeconds(count($users)));
 
@@ -90,7 +91,7 @@ test('round robin assigner distributes requests evenly across managers', functio
     travelBack();
 });
 
-test('round robin assigner wraps around after all managers have been assigned', function () {
+test('round robin assigner wraps around after all managers have been assigned', function (): void {
     asSuperAdmin();
 
     $department = Department::factory()
@@ -104,7 +105,7 @@ test('round robin assigner wraps around after all managers have been assigned', 
         ])
         ->create();
 
-    $users = $department->users()->orderBy('name')->orderBy('id')->get();
+    $users = $department->users()->tap(new OrderByFullName())->orderBy('id')->get();
     $firstUser = $users->first();
 
     travelTo(now()->subSeconds(count($users) + 1));
@@ -145,7 +146,7 @@ test('round robin assigner wraps around after all managers have been assigned', 
     expect($serviceRequest->assignedTo?->user_id)->toBe($firstUser->getKey());
 });
 
-it('assigns to a manager through group membership', function () {
+it('assigns to a manager through group membership', function (): void {
     asSuperAdmin();
 
     $manager = User::factory()->create();
@@ -171,7 +172,7 @@ it('assigns to a manager through group membership', function () {
     expect($serviceRequest->assignedTo?->user_id)->toBe($manager->getKey());
 });
 
-test('round robin assigner does not assign when no managers exist', function () {
+test('round robin assigner does not assign when no managers exist', function (): void {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->state([

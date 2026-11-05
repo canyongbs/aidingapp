@@ -46,7 +46,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::create('pipeline_entry_milestones', function (Blueprint $table) {
+        Schema::create('pipeline_entry_milestones', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->foreignUuid('pipeline_entry_id')->constrained()->cascadeOnDelete();
             $table->foreignUuid('project_milestone_id')->constrained()->cascadeOnDelete();

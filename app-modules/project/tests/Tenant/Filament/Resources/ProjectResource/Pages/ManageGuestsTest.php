@@ -42,7 +42,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-it('cannot render without proper permission', function () {
+it('cannot render without proper permission', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -55,7 +55,7 @@ it('cannot render without proper permission', function () {
         ->assertForbidden();
 });
 
-it('can render with proper permission', function () {
+it('can render with proper permission', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();

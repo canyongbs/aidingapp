@@ -55,7 +55,7 @@ trait HasAssetCheckInInfolist
             TextEntry::make('created_at')
                 ->label('Status')
                 ->state(fn (AssetCheckIn $record): AssetCheckOutStatus => $record->checkOut->status)
-                ->formatStateUsing(fn (AssetCheckOutStatus $state) => $state->getLabel())
+                ->formatStateUsing(fn (AssetCheckOutStatus $state): string => $state->getLabel())
                 ->badge()
                 ->color(fn (AssetCheckOutStatus $state): string => match ($state) {
                     AssetCheckOutStatus::Returned => 'success',
@@ -64,7 +64,7 @@ trait HasAssetCheckInInfolist
                 }),
             Fieldset::make('Involved Parties')
                 ->schema([
-                    TextEntry::make('checkedInBy.name')
+                    TextEntry::make('checkedInBy.full_name')
                         ->label('Performed By')
                         ->url(fn (AssetCheckIn $record): ?string => $record->checkedInBy ? UserResource::getUrl('view', ['record' => $record->checkedInBy]) : null)
                         ->placeholder('Deleted user')

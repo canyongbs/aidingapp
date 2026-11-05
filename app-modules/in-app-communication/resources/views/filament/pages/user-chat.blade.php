@@ -43,7 +43,7 @@
         class="h-[calc(100vh-12rem)] overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700"
         id="user-chat-app"
         data-user-id="{{ auth()->user()->getKey() }}"
-        data-user-name="{{ auth()->user()->name }}"
+        data-user-name="{{ auth()->user()->full_name }}"
         data-user-avatar="{{ auth()->user()->avatar_url ?? "" }}"
         @if (Gate::check(Feature::ServiceManagement->getGateName()))
             data-service-management-enabled

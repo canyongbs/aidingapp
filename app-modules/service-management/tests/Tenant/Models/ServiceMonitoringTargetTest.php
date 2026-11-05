@@ -36,7 +36,7 @@
 
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 
-it('excludes its basic auth credentials from serialization and audits', function () {
+it('excludes its basic auth credentials from serialization and audits', function (): void {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->basicAuth()->create();
 
     $audit = $serviceMonitoringTarget->audits()->latest()->firstOrFail();
@@ -49,7 +49,7 @@ it('excludes its basic auth credentials from serialization and audits', function
         ->and($audit->old_values)->not->toHaveKey('auth_password');
 });
 
-it('computes is_max_latency_enabled from whether max_latency_ms is set', function () {
+it('computes is_max_latency_enabled from whether max_latency_ms is set', function (): void {
     $enabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => 500]);
     $disabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => null]);
 

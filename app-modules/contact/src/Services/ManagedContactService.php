@@ -37,6 +37,7 @@
 namespace AidingApp\Contact\Services;
 
 use AidingApp\Contact\Models\Contact;
+use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -48,7 +49,6 @@ class ManagedContactService
      * @var array<int, string>
      */
     public const SYNCED_USER_ATTRIBUTES = [
-        'name',
         'first_name',
         'last_name',
         'preferred_name',
@@ -74,7 +74,8 @@ class ManagedContactService
      * Turn a User into a managed contact (or update the existing link), keeping
      * the Contact's data synchronized with the User. If a Contact already exists
      * for the User's email address it is linked and overridden instead of creating
-     * a duplicate. Soft-deleted matches are restored.
+     * a duplicate. Soft-deleted matches are restored, and archived matches are
+     * unarchived while contact archiving is active.
      */
     public function enable(User $user, string $contactTypeId): Contact
     {
@@ -88,6 +89,10 @@ class ManagedContactService
         $contact->managedByUser()->associate($user);
 
         $this->syncContact($contact, $user);
+
+        if (ContactArchivingFeature::active() && $contact->isArchived()) {
+            $contact->unarchive();
+        }
 
         return $contact;
     }
@@ -161,7 +166,7 @@ class ManagedContactService
     protected function mapUserAttributes(User $user): array
     {
         $attributes = [
-            'full_name' => trim($user->name),
+            'full_name' => $user->full_name,
             'email' => $user->email,
             ...$this->mapNameAttributes($user),
         ];

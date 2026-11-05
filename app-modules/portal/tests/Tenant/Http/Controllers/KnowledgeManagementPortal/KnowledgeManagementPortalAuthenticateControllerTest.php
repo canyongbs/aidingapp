@@ -40,6 +40,7 @@ use AidingApp\Portal\Enums\PortalType;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Settings\PortalSettings;
+use App\Features\ContactArchivingFeature;
 use App\Support\AuthenticationCodeRateLimiter;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
@@ -47,7 +48,7 @@ use Illuminate\Support\Facades\URL;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\withHeader;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->knowledge_management_portal_service_management = false;
@@ -59,7 +60,7 @@ beforeEach(function () {
     $assistantSettings->save();
 });
 
-test('it returns expired and creates guest session when authentication is expired', function () {
+test('it returns expired and creates guest session when authentication is expired', function (): void {
     $plainCode = 123456;
 
     $authentication = PortalAuthentication::factory()->create([
@@ -86,7 +87,7 @@ test('it returns expired and creates guest session when authentication is expire
     expect(PortalGuest::query()->count())->toBe(1);
 });
 
-test('it reuses existing guest session for expired authentication', function () {
+test('it reuses existing guest session for expired authentication', function (): void {
     $existingGuest = PortalGuest::factory()->create();
 
     $plainCode = 223344;
@@ -115,7 +116,7 @@ test('it reuses existing guest session for expired authentication', function () 
     expect(PortalGuest::query()->count())->toBe(1);
 });
 
-test('it authenticates contact and clears guest session when code is valid', function () {
+test('it authenticates contact and clears guest session when code is valid', function (): void {
     $contact = Contact::factory()->create();
     $existingGuest = PortalGuest::factory()->create();
 
@@ -152,7 +153,69 @@ test('it authenticates contact and clears guest session when code is valid', fun
         ->and(auth('contact')->check())->toBeTrue();
 });
 
-test('it does not rotate the csrf token shared with the admin panel', function () {
+test('it does not authenticate an archived contact', function (): void {
+    $contact = Contact::factory()->create();
+
+    $plainCode = 654321;
+
+    $authentication = PortalAuthentication::factory()->create([
+        'portal_type' => PortalType::KnowledgeManagement,
+        'code' => Hash::make((string) $plainCode),
+        'created_at' => now(),
+    ]);
+    $authentication->educatable()->associate($contact);
+    $authentication->save();
+
+    $contact->archive();
+
+    $url = URL::signedRoute(
+        name: 'api.portal.authenticate.embedded',
+        parameters: ['authentication' => $authentication],
+        absolute: false,
+    );
+
+    postJson($url, ['code' => $plainCode])
+        ->assertOk()
+        ->assertJsonPath('is_expired', true)
+        ->assertSessionHas('guest_id');
+
+    expect(auth('contact')->guest())->toBeTrue()
+        ->and($contact->tokens()->doesntExist())->toBeTrue();
+});
+
+test('it authenticates an archived contact when the contact archiving feature is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    $contact = Contact::factory()->archived()->create();
+
+    $plainCode = 654321;
+
+    $authentication = PortalAuthentication::factory()->create([
+        'portal_type' => PortalType::KnowledgeManagement,
+        'code' => Hash::make((string) $plainCode),
+        'created_at' => now(),
+    ]);
+    $authentication->educatable()->associate($contact);
+    $authentication->save();
+
+    $url = URL::signedRoute(
+        name: 'api.portal.authenticate.embedded',
+        parameters: ['authentication' => $authentication],
+        absolute: false,
+    );
+
+    $response = postJson($url, ['code' => $plainCode]);
+
+    $response
+        ->assertOk()
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('user.id', $contact->getKey());
+
+    expect($response->json('token'))->not()->toBeEmpty()
+        ->and(auth('contact')->check())->toBeTrue();
+});
+
+test('it does not rotate the csrf token shared with the admin panel', function (): void {
     $contact = Contact::factory()->create();
 
     $plainCode = 654321;
@@ -189,7 +252,7 @@ test('it does not rotate the csrf token shared with the admin panel', function (
         ->and(auth('contact')->check())->toBeTrue();
 });
 
-test('it returns validation error when code is invalid', function () {
+test('it returns validation error when code is invalid', function (): void {
     $contact = Contact::factory()->create();
 
     $authentication = PortalAuthentication::factory()->create([
@@ -215,7 +278,7 @@ test('it returns validation error when code is invalid', function () {
         ->assertJsonValidationErrors(['code']);
 });
 
-test('it returns validation error when code is missing', function () {
+test('it returns validation error when code is missing', function (): void {
     $contact = Contact::factory()->create();
 
     $authentication = PortalAuthentication::factory()->create([
@@ -239,7 +302,7 @@ test('it returns validation error when code is missing', function () {
         ->assertJsonValidationErrors(['code']);
 });
 
-test('it locks the authentication after too many invalid code attempts and rejects even the correct code', function () {
+test('it locks the authentication after too many invalid code attempts and rejects even the correct code', function (): void {
     $contact = Contact::factory()->create();
 
     $plainCode = 778899;

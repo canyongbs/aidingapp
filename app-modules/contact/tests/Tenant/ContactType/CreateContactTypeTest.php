@@ -49,7 +49,7 @@ use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEmpty;
 use function Tests\asSuperAdmin;
 
-test('A successful action on the CreateContactType page', function () {
+test('A successful action on the CreateContactType page', function (): void {
     asSuperAdmin()
         ->get(
             ContactTypeResource::getUrl('create')
@@ -68,7 +68,7 @@ test('A successful action on the CreateContactType page', function () {
     assertDatabaseHas(ContactType::class, $request);
 });
 
-test('CreateContactType requires valid data', function (CreateContactTypeRequestFactory $data, array $errors) {
+test('CreateContactType requires valid data', function (CreateContactTypeRequestFactory $data, array $errors): void {
     asSuperAdmin();
 
     Livewire::test(CreateContactType::class)
@@ -79,16 +79,16 @@ test('CreateContactType requires valid data', function (CreateContactTypeRequest
     assertEmpty(ContactType::all());
 })->with(
     [
-        'name missing' => [fn () => CreateContactTypeRequestFactory::new()->without('name'), ['name' => 'required']],
-        'name not a string' => [fn () => CreateContactTypeRequestFactory::new()->state(['name' => 1]), ['name' => 'string']],
-        'color missing' => [fn () => CreateContactTypeRequestFactory::new()->state(['color' => null]), ['color' => 'required']],
-        'color not within enum' => [fn () => CreateContactTypeRequestFactory::new()->state(['color' => 'not-a-color']), ['color' => Enum::class]],
+        'name missing' => [fn (): CreateContactTypeRequestFactory => CreateContactTypeRequestFactory::new()->without('name'), ['name' => 'required']],
+        'name not a string' => [fn (): CreateContactTypeRequestFactory => CreateContactTypeRequestFactory::new()->state(['name' => 1]), ['name' => 'string']],
+        'color missing' => [fn (): CreateContactTypeRequestFactory => CreateContactTypeRequestFactory::new()->state(['color' => null]), ['color' => 'required']],
+        'color not within enum' => [fn (): CreateContactTypeRequestFactory => CreateContactTypeRequestFactory::new()->state(['color' => 'not-a-color']), ['color' => Enum::class]],
     ]
 );
 
 // Permission Tests
 
-test('CreateContactType is gated with proper access control', function () {
+test('CreateContactType is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)

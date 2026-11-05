@@ -34,18 +34,22 @@
 </COPYRIGHT>
 */
 
+use App\Features\UserFullNameFeature;
+use App\Models\Scopes\OrderByFullName;
+use App\Models\Scopes\WhereFullNameLike;
 use App\Models\User;
+use App\Observers\UserObserver;
 
 use function Pest\Laravel\assertDatabaseHas;
 
-it('can always receive email', function () {
+it('can always receive email', function (): void {
     $user = User::factory()->create();
 
     expect($user->canReceiveEmail())->toBeTrue();
 });
 
-describe('push subscriptions', function () {
-    it('stores a push subscription for the user on the tenant connection', function () {
+describe('push subscriptions', function (): void {
+    it('stores a push subscription for the user on the tenant connection', function (): void {
         $user = User::factory()->create();
 
         expect($user->pushSubscriptions()->count())->toBe(0);
@@ -68,7 +72,7 @@ describe('push subscriptions', function () {
         ], 'tenant');
     });
 
-    it('replaces an existing subscription for the same endpoint', function () {
+    it('replaces an existing subscription for the same endpoint', function (): void {
         $user = User::factory()->create();
 
         $user->updatePushSubscription(endpoint: 'https://push.test/endpoint/abc', key: 'first');
@@ -78,7 +82,7 @@ describe('push subscriptions', function () {
             ->and($user->pushSubscriptions()->first()->public_key)->toBe('second');
     });
 
-    it('deletes a push subscription by endpoint', function () {
+    it('deletes a push subscription by endpoint', function (): void {
         $user = User::factory()->create();
 
         $user->updatePushSubscription(endpoint: 'https://push.test/endpoint/abc');
@@ -88,5 +92,57 @@ describe('push subscriptions', function () {
         $user->deletePushSubscription('https://push.test/endpoint/abc');
 
         expect($user->pushSubscriptions()->count())->toBe(0);
+    });
+});
+
+describe('full name', function (): void {
+    it('combines the first and last name', function (): void {
+        $user = User::factory()->make(['first_name' => 'Jordan', 'last_name' => 'Blake']);
+
+        expect($user->full_name)->toBe('Jordan Blake')
+            ->and($user->getFilamentName())->toBe('Jordan Blake');
+    });
+
+    it('trims the full name when a part is blank', function (): void {
+        $user = User::factory()->make(['first_name' => 'Jordan', 'last_name' => '']);
+
+        expect($user->full_name)->toBe('Jordan');
+    });
+
+    it('orders users by first name then last name', function (): void {
+        User::factory()->create(['first_name' => 'Zed', 'last_name' => 'Adams']);
+        User::factory()->create(['first_name' => 'Amy', 'last_name' => 'Young']);
+        User::factory()->create(['first_name' => 'Amy', 'last_name' => 'Baker']);
+
+        expect(User::query()->tap(new OrderByFullName())->get()->pluck('full_name')->all())
+            ->toBe(['Amy Baker', 'Amy Young', 'Zed Adams'])
+            ->and(User::query()->tap(new OrderByFullName('desc'))->get()->pluck('full_name')->all())
+            ->toBe(['Zed Adams', 'Amy Young', 'Amy Baker']);
+    });
+
+    it('searches users by their full name case-insensitively', function (): void {
+        $matching = User::factory()->create(['first_name' => 'Jordan', 'last_name' => 'Blake']);
+        User::factory()->create(['first_name' => 'Jordan', 'last_name' => 'Smith']);
+
+        expect(User::query()->tap(new WhereFullNameLike('jordan BLA'))->pluck('id')->all())
+            ->toBe([$matching->getKey()]);
+    });
+
+    it('keeps the legacy name column populated until the column has been dropped', function (): void {
+        UserFullNameFeature::deactivate();
+
+        $user = User::factory()->make(['first_name' => 'Jordan', 'last_name' => 'Blake']);
+
+        app(UserObserver::class)->saving($user);
+
+        expect($user->getAttributes())->toHaveKey('name', 'Jordan Blake');
+    });
+
+    it('does not write the legacy name column once it has been dropped', function (): void {
+        $user = User::factory()->make(['first_name' => 'Jordan', 'last_name' => 'Blake']);
+
+        app(UserObserver::class)->saving($user);
+
+        expect($user->getAttributes())->not->toHaveKey('name');
     });
 });

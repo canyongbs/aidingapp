@@ -43,7 +43,7 @@ it('has the expected label, color, icon, tooltip, and callout text', function (
     string $icon,
     string $tooltip,
     ?string $callout,
-) {
+): void {
     expect($status->getLabel())->toBe($label)
         ->and($status->getColor())->toBe($color)
         ->and($status->getIcon())->toBe($icon)

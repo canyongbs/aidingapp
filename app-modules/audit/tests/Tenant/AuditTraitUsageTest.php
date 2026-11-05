@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-arch('app', function () {
+arch('app', function (): void {
     expect('App\Models')
         ->not()->toUse('OwenIt\Auditing\Auditable')
         ->and('AidingApp\ServiceManagement')

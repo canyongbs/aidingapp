@@ -163,7 +163,7 @@ class GenerateAiResolutionPrompt
 
         $detailKeys = collect($details)->keys()->filter()->values();
 
-        return $detailKeys->filter(fn ($key) => ! $fieldsMap->has($key))->all();
+        return $detailKeys->filter(fn ($key): bool => ! $fieldsMap->has($key))->all();
     }
 
     /**

@@ -42,9 +42,9 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Observers\ServiceRequestAssignmentObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Timelines\ServiceRequestAssignmentTimeline;
-use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -52,15 +52,18 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperServiceRequestAssignment
  */
 #[ObservedBy([ServiceRequestAssignmentObserver::class])]
-class ServiceRequestAssignment extends BaseModel implements Auditable, ProvidesATimeline
+class ServiceRequestAssignment extends Model implements Auditable, ProvidesATimeline
 {
     use AuditableTrait;
     use SoftDeletes;
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
 
     /** @use HasFactory<ServiceRequestAssignmentFactory> */
     use HasFactory;

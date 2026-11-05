@@ -47,7 +47,7 @@ class SaveServiceMonitoringReportConfigurationsAction
      */
     public function __invoke(ServiceMonitoringTarget $serviceMonitoringTarget, array $reportConfigurationsData): void
     {
-        DB::transaction(function () use ($serviceMonitoringTarget, $reportConfigurationsData) {
+        DB::transaction(function () use ($serviceMonitoringTarget, $reportConfigurationsData): void {
             foreach (ServiceMonitoringReportFrequency::cases() as $frequency) {
                 $frequencyData = $reportConfigurationsData[$frequency->value] ?? [];
 

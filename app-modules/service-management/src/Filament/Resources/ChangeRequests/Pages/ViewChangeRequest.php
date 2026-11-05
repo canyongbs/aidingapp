@@ -66,12 +66,12 @@ class ViewChangeRequest extends ViewRecord
                     ->headerActions([
                         Action::make('approveChangeRequest')
                             ->requiresConfirmation()
-                            ->hidden(fn (ChangeRequest $record) => $record->type()->withTrashed()->first()->number_of_required_approvals === 0 || $record->isNotNew())
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew() || ! $record->canBeApprovedBy(auth()->user()))
+                            ->hidden(fn (ChangeRequest $record): bool => $record->type()->withTrashed()->first()->number_of_required_approvals === 0 || $record->isNotNew())
+                            ->disabled(fn (ChangeRequest $record): bool => $record->isNotNew() || ! $record->canBeApprovedBy(auth()->user()))
                             ->action(fn (ChangeRequest $record) => resolve(ApproveChangeRequest::class, ['changeRequest' => $record, 'user' => auth()->user()])->handle()),
                     ])
-                    ->icon(fn (ChangeRequest $record) => $record->getIcon())
-                    ->iconColor(fn (ChangeRequest $record) => $record->getIconColor())
+                    ->icon(fn (ChangeRequest $record): string => $record->getIcon())
+                    ->iconColor(fn (ChangeRequest $record): string => $record->getIconColor())
                     ->iconSize(IconSize::Large)
                     ->schema([
                         TextEntry::make('type.number_of_required_approvals')
@@ -79,12 +79,12 @@ class ViewChangeRequest extends ViewRecord
                             ->columnSpan(2),
                         RepeatableEntry::make('approvals')
                             ->label('Approved By')
-                            ->hidden(fn (ChangeRequest $record) => $record->type()->withTrashed()->first()->number_of_required_approvals === 0)
+                            ->hidden(fn (ChangeRequest $record): bool => $record->type()->withTrashed()->first()->number_of_required_approvals === 0)
                             ->schema([
                                 TextEntry::make('user')
                                     ->formatStateUsing(fn ($state) => $state->name)
                                     ->hiddenLabel()
-                                    ->url(fn ($state) => UserResource::getUrl('view', ['record' => $state]))
+                                    ->url(fn ($state): string => UserResource::getUrl('view', ['record' => $state]))
                                     ->color('primary'),
                             ]),
                     ]),
@@ -145,8 +145,8 @@ class ViewChangeRequest extends ViewRecord
                         ->transitionTo(ChangeRequestStatus::tap(new ClassifiedAs(SystemChangeRequestClassification::Approved))->first(), SystemChangeRequestClassification::Approved)
                 )
                 ->cancelParentActions()
-                ->disabled(fn (ChangeRequest $record) => ! $record->user->is(auth()->user()))
-                ->visible(fn (ChangeRequest $record) => $record->doesNotNeedExplicitApproval() && $record->getStateMachine(SystemChangeRequestClassification::class, 'status.classification')->getStateTransitions()->contains(SystemChangeRequestClassification::Approved->value)),
+                ->disabled(fn (ChangeRequest $record): bool => ! $record->user->is(auth()->user()))
+                ->visible(fn (ChangeRequest $record): bool => $record->doesNotNeedExplicitApproval() && $record->getStateMachine(SystemChangeRequestClassification::class, 'status.classification')->getStateTransitions()->contains(SystemChangeRequestClassification::Approved->value)),
             Action::make('transition_to_in_progress')
                 ->label('Transition to In Progress')
                 ->action(
@@ -154,7 +154,7 @@ class ViewChangeRequest extends ViewRecord
                         ->transitionTo(ChangeRequestStatus::tap(new ClassifiedAs(SystemChangeRequestClassification::InProgress))->first(), SystemChangeRequestClassification::InProgress)
                 )
                 ->cancelParentActions()
-                ->disabled(fn (ChangeRequest $record) => ! $record->user->is(auth()->user()))
+                ->disabled(fn (ChangeRequest $record): bool => ! $record->user->is(auth()->user()))
                 ->visible(fn (ChangeRequest $record) => $record->getStateMachine(SystemChangeRequestClassification::class, 'status.classification')->getStateTransitions()->contains(SystemChangeRequestClassification::InProgress->value)),
             Action::make('transition_to_completed')
                 ->label('Transition to Completed')
@@ -163,7 +163,7 @@ class ViewChangeRequest extends ViewRecord
                         ->transitionTo(ChangeRequestStatus::tap(new ClassifiedAs(SystemChangeRequestClassification::Completed))->first(), SystemChangeRequestClassification::Completed)
                 )
                 ->cancelParentActions()
-                ->disabled(fn (ChangeRequest $record) => ! $record->user->is(auth()->user()))
+                ->disabled(fn (ChangeRequest $record): bool => ! $record->user->is(auth()->user()))
                 ->visible(fn (ChangeRequest $record) => $record->getStateMachine(SystemChangeRequestClassification::class, 'status.classification')->getStateTransitions()->contains(SystemChangeRequestClassification::Completed->value)),
             Action::make('transition_to_failed')
                 ->label('Transition to Failed')
@@ -172,7 +172,7 @@ class ViewChangeRequest extends ViewRecord
                         ->transitionTo(ChangeRequestStatus::tap(new ClassifiedAs(SystemChangeRequestClassification::FailedOrReverted))->first(), SystemChangeRequestClassification::FailedOrReverted)
                 )
                 ->cancelParentActions()
-                ->disabled(fn (ChangeRequest $record) => ! $record->user->is(auth()->user()))
+                ->disabled(fn (ChangeRequest $record): bool => ! $record->user->is(auth()->user()))
                 ->visible(fn (ChangeRequest $record) => $record->getStateMachine(SystemChangeRequestClassification::class, 'status.classification')->getStateTransitions()->contains(SystemChangeRequestClassification::FailedOrReverted->value)),
             EditAction::make()
                 ->outlined(),

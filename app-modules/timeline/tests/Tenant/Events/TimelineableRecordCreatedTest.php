@@ -38,7 +38,7 @@ use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Listeners\AddRecordToTimeline;
 use Illuminate\Support\Facades\Event;
 
-it('has a listener prepared to handle it', function () {
+it('has a listener prepared to handle it', function (): void {
     Event::fake();
 
     Event::assertListening(

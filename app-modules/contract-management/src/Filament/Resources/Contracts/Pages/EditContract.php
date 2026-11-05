@@ -39,6 +39,7 @@ namespace AidingApp\ContractManagement\Filament\Resources\Contracts\Pages;
 use AidingApp\ContractManagement\Filament\Resources\Contracts\ContractResource;
 use AidingApp\ContractManagement\Models\Contract;
 use AidingApp\ContractManagement\Models\ContractType;
+use App\Features\ContractNameUniquenessFeature;
 use Cknow\Money\Money;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\DatePicker;
@@ -52,6 +53,7 @@ use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Unique;
 
 class EditContract extends EditRecord
 {
@@ -63,7 +65,13 @@ class EditContract extends EditRecord
             ->components([
                 TextInput::make('name')
                     ->string()
-                    ->required(),
+                    ->required()
+                    ->maxLength(255)
+                    // TODO: Cleanup Task (contract-name-uniqueness): replace this `when()` with `->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed())` once the flag is removed.
+                    ->when(
+                        ContractNameUniquenessFeature::active(),
+                        fn (TextInput $field): TextInput => $field->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed()),
+                    ),
                 Select::make('contract_type_id')
                     ->required()
                     ->label('Contract Type')
@@ -97,7 +105,7 @@ class EditContract extends EditRecord
                     ->native(false)
                     ->live(onBlur: true)
                     ->afterStateUpdated(
-                        fn (Get $get, Set $set) => $get('start_date') > $get('end_date') ? $set('end_date', '') : ''
+                        fn (Get $get, Set $set): mixed => $get('start_date') > $get('end_date') ? $set('end_date', '') : ''
                     )
                     ->closeOnDateSelection()
                     ->placeholder('Select start date')
@@ -106,7 +114,7 @@ class EditContract extends EditRecord
                     ->label('End Date')
                     ->native(false)
                     ->placeholder('Select end date')
-                    ->minDate(fn (Get $get) => $get('start_date'))
+                    ->minDate(fn (Get $get): mixed => $get('start_date'))
                     ->live(onBlur: true)
                     ->closeOnDateSelection()
                     ->required(),

@@ -40,10 +40,10 @@ use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\UpdateSe
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ViewServiceRequestController;
 use Illuminate\Support\Facades\Route;
 
-Route::api(majorVersion: 1, routes: function () {
+Route::api(majorVersion: 1, routes: function (): void {
     Route::name('service-requests.')
         ->prefix('service-requests')
-        ->group(function () {
+        ->group(function (): void {
             Route::get('/', ListServiceRequestsController::class)->name('index');
             Route::get('/{serviceRequest}', ViewServiceRequestController::class)->name('show');
             Route::patch('/{serviceRequest}', UpdateServiceRequestController::class)->name('update');

@@ -46,7 +46,7 @@ use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
 
-it('can render the relation manager on the edit page', function () {
+it('can render the relation manager on the edit page', function (): void {
     asSuperAdmin();
 
     $sla = Sla::create([
@@ -62,7 +62,7 @@ it('can render the relation manager on the edit page', function () {
         ->assertSuccessful();
 });
 
-it('lists priorities associated with the SLA', function () {
+it('lists priorities associated with the SLA', function (): void {
     asSuperAdmin();
 
     $sla = Sla::create([
@@ -86,7 +86,7 @@ it('lists priorities associated with the SLA', function () {
         ->assertCountTableRecords(1);
 });
 
-it('displays the correct columns for each priority', function () {
+it('displays the correct columns for each priority', function (): void {
     asSuperAdmin();
 
     $sla = Sla::create([
@@ -120,7 +120,7 @@ it('displays the correct columns for each priority', function () {
         ->assertTableColumnStateSet('type.name', $type->name, $priority);
 });
 
-it('has the associate action available', function () {
+it('has the associate action available', function (): void {
     asSuperAdmin();
 
     $sla = Sla::create([
@@ -136,7 +136,7 @@ it('has the associate action available', function () {
         ->assertTableActionExists(AssociateAction::class);
 });
 
-it('can associate a single priority to the SLA', function () {
+it('can associate a single priority to the SLA', function (): void {
     asSuperAdmin();
 
     $sla = Sla::create([
@@ -161,7 +161,7 @@ it('can associate a single priority to the SLA', function () {
     expect($priority->sla_id)->toBe($sla->getKey());
 });
 
-it('can associate multiple priorities to the SLA', function () {
+it('can associate multiple priorities to the SLA', function (): void {
     asSuperAdmin();
 
     $sla = Sla::create([
@@ -188,13 +188,13 @@ it('can associate multiple priorities to the SLA', function () {
         ])
         ->assertHasNoTableActionErrors();
 
-    $priorities->each(function (ServiceRequestPriority $priority) use ($sla) {
+    $priorities->each(function (ServiceRequestPriority $priority) use ($sla): void {
         $priority->refresh();
         expect($priority->sla_id)->toBe($sla->getKey());
     });
 });
 
-it('can associate priorities from different types to the SLA', function () {
+it('can associate priorities from different types to the SLA', function (): void {
     asSuperAdmin();
 
     $sla = Sla::create([
@@ -232,7 +232,7 @@ it('can associate priorities from different types to the SLA', function () {
         ->and($priorityB->sla_id)->toBe($sla->getKey());
 });
 
-it('can dissociate a priority from the SLA', function () {
+it('can dissociate a priority from the SLA', function (): void {
     asSuperAdmin();
 
     $sla = Sla::create([
@@ -257,7 +257,7 @@ it('can dissociate a priority from the SLA', function () {
     expect($priority->sla_id)->toBeNull();
 });
 
-it('can bulk dissociate priorities from the SLA', function () {
+it('can bulk dissociate priorities from the SLA', function (): void {
     asSuperAdmin();
 
     $sla = Sla::create([
@@ -277,7 +277,7 @@ it('can bulk dissociate priorities from the SLA', function () {
         ->callTableBulkAction(DissociateBulkAction::class, $priorities)
         ->assertHasNoTableBulkActionErrors();
 
-    $priorities->each(function (ServiceRequestPriority $priority) {
+    $priorities->each(function (ServiceRequestPriority $priority): void {
         $priority->refresh();
         expect($priority->sla_id)->toBeNull();
     });

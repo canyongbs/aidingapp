@@ -36,6 +36,7 @@
 
 namespace AidingApp\Contact\Filament\Resources\OrganizationResource\RelationManagers;
 
+use AidingApp\Contact\Models\Builders\ContactBuilder;
 use Filament\Actions\AssociateAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DissociateAction;
@@ -53,13 +54,15 @@ class ContactsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('full_name')
             ->inverseRelationship('organization')
+            ->modifyQueryUsing(fn (ContactBuilder $query): ContactBuilder => $query->withoutArchived())
             ->columns([
                 TextColumn::make('full_name'),
                 TextColumn::make('email'),
                 TextColumn::make('mobile'),
             ])
             ->headerActions([
-                AssociateAction::make(),
+                AssociateAction::make()
+                    ->recordSelectOptionsQuery(fn (ContactBuilder $query): ContactBuilder => $query->withoutArchived()),
             ])
             ->recordActions([
                 DissociateAction::make(),

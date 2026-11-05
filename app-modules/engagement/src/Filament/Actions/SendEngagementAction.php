@@ -75,7 +75,7 @@ class SendEngagementAction extends Action
             ->model(Engagement::class)
             ->authorize(fn () => auth()->user()->can('create', [Engagement::class, null]))
             ->schema(fn (): array => $this->getFormSchema())
-            ->action(function (array $data, Schema $schema) {
+            ->action(function (array $data, Schema $schema): void {
                 $this->createEngagement($data, $schema);
             })
             ->modalSubmitActionLabel('Send')
@@ -88,8 +88,8 @@ class SendEngagementAction extends Action
                     ->color('gray')
                     ->cancelParentActions()
                     ->requiresConfirmation()
-                    ->action(fn () => null)
-                    ->modalSubmitAction(fn (Action $action) => $action->color('danger')),
+                    ->action(fn (): null => null)
+                    ->modalSubmitAction(fn (Action $action): Action => $action->color('danger')),
             ]);
     }
 

@@ -43,13 +43,13 @@ use function Pest\Laravel\get;
 
 use Symfony\Component\HttpFoundation\Response;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
 });
 
-it('redirects a legacy category URL to its canonical URL', function () {
+it('redirects a legacy category URL to its canonical URL', function (): void {
     $category = KnowledgeBaseCategory::factory()->create();
 
     get(route('portal.category.show', ['category' => $category->slug]))
@@ -57,14 +57,14 @@ it('redirects a legacy category URL to its canonical URL', function () {
         ->assertRedirect(KnowledgeBasePortalUrl::category($category));
 });
 
-it('renders a canonical category URL without redirecting', function () {
+it('renders a canonical category URL without redirecting', function (): void {
     $category = KnowledgeBaseCategory::factory()->create();
 
     get(KnowledgeBasePortalUrl::category($category))
         ->assertOk();
 });
 
-it('redirects a stale category slug to its current canonical URL', function () {
+it('redirects a stale category slug to its current canonical URL', function (): void {
     $category = KnowledgeBaseCategory::factory()->create(['slug' => 'old-slug']);
     $staleUrl = KnowledgeBasePortalUrl::category($category);
 
@@ -76,7 +76,7 @@ it('redirects a stale category slug to its current canonical URL', function () {
         ->assertRedirect(KnowledgeBasePortalUrl::category($category) . '?filter=featured');
 });
 
-it('redirects a stale subcategory hierarchy to its current canonical URL', function () {
+it('redirects a stale subcategory hierarchy to its current canonical URL', function (): void {
     $originalParent = KnowledgeBaseCategory::factory()->create();
     $currentParent = KnowledgeBaseCategory::factory()->create();
     $subcategory = KnowledgeBaseCategory::factory()->for($originalParent, 'parentCategory')->create();
@@ -90,7 +90,7 @@ it('redirects a stale subcategory hierarchy to its current canonical URL', funct
         ->assertRedirect(KnowledgeBasePortalUrl::category($subcategory));
 });
 
-it('redirects a stale article title and category hierarchy to its canonical URL', function () {
+it('redirects a stale article title and category hierarchy to its canonical URL', function (): void {
     $originalCategory = KnowledgeBaseCategory::factory()->create();
     $currentParent = KnowledgeBaseCategory::factory()->create();
     $currentCategory = KnowledgeBaseCategory::factory()->for($currentParent, 'parentCategory')->create();
@@ -109,7 +109,7 @@ it('redirects a stale article title and category hierarchy to its canonical URL'
         ->assertRedirect(KnowledgeBasePortalUrl::article($article));
 });
 
-it('redirects a legacy article UUID URL to its canonical URL', function () {
+it('redirects a legacy article UUID URL to its canonical URL', function (): void {
     $category = KnowledgeBaseCategory::factory()->create();
     $article = KnowledgeBaseItem::factory()->for($category, 'category')->create(['public' => true]);
 

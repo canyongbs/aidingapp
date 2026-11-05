@@ -41,7 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Queue;
 
-it('successfully dispatches', function (ServiceMonitoringFrequency $frequency) {
+it('successfully dispatches', function (ServiceMonitoringFrequency $frequency): void {
     Queue::fake();
 
     $numJobs = rand(1, 10);
@@ -54,15 +54,15 @@ it('successfully dispatches', function (ServiceMonitoringFrequency $frequency) {
 })
     ->with(
         [
-            fn () => ServiceMonitoringFrequency::FiveMinutes,
-            fn () => ServiceMonitoringFrequency::FifteenMinutes,
-            fn () => ServiceMonitoringFrequency::ThirtyMinutes,
-            fn () => ServiceMonitoringFrequency::OneHour,
-            fn () => ServiceMonitoringFrequency::TwentyFourHours,
+            fn (): ServiceMonitoringFrequency => ServiceMonitoringFrequency::FiveMinutes,
+            fn (): ServiceMonitoringFrequency => ServiceMonitoringFrequency::FifteenMinutes,
+            fn (): ServiceMonitoringFrequency => ServiceMonitoringFrequency::ThirtyMinutes,
+            fn (): ServiceMonitoringFrequency => ServiceMonitoringFrequency::OneHour,
+            fn (): ServiceMonitoringFrequency => ServiceMonitoringFrequency::TwentyFourHours,
         ]
     );
 
-it('does not dispatch when serviceMonitoring addon is disabled', function (ServiceMonitoringFrequency $frequency) {
+it('does not dispatch when serviceMonitoring addon is disabled', function (ServiceMonitoringFrequency $frequency): void {
     Queue::fake();
 
     $settings = app(LicenseSettings::class);
@@ -77,15 +77,15 @@ it('does not dispatch when serviceMonitoring addon is disabled', function (Servi
 })
     ->with(
         [
-            fn () => ServiceMonitoringFrequency::FiveMinutes,
-            fn () => ServiceMonitoringFrequency::FifteenMinutes,
-            fn () => ServiceMonitoringFrequency::ThirtyMinutes,
-            fn () => ServiceMonitoringFrequency::OneHour,
-            fn () => ServiceMonitoringFrequency::TwentyFourHours,
+            fn (): ServiceMonitoringFrequency => ServiceMonitoringFrequency::FiveMinutes,
+            fn (): ServiceMonitoringFrequency => ServiceMonitoringFrequency::FifteenMinutes,
+            fn (): ServiceMonitoringFrequency => ServiceMonitoringFrequency::ThirtyMinutes,
+            fn (): ServiceMonitoringFrequency => ServiceMonitoringFrequency::OneHour,
+            fn (): ServiceMonitoringFrequency => ServiceMonitoringFrequency::TwentyFourHours,
         ]
     );
 
-it('dispatches confidential service monitors even though the job runs without an authenticated user', function () {
+it('dispatches confidential service monitors even though the job runs without an authenticated user', function (): void {
     Queue::fake();
 
     ServiceMonitoringTarget::factory()->confidential()->create([

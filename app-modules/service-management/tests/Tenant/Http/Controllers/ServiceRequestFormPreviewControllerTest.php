@@ -43,13 +43,13 @@ use Illuminate\Support\Facades\File;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 });
 
-it('redirects unauthenticated users to the login page', function () {
+it('redirects unauthenticated users to the login page', function (): void {
     $type = ServiceRequestType::factory()->create();
 
     $form = new ServiceRequestForm();
@@ -60,7 +60,7 @@ it('redirects unauthenticated users to the login page', function () {
         ->assertRedirect();
 });
 
-it('is forbidden when service management is not enabled', function () {
+it('is forbidden when service management is not enabled', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = false;
     $settings->save();
@@ -78,7 +78,7 @@ it('is forbidden when service management is not enabled', function () {
         ->assertForbidden();
 });
 
-it('renders the preview page for an authenticated user', function () {
+it('renders the preview page for an authenticated user', function (): void {
     $user = User::factory()->create();
 
     $type = ServiceRequestType::factory()->create();

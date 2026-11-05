@@ -41,7 +41,7 @@ use Spatie\LaravelSettings\Migrations\SettingsMigration;
 return new class () extends SettingsMigration {
     public function up(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             try {
                 $this->migrator->add('service-request-notification-automation.preload_new_service_request_types', false);
             } catch (SettingAlreadyExists) {
@@ -56,7 +56,7 @@ return new class () extends SettingsMigration {
 
     public function down(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             $this->migrator->deleteIfExists('service-request-notification-automation.preload_new_service_request_types');
             $this->migrator->deleteIfExists('service-request-notification-automation.use_custom_templates');
         });

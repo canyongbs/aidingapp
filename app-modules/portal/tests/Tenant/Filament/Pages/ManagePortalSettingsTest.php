@@ -41,7 +41,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->knowledgeManagement = false;
     $settings->save();

@@ -43,7 +43,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = false;
     $settings->save();
@@ -65,7 +65,7 @@ it('is gated with proper access control', function () {
     Livewire::test(ListSlas::class)->assertOk();
 });
 
-it('only shows the bulk delete action to a user with the settings.delete permission', function () {
+it('only shows the bulk delete action to a user with the settings.delete permission', function (): void {
     new Sla(['name' => 'test']);
 
     $user = User::factory()

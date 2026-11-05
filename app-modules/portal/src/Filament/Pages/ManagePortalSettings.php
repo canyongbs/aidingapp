@@ -100,44 +100,44 @@ class ManagePortalSettings extends SettingsPage
                         Toggle::make('knowledge_management_portal_enabled')
                             ->label('Knowledge Management')
                             ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
-                            ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
+                            ->hintIcon(fn (Toggle $component): ?string => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
                             ->hintIconTooltip('Knowledge Management is not a part of your current subscription.')
                             ->live()
                             ->columnSpanFull(),
                         ColorSelect::make('knowledge_management_portal_primary_color')
                             ->label('Primary Color')
-                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled'))
+                            ->visible(fn (Get $get): mixed => $get('knowledge_management_portal_enabled'))
                             ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
-                            ->hintIcon(fn (Select $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
+                            ->hintIcon(fn (Select $component): ?string => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
                             ->hintIconTooltip('Knowledge Management is not a part of your current subscription.')
                             ->columnSpan(1),
                         Select::make('knowledge_management_portal_rounding')
                             ->label('Rounding')
                             ->options(Rounding::class)
-                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled'))
+                            ->visible(fn (Get $get): mixed => $get('knowledge_management_portal_enabled'))
                             ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
-                            ->hintIcon(fn (Select $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
+                            ->hintIcon(fn (Select $component): ?string => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
                             ->hintIconTooltip('Knowledge Management is not a part of your current subscription.')
                             ->columnSpan(1),
                         Toggle::make('knowledge_management_portal_requires_authentication')
                             ->label('Require Authentication')
-                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled'))
+                            ->visible(fn (Get $get): mixed => $get('knowledge_management_portal_enabled'))
                             ->disabled(! Gate::check(Feature::ServiceManagement->getGateName()))
-                            ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
+                            ->hintIcon(fn (Toggle $component): ?string => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
                             ->columnSpanFull(),
                         Toggle::make('knowledge_management_portal_service_management')
                             ->label('Service Management')
-                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled'))
+                            ->visible(fn (Get $get): mixed => $get('knowledge_management_portal_enabled'))
                             ->disabled(! Gate::check(Feature::ServiceManagement->getGateName()))
-                            ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
+                            ->hintIcon(fn (Toggle $component): ?string => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
                             ->columnSpanFull(),
                         Toggle::make('ai_support_assistant')
                             ->label('AI Support Assistant')
-                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && app(AiSupportAssistantSettings::class)->is_enabled)
+                            ->visible(fn (Get $get): bool => $get('knowledge_management_portal_enabled') && app(AiSupportAssistantSettings::class)->is_enabled)
                             ->live(),
                         Toggle::make('embed_assistant')
                             ->label('Embed Support Assistant')
-                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && $get('ai_support_assistant'))
+                            ->visible(fn (Get $get): bool => $get('knowledge_management_portal_enabled') && $get('ai_support_assistant'))
                             ->live()
                             ->helperText('If enabled, the assistant can be embedded on other websites.')
                             ->hintAction(
@@ -165,15 +165,15 @@ class ManagePortalSettings extends SettingsPage
                                     ])
                                     ->modalSubmitAction(false)
                                     ->modalCancelActionLabel('Close')
-                                    ->hidden(fn (Get $get) => ! $get('embed_assistant'))
+                                    ->hidden(fn (Get $get): bool => ! $get('embed_assistant'))
                             )
                             ->columnStart(1),
                         TagsInput::make('embed_assistant_allowed_domains')
                             ->label('Allowed Domains')
                             ->helperText('Only these domains will be allowed to embed the assistant.')
                             ->placeholder('example.com')
-                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && $get('ai_support_assistant') && $get('embed_assistant'))
-                            ->disabled(fn (Get $get) => ! $get('embed_assistant'))
+                            ->visible(fn (Get $get): bool => $get('knowledge_management_portal_enabled') && $get('ai_support_assistant') && $get('embed_assistant'))
+                            ->disabled(fn (Get $get): bool => ! $get('embed_assistant'))
                             ->nestedRecursiveRules([
                                 new IsDomain(),
                             ]),
@@ -183,14 +183,14 @@ class ManagePortalSettings extends SettingsPage
                                 ->maxLength(255)
                                 ->columns(1)
                                 ->required()
-                                ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled'))
+                                ->visible(fn (Get $get): mixed => $get('knowledge_management_portal_enabled'))
                                 ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
-                                ->hintIcon(fn (TextInput $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null),
+                                ->hintIcon(fn (TextInput $component): ?string => $component->isDisabled() ? 'heroicon-m-lock-closed' : null),
                         ])->columns(2)->columnSpanFull(),
                         SpatieMediaLibraryFileUpload::make('favicon')
                             ->collection('portal_favicon')
                             ->visibility('private')
-                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled'))
+                            ->visible(fn (Get $get): mixed => $get('knowledge_management_portal_enabled'))
                             ->acceptedFileTypes([
                                 'image/png',
                                 'image/jpeg',
@@ -209,16 +209,16 @@ class ManagePortalSettings extends SettingsPage
                             ->model(
                                 PortalSettings::getSettingsPropertyModel('portal.logo'),
                             )
-                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled')),
+                            ->visible(fn (Get $get): mixed => $get('knowledge_management_portal_enabled')),
                         Actions::make([
                             Action::make('view')
-                                ->url(fn () => route('portal.show'))
+                                ->url(fn (): string => route('portal.show'))
                                 ->icon('heroicon-m-arrow-top-right-on-square')
                                 ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
                                 ->openUrlInNewTab(),
                         ])
                             ->visible(
-                                fn (Get $get) => $get('knowledge_management_portal_enabled') &&
+                                fn (Get $get): bool => $get('knowledge_management_portal_enabled') &&
                                     ! is_null($get('knowledge_management_portal_primary_color')) &&
                                     ! is_null($get('knowledge_management_portal_rounding'))
                             )
@@ -238,7 +238,7 @@ class ManagePortalSettings extends SettingsPage
                             ->columnSpanFull(),
                         TextInput::make('gdpr_privacy_policy_url')
                             ->label('Privacy Policy URL')
-                            ->visible(fn (Get $get) => $get('gdpr_privacy_policy'))
+                            ->visible(fn (Get $get): mixed => $get('gdpr_privacy_policy'))
                             ->maxLength(255)
                             ->rules([new ValidUrl()]),
                         Toggle::make('gdpr_terms_of_use')
@@ -247,7 +247,7 @@ class ManagePortalSettings extends SettingsPage
                             ->columnSpanFull(),
                         TextInput::make('gdpr_terms_of_use_url')
                             ->label('Terms of Use URL')
-                            ->visible(fn (Get $get) => $get('gdpr_terms_of_use'))
+                            ->visible(fn (Get $get): mixed => $get('gdpr_terms_of_use'))
                             ->maxLength(255)
                             ->rules([new ValidUrl()]),
                         Select::make('gdpr_banner_button_label')
@@ -262,10 +262,10 @@ class ManagePortalSettings extends SettingsPage
                         Select::make('gdpr_decline_value')
                             ->options(GdprDeclineOptions::class)
                             ->enum(GdprDeclineOptions::class)
-                            ->visible(fn (Get $get) => $get('gdpr_decline'))
+                            ->visible(fn (Get $get): mixed => $get('gdpr_decline'))
                             ->label('GDPR Decline Option'),
                     ])
-                    ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled')),
+                    ->visible(fn (Get $get): mixed => $get('knowledge_management_portal_enabled')),
             ])
             ->disabled(! auth()->user()->can('settings.*.update'));
     }

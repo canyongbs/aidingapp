@@ -48,7 +48,7 @@ use Illuminate\Support\Facades\Queue;
 use function Pest\Laravel\assertModelExists;
 use function Pest\Laravel\assertModelMissing;
 
-it('deletes messages past the ephemeral period and keeps the rest', function () {
+it('deletes messages past the ephemeral period and keeps the rest', function (): void {
     $conversation = Conversation::factory()
         ->confidential(ConversationEphemeralPeriod::OneHour)
         ->create();
@@ -71,7 +71,7 @@ it('deletes messages past the ephemeral period and keeps the rest', function () 
     assertModelExists($recent);
 });
 
-it('does not delete messages in a confidential conversation without an ephemeral period', function () {
+it('does not delete messages in a confidential conversation without an ephemeral period', function (): void {
     $conversation = Conversation::factory()
         ->confidential(null)
         ->create();
@@ -87,7 +87,7 @@ it('does not delete messages in a confidential conversation without an ephemeral
     assertModelExists($message);
 });
 
-it('does not delete messages in a conversation that is not confidential', function () {
+it('does not delete messages in a conversation that is not confidential', function (): void {
     $conversation = Conversation::factory()->channel()->create([
         'ephemeral_period' => ConversationEphemeralPeriod::OneMinute,
     ]);
@@ -103,7 +103,7 @@ it('does not delete messages in a conversation that is not confidential', functi
     assertModelExists($message);
 });
 
-it('only deletes messages belonging to the expired conversation', function () {
+it('only deletes messages belonging to the expired conversation', function (): void {
     $expiring = Conversation::factory()
         ->confidential(ConversationEphemeralPeriod::OneMinute)
         ->create();
@@ -128,7 +128,7 @@ it('only deletes messages belonging to the expired conversation', function () {
     assertModelExists($kept);
 });
 
-it('queues `MessagesPruned` for a conversation it pruned', function () {
+it('queues `MessagesPruned` for a conversation it pruned', function (): void {
     $conversation = Conversation::factory()
         ->confidential(ConversationEphemeralPeriod::OneHour)
         ->create();
@@ -143,12 +143,12 @@ it('queues `MessagesPruned` for a conversation it pruned', function () {
 
     Queue::assertPushed(
         BroadcastEvent::class,
-        fn (BroadcastEvent $job) => $job->event instanceof MessagesPruned
+        fn (BroadcastEvent $job): bool => $job->event instanceof MessagesPruned
             && $job->event->conversation->is($conversation),
     );
 });
 
-it('does not queue `MessagesPruned` when deleting a message fails', function () {
+it('does not queue `MessagesPruned` when deleting a message fails', function (): void {
     $conversation = Conversation::factory()
         ->confidential(ConversationEphemeralPeriod::OneHour)
         ->create();
@@ -170,7 +170,7 @@ it('does not queue `MessagesPruned` when deleting a message fails', function () 
     Queue::assertNothingPushed();
 });
 
-it('does not broadcast `MessagesPruned` when nothing was pruned', function () {
+it('does not broadcast `MessagesPruned` when nothing was pruned', function (): void {
     $conversation = Conversation::factory()
         ->confidential(ConversationEphemeralPeriod::OneHour)
         ->create();
@@ -186,7 +186,7 @@ it('does not broadcast `MessagesPruned` when nothing was pruned', function () {
     Event::assertNotDispatched(MessagesPruned::class);
 });
 
-it('lowers an unread count that can no longer be reached', function () {
+it('lowers an unread count that can no longer be reached', function (): void {
     $conversation = Conversation::factory()
         ->confidential(ConversationEphemeralPeriod::OneHour)
         ->create();
@@ -210,12 +210,12 @@ it('lowers an unread count that can no longer be reached', function () {
 
     Event::assertDispatched(
         UnreadCountUpdated::class,
-        fn (UnreadCountUpdated $event) => $event->conversationId === $conversation->getKey()
+        fn (UnreadCountUpdated $event): bool => $event->conversationId === $conversation->getKey()
             && $event->unreadCount === 0,
     );
 });
 
-it('leaves an unread count alone when the remaining messages still support it', function () {
+it('leaves an unread count alone when the remaining messages still support it', function (): void {
     $conversation = Conversation::factory()
         ->confidential(ConversationEphemeralPeriod::OneHour)
         ->create();

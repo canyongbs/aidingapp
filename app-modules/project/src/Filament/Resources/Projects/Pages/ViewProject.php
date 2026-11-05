@@ -42,12 +42,14 @@ use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectFilesWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
 use AidingApp\Project\Models\Project;
+use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 
 class ViewProject extends ViewRecord
@@ -60,30 +62,8 @@ class ViewProject extends ViewRecord
 
     protected static ?string $navigationLabel = 'View';
 
-    #[Url()]
-    public ?string $tab = null;
-
-    public function mount(int | string $record): void
-    {
-        parent::mount($record);
-
-        $project = $this->getRecord();
-        assert($project instanceof Project);
-
-        $availableTab = collect(ProjectTab::cases())
-            ->first(fn (ProjectTab $tab): bool => $tab->canView($project));
-
-        if ($availableTab === null) {
-            $this->tab = null;
-
-            return;
-        }
-
-        $requestedTab = is_string($this->tab) ? ProjectTab::tryFrom($this->tab) : null;
-        $effectiveTab = $requestedTab?->canView($project) ? $requestedTab : $availableTab;
-
-        $this->tab = $effectiveTab->value;
-    }
+    #[Url]
+    public ?string $tab = ProjectTab::Access->value;
 
     public function infolist(Schema $schema): Schema
     {
@@ -138,5 +118,15 @@ class ViewProject extends ViewRecord
         }
 
         return $breadcrumbs;
+    }
+
+    #[On('projectUpdated')]
+    public function refreshRecord(): void {}
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            ArchiveAction::make(),
+        ];
     }
 }

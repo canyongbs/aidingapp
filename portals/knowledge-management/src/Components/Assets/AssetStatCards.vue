@@ -32,6 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import { ArchiveBoxIcon, ArrowLeftEndOnRectangleIcon, ArrowUturnLeftIcon } from '@heroicons/vue/24/outline';
     import { computed, defineProps } from 'vue';
     import BaseStatCard from '../ui/BaseStatCard.vue';
 
@@ -48,20 +49,18 @@
             label: 'Total',
             value: props.counts.total,
             tone: 'neutral',
-            iconBg: 'bg-[rgba(var(--primary-50),1)]',
-            iconColor: 'text-[rgba(var(--primary-500),1)]',
-            iconPath:
-                'M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z',
+            iconBg: 'bg-brand-50',
+            iconColor: 'text-brand-500',
+            icon: ArchiveBoxIcon,
         },
         {
             key: 'checked_out',
             label: 'Checked Out',
             value: props.counts.checked_out,
             tone: 'warning',
-            iconBg: 'bg-orange-100',
-            iconColor: 'text-orange-500',
-            iconPath:
-                'M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75',
+            iconBg: 'bg-amber-100',
+            iconColor: 'text-amber-600',
+            icon: ArrowLeftEndOnRectangleIcon,
         },
         {
             key: 'returned',
@@ -70,38 +69,17 @@
             tone: 'success',
             iconBg: 'bg-green-100',
             iconColor: 'text-green-500',
-            iconPath: 'M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3',
+            icon: ArrowUturnLeftIcon,
         },
     ]);
 </script>
 
 <template>
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-2">
-        <BaseStatCard
-            v-for="card in cards"
-            :key="card.key"
-            :label="card.label"
-            :value="card.value"
-            :tone="card.tone"
-            class="transition-colors hover:border-gray-300"
-        >
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <BaseStatCard v-for="card in cards" :key="card.key" :label="card.label" :value="card.value" :tone="card.tone">
             <template #icon>
-                <span
-                    :class="[
-                        'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[var(--rounding-md)]',
-                        card.iconBg,
-                    ]"
-                >
-                    <svg
-                        :class="['h-5 w-5', card.iconColor]"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        aria-hidden="true"
-                    >
-                        <path stroke-linecap="round" stroke-linejoin="round" :d="card.iconPath" />
-                    </svg>
+                <span :class="['flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-md', card.iconBg]">
+                    <component :is="card.icon" :class="['size-5 stroke-2', card.iconColor]" aria-hidden="true" />
                 </span>
             </template>
         </BaseStatCard>

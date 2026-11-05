@@ -43,8 +43,8 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_request_updates', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('service_request_updates', function (Blueprint $table): void {
                 $table->uuidMorphs('created_by');
                 $table->dropColumn('direction');
             });
@@ -53,8 +53,8 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_request_updates', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('service_request_updates', function (Blueprint $table): void {
                 $table->string('direction');
                 $table->dropMorphs('created_by');
             });

@@ -138,7 +138,7 @@ class ContactsTable
             ->recordActions([
                 ViewAction::make()
                     ->authorize('view')
-                    ->url(fn (Contact $record) => ContactResource::getUrl('view', ['record' => $record])),
+                    ->url(fn (Contact $record): string => ContactResource::getUrl('view', ['record' => $record])),
             ]);
     }
 }

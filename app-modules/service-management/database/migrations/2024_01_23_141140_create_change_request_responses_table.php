@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('change_request_responses', function (Blueprint $table) {
+        Schema::create('change_request_responses', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
             $table->foreignUuid('change_request_id')->constrained('change_requests')->cascadeOnDelete();

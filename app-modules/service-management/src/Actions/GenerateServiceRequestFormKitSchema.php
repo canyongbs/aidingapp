@@ -47,7 +47,7 @@ class GenerateServiceRequestFormKitSchema extends GenerateFormKitSchema
     {
         assert($submissible instanceof ServiceRequestForm);
 
-        $priorities = $submissible->type->priorities->map(function (ServiceRequestPriority $priority) {
+        $priorities = $submissible->type->priorities->map(function (ServiceRequestPriority $priority): array {
             return [
                 'label' => $priority->name,
                 'value' => $priority->id,

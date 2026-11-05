@@ -38,7 +38,7 @@ use AidingApp\ServiceManagement\Jobs\AutoSubmitStaleDraftServiceRequests;
 use AidingApp\ServiceManagement\Jobs\DispatchStaleDraftServiceRequestAutoSubmissionForEachTenant;
 use Illuminate\Support\Facades\Queue;
 
-it('dispatches `AutoSubmitStaleDraftServiceRequests` for each eligible tenant', function () {
+it('dispatches `AutoSubmitStaleDraftServiceRequests` for each eligible tenant', function (): void {
     Queue::fake();
 
     (new DispatchStaleDraftServiceRequestAutoSubmissionForEachTenant())->handle();

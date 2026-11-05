@@ -38,7 +38,7 @@ use App\Jobs\DispatchModelPruningForEachTenant;
 use App\Jobs\PruneModels;
 use Illuminate\Support\Facades\Queue;
 
-it('dispatches `PruneModels` for each eligible tenant', function () {
+it('dispatches `PruneModels` for each eligible tenant', function (): void {
     Queue::fake();
 
     (new DispatchModelPruningForEachTenant())->handle();

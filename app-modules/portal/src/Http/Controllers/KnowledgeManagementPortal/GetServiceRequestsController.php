@@ -37,26 +37,19 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Portal\DataTransferObjects\ServiceRequestData;
-use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Http\Controllers\Controller;
-use App\Settings\LicenseSettings;
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class GetServiceRequestsController extends Controller
 {
     public function index(): JsonResponse
     {
-        $license = resolve(LicenseSettings::class);
-        $settings = resolve(PortalSettings::class);
         $contact = auth('contact')->user();
 
-        $enabled = $license->data->addons->serviceManagement
-            && $settings->knowledge_management_portal_service_management
-            && $contact;
-
-        if (! $enabled) {
+        if (! $contact) {
             return response()->json();
         }
 
@@ -66,7 +59,7 @@ class GetServiceRequestsController extends Controller
                     ->with('serviceRequestFormSubmission')
                     ->latest()
                     ->get()
-                    ->map(function (ServiceRequest $serviceRequest) {
+                    ->map(function (ServiceRequest $serviceRequest): ServiceRequestData {
                         return ServiceRequestData::from([
                             'id' => $serviceRequest->getKey(),
                             'number' => $serviceRequest->service_request_number,
@@ -84,17 +77,7 @@ class GetServiceRequestsController extends Controller
 
     public function show(ServiceRequest $serviceRequest): JsonResponse
     {
-        $license = resolve(LicenseSettings::class);
-        $settings = resolve(PortalSettings::class);
-        $contact = auth('contact')->user();
-
-        $enabled = $license->data->addons->serviceManagement
-            && $settings->knowledge_management_portal_service_management
-            && $contact;
-
-        if (! $enabled) {
-            return response()->json();
-        }
+        abort_unless($serviceRequest->respondent()->is(auth('contact')->user()), Response::HTTP_NOT_FOUND);
 
         return response()->json([
             'serviceRequestDetails' => [
@@ -114,7 +97,7 @@ class GetServiceRequestsController extends Controller
                 ->latest('created_at')
                 ->where('internal', false)
                 ->paginate(5)
-                ->through(function (ServiceRequestUpdate $serviceRequestUpdate) {
+                ->through(function (ServiceRequestUpdate $serviceRequestUpdate): array {
                     return [
                         'id' => $serviceRequestUpdate->getKey(),
                         'update' => $serviceRequestUpdate->update,

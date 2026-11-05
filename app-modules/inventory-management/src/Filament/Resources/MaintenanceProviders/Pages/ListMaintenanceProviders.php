@@ -74,7 +74,7 @@ class ListMaintenanceProviders extends ListRecords
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->authorizeIndividualRecords('delete')
-                        ->action(function (Collection $records) {
+                        ->action(function (Collection $records): void {
                             $successfullyDeleted = 0;
                             $unsuccessfullyDeleted = 0;
 

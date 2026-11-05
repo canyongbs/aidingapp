@@ -88,7 +88,7 @@ class CheckServiceRequestConversationEligibilityController extends Controller
 
         return response()->json([
             'eligible' => true,
-            'agent_name' => $agent->name,
+            'agent_name' => $agent->full_name,
         ]);
     }
 }

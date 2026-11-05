@@ -43,7 +43,7 @@ use Illuminate\Support\Facades\Storage;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-beforeEach(function () {
+beforeEach(function (): void {
     Storage::fake('s3');
 
     $portalSettings = app(PortalSettings::class);
@@ -55,7 +55,7 @@ beforeEach(function () {
     $settings->save();
 });
 
-test('a user can download an attachment from a public knowledge base article', function () {
+test('a user can download an attachment from a public knowledge base article', function (): void {
     asSuperAdmin();
 
     $article = KnowledgeBaseItem::factory()->create(['public' => true]);
@@ -69,7 +69,7 @@ test('a user can download an attachment from a public knowledge base article', f
         ->assertRedirect();
 });
 
-test('a user cannot download an attachment from a private knowledge base article', function () {
+test('a user cannot download an attachment from a private knowledge base article', function (): void {
     asSuperAdmin();
 
     $article = KnowledgeBaseItem::factory()->create(['public' => false]);
@@ -83,7 +83,7 @@ test('a user cannot download an attachment from a private knowledge base article
         ->assertForbidden();
 });
 
-test('a user cannot download media that is not in the article_attachments collection', function () {
+test('a user cannot download media that is not in the article_attachments collection', function (): void {
     asSuperAdmin();
 
     $article = KnowledgeBaseItem::factory()->create(['public' => true]);
@@ -97,7 +97,7 @@ test('a user cannot download media that is not in the article_attachments collec
         ->assertForbidden();
 });
 
-test('a user cannot download media that does not belong to a knowledge base article', function () {
+test('a user cannot download media that does not belong to a knowledge base article', function (): void {
     asSuperAdmin();
 
     $article = KnowledgeBaseItem::factory()->create(['public' => true]);
@@ -113,7 +113,7 @@ test('a user cannot download media that does not belong to a knowledge base arti
         ->assertForbidden();
 });
 
-test('the download redirect url contains a temporary url with the file name', function () {
+test('the download redirect url contains a temporary url with the file name', function (): void {
     asSuperAdmin();
 
     $article = KnowledgeBaseItem::factory()->create(['public' => true]);
@@ -130,7 +130,7 @@ test('the download redirect url contains a temporary url with the file name', fu
     expect($redirectUrl)->toContain($media->file_name);
 });
 
-test('a previously public article that becomes private denies download access', function () {
+test('a previously public article that becomes private denies download access', function (): void {
     asSuperAdmin();
 
     $article = KnowledgeBaseItem::factory()->create(['public' => true]);

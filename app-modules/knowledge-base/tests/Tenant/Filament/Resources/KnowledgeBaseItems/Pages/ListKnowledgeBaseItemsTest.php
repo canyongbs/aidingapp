@@ -65,7 +65,7 @@ testResourceRequiresPermissionForAccess(
     method: 'index'
 );
 
-test('ListKnowledgeBaseItems is gated with proper feature access control', function () {
+test('ListKnowledgeBaseItems is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = false;
@@ -91,7 +91,7 @@ test('ListKnowledgeBaseItems is gated with proper feature access control', funct
     )->assertSuccessful();
 });
 
-test('Filter ListKnowledgeBaseItems with `status` filter', function () {
+test('Filter ListKnowledgeBaseItems with `status` filter', function (): void {
     $settings = app(LicenseSettings::class);
 
     // When the feature is enabled
@@ -136,7 +136,7 @@ test('Filter ListKnowledgeBaseItems with `status` filter', function () {
         ->assertCanNotSeeTableRecords($archivedKnowledgeBaseItems);
 });
 
-test('Filter ListKnowledgeBaseItems with `category` filter', function () {
+test('Filter ListKnowledgeBaseItems with `category` filter', function (): void {
     $settings = app(LicenseSettings::class);
 
     // When the feature is enabled
@@ -188,7 +188,7 @@ test('Filter ListKnowledgeBaseItems with `category` filter', function () {
         ->assertCanNotSeeTableRecords($networkTroubleshootingKnowledgeBaseItems);
 });
 
-test('Filter ListKnowledgeBaseItems with `category` filter only matches the selected category, not its subcategories', function () {
+test('Filter ListKnowledgeBaseItems with `category` filter only matches the selected category, not its subcategories', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = true;
@@ -223,7 +223,7 @@ test('Filter ListKnowledgeBaseItems with `category` filter only matches the sele
         ->assertCanNotSeeTableRecords($childCategoryKnowledgeBaseItems);
 });
 
-it('nests child categories beneath their parent in sort order in the category filter tree', function () {
+it('nests child categories beneath their parent in sort order in the category filter tree', function (): void {
     $parentCategory = KnowledgeBaseCategory::factory()->state([
         'name' => 'Hardware',
     ])->create();
@@ -259,7 +259,7 @@ it('nests child categories beneath their parent in sort order in the category fi
         ->and($tree[0]['children'][1]['children'])->toBe([]);
 });
 
-it('promotes categories whose parent is soft-deleted to the root of the category filter tree', function () {
+it('promotes categories whose parent is soft-deleted to the root of the category filter tree', function (): void {
     // An existing active root category. Its integer key can collide with the orphan
     // group's key under PHP array union, which is how the package's query() path
     // silently drops a promoted orphan. Asserting both appear guards against that
@@ -295,7 +295,7 @@ it('promotes categories whose parent is soft-deleted to the root of the category
         ->and($tree[1]['children'])->toBe([]);
 });
 
-test('Filter ListKnowledgeBaseItems with `public` filter', function () {
+test('Filter ListKnowledgeBaseItems with `public` filter', function (): void {
     $settings = app(LicenseSettings::class);
 
     // When the feature is enabled
@@ -337,7 +337,7 @@ test('Filter ListKnowledgeBaseItems with `public` filter', function () {
         ->assertDontSee('Public: No');
 });
 
-test('Filter ListKnowledgeBaseItems with `created after` filter', function () {
+test('Filter ListKnowledgeBaseItems with `created after` filter', function (): void {
     $settings = app(LicenseSettings::class);
 
     // When the feature is enabled
@@ -378,7 +378,7 @@ test('Filter ListKnowledgeBaseItems with `created after` filter', function () {
         ->assertCanNotSeeTableRecords($knowledgeBaseItemsCreatedBefore);
 });
 
-test('Filter ListKnowledgeBaseItems with `updated after` filter', function () {
+test('Filter ListKnowledgeBaseItems with `updated after` filter', function (): void {
     $settings = app(LicenseSettings::class);
 
     // When the feature is enabled
@@ -419,7 +419,7 @@ test('Filter ListKnowledgeBaseItems with `updated after` filter', function () {
         ->assertCanNotSeeTableRecords($knowledgeBaseItemsUpdatedAtBefore);
 });
 
-test('SearchKnowledgeBaseItems by title', function () {
+test('SearchKnowledgeBaseItems by title', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = true;
@@ -446,7 +446,7 @@ test('SearchKnowledgeBaseItems by title', function () {
         ->assertCanNotSeeTableRecords(collect([$nonMatchingItem]));
 });
 
-test('SearchKnowledgeBaseItems by article body text', function () {
+test('SearchKnowledgeBaseItems by article body text', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = true;
@@ -499,7 +499,7 @@ test('SearchKnowledgeBaseItems by article body text', function () {
         ->assertCanNotSeeTableRecords(collect([$nonMatchingItem]));
 });
 
-it('displays the full category path as the title description', function () {
+it('displays the full category path as the title description', function (): void {
     asSuperAdmin();
 
     $networking = KnowledgeBaseCategory::factory()->state(['name' => 'Networking'])->create();
@@ -516,7 +516,7 @@ it('displays the full category path as the title description', function () {
         ->assertTableColumnHasDescription('title', 'Networking > Wifi > Quick Start Guides', $knowledgeBaseItem);
 });
 
-it('displays only the category name as the title description for a top-level category', function () {
+it('displays only the category name as the title description for a top-level category', function (): void {
     asSuperAdmin();
 
     $networking = KnowledgeBaseCategory::factory()->state(['name' => 'Networking'])->create();
@@ -527,7 +527,7 @@ it('displays only the category name as the title description for a top-level cat
         ->assertTableColumnHasDescription('title', 'Networking', $knowledgeBaseItem);
 });
 
-it('does not display a title description when the article has no category', function () {
+it('does not display a title description when the article has no category', function (): void {
     asSuperAdmin();
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->state(['category_id' => null])->create();
@@ -536,7 +536,7 @@ it('does not display a title description when the article has no category', func
         ->assertTableColumnHasDescription('title', null, $knowledgeBaseItem);
 });
 
-test('Health column shows true when knowledge base item has title, article content, manager, and no unresolved concerns', function () {
+test('Health column shows true when knowledge base item has title, article content, manager, and no unresolved concerns', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -561,7 +561,7 @@ test('Health column shows true when knowledge base item has title, article conte
         ->assertTableColumnStateSet('health', true, $knowledgeBaseItem);
 });
 
-test('Health column shows false when knowledge base item has empty title', function () {
+test('Health column shows false when knowledge base item has empty title', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -584,7 +584,7 @@ test('Health column shows false when knowledge base item has empty title', funct
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
 });
 
-test('Health column shows false when knowledge base item has no article content', function () {
+test('Health column shows false when knowledge base item has no article content', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -602,7 +602,7 @@ test('Health column shows false when knowledge base item has no article content'
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
 });
 
-test('Health column shows false when knowledge base item has empty doc article content', function () {
+test('Health column shows false when knowledge base item has empty doc article content', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -625,7 +625,7 @@ test('Health column shows false when knowledge base item has empty doc article c
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
 });
 
-test('Health column shows false when knowledge base item article content has only empty text nodes', function () {
+test('Health column shows false when knowledge base item article content has only empty text nodes', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -648,7 +648,7 @@ test('Health column shows false when knowledge base item article content has onl
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
 });
 
-test('Health column shows false when knowledge base item has no manager assigned', function () {
+test('Health column shows false when knowledge base item has no manager assigned', function (): void {
     asSuperAdmin();
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
@@ -667,7 +667,7 @@ test('Health column shows false when knowledge base item has no manager assigned
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
 });
 
-test('Health column shows false when knowledge base item has unresolved concern with New status', function () {
+test('Health column shows false when knowledge base item has unresolved concern with New status', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -695,7 +695,7 @@ test('Health column shows false when knowledge base item has unresolved concern 
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
 });
 
-test('Health column shows true when knowledge base item has only resolved concerns', function () {
+test('Health column shows true when knowledge base item has only resolved concerns', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -723,7 +723,7 @@ test('Health column shows true when knowledge base item has only resolved concer
         ->assertTableColumnStateSet('health', true, $knowledgeBaseItem);
 });
 
-test('Health column shows true when knowledge base item has only archived concerns', function () {
+test('Health column shows true when knowledge base item has only archived concerns', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -751,7 +751,7 @@ test('Health column shows true when knowledge base item has only archived concer
         ->assertTableColumnStateSet('health', true, $knowledgeBaseItem);
 });
 
-test('Health column shows false when multiple conditions fail simultaneously', function () {
+test('Health column shows false when multiple conditions fail simultaneously', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -772,7 +772,7 @@ test('Health column shows false when multiple conditions fail simultaneously', f
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
 });
 
-test('Health column shows false when broken links are detected', function () {
+test('Health column shows false when broken links are detected', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -797,7 +797,7 @@ test('Health column shows false when broken links are detected', function () {
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
 });
 
-test('Health column shows false when broken images are detected', function () {
+test('Health column shows false when broken images are detected', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -822,7 +822,7 @@ test('Health column shows false when broken images are detected', function () {
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
 });
 
-test('an authorised user can duplicate a knowledge base article', function () {
+test('an authorised user can duplicate a knowledge base article', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->knowledgeManagement = true;
     $settings->save();
@@ -866,7 +866,7 @@ test('an authorised user can duplicate a knowledge base article', function () {
     expect($replicatedKnowledgeBaseItem->tags->pluck('id'))->toEqual($knowledgeBaseItem->tags->pluck('id'));
 });
 
-test('duplicating a knowledge base article is gated by the knowledge_base_item.create ability', function () {
+test('duplicating a knowledge base article is gated by the knowledge_base_item.create ability', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->knowledgeManagement = true;
     $settings->save();
@@ -884,7 +884,7 @@ test('duplicating a knowledge base article is gated by the knowledge_base_item.c
         ->assertTableActionHidden('replicate', $knowledgeBaseItem);
 });
 
-it('only shows the bulk delete action to a user with the knowledge_base_item.delete permission', function () {
+it('only shows the bulk delete action to a user with the knowledge_base_item.delete permission', function (): void {
     KnowledgeBaseItem::factory(15)->create();
 
     $user = User::factory()

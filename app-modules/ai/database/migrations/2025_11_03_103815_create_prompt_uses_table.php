@@ -41,7 +41,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('prompt_uses', function (Blueprint $table) {
+        Schema::create('prompt_uses', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->foreignUuid('prompt_id')->constrained()->cascadeOnDelete();
             $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();

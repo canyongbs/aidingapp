@@ -42,7 +42,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-it('only shows the bulk delete action to a user with the system_user.delete permission', function () {
+it('only shows the bulk delete action to a user with the system_user.delete permission', function (): void {
     SystemUser::factory(15)->create();
 
     $user = User::factory()

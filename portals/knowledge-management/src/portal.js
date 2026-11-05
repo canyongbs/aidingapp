@@ -45,6 +45,7 @@ import { bootPortal } from './Composables/usePortalBoot.js';
 import config from './formkit.config.js';
 import {
     useAdvisoriesData,
+    useAdvisoryData,
     useArticleData,
     useAssetsData,
     useCategoriesData,
@@ -209,6 +210,15 @@ customElements.define(
                         },
                     },
                     {
+                        path: baseUrl + '/advisories/:advisoryId',
+                        name: 'view-advisory',
+                        component: () => import('./Pages/ViewAdvisory.vue'),
+                        meta: {
+                            requiresAuth: true,
+                            loaders: [useAdvisoryData],
+                        },
+                    },
+                    {
                         path: baseUrl + '/assets',
                         name: 'assets',
                         component: () => import('./Pages/Assets.vue'),
@@ -260,8 +270,11 @@ customElements.define(
 
             app.directive('code-blocks', codeBlocksDirective);
 
+            // Share the configured app's plugins with the custom element, but keep the element's own app as the context's
+            // owner: it is the one that is actually mounted, which vue-router relies on after each route renders.
             const inst = getCurrentInstance();
-            Object.assign(inst.appContext, app._context);
+            const elementApp = inst.appContext.app;
+            Object.assign(inst.appContext, app._context, { app: elementApp });
             Object.assign(inst.provides, app._context.provides);
 
             return () => h(App, props);

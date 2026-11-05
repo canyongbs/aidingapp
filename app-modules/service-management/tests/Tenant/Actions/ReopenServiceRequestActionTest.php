@@ -41,7 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use Illuminate\Support\Facades\Exceptions;
 
-it('reopens a closed service request to the first open status ordered by sort', function () {
+it('reopens a closed service request to the first open status ordered by sort', function (): void {
     // A system-protected 'New' status (Open, sort 0) is seeded for every tenant, so use a lower sort to be unambiguously first.
     $expectedOpenStatus = ServiceRequestStatus::factory()->open()->create(['sort' => -1]);
 
@@ -62,7 +62,7 @@ it('reopens a closed service request to the first open status ordered by sort', 
         ->and($reopened->status->classification)->toBe(SystemServiceRequestClassification::Open);
 });
 
-it('does not change the status when the service request is not closed', function () {
+it('does not change the status when the service request is not closed', function (): void {
     $inProgressStatus = ServiceRequestStatus::factory()->inProgress()->create();
 
     $serviceRequest = ServiceRequest::factory()->for($inProgressStatus, 'status')->create();
@@ -72,7 +72,7 @@ it('does not change the status when the service request is not closed', function
     expect($serviceRequest->fresh()->status_id)->toBe($inProgressStatus->getKey());
 });
 
-it('reports an error and leaves the status unchanged when no open status exists', function () {
+it('reports an error and leaves the status unchanged when no open status exists', function (): void {
     Exceptions::fake();
 
     // The seeded "New" status is system protected, so bypass row-protection triggers to clear all statuses.
@@ -96,8 +96,8 @@ it('reports an error and leaves the status unchanged when no open status exists'
     Exceptions::assertReported(NoOpenServiceRequestStatusFoundException::class);
 });
 
-describe('archiving', function () {
-    it('does not reopen into an archived open status', function () {
+describe('archiving', function (): void {
+    it('does not reopen into an archived open status', function (): void {
         $archivedOpenStatus = ServiceRequestStatus::factory()->archived()->create([
             'classification' => SystemServiceRequestClassification::Open,
             'sort' => -2,
@@ -115,7 +115,7 @@ describe('archiving', function () {
             ->and($serviceRequest->fresh()->status_id)->not->toBe($archivedOpenStatus->getKey());
     });
 
-    it('reports an error and leaves the status unchanged when every open status is archived', function () {
+    it('reports an error and leaves the status unchanged when every open status is archived', function (): void {
         Exceptions::fake();
 
         // The seeded "New" status is system protected, so bypass row-protection triggers to clear all statuses.

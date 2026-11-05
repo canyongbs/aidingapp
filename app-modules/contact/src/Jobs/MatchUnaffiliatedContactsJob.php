@@ -85,6 +85,7 @@ class MatchUnaffiliatedContactsJob implements ShouldQueue
         }
 
         Contact::query()
+            ->withoutArchived()
             ->select(['id', 'email', 'organization_id'])
             ->whereNull('organization_id')
             ->whereNotNull('email')

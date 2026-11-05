@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('engagements', function (Blueprint $table) {
+        Schema::table('engagements', function (Blueprint $table): void {
             $table->dropColumn('scheduled');
             $table->dropColumn('deliver_at');
             $table->string('channel');
@@ -52,7 +52,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('engagements', function (Blueprint $table) {
+        Schema::table('engagements', function (Blueprint $table): void {
             $table->boolean('scheduled')->default(false);
             $table->dateTime('deliver_at');
             $table->dropColumn('channel');

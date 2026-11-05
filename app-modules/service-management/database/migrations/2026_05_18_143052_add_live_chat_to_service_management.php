@@ -42,13 +42,13 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_request_types', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('service_request_types', function (Blueprint $table): void {
                 $table->boolean('is_live_chat_enabled')->default(true);
                 $table->unsignedInteger('max_simultaneous_chats')->nullable();
             });
 
-            Schema::create('service_request_conversations', function (Blueprint $table) {
+            Schema::create('service_request_conversations', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
                 $table->foreignUuid('service_request_id')->constrained('service_requests')->cascadeOnDelete();
                 $table->foreignUuid('contact_id')->constrained('contacts')->cascadeOnDelete();
@@ -65,10 +65,10 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             Schema::dropIfExists('service_request_conversations');
 
-            Schema::table('service_request_types', function (Blueprint $table) {
+            Schema::table('service_request_types', function (Blueprint $table): void {
                 $table->dropColumn('is_live_chat_enabled');
                 $table->dropColumn('max_simultaneous_chats');
             });

@@ -46,7 +46,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->contractManagement = false;
     $settings->save();
@@ -70,7 +70,7 @@ it('is gated with proper access control', function () {
     get(ContractManagement::getUrl())->assertSuccessful();
 });
 
-it('grants access to a user belonging to a department that has been granted access', function () {
+it('grants access to a user belonging to a department that has been granted access', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->contractManagement = true;
     $settings->save();

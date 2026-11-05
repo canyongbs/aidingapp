@@ -44,7 +44,7 @@ return new class () extends Migration {
         DB::table('roles')
             ->where('name', '!=', 'authorization.super_admin')
             ->orderBy('id')
-            ->chunk(100, function (Collection $roles) {
+            ->chunk(100, function (Collection $roles): void {
                 foreach ($roles as $role) {
                     DB::table('model_has_roles')->where('role_id', $role->id)->delete();
                     DB::table('role_has_permissions')->where('role_id', $role->id)->delete();

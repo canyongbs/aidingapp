@@ -61,7 +61,7 @@ $serviceRequestFormStepContent = function (string $label): array {
     ];
 };
 
-it('keeps the default fields and custom content as separate steps by default', function () use ($serviceRequestFormStepContent) {
+it('keeps the default fields and custom content as separate steps by default', function () use ($serviceRequestFormStepContent): void {
     $type = ServiceRequestType::factory()->create();
 
     $form = ServiceRequestForm::factory()
@@ -84,7 +84,7 @@ it('keeps the default fields and custom content as separate steps by default', f
         ->and($result->steps->last()->label)->toBe('Details');
 });
 
-it('does not combine the first step when the caller does not opt in, even if the flag is set', function () use ($serviceRequestFormStepContent) {
+it('does not combine the first step when the caller does not opt in, even if the flag is set', function () use ($serviceRequestFormStepContent): void {
     $type = ServiceRequestType::factory()->create();
 
     $form = ServiceRequestForm::factory()
@@ -107,7 +107,7 @@ it('does not combine the first step when the caller does not opt in, even if the
         ->and($result->steps->last()->label)->toBe('Details');
 });
 
-it('does not combine the first step when the form has not opted in, even if the caller allows it', function () use ($serviceRequestFormStepContent) {
+it('does not combine the first step when the form has not opted in, even if the caller allows it', function () use ($serviceRequestFormStepContent): void {
     $type = ServiceRequestType::factory()->create();
 
     $form = ServiceRequestForm::factory()
@@ -130,7 +130,7 @@ it('does not combine the first step when the form has not opted in, even if the 
         ->and($result->steps->last()->label)->toBe('Details');
 });
 
-it('combines the single custom step into the Main step when both the caller and form opt in', function () use ($serviceRequestFormStepContent) {
+it('combines the single custom step into the Main step when both the caller and form opt in', function () use ($serviceRequestFormStepContent): void {
     $type = ServiceRequestType::factory()->create();
 
     $form = ServiceRequestForm::factory()
@@ -153,7 +153,7 @@ it('combines the single custom step into the Main step when both the caller and 
         ->and($mainContent[4]['attrs']['config']['label'])->toBe('Preferred name');
 });
 
-it('combines only the first step of a multi-step custom form into Main, keeping remaining steps separate', function () use ($serviceRequestFormStepContent) {
+it('combines only the first step of a multi-step custom form into Main, keeping remaining steps separate', function () use ($serviceRequestFormStepContent): void {
     $type = ServiceRequestType::factory()->create();
 
     $form = ServiceRequestForm::factory()
@@ -180,4 +180,51 @@ it('combines only the first step of a multi-step custom form into Main, keeping 
         ->and($result->steps->first()->label)->toBe('Main')
         ->and($result->steps->first()->content['content'])->toHaveCount(5)
         ->and($result->steps->last()->label)->toBe('Step Two');
+});
+
+it('lends the combined step title and description to the Main step while keeping its `Main` label', function () use ($serviceRequestFormStepContent): void {
+    $type = ServiceRequestType::factory()->create();
+
+    $form = ServiceRequestForm::factory()
+        ->for($type, 'type')
+        ->create(['is_first_step_combined' => true]);
+
+    $form->steps()->create([
+        'label' => 'Personal details',
+        'description' => 'Tell us about yourself.',
+        'sort' => 0,
+        'content' => $serviceRequestFormStepContent('Preferred name'),
+    ]);
+
+    $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
+
+    $result = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection, shouldCombineFirstStepIfEnabled: true);
+
+    expect($result->steps->first()->label)->toBe('Main')
+        ->and($result->steps->first()->description)->toBe('Tell us about yourself.')
+        ->and($result->steps->first()->getAttribute('display_label'))->toBe('Personal details');
+});
+
+it('titles the Main step "Request Details" without a description when no step is combined into it', function () use ($serviceRequestFormStepContent): void {
+    $type = ServiceRequestType::factory()->create();
+
+    $form = ServiceRequestForm::factory()
+        ->for($type, 'type')
+        ->create(['is_first_step_combined' => false]);
+
+    $form->steps()->create([
+        'label' => 'Personal details',
+        'description' => 'Tell us about yourself.',
+        'sort' => 0,
+        'content' => $serviceRequestFormStepContent('Preferred name'),
+    ]);
+
+    $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
+
+    $result = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection, shouldCombineFirstStepIfEnabled: true);
+
+    expect($result->steps->first()->label)->toBe('Main')
+        ->and($result->steps->first()->description)->toBeNull()
+        ->and($result->steps->first()->getAttribute('display_label'))->toBe('Request Details')
+        ->and($result->steps->last()->description)->toBe('Tell us about yourself.');
 });

@@ -51,6 +51,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Enums\Feature;
 use App\Enums\ReportLibraryNavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
+use App\Models\Scopes\OrderByFullName;
 use App\Models\User;
 use BackedEnum;
 use Filament\Forms\Components\DatePicker;
@@ -112,8 +113,8 @@ class Sla extends Dashboard
                                 $set('startDate', now()->subMonths(12)->startOfDay()->toDateTimeString());
                             }
                         })
-                        ->maxDate(fn (Get $get) => $get('endDate') ?: now())
-                        ->afterStateUpdated(function (callable $set, mixed $state, Get $get) {
+                        ->maxDate(fn (Get $get): mixed => $get('endDate') ?: now())
+                        ->afterStateUpdated(function (callable $set, mixed $state, Get $get): void {
                             if (blank($get('endDate')) && filled($state)) {
                                 $set('endDate', $state);
                             }
@@ -126,9 +127,9 @@ class Sla extends Dashboard
                                 $set('endDate', now()->endOfDay()->toDateTimeString());
                             }
                         })
-                        ->minDate(fn (Get $get) => $get('startDate') ?: now())
+                        ->minDate(fn (Get $get): mixed => $get('startDate') ?: now())
                         ->maxDate(now())
-                        ->afterStateUpdated(function (callable $set, mixed $state, Get $get) {
+                        ->afterStateUpdated(function (callable $set, mixed $state, Get $get): void {
                             if (blank($get('startDate')) && filled($state)) {
                                 $set('startDate', $state);
                             }
@@ -158,8 +159,9 @@ class Sla extends Dashboard
             ->whereIn('id', ServiceRequestAssignment::query()
                 ->where('status', ServiceRequestAssignmentStatus::Active)
                 ->select('user_id'))
-            ->orderBy('name')
-            ->pluck('name', 'id')
+            ->tap(new OrderByFullName())
+            ->get()
+            ->pluck('full_name', 'id')
             ->all();
     }
 

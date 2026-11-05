@@ -45,7 +45,7 @@ use function Pest\Laravel\assertDatabaseHas;
 
 beforeEach(fn () => Event::fake());
 
-it('allows user to join a public channel', function () {
+it('allows user to join a public channel', function (): void {
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => false,
     ]);
@@ -63,7 +63,7 @@ it('allows user to join a public channel', function () {
     expect($participant->conversation_id)->toBe($conversation->getKey())->and($participant->participant_id)->toBe($user->getKey())->and($participant->is_manager)->toBeFalse();
 });
 
-it('throws exception when joining a private channel', function () {
+it('throws exception when joining a private channel', function (): void {
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => true,
     ]);
@@ -75,7 +75,7 @@ it('throws exception when joining a private channel', function () {
     );
 })->throws(InvalidArgumentException::class, 'Cannot join private channels.');
 
-it('throws exception when joining a direct message conversation', function () {
+it('throws exception when joining a direct message conversation', function (): void {
     $conversation = Conversation::factory()->direct()->create();
     $user = User::factory()->create();
 
@@ -85,7 +85,7 @@ it('throws exception when joining a direct message conversation', function () {
     );
 })->throws(InvalidArgumentException::class, 'Can only join channel conversations.');
 
-it('throws exception when user is already a member', function () {
+it('throws exception when user is already a member', function (): void {
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => false,
     ]);
@@ -102,7 +102,7 @@ it('throws exception when user is already a member', function () {
     );
 })->throws(InvalidArgumentException::class, 'User is already a member of this channel.');
 
-it('adds user as non-manager when joining', function () {
+it('adds user as non-manager when joining', function (): void {
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => false,
     ]);

@@ -65,16 +65,16 @@ $openServiceRequest = function (): ServiceRequest {
         ->create();
 };
 
-beforeEach(function () {
+beforeEach(function (): void {
     asSuperAdmin();
 });
 
-it('lists updates with their authors, visibility, and attachments', function () {
+it('lists updates with their authors, visibility, and attachments', function (): void {
     Storage::fake('s3');
 
     $serviceRequest = ServiceRequest::factory()->create();
     $customer = Contact::factory()->create(['full_name' => 'Bethany Emory']);
-    $agent = User::factory()->create(['name' => 'Cameron Zimny']);
+    $agent = User::factory()->create(['first_name' => 'Cameron', 'last_name' => 'Zimny']);
 
     $customerUpdate = ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create([
         'update' => 'I am still unable to access the service.',
@@ -116,7 +116,7 @@ it('lists updates with their authors, visibility, and attachments', function () 
         ->toBe(Vite::asset('resources/images/canyon-ai-headshot.jpg'));
 });
 
-it('shows the latest updates first and loads earlier updates on request', function () {
+it('shows the latest updates first and loads earlier updates on request', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
     $contact = Contact::factory()->create();
 
@@ -139,7 +139,7 @@ it('shows the latest updates first and loads earlier updates on request', functi
         ->assertDontSeeText('Show earlier updates');
 });
 
-it('polls for updates added after the feed loads', function () {
+it('polls for updates added after the feed loads', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $component = Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
@@ -155,7 +155,7 @@ it('polls for updates added after the feed loads', function () {
         ->assertSeeText('A reply from the portal.');
 });
 
-it('displays update times in the user timezone', function () {
+it('displays update times in the user timezone', function (): void {
     $user = User::factory()->create(['timezone' => 'America/Denver']);
     asSuperAdmin($user);
 
@@ -171,7 +171,7 @@ it('displays update times in the user timezone', function () {
         ->assertSeeHtml('title="Oct 5, 2026 11:07 am (MDT)"');
 });
 
-it('displays update times in the system timezone when the user has none', function () {
+it('displays update times in the system timezone when the user has none', function (): void {
     $user = User::factory()->create();
     $user->setAttribute('timezone', null);
     asSuperAdmin($user);
@@ -191,7 +191,7 @@ it('displays update times in the system timezone when the user has none', functi
         ->assertSeeText('2:07 am');
 });
 
-it('can create an update', function (bool $isInternal) use ($openServiceRequest) {
+it('can create an update', function (bool $isInternal) use ($openServiceRequest): void {
     $serviceRequest = $openServiceRequest();
     $status = ServiceRequestStatus::factory()->create(['classification' => SystemServiceRequestClassification::InProgress]);
 
@@ -206,6 +206,7 @@ it('can create an update', function (bool $isInternal) use ($openServiceRequest)
         ->call('create')
         ->assertHasNoFormErrors()
         ->assertNotified()
+        ->assertDispatched('service-request-status-changed')
         ->assertSet('data.update', null)
         ->assertSeeText('We are looking into this.');
 
@@ -223,7 +224,82 @@ it('can create an update', function (bool $isInternal) use ($openServiceRequest)
     'internal' => true,
 ]);
 
-it('attaches uploaded files to the update', function () use ($openServiceRequest) {
+it('does not signal a status change when the status is left as is', function () use ($openServiceRequest): void {
+    $serviceRequest = $openServiceRequest();
+
+    Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+        ->assertSet('data.status_id', $serviceRequest->status_id)
+        ->fillForm(['update' => 'No status change here.'])
+        ->call('create')
+        ->assertHasNoFormErrors()
+        ->assertNotDispatched('service-request-status-changed');
+
+    assertDatabaseHas(ServiceRequestUpdate::class, ['update' => 'No status change here.']);
+});
+
+it('labels the send action by the update visibility', function (bool $isInternal, string $label, string $color) use ($openServiceRequest): void {
+    Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $openServiceRequest()])
+        ->fillForm(['internal' => (int) $isInternal])
+        ->assertActionHasLabel(TestAction::make('sendUpdate')->schemaComponent('newUpdate'), $label)
+        ->assertActionHasColor(TestAction::make('sendUpdate')->schemaComponent('newUpdate'), $color);
+})->with([
+    'visible to customer' => [false, 'Send update', 'primary'],
+    'internal' => [true, 'Add internal note', 'warning'],
+]);
+
+it('does not revert a status changed elsewhere since the composer loaded', function () use ($openServiceRequest): void {
+    $serviceRequest = $openServiceRequest();
+    $changedStatus = ServiceRequestStatus::factory()->create(['classification' => SystemServiceRequestClassification::InProgress]);
+
+    $component = Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest]);
+
+    $serviceRequest->update(['status_id' => $changedStatus->getKey()]);
+
+    $component
+        ->fillForm(['update' => 'Replying without touching the status.'])
+        ->call('create')
+        ->assertHasNoFormErrors()
+        ->assertNotDispatched('service-request-status-changed');
+
+    expect($serviceRequest->refresh()->status_id)->toBe($changedStatus->getKey());
+});
+
+it('follows a status changed elsewhere while the composer status is untouched', function () use ($openServiceRequest): void {
+    $serviceRequest = $openServiceRequest();
+    $changedStatus = ServiceRequestStatus::factory()->create(['classification' => SystemServiceRequestClassification::InProgress]);
+
+    $component = Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+        ->assertSet('data.status_id', $serviceRequest->status_id);
+
+    $serviceRequest->update(['status_id' => $changedStatus->getKey()]);
+
+    $component
+        ->call('$refresh')
+        ->assertSet('data.status_id', $changedStatus->getKey());
+});
+
+it('keeps the status the user picked when the status is changed elsewhere', function () use ($openServiceRequest): void {
+    $serviceRequest = $openServiceRequest();
+    $pickedStatus = ServiceRequestStatus::factory()->create(['classification' => SystemServiceRequestClassification::InProgress]);
+    $changedStatus = ServiceRequestStatus::factory()->create(['classification' => SystemServiceRequestClassification::InProgress]);
+
+    $component = Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+        ->fillForm(['status_id' => $pickedStatus->getKey()]);
+
+    $serviceRequest->update(['status_id' => $changedStatus->getKey()]);
+
+    $component
+        ->call('$refresh')
+        ->assertSet('data.status_id', $pickedStatus->getKey())
+        ->fillForm(['update' => 'Applying the status I picked.'])
+        ->call('create')
+        ->assertHasNoFormErrors()
+        ->assertDispatched('service-request-status-changed');
+
+    expect($serviceRequest->refresh()->status_id)->toBe($pickedStatus->getKey());
+});
+
+it('attaches uploaded files to the update', function () use ($openServiceRequest): void {
     Storage::fake('s3');
 
     $serviceRequest = $openServiceRequest();
@@ -241,10 +317,10 @@ it('attaches uploaded files to the update', function () use ($openServiceRequest
     expect($update->getMedia('uploads')->pluck('name')->all())->toBe(['browser-console-log']);
 });
 
-it('drafts an update with AI', function () {
+it('drafts an update with AI', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
-    mock(CompletePrompt::class, function (MockInterface $mock) {
+    mock(CompletePrompt::class, function (MockInterface $mock): void {
         $mock->shouldReceive('execute')->once()->andReturn('Drafted update content.');
     });
 
@@ -256,7 +332,7 @@ it('drafts an update with AI', function () {
         ->assertSet('data.update', 'Drafted update content.');
 });
 
-it('validates the inputs', function (array $data, array $errors) use ($openServiceRequest) {
+it('validates the inputs', function (array $data, array $errors) use ($openServiceRequest): void {
     $serviceRequest = $openServiceRequest();
 
     Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
@@ -267,7 +343,7 @@ it('validates the inputs', function (array $data, array $errors) use ($openServi
     'update required' => [['update' => null], ['update' => 'required']],
 ]);
 
-it('hides the composer when the service request is closed', function () {
+it('hides the composer when the service request is closed', function (): void {
     $serviceRequest = ServiceRequest::factory()
         ->for(ServiceRequestStatus::factory()->state(['classification' => SystemServiceRequestClassification::Closed]), 'status')
         ->create();
@@ -282,8 +358,8 @@ it('hides the composer when the service request is closed', function () {
     assertDatabaseMissing(ServiceRequestUpdate::class, ['update' => 'Too late.']);
 });
 
-describe('deletion', function () {
-    it('can delete an update', function () {
+describe('deletion', function (): void {
+    it('can delete an update', function (): void {
         $update = ServiceRequestUpdate::factory()->create();
 
         Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $update->serviceRequest])
@@ -292,7 +368,7 @@ describe('deletion', function () {
         assertSoftDeleted($update);
     });
 
-    it('does not delete an update from another service request', function () {
+    it('does not delete an update from another service request', function (): void {
         $serviceRequest = ServiceRequest::factory()->create();
         $otherUpdate = ServiceRequestUpdate::factory()->create();
 
@@ -303,15 +379,15 @@ describe('deletion', function () {
     });
 });
 
-describe('authorization', function () use ($openServiceRequest) {
-    it('denies access without the `service_request_update.view-any` permission', function () {
+describe('authorization', function () use ($openServiceRequest): void {
+    it('denies access without the `service_request_update.view-any` permission', function (): void {
         actingAs(User::factory()->create());
 
         Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => ServiceRequest::factory()->create()])
             ->assertForbidden();
     });
 
-    it('does not create an update without the `service_request_update.create` permission', function () use ($openServiceRequest) {
+    it('does not create an update without the `service_request_update.create` permission', function () use ($openServiceRequest): void {
         $user = User::factory()->create();
         $user->givePermissionTo('service_request_update.view-any');
         actingAs($user);
@@ -327,7 +403,7 @@ describe('authorization', function () use ($openServiceRequest) {
         assertDatabaseMissing(ServiceRequestUpdate::class, ['update' => 'Unauthorized update.']);
     });
 
-    it('does not change the status without permission to update the service request', function () use ($openServiceRequest) {
+    it('does not change the status without permission to update the service request', function () use ($openServiceRequest): void {
         $user = User::factory()->create();
         $user->givePermissionTo(['service_request_update.view-any', 'service_request_update.create']);
         actingAs($user);
@@ -343,14 +419,15 @@ describe('authorization', function () use ($openServiceRequest) {
                 'status_id' => $status->getKey(),
             ])
             ->call('create')
-            ->assertHasNoFormErrors();
+            ->assertHasNoFormErrors()
+            ->assertNotDispatched('service-request-status-changed');
 
         assertDatabaseHas(ServiceRequestUpdate::class, ['update' => 'Update from a non-manager.']);
 
         expect($serviceRequest->refresh()->status_id)->toBe($originalStatusId);
     });
 
-    it('hides the `deleteUpdate` action without the `service_request_update.*.delete` permission', function () {
+    it('hides the `deleteUpdate` action without the `service_request_update.*.delete` permission', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('service_request_update.view-any');
         actingAs($user);

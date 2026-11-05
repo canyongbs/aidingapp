@@ -47,12 +47,12 @@ use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\postJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     Queue::fake();
     config()->set('audit.enabled', false);
 });
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $payload = [
         'first_name' => 'Test',
         'last_name' => 'User',
@@ -75,7 +75,7 @@ it('is gated with proper access control', function () {
         ->assertCreated();
 });
 
-it('creates a user and returns a 201 response with required fields', function () {
+it('creates a user and returns a 201 response with required fields', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
     Sanctum::actingAs($user, ['api']);
@@ -99,7 +99,7 @@ it('creates a user and returns a 201 response with required fields', function ()
     expect(User::where('email', 'jane.doe@example.com')->exists())->toBeTrue();
 });
 
-it('creates a user with all optional fields', function () {
+it('creates a user with all optional fields', function (): void {
     $department = Department::factory()->create(['name' => 'Engineering']);
     $role = Role::factory()->create(['name' => 'custom-role', 'guard_name' => 'web']);
 
@@ -134,7 +134,7 @@ it('creates a user with all optional fields', function () {
     expect($created->hasRole($role))->toBeTrue();
 });
 
-it('creates a user with all newly added demographic and address fields', function () {
+it('creates a user with all newly added demographic and address fields', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
     Sanctum::actingAs($user, ['api']);
@@ -204,7 +204,7 @@ it('creates a user with all newly added demographic and address fields', functio
     expect($created->country)->toBe('United States');
 });
 
-it('sends SetPasswordNotification only to non-external users', function (bool $isExternal, bool $shouldSend) {
+it('sends SetPasswordNotification only to non-external users', function (bool $isExternal, bool $shouldSend): void {
     Notification::fake();
 
     $user = SystemUser::factory()->create();
@@ -230,7 +230,7 @@ it('sends SetPasswordNotification only to non-external users', function (bool $i
     'external user does not receive notification' => [true, false],
 ]);
 
-it('resolves department case-insensitively', function () {
+it('resolves department case-insensitively', function (): void {
     $department = Department::factory()->create(['name' => 'Human Resources']);
 
     $user = SystemUser::factory()->create();
@@ -249,7 +249,7 @@ it('resolves department case-insensitively', function () {
     expect($response['data']['department']['id'])->toBe($department->id);
 });
 
-it('resolves department case-insensitively for multibyte characters', function () {
+it('resolves department case-insensitively for multibyte characters', function (): void {
     $department = Department::factory()->create(['name' => 'Équipe']);
 
     $user = SystemUser::factory()->create();
@@ -268,7 +268,7 @@ it('resolves department case-insensitively for multibyte characters', function (
     expect($response['data']['department']['id'])->toBe($department->id);
 });
 
-it('resolves role names case-insensitively', function () {
+it('resolves role names case-insensitively', function (): void {
     $role = Role::factory()->create(['name' => 'Support Agent', 'guard_name' => 'web']);
 
     $user = SystemUser::factory()->create();
@@ -289,7 +289,7 @@ it('resolves role names case-insensitively', function () {
     expect($created->hasRole($role))->toBeTrue();
 });
 
-it('rejects a duplicate email address', function () {
+it('rejects a duplicate email address', function (): void {
     User::factory()->create(['email' => 'taken@example.com']);
 
     $user = SystemUser::factory()->create();
@@ -305,7 +305,7 @@ it('rejects a duplicate email address', function () {
         ->assertJsonValidationErrors(['email']);
 });
 
-it('rejects the email of a soft-deleted user', function () {
+it('rejects the email of a soft-deleted user', function (): void {
     $deleted = User::factory()->create(['email' => 'archived@example.com']);
     $deleted->delete();
 
@@ -322,7 +322,7 @@ it('rejects the email of a soft-deleted user', function () {
         ->assertJsonValidationErrors(['email']);
 });
 
-it('returns 422 when department name does not exist', function () {
+it('returns 422 when department name does not exist', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
     Sanctum::actingAs($user, ['api']);
@@ -337,7 +337,7 @@ it('returns 422 when department name does not exist', function () {
         ->assertJsonValidationErrors(['department']);
 });
 
-it('returns 422 when a role name does not exist', function () {
+it('returns 422 when a role name does not exist', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
     Sanctum::actingAs($user, ['api']);
@@ -352,7 +352,7 @@ it('returns 422 when a role name does not exist', function () {
         ->assertJsonValidationErrors(['roles.0']);
 });
 
-it('rejects admin roles', function (string $roleToCreate, string $roleNameToSend) {
+it('rejects admin roles', function (string $roleToCreate, string $roleNameToSend): void {
     Role::firstOrCreate(['name' => $roleToCreate, 'guard_name' => 'web']);
 
     $user = SystemUser::factory()->create();
@@ -374,7 +374,7 @@ it('rejects admin roles', function (string $roleToCreate, string $roleNameToSend
     'SaaS Global Admin (lowercase)' => [Authenticatable::SUPER_ADMIN_ROLE, 'saas global admin'],
 ]);
 
-it('requires first_name, last_name, email, and is_external fields', function () {
+it('requires first_name, last_name, email, and is_external fields', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
     Sanctum::actingAs($user, ['api']);
@@ -384,7 +384,7 @@ it('requires first_name, last_name, email, and is_external fields', function () 
         ->assertJsonValidationErrors(['first_name', 'last_name', 'email', 'is_external']);
 });
 
-it('rejects an invalid email format', function () {
+it('rejects an invalid email format', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
     Sanctum::actingAs($user, ['api']);
@@ -398,7 +398,7 @@ it('rejects an invalid email format', function () {
         ->assertJsonValidationErrors(['email']);
 });
 
-it('does not set a password on the created user', function () {
+it('does not set a password on the created user', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
     Sanctum::actingAs($user, ['api']);

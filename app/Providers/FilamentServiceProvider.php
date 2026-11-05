@@ -63,6 +63,8 @@ use Filament\Schemas\Schema;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentView;
+use Filament\Tables\Columns\ColorColumn;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -208,7 +210,7 @@ class FilamentServiceProvider extends ServiceProvider
                 ->defaultTimeDisplayFormat('g:i a')
                 ->paginationPageOptions([5, 10, 20]);
         });
-        Schema::configureUsing(fn (Schema $infolist) => $infolist
+        Schema::configureUsing(fn (Schema $infolist): Schema => $infolist
             ->defaultDateTimeDisplayFormat($defaultDateTimeDisplayFormat)
             ->defaultTimeDisplayFormat('g:i a'));
 
@@ -222,15 +224,15 @@ class FilamentServiceProvider extends ServiceProvider
             fn (): HtmlString => new HtmlString(Blade::render("@vite('resources/js/panel.js')")),
         );
 
-        Select::configureUsing(function (Select $component) {
+        Select::configureUsing(function (Select $component): void {
             $component->native(false);
         });
 
-        SelectFilter::configureUsing(function (SelectFilter $component) {
+        SelectFilter::configureUsing(function (SelectFilter $component): void {
             $component->native(false);
         });
 
-        DateTimePicker::configureUsing(function (DateTimePicker $component) {
+        DateTimePicker::configureUsing(function (DateTimePicker $component): void {
             if ($component instanceof DatePicker) {
                 return;
             }
@@ -248,11 +250,12 @@ class FilamentServiceProvider extends ServiceProvider
                 ->hintIconTooltip("This time is set in {$timezoneLabel}.");
         });
 
-        TextColumn::configureUsing(function (TextColumn $column) {
+        TextColumn::configureUsing(function (TextColumn $column): void {
             $timezone = app(DisplaySettings::class)->getTimezone();
             $timezoneLabel = app(DisplaySettings::class)->getTimezoneLabel();
 
             $column
+                ->placeholder('N/A')
                 ->timezone(function (TextColumn $column) use ($timezone): ?string {
                     if ($column->isDateTime()) {
                         return $timezone;
@@ -272,11 +275,12 @@ class FilamentServiceProvider extends ServiceProvider
                 });
         });
 
-        TextEntry::configureUsing(function (TextEntry $entry) {
+        TextEntry::configureUsing(function (TextEntry $entry): void {
             $timezone = app(DisplaySettings::class)->getTimezone();
             $timezoneLabel = app(DisplaySettings::class)->getTimezoneLabel();
 
             $entry
+                ->placeholder('N/A')
                 ->timezone(function (TextEntry $column) use ($timezone): ?string {
                     if ($column->isDateTime()) {
                         return $timezone;
@@ -303,6 +307,14 @@ class FilamentServiceProvider extends ServiceProvider
                 });
         });
 
+        ColorColumn::configureUsing(function (ColorColumn $column): void {
+            $column->placeholder('N/A');
+        });
+
+        IconColumn::configureUsing(function (IconColumn $column): void {
+            $column->placeholder('N/A');
+        });
+
         PhoneInput::configureUsing(function (PhoneInput $phoneInput): void {
             $phoneInput->defaultCountry('US')
                 ->initialCountry('US')
@@ -317,13 +329,13 @@ class FilamentServiceProvider extends ServiceProvider
             $phoneEntry->displayFormat(PhoneInputNumberType::INTERNATIONAL);
         });
 
-        Fieldset::configureUsing(fn (Fieldset $fieldset) => $fieldset
+        Fieldset::configureUsing(fn (Fieldset $fieldset): Fieldset => $fieldset
             ->columnSpanFull());
 
-        Grid::configureUsing(fn (Grid $grid) => $grid
+        Grid::configureUsing(fn (Grid $grid): Grid => $grid
             ->columnSpanFull());
 
-        Section::configureUsing(fn (Section $section) => $section
+        Section::configureUsing(fn (Section $section): Section => $section
             ->columnSpanFull());
 
         Textarea::configureUsing(function (Textarea $textarea): void {

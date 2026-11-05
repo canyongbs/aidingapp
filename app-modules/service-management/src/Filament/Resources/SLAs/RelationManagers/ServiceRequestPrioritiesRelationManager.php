@@ -79,7 +79,7 @@ class ServiceRequestPrioritiesRelationManager extends RelationManager
                 AssociateAction::make()
                     ->slideOver()
                     ->multiple()
-                    ->schema(fn (AssociateAction $action) => [
+                    ->schema(fn (AssociateAction $action): array => [
                         TableSelect::make('recordId')
                             ->hiddenLabel()
                             ->ignoreRelatedRecords()

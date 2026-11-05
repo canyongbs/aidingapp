@@ -43,9 +43,9 @@ use AidingApp\InventoryManagement\Observers\AssetCheckInObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Timeline\Timelines\AssetCheckInTimeline;
-use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,13 +56,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperAssetCheckIn
  */
 #[ObservedBy([AssetCheckInObserver::class])]
-class AssetCheckIn extends BaseModel implements Auditable, ProvidesATimeline
+class AssetCheckIn extends Model implements Auditable, ProvidesATimeline
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
     use AuditableTrait;
     use SoftDeletes;
 
@@ -146,7 +149,7 @@ class AssetCheckIn extends BaseModel implements Auditable, ProvidesATimeline
     protected function formattedCheckedInAt(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value, array $attributes) => Carbon::parse($attributes['checked_in_at'])->format('M j, Y g:i a (T)'),
+            get: fn (?string $value, array $attributes): string => Carbon::parse($attributes['checked_in_at'])->format('M j, Y g:i a (T)'),
         );
     }
 }

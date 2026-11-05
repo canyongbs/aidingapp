@@ -78,9 +78,9 @@ class EngagementTimeline extends CustomTimeline
     {
         return ViewAction::make()
             ->schema([
-                TextEntry::make('user.name')
+                TextEntry::make('user.full_name')
                     ->label('Created By')
-                    ->state(fn (Engagement $engagement): string => $engagement->user()->withTrashed()->first()->name ?? 'Deleted user'),
+                    ->state(fn (Engagement $engagement): string => $engagement->user()->withTrashed()->first()->full_name ?? 'Deleted user'),
                 Fieldset::make('Content')
                     ->schema([
                         TextEntry::make('subject')

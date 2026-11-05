@@ -63,7 +63,7 @@ class OtpCodeNotification extends Notification
     {
         return MailMessage::make()
             ->subject('Your Login Verification Code')
-            ->greeting('Hello ' . $notifiable->name . ',')
+            ->greeting('Hello ' . $notifiable->full_name . ',')
             ->line('Your one-time login verification code is:')
             ->line("**{$this->code}**")
             ->line('This code will expire in 20 minutes.')

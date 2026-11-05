@@ -41,7 +41,7 @@ use Spatie\LaravelSettings\Migrations\SettingsMigration;
 return new class () extends SettingsMigration {
     public function up(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             try {
                 $this->migrator->add('theme.is_support_url_enabled', false);
             } catch (SettingAlreadyExists $exception) {
@@ -82,7 +82,7 @@ return new class () extends SettingsMigration {
 
     public function down(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             $this->migrator->deleteIfExists('theme.is_support_url_enabled');
             $this->migrator->deleteIfExists('theme.support_url');
             $this->migrator->deleteIfExists('theme.is_recent_updates_url_enabled');

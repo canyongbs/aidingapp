@@ -41,7 +41,7 @@ use Illuminate\Database\QueryException;
 
 use function Tests\asSuperAdmin;
 
-it('belongs to a pipeline', function () {
+it('belongs to a pipeline', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -57,7 +57,7 @@ it('belongs to a pipeline', function () {
         ->and($pipeline->milestones->pluck('id')->all())->toContain($milestone->id);
 });
 
-it('requires a pipeline', function () {
+it('requires a pipeline', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -70,7 +70,7 @@ it('requires a pipeline', function () {
     ]))->toThrow(QueryException::class);
 });
 
-it('can change its pipeline', function () {
+it('can change its pipeline', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -88,7 +88,7 @@ it('can change its pipeline', function () {
     expect($milestone->fresh()->pipeline->is($pipelines->last()))->toBeTrue();
 });
 
-it('is deleted when its pipeline is deleted', function () {
+it('is deleted when its pipeline is deleted', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();

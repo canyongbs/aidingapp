@@ -62,8 +62,8 @@ use Spatie\Health\Checks\Check;
 use Spatie\Health\Checks\Checks\ScheduleCheck;
 use Spatie\Health\Facades\Health;
 
-describe('schedule', function () {
-    it('dispatches the tenant fan-out orchestrators on a daily run', function () {
+describe('schedule', function (): void {
+    it('dispatches the tenant fan-out orchestrators on a daily run', function (): void {
         Queue::fake();
 
         travelTo(now()->startOfDay());
@@ -85,11 +85,11 @@ describe('schedule', function () {
         Queue::assertPushed(DispatchModelPruningForEachTenant::class);
         Queue::assertPushed(
             DispatchServiceMonitoringReportForEachTenant::class,
-            fn (DispatchServiceMonitoringReportForEachTenant $job) => $job->frequency === ServiceMonitoringReportFrequency::Daily,
+            fn (DispatchServiceMonitoringReportForEachTenant $job): bool => $job->frequency === ServiceMonitoringReportFrequency::Daily,
         );
     });
 
-    it('dispatches the weekly service monitoring report orchestrator on Mondays', function () {
+    it('dispatches the weekly service monitoring report orchestrator on Mondays', function (): void {
         Queue::fake();
 
         travelTo(now()->startOfDay()->next(1));
@@ -98,11 +98,11 @@ describe('schedule', function () {
 
         Queue::assertPushed(
             DispatchServiceMonitoringReportForEachTenant::class,
-            fn (DispatchServiceMonitoringReportForEachTenant $job) => $job->frequency === ServiceMonitoringReportFrequency::Weekly,
+            fn (DispatchServiceMonitoringReportForEachTenant $job): bool => $job->frequency === ServiceMonitoringReportFrequency::Weekly,
         );
     });
 
-    it('dispatches the monthly service monitoring report orchestrator on the first of the month', function () {
+    it('dispatches the monthly service monitoring report orchestrator on the first of the month', function (): void {
         Queue::fake();
 
         travelTo(now()->startOfMonth());
@@ -111,11 +111,11 @@ describe('schedule', function () {
 
         Queue::assertPushed(
             DispatchServiceMonitoringReportForEachTenant::class,
-            fn (DispatchServiceMonitoringReportForEachTenant $job) => $job->frequency === ServiceMonitoringReportFrequency::Monthly,
+            fn (DispatchServiceMonitoringReportForEachTenant $job): bool => $job->frequency === ServiceMonitoringReportFrequency::Monthly,
         );
     });
 
-    it('dispatches only the per-minute tasks on an off-cadence minute', function () {
+    it('dispatches only the per-minute tasks on an off-cadence minute', function (): void {
         Queue::fake();
 
         travelTo(now()->startOfDay()->setTime(10, 7));
@@ -140,7 +140,7 @@ describe('schedule', function () {
         Queue::assertNotPushed(DispatchMatchUnaffiliatedContactsForEachTenant::class);
     });
 
-    it('dispatches contact reconciliation on a ten-minute boundary', function () {
+    it('dispatches contact reconciliation on a ten-minute boundary', function (): void {
         Queue::fake();
 
         travelTo(now()->startOfDay()->setTime(10, 20));
@@ -150,7 +150,7 @@ describe('schedule', function () {
         Queue::assertPushed(DispatchMatchUnaffiliatedContactsForEachTenant::class);
     });
 
-    it('dispatches the five-minute service monitoring orchestrator on a five-minute boundary', function () {
+    it('dispatches the five-minute service monitoring orchestrator on a five-minute boundary', function (): void {
         Queue::fake();
 
         travelTo(now()->startOfDay()->setTime(10, 5));
@@ -162,11 +162,11 @@ describe('schedule', function () {
         Queue::assertPushed(DispatchServiceMonitoringForEachTenant::class, 1);
         Queue::assertPushed(
             DispatchServiceMonitoringForEachTenant::class,
-            fn (DispatchServiceMonitoringForEachTenant $job) => $job->frequency === ServiceMonitoringFrequency::FiveMinutes,
+            fn (DispatchServiceMonitoringForEachTenant $job): bool => $job->frequency === ServiceMonitoringFrequency::FiveMinutes,
         );
     });
 
-    it('dispatches the fifteen-minute service monitoring orchestrator on a fifteen-minute boundary', function () {
+    it('dispatches the fifteen-minute service monitoring orchestrator on a fifteen-minute boundary', function (): void {
         Queue::fake();
 
         travelTo(now()->startOfDay()->setTime(10, 15));
@@ -176,11 +176,11 @@ describe('schedule', function () {
         Queue::assertPushed(DispatchServiceMonitoringForEachTenant::class, 2);
         Queue::assertPushed(
             DispatchServiceMonitoringForEachTenant::class,
-            fn (DispatchServiceMonitoringForEachTenant $job) => $job->frequency === ServiceMonitoringFrequency::FifteenMinutes,
+            fn (DispatchServiceMonitoringForEachTenant $job): bool => $job->frequency === ServiceMonitoringFrequency::FifteenMinutes,
         );
     });
 
-    it('dispatches the thirty-minute service monitoring orchestrator on a thirty-minute boundary', function () {
+    it('dispatches the thirty-minute service monitoring orchestrator on a thirty-minute boundary', function (): void {
         Queue::fake();
 
         travelTo(now()->startOfDay()->setTime(10, 30));
@@ -190,14 +190,14 @@ describe('schedule', function () {
         Queue::assertPushed(DispatchServiceMonitoringForEachTenant::class, 3);
         Queue::assertPushed(
             DispatchServiceMonitoringForEachTenant::class,
-            fn (DispatchServiceMonitoringForEachTenant $job) => $job->frequency === ServiceMonitoringFrequency::ThirtyMinutes,
+            fn (DispatchServiceMonitoringForEachTenant $job): bool => $job->frequency === ServiceMonitoringFrequency::ThirtyMinutes,
         );
     });
 
-    it('writes the schedule heartbeat to the shared store on each run', function () {
+    it('writes the schedule heartbeat to the shared store on each run', function (): void {
         Queue::fake();
 
-        $check = Health::registeredChecks()->first(fn (Check $registeredCheck) => $registeredCheck instanceof ScheduleCheck);
+        $check = Health::registeredChecks()->first(fn (Check $registeredCheck): bool => $registeredCheck instanceof ScheduleCheck);
 
         assert($check instanceof ScheduleCheck);
 
@@ -212,7 +212,7 @@ describe('schedule', function () {
         cache()->store('health')->forget($check->getCacheKey());
     });
 
-    it('records the schedule heartbeat via the liveness beacon', function () {
+    it('records the schedule heartbeat via the liveness beacon', function (): void {
         $path = storage_path('framework/schedule-heartbeat');
 
         @unlink($path);

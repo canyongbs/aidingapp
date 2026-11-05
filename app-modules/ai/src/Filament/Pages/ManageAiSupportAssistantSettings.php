@@ -83,7 +83,7 @@ class ManageAiSupportAssistantSettings extends SettingsPage
                             ->live(),
                         Callout::make('Disabling the AI Support Assistant globally will also disable it in the portal settings. Any portal that currently has the AI Support Assistant enabled will have it turned off.')
                             ->warning()
-                            ->visible(fn (Get $get) => app(AiSupportAssistantSettings::class)->is_enabled && ! $get('is_enabled')),
+                            ->visible(fn (Get $get): bool => app(AiSupportAssistantSettings::class)->is_enabled && ! $get('is_enabled')),
                     ]),
                 Section::make('Assistant Instructions')
                     ->description('The system prompt sent to the AI on every conversation. Tune this to control how the assistant engages — for example, to make it more inquisitive, stricter about staying on topic, or more concise.')
@@ -101,7 +101,7 @@ class ManageAiSupportAssistantSettings extends SettingsPage
                                     ->requiresConfirmation()
                                     ->modalHeading('Reset instructions to default?')
                                     ->modalDescription('This will replace your current instructions with the system default. You can save or discard the change afterwards.')
-                                    ->action(fn (Set $set) => $set('instructions', AiSupportAssistantSettings::defaultInstructions()))
+                                    ->action(fn (Set $set): mixed => $set('instructions', AiSupportAssistantSettings::defaultInstructions()))
                             )
                             ->columnSpanFull(),
                     ]),

@@ -56,7 +56,7 @@ $createHistoryAt = function (ServiceMonitoringTarget $target, bool $succeeded, f
     ])->saveQuietly();
 };
 
-it('routes notifications to the expected channels', function (string $channel, array $expectedChannels) {
+it('routes notifications to the expected channels', function (string $channel, array $expectedChannels): void {
     $target = ServiceMonitoringTarget::factory()->create();
 
     $notification = new ServiceMonitoringReportNotification(
@@ -72,7 +72,7 @@ it('routes notifications to the expected channels', function (string $channel, a
     'both' => ['both', ['database', 'mail']],
 ]);
 
-it('throws an error for an unsupported channel', function () {
+it('throws an error for an unsupported channel', function (): void {
     $target = ServiceMonitoringTarget::factory()->create();
 
     $notification = new ServiceMonitoringReportNotification(
@@ -81,11 +81,11 @@ it('throws an error for an unsupported channel', function () {
         'unsupported-channel',
     );
 
-    expect(fn () => $notification->via(User::factory()->create()))
+    expect(fn (): array => $notification->via(User::factory()->create()))
         ->toThrow(InvalidArgumentException::class, 'Unsupported notification channel: unsupported-channel');
 });
 
-it('returns N/A statistics when no checks exist in the reporting period', function () {
+it('returns N/A statistics when no checks exist in the reporting period', function (): void {
     $target = ServiceMonitoringTarget::factory()->create(['name' => 'Payment API']);
     $frequency = ServiceMonitoringReportFrequency::Daily;
 
@@ -99,7 +99,7 @@ it('returns N/A statistics when no checks exist in the reporting period', functi
         ->and($databaseMessage['body'])->toContain('No incidents were detected during this reporting period.');
 });
 
-it('returns N/A statistics when no checks exist in the reporting period for mail notification', function () {
+it('returns N/A statistics when no checks exist in the reporting period for mail notification', function (): void {
     $target = ServiceMonitoringTarget::factory()->create(['name' => 'Payment API']);
     $frequency = ServiceMonitoringReportFrequency::Daily;
 
@@ -116,7 +116,7 @@ it('returns N/A statistics when no checks exist in the reporting period for mail
         ->and($viewData['incidentSummary'])->toBe('No incidents were detected during this reporting period.');
 });
 
-it('builds expected report statistics and incident summary in the mail payload', function () use ($createHistoryAt) {
+it('builds expected report statistics and incident summary in the mail payload', function () use ($createHistoryAt): void {
     $target = ServiceMonitoringTarget::factory()->create(['name' => 'External Status API']);
     $frequency = ServiceMonitoringReportFrequency::Daily;
 
@@ -142,7 +142,7 @@ it('builds expected report statistics and incident summary in the mail payload',
         ->and($viewData['incidentSummary'])->toBe('1 incident was detected during this reporting period.');
 });
 
-it('uses tenant display timezone boundaries for daily reports', function () use ($createHistoryAt) {
+it('uses tenant display timezone boundaries for daily reports', function () use ($createHistoryAt): void {
     app(DisplaySettings::class)->timezone = 'America/New_York';
     app(DisplaySettings::class)->save();
 
@@ -174,7 +174,7 @@ it('uses tenant display timezone boundaries for daily reports', function () use 
         ->and($viewData['incidentSummary'])->toBe('1 incident was detected during this reporting period.');
 });
 
-it('suppresses delivery to a user without confidential access to a confidential target', function () {
+it('suppresses delivery to a user without confidential access to a confidential target', function (): void {
     $target = ServiceMonitoringTarget::factory()->confidential()->create();
     $user = User::factory()->create();
 
@@ -183,7 +183,7 @@ it('suppresses delivery to a user without confidential access to a confidential 
     expect($notification->via($user))->toBe([]);
 });
 
-it('delivers to a user granted confidential access to a confidential target', function () {
+it('delivers to a user granted confidential access to a confidential target', function (): void {
     $target = ServiceMonitoringTarget::factory()->confidential()->create();
     $user = User::factory()->create();
     $target->confidentialUsers()->attach($user->getKey());
@@ -193,7 +193,7 @@ it('delivers to a user granted confidential access to a confidential target', fu
     expect($notification->via($user))->toBe(['mail']);
 });
 
-it('suppresses delivery to a contact without confidential access to a confidential target', function () {
+it('suppresses delivery to a contact without confidential access to a confidential target', function (): void {
     $target = ServiceMonitoringTarget::factory()->confidential()->create();
     $contact = Contact::factory()->create();
 
@@ -202,7 +202,7 @@ it('suppresses delivery to a contact without confidential access to a confidenti
     expect($notification->via($contact))->toBe([]);
 });
 
-it('delivers to a contact granted confidential access to a confidential target', function () {
+it('delivers to a contact granted confidential access to a confidential target', function (): void {
     $target = ServiceMonitoringTarget::factory()->confidential()->create();
     $contact = Contact::factory()->create();
     $target->confidentialContacts()->attach($contact->getKey());
@@ -212,7 +212,7 @@ it('delivers to a contact granted confidential access to a confidential target',
     expect($notification->via($contact))->toBe(['mail']);
 });
 
-it('restores a notification through a real serialize/unserialize round trip', function () {
+it('restores a notification through a real serialize/unserialize round trip', function (): void {
     $target = ServiceMonitoringTarget::factory()->create();
 
     $notification = new ServiceMonitoringReportNotification($target, ServiceMonitoringReportFrequency::Weekly, MailChannel::class);

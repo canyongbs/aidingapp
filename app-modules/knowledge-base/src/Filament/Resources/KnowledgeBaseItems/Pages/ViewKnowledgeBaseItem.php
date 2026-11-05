@@ -59,16 +59,7 @@ class ViewKnowledgeBaseItem extends ViewRecord
     protected static string $resource = KnowledgeBaseItemResource::class;
 
     #[Url]
-    public ?string $tab = null;
-
-    public function mount(int | string $record): void
-    {
-        parent::mount($record);
-
-        if (! in_array($this->tab, ['resource', 'properties', 'concerns', 'health'])) {
-            $this->tab = 'resource';
-        }
-    }
+    public ?string $tab = 'resource';
 
     public function getTitle(): string|Htmlable
     {
@@ -109,7 +100,7 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                             ->label('Category'),
                                         TextEntry::make('managers')
                                             ->label('Managers')
-                                            ->getStateUsing(fn (KnowledgeBaseItem $record) => $record->managers->pluck('name')->join(', ')),
+                                            ->getStateUsing(fn (KnowledgeBaseItem $record) => $record->managers->pluck('full_name')->join(', ')),
                                     ]),
                                 Grid::make(3)
                                     ->schema([

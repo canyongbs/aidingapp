@@ -49,16 +49,16 @@ use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsEx
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
-use App\Models\BaseModel;
 use App\Models\Media;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Closure;
-use DateTimeInterface;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -70,6 +70,7 @@ use Illuminate\Support\HtmlString;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
 /**
@@ -79,11 +80,13 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
  * @mixin IdeHelperServiceRequest
  */
 #[ObservedBy([ServiceRequestObserver::class])]
-class ServiceRequest extends BaseModel implements Auditable, HasMedia
+class ServiceRequest extends Model implements Auditable, HasMedia
 {
     use SoftDeletes;
     use AuditableTrait;
     use HasRelationships;
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
 
     /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
@@ -358,9 +361,9 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         return $this->hasOne(ServiceRequestUpdate::class, 'service_request_id')
             ->ofMany([
                 'created_at' => 'max',
-            ], function (Builder $query) {
+            ], function (Builder $query): void {
                 $query
-                    ->whereHas('createdBy', function (Builder $query) {
+                    ->whereHas('createdBy', function (Builder $query): void {
                         $query->where('created_by_type', (new Contact())->getMorphClass());
                     })
                     ->where('internal', false);
@@ -375,9 +378,9 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         return $this->hasOne(ServiceRequestUpdate::class, 'service_request_id')
             ->ofMany([
                 'created_at' => 'max',
-            ], function (Builder $query) {
+            ], function (Builder $query): void {
                 $query
-                    ->whereHas('createdBy', function (Builder $query) {
+                    ->whereHas('createdBy', function (Builder $query): void {
                         $query->where('created_by_type', (new User())->getMorphClass());
                     })
                     ->where('internal', false);
@@ -543,17 +546,17 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     public function getTemplateMergeData(?string $timezone = null, ?string $recipientName = null): array
     {
         return [
-            'recipient name' => fn () => $recipientName ?? '',
+            'recipient name' => fn (): string => $recipientName ?? '',
             'contact name' => fn () => $this->respondent->{$this->respondent::displayNameKey()},
             'service request number' => fn () => $this->service_request_number,
             'created date' => fn () => ! is_null($timezone) ? $this->created_at->setTimeZone($timezone)->format('M j, Y g:i a (T)') : $this->created_at->format('M j, Y g:i a (T)'),
             'updated date' => fn () => ! is_null($timezone) ? $this->updated_at->setTimeZone($timezone)->format('M j, Y g:i a (T)') : $this->updated_at->format('M j, Y g:i a (T)'),
-            'assigned staff name' => fn () => $this->assignedTo->user->name ?? 'Unassigned',
+            'assigned staff name' => fn () => $this->assignedTo->user->full_name ?? 'Unassigned',
             'status' => fn () => $this->status->name,
             'title' => fn () => $this->title,
             'type' => fn () => $this->priority->type->name,
             'description' => fn () => $this->close_details,
-            'recent update' => fn () => $this->getRecentUpdateFormatted($timezone),
+            'recent update' => fn (): Htmlable|string => $this->getRecentUpdateFormatted($timezone),
         ];
     }
 
@@ -577,7 +580,7 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         } else {
             $user = $recentUpdate->createdBy;
             assert($user instanceof User);
-            $creatorInfo = e($user->name) . ' - Service Provider';
+            $creatorInfo = e($user->full_name) . ' - Service Provider';
         }
 
         $updateDate = ! is_null($timezone) ? $recentUpdate->created_at->setTimeZone($timezone)->format('M j, Y \a\t g:i a (T)') : $recentUpdate->created_at->format('M j, Y \a\t g:i a (T)');
@@ -608,14 +611,9 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
 
     protected static function booted(): void
     {
-        static::addGlobalScope('excludeDrafts', function (Builder $builder) {
+        static::addGlobalScope('excludeDrafts', function (Builder $builder): void {
             $builder->where('is_draft', false);
         });
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 
     private function responseSecondsBetween(CarbonInterface $start, CarbonInterface $end): int

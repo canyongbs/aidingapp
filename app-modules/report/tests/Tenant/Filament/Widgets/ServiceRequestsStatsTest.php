@@ -41,7 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
-it('returns correct service request statistics within the given date range', function () {
+it('returns correct service request statistics within the given date range', function (): void {
     $startDate = now()->subDays(10);
     $endDate = now()->subDays(5);
 
@@ -100,7 +100,7 @@ it('returns correct service request statistics within the given date range', fun
         ->and($stats[2]->getValue())->toEqual((string) $expectedOpenRequests); // Total Open Requests
 });
 
-it('returns correct statistics when no date filters are applied', function () {
+it('returns correct statistics when no date filters are applied', function (): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->id])->create();
 

@@ -75,11 +75,11 @@ class MaintenanceActivitiesRelationManager extends RelationManager
                 ->enum(MaintenanceActivityStatus::class),
             DateTimePicker::make('completed_date')
                 ->label('Completed On')
-                ->visible(fn (callable $get) => $get('status') === MaintenanceActivityStatus::Completed->value)
+                ->visible(fn (callable $get): bool => $get('status') === MaintenanceActivityStatus::Completed->value)
                 ->requiredIf('status', MaintenanceActivityStatus::Completed->value),
             DateTimePicker::make('scheduled_date')
                 ->label('Scheduled For')
-                ->visible(fn (callable $get) => $get('status') !== MaintenanceActivityStatus::Completed->value)
+                ->visible(fn (callable $get): bool => $get('status') !== MaintenanceActivityStatus::Completed->value)
                 ->requiredIf('status', [MaintenanceActivityStatus::Scheduled->value, MaintenanceActivityStatus::Delayed->value]),
             Textarea::make('notes')
                 ->label('Notes'),

@@ -50,7 +50,7 @@ use function Pest\Laravel\assertDatabaseMissing;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
-test('A successful action on the CreateServiceRequestStatus page', function () {
+test('A successful action on the CreateServiceRequestStatus page', function (): void {
     asSuperAdmin()
         ->get(
             ServiceRequestStatusResource::getUrl('create')
@@ -69,7 +69,7 @@ test('A successful action on the CreateServiceRequestStatus page', function () {
     assertDatabaseHas(ServiceRequestStatus::class, $request);
 });
 
-test('CreateServiceRequestStatus requires valid data', function (CreateServiceRequestStatusRequestFactory $data, array $errors) {
+test('CreateServiceRequestStatus requires valid data', function (CreateServiceRequestStatusRequestFactory $data, array $errors): void {
     asSuperAdmin();
 
     ServiceRequestStatus::query()->truncate();
@@ -91,7 +91,7 @@ test('CreateServiceRequestStatus requires valid data', function (CreateServiceRe
 
 // Permission Tests
 
-test('CreateServiceRequestStatus is gated with proper access control', function () {
+test('CreateServiceRequestStatus is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -122,7 +122,7 @@ test('CreateServiceRequestStatus is gated with proper access control', function 
     assertDatabaseHas(ServiceRequestStatus::class, $request->toArray());
 });
 
-test('CreateServiceRequestStatus is gated with proper feature access control', function () {
+test('CreateServiceRequestStatus is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -165,7 +165,7 @@ test('CreateServiceRequestStatus is gated with proper feature access control', f
 
 // Name Uniqueness Tests
 
-test('CreateServiceRequestStatus prevents creating a case-insensitive duplicate name', function () {
+test('CreateServiceRequestStatus prevents creating a case-insensitive duplicate name', function (): void {
     asSuperAdmin();
 
     ServiceRequestStatus::factory()->create(['name' => 'Backlog']);
@@ -176,7 +176,7 @@ test('CreateServiceRequestStatus prevents creating a case-insensitive duplicate 
         ->assertHasFormErrors(['name' => 'unique']);
 });
 
-test('CreateServiceRequestStatus allows reusing the name of a soft deleted status', function () {
+test('CreateServiceRequestStatus allows reusing the name of a soft deleted status', function (): void {
     asSuperAdmin();
 
     ServiceRequestStatus::factory()->create(['name' => 'Backlog'])->delete();

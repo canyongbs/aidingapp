@@ -72,16 +72,16 @@ class EditServiceRequestTypeAutomaticEmailCreation extends EditRecord
                             ->live(),
                         TextInput::make('domain')
                             ->label('Domain')
-                            ->prefix(function () {
+                            ->prefix(function (): string {
                                 $currentTenantDomain = Tenant::current()?->domain;
 
                                 assert(! is_null($currentTenantDomain));
 
                                 return Tenant::current()->getSubdomain() . '-sr-';
                             })
-                            ->suffix(fn () => '@' . Config::string('mail.from.root_domain'))
+                            ->suffix(fn (): string => '@' . Config::string('mail.from.root_domain'))
                             ->required()
-                            ->maxLength(function () {
+                            ->maxLength(function (): int {
                                 $subdomain = Tenant::current()->getSubdomain();
 
                                 // SES local part limit is 64 chars: {subdomain}-sr-{typedomain}

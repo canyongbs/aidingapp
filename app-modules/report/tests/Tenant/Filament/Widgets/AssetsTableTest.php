@@ -50,7 +50,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-it('displays all assets with correct information', function () {
+it('displays all assets with correct information', function (): void {
     actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
 
     $type1 = AssetType::factory()->create(['name' => 'Laptop']);
@@ -107,7 +107,7 @@ it('displays all assets with correct information', function () {
         ]));
 });
 
-it('displays correct deployment status for assets', function () {
+it('displays correct deployment status for assets', function (): void {
     actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
     $type = AssetType::factory()->create();
     $status = AssetStatus::factory()->available()->create();
@@ -155,7 +155,7 @@ it('displays correct deployment status for assets', function () {
         ->assertTableColumnStateSet('deployment_status', 'Bench Stock', $benchAsset);
 });
 
-it('filters assets by name', function () {
+it('filters assets by name', function (): void {
     actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
 
     $type = AssetType::factory()->create();
@@ -187,7 +187,7 @@ it('filters assets by name', function () {
         ->assertCanNotSeeTableRecords(collect([$laptop2, $desktop]));
 });
 
-it('filters assets by type', function () {
+it('filters assets by type', function (): void {
     actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
 
     $laptopType = AssetType::factory()->create(['name' => 'Laptop']);
@@ -212,7 +212,7 @@ it('filters assets by type', function () {
         ->assertCanNotSeeTableRecords(collect([$desktop]));
 });
 
-it('filters assets by status', function () {
+it('filters assets by status', function (): void {
     actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
 
     $type = AssetType::factory()->create();
@@ -237,7 +237,7 @@ it('filters assets by status', function () {
         ->assertCanNotSeeTableRecords(collect([$retiredAsset]));
 });
 
-it('filters assets by deployment status', function () {
+it('filters assets by deployment status', function (): void {
     actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
     $type = AssetType::factory()->create();
     $status = AssetStatus::factory()->available()->create();
@@ -277,7 +277,7 @@ it('filters assets by deployment status', function () {
         ->assertCanNotSeeTableRecords(collect([$checkedOutAsset, $benchAsset]));
 });
 
-it('shows assets ordered by created date descending', function () {
+it('shows assets ordered by created date descending', function (): void {
     actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
 
     $type = AssetType::factory()->create();
@@ -307,7 +307,7 @@ it('shows assets ordered by created date descending', function () {
         ->assertCanSeeTableRecords(collect([$assetNewest, $assetMiddle, $assetOldest]), inOrder: true);
 });
 
-it('handles multiple deployment status filters simultaneously', function () {
+it('handles multiple deployment status filters simultaneously', function (): void {
     actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
     $type = AssetType::factory()->create();
     $status = AssetStatus::factory()->available()->create();
@@ -347,7 +347,7 @@ it('handles multiple deployment status filters simultaneously', function () {
         ->assertCanNotSeeTableRecords(collect([$benchAsset]));
 });
 
-it('handles completed maintenance activities correctly for bench stock', function () {
+it('handles completed maintenance activities correctly for bench stock', function (): void {
     actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
     $type = AssetType::factory()->create();
     $status = AssetStatus::factory()->available()->create();
@@ -368,7 +368,7 @@ it('handles completed maintenance activities correctly for bench stock', functio
         ->assertTableColumnStateSet('deployment_status', 'Bench Stock', $asset);
 });
 
-it('handles checked-in assets correctly for bench stock', function () {
+it('handles checked-in assets correctly for bench stock', function (): void {
     actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
     $type = AssetType::factory()->create();
     $status = AssetStatus::factory()->available()->create();
@@ -396,13 +396,13 @@ it('handles checked-in assets correctly for bench stock', function () {
         ->assertTableColumnStateSet('deployment_status', 'Bench Stock', $asset);
 });
 
-it('has table an export action', function () {
+it('has table an export action', function (): void {
     Livewire::test(AssetsTable::class, [
         'cacheTag' => 'test-assets-table-export',
     ])->assertTableActionExists(ExportAction::class);
 });
 
-it('can start an export and send a notification', function () {
+it('can start an export and send a notification', function (): void {
     Storage::fake('s3');
 
     actingAs(User::factory()->create());

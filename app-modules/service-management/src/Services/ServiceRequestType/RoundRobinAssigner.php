@@ -38,8 +38,8 @@ namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
 use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Models\Scopes\OrderByFullName;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
 
 class RoundRobinAssigner extends ServiceRequestTypeAssigner
 {
@@ -57,17 +57,14 @@ class RoundRobinAssigner extends ServiceRequestTypeAssigner
         if ($lastAssignee) {
             $user = User::query()
                 ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
-                ->where('name', '>=', $lastAssignee->name)
-                ->where(fn (Builder $query) => $query
-                    ->where('name', '!=', $lastAssignee->name)
-                    ->orWhere('users.id', '>', $lastAssignee->id))
-                ->orderBy('name')->orderBy('id')->first();
+                ->whereRaw('(users.first_name, users.last_name, users.id) > (?, ?, ?)', [$lastAssignee->first_name, $lastAssignee->last_name, $lastAssignee->getKey()])
+                ->tap(new OrderByFullName())->orderBy('id')->first();
         }
 
         if ($user === null) {
             $user = User::query()
                 ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
-                ->orderBy('name')->orderBy('id')->first();
+                ->tap(new OrderByFullName())->orderBy('id')->first();
         }
 
         if ($user === null) {

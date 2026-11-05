@@ -39,7 +39,7 @@ use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
 
-it('returns only confidential conversations when asked for them', function () {
+it('returns only confidential conversations when asked for them', function (): void {
     $user = User::factory()->create();
 
     $confidential = Conversation::factory()->confidential()->create();
@@ -55,7 +55,7 @@ it('returns only confidential conversations when asked for them', function () {
         ->not()->toContain($ordinary->getKey());
 });
 
-it('excludes confidential conversations when asked to', function () {
+it('excludes confidential conversations when asked to', function (): void {
     $user = User::factory()->create();
 
     $confidential = Conversation::factory()->confidential()->create();
@@ -71,7 +71,7 @@ it('excludes confidential conversations when asked to', function () {
         ->not()->toContain($confidential->getKey());
 });
 
-it('returns both when no confidentiality filter is given', function () {
+it('returns both when no confidentiality filter is given', function (): void {
     $user = User::factory()->create();
 
     $confidential = Conversation::factory()->confidential()->create();
@@ -87,7 +87,7 @@ it('returns both when no confidentiality filter is given', function () {
         ->toContain($ordinary->getKey());
 });
 
-it('applies the confidentiality filter to pinned conversations', function () {
+it('applies the confidentiality filter to pinned conversations', function (): void {
     $user = User::factory()->create();
 
     $confidential = Conversation::factory()->confidential()->create();

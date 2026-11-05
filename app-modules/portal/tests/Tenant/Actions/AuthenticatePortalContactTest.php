@@ -39,7 +39,7 @@ use AidingApp\Portal\Actions\AuthenticatePortalContact;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Support\Facades\Auth;
 
-it('authenticates the contact into the portal', function () {
+it('authenticates the contact into the portal', function (): void {
     $contact = Contact::factory()->create();
 
     app(Session::class)->start();
@@ -51,7 +51,7 @@ it('authenticates the contact into the portal', function () {
     expect(Auth::guard('contact')->id())->toBe($contact->getKey());
 });
 
-it('preserves the csrf token so pages open in the admin panel stay valid', function () {
+it('preserves the csrf token so pages open in the admin panel stay valid', function (): void {
     $contact = Contact::factory()->create();
 
     $session = app(Session::class);
@@ -65,7 +65,7 @@ it('preserves the csrf token so pages open in the admin panel stay valid', funct
     expect($session->token())->toBe($token);
 });
 
-it('still rotates the session id', function () {
+it('still rotates the session id', function (): void {
     $contact = Contact::factory()->create();
 
     $session = app(Session::class);
@@ -79,7 +79,7 @@ it('still rotates the session id', function () {
     expect($session->getId())->not->toBe($id);
 });
 
-it('authenticates the contact when the session has not been started', function () {
+it('authenticates the contact when the session has not been started', function (): void {
     $contact = Contact::factory()->create();
 
     expect(app(Session::class)->isStarted())->toBeFalse()

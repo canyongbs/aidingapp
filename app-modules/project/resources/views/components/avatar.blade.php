@@ -49,18 +49,18 @@
 <div
     class="flex shrink-0 flex-col items-center gap-1"
     x-tooltip="{
-        content: @js($user->name),
+        content: @js($user->full_name),
         theme: $store.theme,
     }"
 >
     <img
         src="{{ Filament::getUserAvatarUrl($user) }}"
-        alt="{{ $user->name }}"
+        alt="{{ $user->full_name }}"
         class="{{ $imageSizeClasses }} rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
     />
     @if ($showName)
         <span class="max-w-16 truncate text-xs text-gray-600 dark:text-gray-400">
-            {{ str($user->name)->before(' ') }}
+            {{ $user->first_name }}
         </span>
     @endif
 </div>

@@ -39,7 +39,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 
 use function Tests\asSuperAdmin;
 
-test('Audit logs are only created if the Model is not set to be excluded from Auditing by audit settings', function () {
+test('Audit logs are only created if the Model is not set to be excluded from Auditing by audit settings', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->make();

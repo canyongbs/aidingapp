@@ -53,7 +53,7 @@ use Illuminate\Support\Facades\Notification;
 
 use function Pest\Laravel\assertDatabaseHas;
 
-it('sends a notification if the response is not 200', function (ServiceMonitoringFrequency $frequency) {
+it('sends a notification if the response is not 200', function (ServiceMonitoringFrequency $frequency): void {
     Http::fake(function () {
         return Http::response('Test', 500);
     });
@@ -76,12 +76,12 @@ it('sends a notification if the response is not 200', function (ServiceMonitorin
 })
     ->with(
         [
-            fn () => ServiceMonitoringFrequency::OneHour,
-            fn () => ServiceMonitoringFrequency::TwentyFourHours,
+            fn (): ServiceMonitoringFrequency => ServiceMonitoringFrequency::OneHour,
+            fn (): ServiceMonitoringFrequency => ServiceMonitoringFrequency::TwentyFourHours,
         ]
     );
 
-it('does not send a notification if the response is 200', function (ServiceMonitoringFrequency $frequency) {
+it('does not send a notification if the response is 200', function (ServiceMonitoringFrequency $frequency): void {
     Http::fake(function () {
         return Http::response('Test', 200);
     });
@@ -99,12 +99,12 @@ it('does not send a notification if the response is 200', function (ServiceMonit
 })
     ->with(
         [
-            fn () => ServiceMonitoringFrequency::OneHour,
-            fn () => ServiceMonitoringFrequency::TwentyFourHours,
+            fn (): ServiceMonitoringFrequency => ServiceMonitoringFrequency::OneHour,
+            fn (): ServiceMonitoringFrequency => ServiceMonitoringFrequency::TwentyFourHours,
         ]
     );
 
-it('does not send a notification when all required keyword match values are present', function (ServiceMonitoringFrequency $frequency) {
+it('does not send a notification when all required keyword match values are present', function (ServiceMonitoringFrequency $frequency): void {
     Http::fake(fn () => Http::response('Test 1 and Test 2'));
     Notification::fake();
 
@@ -130,7 +130,7 @@ it('does not send a notification when all required keyword match values are pres
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('sends a notification when any required keyword match value is missing', function (ServiceMonitoringFrequency $frequency) {
+it('sends a notification when any required keyword match value is missing', function (ServiceMonitoringFrequency $frequency): void {
     Http::fakeSequence()
         ->push('Test 1')
         ->push('Test 2');
@@ -156,7 +156,7 @@ it('sends a notification when any required keyword match value is missing', func
     Notification::assertSentTo($user, ServiceMonitoringNotification::class);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('sends a failure notification when both keyword match fields are empty', function (ServiceMonitoringFrequency $frequency) {
+it('sends a failure notification when both keyword match fields are empty', function (ServiceMonitoringFrequency $frequency): void {
     Http::preventStrayRequests();
     Notification::fake();
 
@@ -185,7 +185,7 @@ it('sends a failure notification when both keyword match fields are empty', func
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('sends a notification when a prohibited keyword match value is present', function (ServiceMonitoringFrequency $frequency) {
+it('sends a notification when a prohibited keyword match value is present', function (ServiceMonitoringFrequency $frequency): void {
     Http::fake(fn () => Http::response('Test 1'));
     Notification::fake();
 
@@ -206,7 +206,7 @@ it('sends a notification when a prohibited keyword match value is present', func
     Notification::assertSentTo($user, ServiceMonitoringNotification::class);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('does not send a notification when no prohibited keyword match values are present', function (ServiceMonitoringFrequency $frequency) {
+it('does not send a notification when no prohibited keyword match values are present', function (ServiceMonitoringFrequency $frequency): void {
     Http::fake(fn () => Http::response('Test 3'));
     Notification::fake();
 
@@ -233,7 +233,7 @@ it('does not send a notification when no prohibited keyword match values are pre
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('passes when all required keyword match values are present and no prohibited values are present', function (ServiceMonitoringFrequency $frequency) {
+it('passes when all required keyword match values are present and no prohibited values are present', function (ServiceMonitoringFrequency $frequency): void {
     Http::fakeSequence()
         ->push('Test 1 and Test 2')
         ->push('Test 1')
@@ -271,7 +271,7 @@ it('passes when all required keyword match values are present and no prohibited 
     Notification::assertSentTo($user, ServiceMonitoringNotification::class);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('matches keyword values case-insensitively and treats special characters literally', function (ServiceMonitoringFrequency $frequency) {
+it('matches keyword values case-insensitively and treats special characters literally', function (ServiceMonitoringFrequency $frequency): void {
     Http::fakeSequence()
         ->push('test 1 sign-in sign_in test, one . * ? ! ( ) [ ]')
         ->push('test 1 sign in sign_in test, one . * ? ! ( ) [ ]');
@@ -297,7 +297,7 @@ it('matches keyword values case-insensitively and treats special characters lite
     Notification::assertSentTo($user, ServiceMonitoringNotification::class);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('records each unique keyword match failure', function (ServiceMonitoringFrequency $frequency) {
+it('records each unique keyword match failure', function (ServiceMonitoringFrequency $frequency): void {
     Http::fake(fn () => Http::response('Test 1 and Test 4'));
     Notification::fake();
 
@@ -330,7 +330,7 @@ it('records each unique keyword match failure', function (ServiceMonitoringFrequ
         ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('sends a notification when a keyword match response has no readable body', function (ServiceMonitoringFrequency $frequency) {
+it('sends a notification when a keyword match response has no readable body', function (ServiceMonitoringFrequency $frequency): void {
     Http::fake(fn () => Http::response('', 200));
     Notification::fake();
 
@@ -356,7 +356,7 @@ it('sends a notification when a keyword match response has no readable body', fu
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('matches keyword values across HTML tags', function (ServiceMonitoringFrequency $frequency) {
+it('matches keyword values across HTML tags', function (ServiceMonitoringFrequency $frequency): void {
     Http::fake(fn () => Http::response('<html><body><p>Sign <strong>in</strong></p></body></html>'));
     Notification::fake();
 
@@ -382,7 +382,7 @@ it('matches keyword values across HTML tags', function (ServiceMonitoringFrequen
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('does not match keyword values across adjacent inline HTML elements', function (ServiceMonitoringFrequency $frequency) {
+it('does not match keyword values across adjacent inline HTML elements', function (ServiceMonitoringFrequency $frequency): void {
     Http::fake(fn () => Http::response('<span>Sign</span><span>in</span>'));
     Notification::fake();
 
@@ -411,7 +411,7 @@ it('does not match keyword values across adjacent inline HTML elements', functio
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('matches keyword values across adjacent block HTML elements', function (ServiceMonitoringFrequency $frequency) {
+it('matches keyword values across adjacent block HTML elements', function (ServiceMonitoringFrequency $frequency): void {
     Http::fake(fn () => Http::response('<p>Sign</p><p>in</p>'));
     Notification::fake();
 
@@ -437,7 +437,7 @@ it('matches keyword values across adjacent block HTML elements', function (Servi
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('matches keyword values separated by a line break element', function (ServiceMonitoringFrequency $frequency) {
+it('matches keyword values separated by a line break element', function (ServiceMonitoringFrequency $frequency): void {
     Http::fake(fn () => Http::response('Sign<br>in'));
     Notification::fake();
 
@@ -463,7 +463,7 @@ it('matches keyword values separated by a line break element', function (Service
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('matches keyword values across inline HTML elements with source whitespace', function (ServiceMonitoringFrequency $frequency) {
+it('matches keyword values across inline HTML elements with source whitespace', function (ServiceMonitoringFrequency $frequency): void {
     Http::fake(fn () => Http::response('<strong>sign</strong> <em>in</em>'));
     Notification::fake();
 
@@ -489,7 +489,7 @@ it('matches keyword values across inline HTML elements with source whitespace', 
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('matches keyword values separated by a non-breaking space', function (ServiceMonitoringFrequency $frequency) {
+it('matches keyword values separated by a non-breaking space', function (ServiceMonitoringFrequency $frequency): void {
     Http::fake(fn () => Http::response('Sign&nbsp;in'));
     Notification::fake();
 
@@ -515,7 +515,7 @@ it('matches keyword values separated by a non-breaking space', function (Service
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('preserves block boundaries in minified HTML', function (ServiceMonitoringFrequency $frequency) {
+it('preserves block boundaries in minified HTML', function (ServiceMonitoringFrequency $frequency): void {
     Http::fake(fn () => Http::response('<div>Sign</div><div>in</div>'));
     Notification::fake();
 
@@ -541,7 +541,7 @@ it('preserves block boundaries in minified HTML', function (ServiceMonitoringFre
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('excludes script, style, and noscript content from keyword matching', function (ServiceMonitoringFrequency $frequency) {
+it('excludes script, style, and noscript content from keyword matching', function (ServiceMonitoringFrequency $frequency): void {
     Http::fake(fn () => Http::response('<script>sign in</script><style>sign in</style><noscript>sign in</noscript>'));
     Notification::fake();
 
@@ -570,8 +570,8 @@ it('excludes script, style, and noscript content from keyword matching', functio
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('handles unresolvable host errors gracefully', function (ServiceMonitoringFrequency $frequency) {
-    Http::fake(function () {
+it('handles unresolvable host errors gracefully', function (ServiceMonitoringFrequency $frequency): void {
+    Http::fake(function (): void {
         throw new ConnectionException('Could not resolve host');
     });
     Notification::fake();
@@ -593,12 +593,12 @@ it('handles unresolvable host errors gracefully', function (ServiceMonitoringFre
 })
     ->with(
         [
-            fn () => ServiceMonitoringFrequency::OneHour,
-            fn () => ServiceMonitoringFrequency::TwentyFourHours,
+            fn (): ServiceMonitoringFrequency => ServiceMonitoringFrequency::OneHour,
+            fn (): ServiceMonitoringFrequency => ServiceMonitoringFrequency::TwentyFourHours,
         ]
     );
 
-it('sends a notification when a keyword match response has a binary content type', function (ServiceMonitoringFrequency $frequency) {
+it('sends a notification when a keyword match response has a binary content type', function (ServiceMonitoringFrequency $frequency): void {
     Http::fake(fn () => Http::response('Test 1', 200, ['Content-Type' => 'application/octet-stream']));
     Notification::fake();
 
@@ -628,7 +628,7 @@ it('sends a notification when a keyword match response has a binary content type
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('sends a notification when a keyword match response is an Incapsula challenge page', function () {
+it('sends a notification when a keyword match response is an Incapsula challenge page', function (): void {
     Http::fake(fn () => Http::response('<iframe src="/_Incapsula_Resource">Request unsuccessful. Incapsula</iframe>', 200));
     Notification::fake();
 
@@ -661,7 +661,7 @@ it('sends notifications based on configured channels', function (
     bool $emailEnabled,
     bool $databaseEnabled,
     ?string $expectedChannel
-) {
+): void {
     Http::fake(fn () => Http::response('Test', 500));
     Notification::fake();
 
@@ -683,7 +683,7 @@ it('sends notifications based on configured channels', function (
         Notification::assertSentTo(
             $user,
             ServiceMonitoringNotification::class,
-            fn (ServiceMonitoringNotification $notification) => $notification->channel === $expectedChannel
+            fn (ServiceMonitoringNotification $notification): bool => $notification->channel === $expectedChannel
         );
     }
 
@@ -716,7 +716,7 @@ it('sends notifications based on configured channels', function (
         ],
     ]);
 
-it('sends a notification for a confidential service monitor to a recipient granted confidential access', function () {
+it('sends a notification for a confidential service monitor to a recipient granted confidential access', function (): void {
     Http::fake(fn () => Http::response('Test', 500));
     Notification::fake();
 
@@ -733,11 +733,11 @@ it('sends a notification for a confidential service monitor to a recipient grant
     Notification::assertSentTo(
         $user,
         ServiceMonitoringNotification::class,
-        fn (ServiceMonitoringNotification $notification) => $notification->toMail($user)->subject === "Aiding App Service Monitoring Alert for {$serviceMonitorTarget->name}"
+        fn (ServiceMonitoringNotification $notification): bool => $notification->toMail($user)->subject === "Aiding App Service Monitoring Alert for {$serviceMonitorTarget->name}"
     );
 });
 
-it('builds the database notification for a confidential service monitor without an authenticated user', function () {
+it('builds the database notification for a confidential service monitor without an authenticated user', function (): void {
     Http::fake(fn () => Http::response('Test', 500));
     Notification::fake();
 
@@ -754,14 +754,14 @@ it('builds the database notification for a confidential service monitor without 
     Notification::assertSentTo(
         $user,
         ServiceMonitoringNotification::class,
-        fn (ServiceMonitoringNotification $notification) => str_contains(
+        fn (ServiceMonitoringNotification $notification): bool => str_contains(
             $notification->toDatabase($user)['title'],
             e($serviceMonitorTarget->name),
         )
     );
 });
 
-it('still resolves the confidential target after the notification is serialized for the queue', function () {
+it('still resolves the confidential target after the notification is serialized for the queue', function (): void {
     $user = User::factory()->create();
 
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
@@ -781,7 +781,7 @@ it('still resolves the confidential target after the notification is serialized 
         ->and($notification->toMail($user)->subject)->toBe("Aiding App Service Monitoring Alert for {$serviceMonitorTarget->name}");
 });
 
-it('does not send a notification for a confidential service monitor to a subscriber who is not granted confidential access', function () {
+it('does not send a notification for a confidential service monitor to a subscriber who is not granted confidential access', function (): void {
     Http::fake(fn () => Http::response('Test', 500));
     Notification::fake();
 
@@ -797,7 +797,7 @@ it('does not send a notification for a confidential service monitor to a subscri
     Notification::assertNotSentTo($user, ServiceMonitoringNotification::class);
 });
 
-it('does not send a notification for a confidential service monitor to a subscriber whose department is not granted confidential access', function () {
+it('does not send a notification for a confidential service monitor to a subscriber whose department is not granted confidential access', function (): void {
     Http::fake(fn () => Http::response('Test', 500));
     Notification::fake();
 
@@ -823,7 +823,7 @@ it('does not send a notification for a confidential service monitor to a subscri
     Notification::assertNotSentTo($ungrantedUser, ServiceMonitoringNotification::class);
 });
 
-it('applies basic auth to the availability check request when configured', function () {
+it('applies basic auth to the availability check request when configured', function (): void {
     Http::fake(fn () => Http::response('Test', 200));
 
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
@@ -832,14 +832,14 @@ it('applies basic auth to the availability check request when configured', funct
 
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
-    Http::assertSent(function (Request $request) use ($serviceMonitorTarget) {
+    Http::assertSent(function (Request $request) use ($serviceMonitorTarget): bool {
         return $request->hasHeader('Authorization')
             && str_starts_with($request->header('Authorization')[0], 'Basic ')
             && base64_decode(substr($request->header('Authorization')[0], 6)) === "{$serviceMonitorTarget->auth_username}:{$serviceMonitorTarget->auth_password}";
     });
 });
 
-it('applies basic auth to the keyword match check request when configured', function () {
+it('applies basic auth to the keyword match check request when configured', function (): void {
     Http::fake(fn () => Http::response('Test 1', 200));
 
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
@@ -851,14 +851,14 @@ it('applies basic auth to the keyword match check request when configured', func
 
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
-    Http::assertSent(function (Request $request) use ($serviceMonitorTarget) {
+    Http::assertSent(function (Request $request) use ($serviceMonitorTarget): bool {
         return $request->hasHeader('Authorization')
             && str_starts_with($request->header('Authorization')[0], 'Basic ')
             && base64_decode(substr($request->header('Authorization')[0], 6)) === "{$serviceMonitorTarget->auth_username}:{$serviceMonitorTarget->auth_password}";
     });
 });
 
-it('does not follow redirects for an availability check when follow redirection is disabled', function () {
+it('does not follow redirects for an availability check when follow redirection is disabled', function (): void {
     // follow_redirection now applies to every monitor type, not just API Endpoint. handleAvailability()
     // only ever treats a 200 as success, so proving the redirect wasn't followed is the 302 itself
     // surviving into the recorded response, not the succeeded flag.
@@ -878,7 +878,7 @@ it('does not follow redirects for an availability check when follow redirection 
     ]);
 });
 
-it('does not follow redirects for a keyword match check when follow redirection is disabled', function () {
+it('does not follow redirects for a keyword match check when follow redirection is disabled', function (): void {
     Http::fake(fn () => Http::response('', 302, ['Location' => 'https://example.com/redirected']));
 
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
@@ -896,7 +896,7 @@ it('does not follow redirects for a keyword match check when follow redirection 
     ]);
 });
 
-it('does not apply basic auth when the auth type is none', function () {
+it('does not apply basic auth when the auth type is none', function (): void {
     Http::fake(fn () => Http::response('Test', 200));
 
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
@@ -904,10 +904,10 @@ it('does not apply basic auth when the auth type is none', function () {
 
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
-    Http::assertSent(fn (Request $request) => ! $request->hasHeader('Authorization'));
+    Http::assertSent(fn (Request $request): bool => ! $request->hasHeader('Authorization'));
 });
 
-it('passes when the response status code is in the successful status codes list', function () {
+it('passes when the response status code is in the successful status codes list', function (): void {
     Http::fake(fn () => Http::response('Test', 200));
 
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
@@ -923,7 +923,7 @@ it('passes when the response status code is in the successful status codes list'
     ]);
 });
 
-it('fails when the response status code is not in the successful status codes list', function () {
+it('fails when the response status code is not in the successful status codes list', function (): void {
     Http::fake(fn () => Http::response('Test', 404));
 
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
@@ -943,7 +943,7 @@ it('fails when the response status code is not in the successful status codes li
     expect($history->keyword_match_failures)->toBe(['Unexpected status code: 404']);
 });
 
-it('does not follow redirects when follow redirection is disabled', function () {
+it('does not follow redirects when follow redirection is disabled', function (): void {
     Http::fake(fn () => Http::response('', 302, ['Location' => 'https://example.com/redirected']));
 
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
@@ -962,7 +962,7 @@ it('does not follow redirects when follow redirection is disabled', function () 
     ]);
 });
 
-it('does not fail for latency when the maximum latency check is disabled', function () {
+it('does not fail for latency when the maximum latency check is disabled', function (): void {
     Http::fake(fn () => Http::response('Test', 200));
 
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
@@ -983,7 +983,7 @@ it('does not fail for latency when the maximum latency check is disabled', funct
 // and no positive max_latency_ms threshold can ever be exceeded by it. Any such test would need
 // a degenerate negative threshold to pass, which doesn't actually exercise the real comparison --
 // see exceedsMaxLatency()'s direct unit test below instead.
-it('converts the response time from seconds to milliseconds before comparing against max_latency_ms', function () {
+it('converts the response time from seconds to milliseconds before comparing against max_latency_ms', function (): void {
     // transferStats reports response time in seconds; max_latency_ms is milliseconds. Http::fake()
     // never produces real transfer timings, so this exercises the unit conversion directly rather
     // than through a faked HTTP round trip.
@@ -1005,7 +1005,7 @@ it('converts the response time from seconds to milliseconds before comparing aga
     expect($exceedsMaxLatency->invoke($job, 0.05))->toBeFalse();
 });
 
-it('scales the request timeout to the configured max latency threshold', function () {
+it('scales the request timeout to the configured max latency threshold', function (): void {
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
         ->apiEndpoint()
         ->create([
@@ -1022,7 +1022,7 @@ it('scales the request timeout to the configured max latency threshold', functio
     expect($requestTimeoutInSeconds->invoke($job))->toBe(25);
 });
 
-it('falls back to a fixed request timeout when max latency is not configured', function () {
+it('falls back to a fixed request timeout when max latency is not configured', function (): void {
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
         ->apiEndpoint()
         ->create();
@@ -1035,7 +1035,7 @@ it('falls back to a fixed request timeout when max latency is not configured', f
     expect($requestTimeoutInSeconds->invoke($job))->toBe(15);
 });
 
-it('sends the configured request headers', function () {
+it('sends the configured request headers', function (): void {
     Http::fake(fn () => Http::response('Test', 200));
 
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
@@ -1051,7 +1051,7 @@ it('sends the configured request headers', function () {
     Http::assertSent(fn (Request $request) => $request->hasHeader('X-Custom-Header', 'custom-value'));
 });
 
-it('does not crash when a stored successful_status_codes value is a scalar instead of an array', function () {
+it('does not crash when a stored successful_status_codes value is a scalar instead of an array', function (): void {
     Http::fake(fn () => Http::response('Test', 200));
 
     // ValidHttpStatusCodes normalizes a scalar for validation, but a tampered payload could
@@ -1071,7 +1071,7 @@ it('does not crash when a stored successful_status_codes value is a scalar inste
     expect($history->succeeded)->toBeTrue();
 });
 
-it('records a failed check instead of crashing when a stored header name is not valid to send', function () {
+it('records a failed check instead of crashing when a stored header name is not valid to send', function (): void {
     Http::fake(fn () => Http::response('Test', 200));
 
     // Bypasses the form's regex validation via the factory to simulate a record whose headers
@@ -1093,7 +1093,7 @@ it('records a failed check instead of crashing when a stored header name is not 
         ->and($history->keyword_match_failures[0])->toContain('Invalid request configuration');
 });
 
-it('includes the API endpoint failure reason in the email notification body', function () {
+it('includes the API endpoint failure reason in the email notification body', function (): void {
     // The mail template used to only show detailed failure reasons for Keyword Match monitors,
     // falling back to a generic "did not respond" message for every other monitor type — which
     // silently dropped the specific reason (e.g. the max latency message) for API Endpoint checks.
@@ -1120,7 +1120,7 @@ it('includes the API endpoint failure reason in the email notification body', fu
         ->not()->toContain('The monitored service did not respond to a health check');
 });
 
-it('includes the max latency failure reason in the email notification body', function () {
+it('includes the max latency failure reason in the email notification body', function (): void {
     // transferStats is never populated under Http::fake() (confirmed while fixing the
     // seconds/milliseconds unit bug), so a real latency failure can't be produced through the
     // full HTTP round trip in a test. The history record is built directly instead, to test
@@ -1149,7 +1149,7 @@ it('includes the max latency failure reason in the email notification body', fun
         ->not()->toContain('The monitored service did not respond to a health check');
 });
 
-it('includes the keyword match failure reason in the email notification body', function () {
+it('includes the keyword match failure reason in the email notification body', function (): void {
     Http::fake(fn () => Http::response('the page does not mention it', 200, ['Content-Type' => 'text/plain']));
 
     $user = User::factory()->create();
@@ -1173,7 +1173,7 @@ it('includes the keyword match failure reason in the email notification body', f
         ->not()->toContain('The monitored service did not respond to a health check');
 });
 
-it('falls back to the generic failure message in the email for an Availability monitor', function () {
+it('falls back to the generic failure message in the email for an Availability monitor', function (): void {
     // Availability never populates keyword_match_failures, so removing the monitor_type gate
     // from the mail template must not change its behavior: it should still fall back to the
     // generic message, since filled() alone already distinguishes the two cases.
@@ -1198,7 +1198,7 @@ it('falls back to the generic failure message in the email for an Availability m
     expect($body)->toContain('The monitored service did not respond to a health check');
 });
 
-it('sends the request body as JSON when configured', function () {
+it('sends the request body as JSON when configured', function (): void {
     Http::fake(fn () => Http::response('Test', 200));
 
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
@@ -1211,11 +1211,11 @@ it('sends the request body as JSON when configured', function () {
 
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
-    Http::assertSent(fn (Request $request) => $request->hasHeader('Content-Type', 'application/json')
+    Http::assertSent(fn (Request $request): bool => $request->hasHeader('Content-Type', 'application/json')
         && $request->data() === ['key' => 'value']);
 });
 
-it('sends the configured JSON body exactly as entered instead of re-encoding it', function () {
+it('sends the configured JSON body exactly as entered instead of re-encoding it', function (): void {
     // json_decode()-ing then letting Guzzle's 'json' option re-encode would turn '{}' into '[]',
     // since PHP has no empty-object/empty-array distinction. Sending the raw validated string
     // must preserve it exactly.
@@ -1231,10 +1231,10 @@ it('sends the configured JSON body exactly as entered instead of re-encoding it'
 
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
-    Http::assertSent(fn (Request $request) => $request->body() === '{}');
+    Http::assertSent(fn (Request $request): bool => $request->body() === '{}');
 });
 
-it('sends the request body as form-encoded when JSON is not enabled', function () {
+it('sends the request body as form-encoded when JSON is not enabled', function (): void {
     Http::fake(fn () => Http::response('Test', 200));
 
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
@@ -1247,11 +1247,11 @@ it('sends the request body as form-encoded when JSON is not enabled', function (
 
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
-    Http::assertSent(fn (Request $request) => str_contains($request->header('Content-Type')[0] ?? '', 'application/x-www-form-urlencoded')
+    Http::assertSent(fn (Request $request): bool => str_contains($request->header('Content-Type')[0] ?? '', 'application/x-www-form-urlencoded')
         && $request->body() === 'key=value');
 });
 
-it('does not send a request body when the HTTP method does not support one', function () {
+it('does not send a request body when the HTTP method does not support one', function (): void {
     Http::fake(fn () => Http::response('Test', 200));
 
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
@@ -1264,10 +1264,10 @@ it('does not send a request body when the HTTP method does not support one', fun
 
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
-    Http::assertSent(fn (Request $request) => blank($request->body()));
+    Http::assertSent(fn (Request $request): bool => blank($request->body()));
 });
 
-it('sends the request using the configured HTTP method', function () {
+it('sends the request using the configured HTTP method', function (): void {
     Http::fake(fn () => Http::response('Test', 200));
 
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
@@ -1276,5 +1276,5 @@ it('sends the request using the configured HTTP method', function () {
 
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
-    Http::assertSent(fn (Request $request) => $request->method() === 'QUERY');
+    Http::assertSent(fn (Request $request): bool => $request->method() === 'QUERY');
 });

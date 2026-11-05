@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('contract_types', function (Blueprint $table) {
+        Schema::create('contract_types', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->string('name');
             $table->boolean('is_default');

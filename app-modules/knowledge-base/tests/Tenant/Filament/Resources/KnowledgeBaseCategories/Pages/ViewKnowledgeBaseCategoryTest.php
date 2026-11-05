@@ -46,7 +46,7 @@ use function Pest\Laravel\actingAs;
 
 // Permission Tests
 
-test('ViewKnowledgeBaseCategory is gated with proper access control', function () {
+test('ViewKnowledgeBaseCategory is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
@@ -69,7 +69,7 @@ test('ViewKnowledgeBaseCategory is gated with proper access control', function (
         )->assertSuccessful();
 });
 
-test('ViewKnowledgeBaseCategory is gated with proper feature access control', function () {
+test('ViewKnowledgeBaseCategory is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = false;

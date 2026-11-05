@@ -61,7 +61,7 @@ class KnowledgeBaseItemSeeder extends Seeder
         KnowledgeBaseItem::factory()
             ->count(25)
             ->create()
-            ->each(function (KnowledgeBaseItem $article) use ($tags) {
+            ->each(function (KnowledgeBaseItem $article) use ($tags): void {
                 collect(fake()->randomElements($tags, rand(0, 5)))
                     ->each(fn (Tag $tag) => $article->tags()->attach($tag));
             });

@@ -37,10 +37,10 @@
 use AidingApp\Authorization\Http\Controllers\Api\V1\Users\SyncUserRolesController;
 use Illuminate\Support\Facades\Route;
 
-Route::api(majorVersion: 1, routes: function () {
+Route::api(majorVersion: 1, routes: function (): void {
     Route::name('users.')
         ->prefix('users')
-        ->group(function () {
+        ->group(function (): void {
             Route::put('/{user}/roles', SyncUserRolesController::class)->name('roles.sync');
         });
 });

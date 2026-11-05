@@ -62,7 +62,7 @@ $createValidStaleDraft = function (): ServiceRequest {
     return $draft;
 };
 
-it('does nothing when no drafts exist', function () {
+it('does nothing when no drafts exist', function (): void {
     Queue::fake();
 
     (new AutoSubmitStaleDraftServiceRequests())->handle();
@@ -70,7 +70,7 @@ it('does nothing when no drafts exist', function () {
     Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
-it('does not dispatch job for non-draft service requests', function () {
+it('does not dispatch job for non-draft service requests', function (): void {
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
@@ -92,7 +92,7 @@ it('does not dispatch job for non-draft service requests', function () {
     Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
-it('does not dispatch job for recently updated drafts', function () {
+it('does not dispatch job for recently updated drafts', function (): void {
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
@@ -110,7 +110,7 @@ it('does not dispatch job for recently updated drafts', function () {
     Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
-it('does not dispatch job for drafts with null title', function () {
+it('does not dispatch job for drafts with null title', function (): void {
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
@@ -132,7 +132,7 @@ it('does not dispatch job for drafts with null title', function () {
     Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
-it('does not dispatch job for drafts with empty title', function () {
+it('does not dispatch job for drafts with empty title', function (): void {
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
@@ -154,7 +154,7 @@ it('does not dispatch job for drafts with empty title', function () {
     Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
-it('does not dispatch job for drafts with null description', function () {
+it('does not dispatch job for drafts with null description', function (): void {
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
@@ -176,7 +176,7 @@ it('does not dispatch job for drafts with null description', function () {
     Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
-it('does not dispatch job for drafts with empty description', function () {
+it('does not dispatch job for drafts with empty description', function (): void {
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
@@ -198,7 +198,7 @@ it('does not dispatch job for drafts with empty description', function () {
     Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
-it('does not dispatch job for drafts with recently updated form submission', function () {
+it('does not dispatch job for drafts with recently updated form submission', function (): void {
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
@@ -229,7 +229,7 @@ it('does not dispatch job for drafts with recently updated form submission', fun
     Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
-it('does not dispatch job for drafts with recently updated form field submissions', function () {
+it('does not dispatch job for drafts with recently updated form field submissions', function (): void {
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
@@ -276,7 +276,7 @@ it('does not dispatch job for drafts with recently updated form field submission
     Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
-it('does not dispatch job for drafts with recently added service request updates', function () {
+it('does not dispatch job for drafts with recently added service request updates', function (): void {
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
@@ -305,19 +305,19 @@ it('does not dispatch job for drafts with recently added service request updates
     Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
-it('dispatches job for valid stale drafts', function () use ($createValidStaleDraft) {
+it('dispatches job for valid stale drafts', function () use ($createValidStaleDraft): void {
     Queue::fake();
 
     $draft = $createValidStaleDraft();
 
     (new AutoSubmitStaleDraftServiceRequests())->handle();
 
-    Queue::assertPushed(AutoSubmitStaleDraftServiceRequest::class, function (AutoSubmitStaleDraftServiceRequest $job) use ($draft) {
+    Queue::assertPushed(AutoSubmitStaleDraftServiceRequest::class, function (AutoSubmitStaleDraftServiceRequest $job) use ($draft): bool {
         return $job->uniqueId() === $draft->getKey();
     });
 });
 
-it('dispatches jobs for multiple valid stale drafts', function () use ($createValidStaleDraft) {
+it('dispatches jobs for multiple valid stale drafts', function () use ($createValidStaleDraft): void {
     Queue::fake();
 
     $draft1 = $createValidStaleDraft();
@@ -328,7 +328,7 @@ it('dispatches jobs for multiple valid stale drafts', function () use ($createVa
     Queue::assertPushed(AutoSubmitStaleDraftServiceRequest::class, 2);
 });
 
-it('dispatches job for stale draft with old form submission', function () {
+it('dispatches job for stale draft with old form submission', function (): void {
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
@@ -356,7 +356,7 @@ it('dispatches job for stale draft with old form submission', function () {
 
     (new AutoSubmitStaleDraftServiceRequests())->handle();
 
-    Queue::assertPushed(AutoSubmitStaleDraftServiceRequest::class, function (AutoSubmitStaleDraftServiceRequest $job) use ($draft) {
+    Queue::assertPushed(AutoSubmitStaleDraftServiceRequest::class, function (AutoSubmitStaleDraftServiceRequest $job) use ($draft): bool {
         return $job->uniqueId() === $draft->getKey();
     });
 });

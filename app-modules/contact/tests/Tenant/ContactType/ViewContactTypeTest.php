@@ -44,7 +44,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('The correct details are displayed on the ViewContactType page', function () {
+test('The correct details are displayed on the ViewContactType page', function (): void {
     $contactType = ContactType::factory()->create();
 
     asSuperAdmin();
@@ -60,7 +60,7 @@ test('The correct details are displayed on the ViewContactType page', function (
 
 // Permission Tests
 
-test('ViewContactType is gated with proper access control', function () {
+test('ViewContactType is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $contactType = ContactType::factory()->create();

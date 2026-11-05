@@ -36,6 +36,7 @@
 
 namespace AidingApp\Portal\Jobs;
 
+use AidingApp\ServiceManagement\Enums\ServiceRequestFileUploadType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
@@ -87,6 +88,9 @@ class PersistServiceRequestUpload implements ShouldQueue
                 ->addMediaFromDisk($this->path)
                 ->usingName(pathinfo($this->originalFileName, PATHINFO_FILENAME))
                 ->createdBy($this->serviceRequest->respondent)
+                ->withCustomProperties([
+                    ServiceRequestFileUploadType::CUSTOM_PROPERTY => ServiceRequestFileUploadType::RequestSubmission->value,
+                ])
                 ->toMediaCollection($this->collection);
         } finally {
             Storage::delete($this->path);

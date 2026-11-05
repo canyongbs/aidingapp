@@ -40,23 +40,27 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\InventoryManagement\Database\Factories\AssetFactory;
 use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
 use AidingApp\InventoryManagement\Models\Scopes\ClassifiedAs;
-use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @property-read string $purchase_age
  *
  * @mixin IdeHelperAsset
  */
-class Asset extends BaseModel implements Auditable
+class Asset extends Model implements Auditable
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
     use AuditableTrait;
     use SoftDeletes;
 
@@ -181,7 +185,7 @@ class Asset extends BaseModel implements Auditable
      */
     protected function purchaseAge(): Attribute
     {
-        return Attribute::get(function () {
+        return Attribute::get(function (): string {
             if ($this->purchase_date->isFuture()) {
                 return '0 Years 0 Months';
             }

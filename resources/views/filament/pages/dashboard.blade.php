@@ -58,7 +58,7 @@
             <div class="grid w-full gap-1 text-center md:text-start">
                 <p class="text-2xl font-bold text-white">Welcome,</p>
 
-                <p class="text-3xl font-bold text-white">{{ auth()->user()->name }}!</p>
+                <p class="text-3xl font-bold text-white">{{ auth()->user()->full_name }}!</p>
 
                 <p class="mt-2 text-sm text-gray-200" id="current-date"></p>
 

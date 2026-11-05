@@ -42,14 +42,14 @@ use Illuminate\Support\Facades\Crypt;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\postJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->ai_support_assistant = true;
     $settings->save();
 });
 
-it('stores encrypted assistant secrets authored by the contact', function () {
+it('stores encrypted assistant secrets authored by the contact', function (): void {
     $contact = Contact::factory()->create();
 
     $response = actingAs($contact, 'contact')->postJson(
@@ -67,7 +67,7 @@ it('stores encrypted assistant secrets authored by the contact', function () {
         ->and($secret->related_id)->toBeNull();
 });
 
-it('denies unauthenticated assistant secret storage', function () {
+it('denies unauthenticated assistant secret storage', function (): void {
     postJson(
         route('widgets.assistant.api.service-request.store-secret'),
         ['value' => 'service-request-password'],

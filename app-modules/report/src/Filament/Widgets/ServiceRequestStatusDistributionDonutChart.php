@@ -113,9 +113,9 @@ class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
     private function getServiceRequestStatusData(?Carbon $startDate = null, ?Carbon $endDate = null, ?array $types = null): Collection
     {
         $serviceRequestByStatusData = ServiceRequestStatus::withCount([
-            'serviceRequests' => function (Builder $query) use ($startDate, $endDate, $types) {
+            'serviceRequests' => function (Builder $query) use ($startDate, $endDate, $types): void {
                 $query->when(
-                    $startDate && $endDate,
+                    $startDate instanceof Carbon && $endDate instanceof Carbon,
                     fn (Builder $query): Builder => $query->whereBetween('created_at', [$startDate, $endDate])
                 )->when(
                     $types,
@@ -127,7 +127,7 @@ class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
         return $serviceRequestByStatusData
             ->filter(fn (ServiceRequestStatus $status): bool => $status->service_requests_count > 0)
             ->values()
-            ->map(function (ServiceRequestStatus $status) {
+            ->map(function (ServiceRequestStatus $status): ServiceRequestStatus {
                 $status['bg_color'] = $status->color->getRgb();
 
                 return $status;

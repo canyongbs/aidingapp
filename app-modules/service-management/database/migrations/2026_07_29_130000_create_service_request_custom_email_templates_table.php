@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('service_request_custom_email_templates', function (Blueprint $table) {
+        Schema::create('service_request_custom_email_templates', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->string('type');
             $table->string('role');

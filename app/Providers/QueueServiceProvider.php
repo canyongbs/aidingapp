@@ -45,7 +45,7 @@ class QueueServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $manager = $this->app->make('queue');
-        $manager->addConnector('canyongbs-sqs-disk', fn () => new SqsDiskConnector());
-        $manager->addConnector('tenant-aware-background', fn () => new TenantAwareBackgroundConnector());
+        $manager->addConnector('canyongbs-sqs-disk', fn (): SqsDiskConnector => new SqsDiskConnector());
+        $manager->addConnector('tenant-aware-background', fn (): TenantAwareBackgroundConnector => new TenantAwareBackgroundConnector());
     }
 }

@@ -38,7 +38,7 @@ use App\Jobs\DispatchStaleCacheTagPruningForEachTenant;
 use App\Jobs\PruneStaleCacheTags;
 use Illuminate\Support\Facades\Queue;
 
-it('dispatches `PruneStaleCacheTags` for each eligible tenant', function () {
+it('dispatches `PruneStaleCacheTags` for each eligible tenant', function (): void {
     Queue::fake();
 
     (new DispatchStaleCacheTagPruningForEachTenant())->handle();

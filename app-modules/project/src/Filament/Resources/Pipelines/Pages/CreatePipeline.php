@@ -37,6 +37,8 @@
 namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
 use AidingApp\Project\Enums\PipelineStageClassification;
+use AidingApp\Project\Filament\Resources\Pipelines\Forms\Components\PipelineNameInput;
+use AidingApp\Project\Filament\Resources\Pipelines\Forms\Components\PipelineStageNameInput;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
@@ -46,7 +48,6 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Js;
@@ -59,9 +60,7 @@ class CreatePipeline extends CreateRecord
     {
         return $schema
             ->components([
-                TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
+                PipelineNameInput::make(fn (): string => $this->getParentRecord()->getKey()),
                 Textarea::make('description')
                     ->required()
                     ->maxLength(65535),
@@ -72,10 +71,7 @@ class CreatePipeline extends CreateRecord
                     ])
                     ->relationship('stages')
                     ->schema([
-                        TextInput::make('name')
-                            ->label('Stage')
-                            ->distinct()
-                            ->required(),
+                        PipelineStageNameInput::make(),
                         Select::make('classification')
                             ->label('Classification')
                             ->options(PipelineStageClassification::class)
@@ -85,7 +81,7 @@ class CreatePipeline extends CreateRecord
                             ->default(PipelineStageClassification::Planning->value),
                     ])
                     ->default(
-                        collect(PipelineStageClassification::cases())->map(fn (PipelineStageClassification $case) => [
+                        collect(PipelineStageClassification::cases())->map(fn (PipelineStageClassification $case): array => [
                             'name' => $case->getLabel(),
                             'classification' => $case->value,
                         ])->all()

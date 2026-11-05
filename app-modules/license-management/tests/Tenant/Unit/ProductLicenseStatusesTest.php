@@ -37,25 +37,25 @@
 use AidingApp\LicenseManagement\Enums\ProductLicenseStatus;
 use AidingApp\LicenseManagement\Models\ProductLicense;
 
-it('returns Pending when the current date is before the start date', function () {
+it('returns Pending when the current date is before the start date', function (): void {
     $productLicense = ProductLicense::factory()->pending()->create();
 
     expect($productLicense->status)->toBe(ProductLicenseStatus::Pending);
 });
 
-it('returns Active when the current date is between start and expiration dates', function () {
+it('returns Active when the current date is between start and expiration dates', function (): void {
     $productLicense = ProductLicense::factory()->active()->create();
 
     expect($productLicense->status)->toBe(ProductLicenseStatus::Active);
 });
 
-it('returns Expired when the current date is after the expiration date', function () {
+it('returns Expired when the current date is after the expiration date', function (): void {
     $productLicense = ProductLicense::factory()->expired()->create();
 
     expect($productLicense->status)->toBe(ProductLicenseStatus::Expired);
 });
 
-it('returns Active when there is no expiration date and the current date is after the start date', function () {
+it('returns Active when there is no expiration date and the current date is after the start date', function (): void {
     $productLicense = ProductLicense::factory()->noExpiration()->create();
 
     expect($productLicense->status)->toBe(ProductLicenseStatus::Active);

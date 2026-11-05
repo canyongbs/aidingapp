@@ -48,7 +48,7 @@ use function Pest\Laravel\actingAs;
  */
 function testResourceRequiresPermissionForAccess(string $resource, string|array $permissions, string $method, ?string $feature = null): void
 {
-    test("{$resource} {$method} is gated with proper access control", function () use ($permissions, $resource, $method, $feature) {
+    test("{$resource} {$method} is gated with proper access control", function () use ($permissions, $resource, $method, $feature): void {
         if (! is_null($feature)) {
             $settings = app(LicenseSettings::class);
 

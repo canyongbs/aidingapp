@@ -50,14 +50,14 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->data->addons->advisoryManagement = true;
     $settings->save();
 });
 
-test('the records are displayed on the AdvisoryUpdatesRelationManager', function () {
+test('the records are displayed on the AdvisoryUpdatesRelationManager', function (): void {
     $advisory = Advisory::factory()->create();
 
     $advisoryUpdates = AdvisoryUpdate::factory()
@@ -76,7 +76,7 @@ test('the records are displayed on the AdvisoryUpdatesRelationManager', function
         ->assertCountTableRecords(10);
 });
 
-test('only shows the updates bulk delete action to a user with the advisory_update delete permission', function () {
+test('only shows the updates bulk delete action to a user with the advisory_update delete permission', function (): void {
     $user = User::factory()
         ->create()
         ->givePermissionTo('advisory.view-any', 'advisory.*.view', 'advisory_update.view-any');
@@ -102,7 +102,7 @@ test('only shows the updates bulk delete action to a user with the advisory_upda
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
 
-test('the create action is hidden when the advisory is resolved', function () {
+test('the create action is hidden when the advisory is resolved', function (): void {
     $advisory = Advisory::factory()->create([
         'status_id' => AdvisoryStatus::factory()->create([
             'classification' => SystemAdvisoryStatusClassification::Resolved,
@@ -118,7 +118,7 @@ test('the create action is hidden when the advisory is resolved', function () {
         ->assertTableActionHidden('create');
 });
 
-test('the create action is visible when the advisory is open', function () {
+test('the create action is visible when the advisory is open', function (): void {
     $advisory = Advisory::factory()->create([
         'status_id' => AdvisoryStatus::factory()->create([
             'classification' => SystemAdvisoryStatusClassification::Open,
@@ -134,7 +134,7 @@ test('the create action is visible when the advisory is open', function () {
         ->assertTableActionVisible('create');
 });
 
-test('creating an advisory update updates the advisory status', function () {
+test('creating an advisory update updates the advisory status', function (): void {
     $advisory = Advisory::factory()->create([
         'status_id' => AdvisoryStatus::factory()->create([
             'classification' => SystemAdvisoryStatusClassification::Open,
@@ -164,7 +164,7 @@ test('creating an advisory update updates the advisory status', function () {
     expect(AdvisoryUpdate::query()->where('advisory_id', $advisory->getKey())->count())->toBe(1);
 });
 
-test('creating an advisory update that resolves the advisory hides the create action without a page refresh', function () {
+test('creating an advisory update that resolves the advisory hides the create action without a page refresh', function (): void {
     $advisory = Advisory::factory()->create([
         'status_id' => AdvisoryStatus::factory()->create([
             'classification' => SystemAdvisoryStatusClassification::Open,
@@ -193,7 +193,7 @@ test('creating an advisory update that resolves the advisory hides the create ac
     $component->assertTableActionHidden('create');
 });
 
-test('the create action opens in a slide over with the advisory status field labelled and described', function () {
+test('the create action opens in a slide over with the advisory status field labelled and described', function (): void {
     $advisory = Advisory::factory()->create([
         'status_id' => AdvisoryStatus::factory()->create([
             'classification' => SystemAdvisoryStatusClassification::Open,
@@ -218,7 +218,7 @@ test('the create action opens in a slide over with the advisory status field lab
     expect($component->instance()->getTable()->getAction('create')->isModalSlideOver())->toBeTrue();
 });
 
-test('the view or edit action opens in a slide over with the advisory status field labelled and described', function () {
+test('the view or edit action opens in a slide over with the advisory status field labelled and described', function (): void {
     $advisory = Advisory::factory()->create([
         'status_id' => AdvisoryStatus::factory()->create([
             'classification' => SystemAdvisoryStatusClassification::Open,
@@ -245,7 +245,7 @@ test('the view or edit action opens in a slide over with the advisory status fie
     expect($component->instance()->getTable()->getAction('viewOrEditAdvisoryUpdate')->isModalSlideOver())->toBeTrue();
 });
 
-test('the view or edit action hides the status change guidance when the user cannot update the advisory update', function () {
+test('the view or edit action hides the status change guidance when the user cannot update the advisory update', function (): void {
     // Resolved advisories cannot be edited, per AdvisoryUpdatePolicy::update().
     $advisory = Advisory::factory()->create([
         'status_id' => AdvisoryStatus::factory()->create([
@@ -274,7 +274,7 @@ test('the view or edit action hides the status change guidance when the user can
         });
 });
 
-test('the create form date field defaults to now', function () {
+test('the create form date field defaults to now', function (): void {
     $advisory = Advisory::factory()->create([
         'status_id' => AdvisoryStatus::factory()->create([
             'classification' => SystemAdvisoryStatusClassification::Open,
@@ -295,7 +295,7 @@ test('the create form date field defaults to now', function () {
         });
 });
 
-test('the title column with a description replaces the update column', function () {
+test('the title column with a description replaces the update column', function (): void {
     $advisory = Advisory::factory()->create();
 
     $advisoryUpdate = AdvisoryUpdate::factory()->for($advisory, 'advisory')->create();
@@ -313,7 +313,7 @@ test('the title column with a description replaces the update column', function 
         ->assertTableColumnHasDescription('title', $advisoryUpdate->update, record: $advisoryUpdate);
 });
 
-test('clicking the title opens an editable modal when the user can update the advisory update', function () {
+test('clicking the title opens an editable modal when the user can update the advisory update', function (): void {
     $advisory = Advisory::factory()->create([
         'status_id' => AdvisoryStatus::factory()->create([
             'classification' => SystemAdvisoryStatusClassification::Open,
@@ -333,7 +333,7 @@ test('clicking the title opens an editable modal when the user can update the ad
         ->assertFormFieldEnabled('title');
 });
 
-test('clicking the title opens a read-only modal when the user cannot update the advisory update', function () {
+test('clicking the title opens a read-only modal when the user cannot update the advisory update', function (): void {
     // Resolved advisories cannot be edited, per AdvisoryUpdatePolicy::update().
     $advisory = Advisory::factory()->create([
         'status_id' => AdvisoryStatus::factory()->create([
@@ -358,7 +358,7 @@ test('clicking the title opens a read-only modal when the user cannot update the
         ->assertFormFieldDisabled('title');
 });
 
-test('a user cannot mount the view or edit advisory update action without the view permission', function () {
+test('a user cannot mount the view or edit advisory update action without the view permission', function (): void {
     $advisory = Advisory::factory()->create([
         'status_id' => AdvisoryStatus::factory()->create([
             'classification' => SystemAdvisoryStatusClassification::Open,
@@ -380,7 +380,7 @@ test('a user cannot mount the view or edit advisory update action without the vi
         ->assertActionHidden(TestAction::make('viewOrEditAdvisoryUpdate')->table($advisoryUpdate));
 });
 
-test('submitting the view or edit advisory update action updates the advisory update and the advisory status', function () {
+test('submitting the view or edit advisory update action updates the advisory update and the advisory status', function (): void {
     $advisory = Advisory::factory()->create([
         'status_id' => AdvisoryStatus::factory()->create([
             'classification' => SystemAdvisoryStatusClassification::Open,
@@ -412,7 +412,7 @@ test('submitting the view or edit advisory update action updates the advisory up
     expect($advisory->refresh()->status_id)->toBe($newStatus->getKey());
 });
 
-test('submitting the view or edit advisory update action that resolves the advisory hides the create action without a page refresh', function () {
+test('submitting the view or edit advisory update action that resolves the advisory hides the create action without a page refresh', function (): void {
     $advisory = Advisory::factory()->create([
         'status_id' => AdvisoryStatus::factory()->create([
             'classification' => SystemAdvisoryStatusClassification::Open,
@@ -445,7 +445,7 @@ test('submitting the view or edit advisory update action that resolves the advis
 
 // Permission Tests
 
-test('AdvisoryUpdatesRelationManager create action is gated with proper access control', function () {
+test('AdvisoryUpdatesRelationManager create action is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create([

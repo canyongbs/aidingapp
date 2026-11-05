@@ -52,8 +52,10 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
+use App\Filament\Concerns\CanBeReadOnly;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Authenticatable;
+use App\Models\Scopes\WhereFullNameLike;
 use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
@@ -79,6 +81,8 @@ use Illuminate\Support\Str;
 
 class ServiceRequestsRelationManager extends RelationManager
 {
+    use CanBeReadOnly;
+
     protected static string $relationship = 'serviceRequests';
 
     public function form(Schema $schema): Schema
@@ -108,7 +112,7 @@ class ServiceRequestsRelationManager extends RelationManager
                                     ->where(
                                         fn (Builder $query) => $query
                                             ->withoutArchived()
-                                            ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
+                                            ->when(! auth()->user()->isSuperAdmin(), function (Builder $query): void {
                                                 $user = auth()->user();
                                                 assert($user instanceof User);
 
@@ -127,7 +131,7 @@ class ServiceRequestsRelationManager extends RelationManager
                                     ->pluck('name', 'id')
                             )
                             ->rule(new ManagedServiceRequestType())
-                            ->afterStateUpdated(function (Set $set, Select $component) {
+                            ->afterStateUpdated(function (Set $set, Select $component): void {
                                 $set('priority_id', null);
                                 $component
                                     ->getContainer()
@@ -179,7 +183,7 @@ class ServiceRequestsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('id')
-            ->modifyQueryUsing(function (Builder $query) {
+            ->modifyQueryUsing(function (Builder $query): void {
                 $query->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                     $user = auth()->user();
                     assert($user instanceof User);
@@ -199,10 +203,13 @@ class ServiceRequestsRelationManager extends RelationManager
                     ->label('Priority')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('assignedTo.user.name')
+                TextColumn::make('assignedTo.user.full_name')
                     ->label('Assigned to')
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas(
+                        'assignedTo.user',
+                        fn (Builder $query) => $query->tap(new WhereFullNameLike($search)),
+                    ))
+                    ->sortable(['first_name', 'last_name']),
             ])
             ->filters([
                 SelectFilter::make('priority')
@@ -213,7 +220,7 @@ class ServiceRequestsRelationManager extends RelationManager
                             ->whereHas('type')
                             ->with('type')
                     )
-                    ->getOptionLabelFromRecordUsing(fn (ServiceRequestPriority $record) => "{$record->type->name} - {$record->name}")
+                    ->getOptionLabelFromRecordUsing(fn (ServiceRequestPriority $record): string => "{$record->type->name} - {$record->name}")
                     ->multiple()
                     ->preload(),
                 SelectFilter::make('status')
@@ -232,7 +239,7 @@ class ServiceRequestsRelationManager extends RelationManager
                     ->slideOver(),
                 EditAction::make()
                     ->slideOver()
-                    ->mutateRecordDataUsing(function (array $data, ?ServiceRequest $record) {
+                    ->mutateRecordDataUsing(function (array $data, ?ServiceRequest $record): array {
                         $data['type_id'] = $record?->priority?->type_id;
 
                         return $data;
@@ -310,17 +317,17 @@ class ServiceRequestsRelationManager extends RelationManager
 
         /** @var Collection<int, ServiceRequestFormField> $fields */
         $fields = $form->fields;
-        $fields->each(function (ServiceRequestFormField $field) use (&$allFields) {
+        $fields->each(function (ServiceRequestFormField $field) use (&$allFields): void {
             $allFields->put($field->id, $field);
         });
 
         if ($form->steps->isNotEmpty()) {
             /** @var Collection<int, ServiceRequestFormStep> $steps */
             $steps = $form->steps;
-            $steps->each(function (ServiceRequestFormStep $step) use (&$allFields) {
+            $steps->each(function (ServiceRequestFormStep $step) use (&$allFields): void {
                 /** @var Collection<int, ServiceRequestFormField> $stepFields */
                 $stepFields = $step->fields;
-                $stepFields->each(function (ServiceRequestFormField $field) use (&$allFields) {
+                $stepFields->each(function (ServiceRequestFormField $field) use (&$allFields): void {
                     $allFields->put($field->id, $field);
                 });
             });

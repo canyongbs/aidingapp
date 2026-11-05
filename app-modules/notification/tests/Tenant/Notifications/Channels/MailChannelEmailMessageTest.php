@@ -38,15 +38,18 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Notification\Enums\EmailMessageEventType;
 use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Notification\Notifications\Attributes\SystemNotification;
+use AidingApp\Notification\Notifications\Contracts\OnDemandNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Notification\Tests\Fixtures\TestEmailNotification;
+use App\Features\ContactArchivingFeature;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Notification;
 
-it('will create an EmailMessage for the notification', function () {
+it('will create an EmailMessage for the notification', function (): void {
     $notifiable = User::factory()->create();
 
     $notification = new TestEmailNotification();
@@ -59,7 +62,7 @@ it('will create an EmailMessage for the notification', function () {
     expect($emailMessages->first()->notification_class)->toBe(TestEmailNotification::class);
 });
 
-it('will not send emails in demo mode and record a BlockedByDemoMode event', function () {
+it('will not send emails in demo mode and record a BlockedByDemoMode event', function (): void {
     $user = User::factory()->create();
 
     $tenantConfig = Tenant::current()->config;
@@ -80,7 +83,7 @@ it('will not send emails in demo mode and record a BlockedByDemoMode event', fun
     expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::BlockedByDemoMode);
 });
 
-it('will send system notifications in demo mode', function () {
+it('will send system notifications in demo mode', function (): void {
     $user = User::factory()->create();
 
     $tenantConfig = Tenant::current()->config;
@@ -102,7 +105,7 @@ it('will send system notifications in demo mode', function () {
     expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::Dispatched);
 });
 
-it('will not send system notifications in demo mode when system notifications are not excluded', function () {
+it('will not send system notifications in demo mode when system notifications are not excluded', function (): void {
     $user = User::factory()->create();
 
     $tenantConfig = Tenant::current()->config;
@@ -124,7 +127,7 @@ it('will not send system notifications in demo mode when system notifications ar
     expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::BlockedByDemoMode);
 });
 
-it('suppresses the send and records a SuppressedByBounced event for a bounced contact', function () {
+it('suppresses the send and records a SuppressedByBounced event for a bounced contact', function (): void {
     $contact = Contact::factory()->bounced()->create();
 
     expect($contact->canReceiveEmail())->toBeFalse();
@@ -141,7 +144,72 @@ it('suppresses the send and records a SuppressedByBounced event for a bounced co
     expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::SuppressedByBounced);
 });
 
-it('still dispatches to a healthy contact', function () {
+it('suppresses the send and records a SuppressedByArchived event for an archived contact', function (): void {
+    $contact = Contact::factory()->archived()->create();
+
+    $contact->notify(new TestEmailNotification());
+
+    $emailMessages = EmailMessage::query()
+        ->with('events')
+        ->get();
+
+    expect($emailMessages->count())->toBe(1);
+    expect($emailMessages->first()->events->count())->toBe(1);
+    expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::SuppressedByArchived);
+});
+
+it('records SuppressedByArchived rather than SuppressedByBounced for an archived contact that has bounced', function (): void {
+    $contact = Contact::factory()->archived()->bounced()->create();
+
+    $contact->notify(new TestEmailNotification());
+
+    $emailMessages = EmailMessage::query()
+        ->with('events')
+        ->get();
+
+    expect($emailMessages->count())->toBe(1);
+    expect($emailMessages->first()->events->count())->toBe(1);
+    expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::SuppressedByArchived);
+});
+
+it('suppresses the send and records a SuppressedByArchived event for an on-demand notification to a contact archived before delivery', function (): void {
+    $contact = Contact::factory()->create();
+
+    $notification = new TestOnDemandEmailNotification($contact);
+
+    $contact->archive();
+
+    (new AnonymousNotifiable())
+        ->route('mail', $contact->email)
+        ->notifyNow($notification);
+
+    $emailMessages = EmailMessage::query()
+        ->with('events')
+        ->get();
+
+    expect($emailMessages->count())->toBe(1);
+    expect($emailMessages->first()->recipient->is($contact))->toBeTrue();
+    expect($emailMessages->first()->events->count())->toBe(1);
+    expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::SuppressedByArchived);
+});
+
+it('still dispatches to an archived contact when the contact archiving feature is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    $contact = Contact::factory()->archived()->create();
+
+    $contact->notify(new TestEmailNotification());
+
+    $emailMessages = EmailMessage::query()
+        ->with('events')
+        ->get();
+
+    expect($emailMessages->count())->toBe(1);
+    expect($emailMessages->first()->events->count())->toBe(1);
+    expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::Dispatched);
+});
+
+it('still dispatches to a healthy contact', function (): void {
     $contact = Contact::factory()->create();
 
     expect($contact->canReceiveEmail())->toBeTrue();
@@ -158,7 +226,7 @@ it('still dispatches to a healthy contact', function () {
     expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::Dispatched);
 });
 
-it('is unaffected for a User notifiable', function () {
+it('is unaffected for a User notifiable', function (): void {
     $user = User::factory()->create();
 
     $notification = new TestEmailNotification();
@@ -192,5 +260,36 @@ class TestSystemNotification extends Notification implements ShouldQueue
             ->subject('Test Subject')
             ->greeting('Test Greeting')
             ->content('This is a test email');
+    }
+}
+
+class TestOnDemandEmailNotification extends Notification implements OnDemandNotification
+{
+    public function __construct(
+        public Contact $contact,
+    ) {}
+
+    /**
+     * @return list<string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['mail'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return MailMessage::make()
+            ->subject('Test Subject')
+            ->greeting('Test Greeting')
+            ->content('This is a test email');
+    }
+
+    /**
+     * @return array{0: string, 1: string}
+     */
+    public function identifyRecipient(?object $notifiable = null): array
+    {
+        return [$this->contact->getKey(), $this->contact->getMorphClass()];
     }
 }

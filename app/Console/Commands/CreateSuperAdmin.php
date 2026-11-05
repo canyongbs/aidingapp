@@ -78,8 +78,8 @@ class CreateSuperAdmin extends Command
 
         $rules = [
             'email' => ['required', 'email', 'unique:users,email'],
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:' . User::NAME_PART_MAX_LENGTH],
+            'last_name' => ['required', 'string', 'max:' . User::NAME_PART_MAX_LENGTH],
         ];
 
         $validator = Validator::make($input, $rules);
@@ -97,7 +97,6 @@ class CreateSuperAdmin extends Command
 
         $userData['first_name'] = $validated['first_name'];
         $userData['last_name'] = $validated['last_name'];
-        $userData['name'] = trim("{$validated['first_name']} {$validated['last_name']}");
 
         $user = User::create($userData);
 

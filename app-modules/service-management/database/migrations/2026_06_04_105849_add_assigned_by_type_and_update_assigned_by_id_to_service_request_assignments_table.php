@@ -42,12 +42,12 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_request_assignments', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('service_request_assignments', function (Blueprint $table): void {
                 $table->string('assigned_by_type')->nullable();
             });
 
-            Schema::table('service_request_assignments', function (Blueprint $table) {
+            Schema::table('service_request_assignments', function (Blueprint $table): void {
                 $table->dropForeign(['assigned_by_id']);
                 $table->index(['assigned_by_type', 'assigned_by_id']);
             });
@@ -56,12 +56,12 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_request_assignments', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('service_request_assignments', function (Blueprint $table): void {
                 $table->dropIndex(['assigned_by_type', 'assigned_by_id']);
             });
 
-            Schema::table('service_request_assignments', function (Blueprint $table) {
+            Schema::table('service_request_assignments', function (Blueprint $table): void {
                 $table->foreign('assigned_by_id')->references('id')->on('users');
                 $table->dropColumn('assigned_by_type');
             });

@@ -47,7 +47,7 @@ $exportUserRow = function (User $user): array {
     $columnMap = [
         'first_name' => 'First Name',
         'last_name' => 'Last Name',
-        'name' => 'Full Name',
+        'full_name' => 'Full Name',
         'preferred_name' => 'Preferred Name',
         'email' => 'Email address',
         'job_title' => 'Job title',
@@ -78,7 +78,7 @@ $exportUserRow = function (User $user): array {
     return $exporter($user);
 };
 
-it('exports all user fields, the department name, and roles joined with a pipe', function () use ($exportUserRow) {
+it('exports all user fields, the department name, and roles joined with a pipe', function () use ($exportUserRow): void {
     $department = Department::factory()->create(['name' => 'Engineering']);
     Role::factory()->create(['name' => 'Manager', 'guard_name' => 'web']);
     Role::factory()->create(['name' => 'Advisor', 'guard_name' => 'web']);
@@ -88,7 +88,6 @@ it('exports all user fields, the department name, and roles joined with a pipe',
         ->create([
             'first_name' => 'Jonathan',
             'last_name' => 'Smith',
-            'name' => 'Jonathan Smith',
             'email' => 'jonathan@example.com',
             'job_title' => 'Advisor',
             'work_number' => '+1 555 123 4567',
@@ -117,13 +116,13 @@ it('exports all user fields, the department name, and roles joined with a pipe',
         ->toContain('Advisor');
 });
 
-it('exports is_external as true for external users', function () use ($exportUserRow) {
+it('exports is_external as true for external users', function () use ($exportUserRow): void {
     $user = User::factory()->create(['is_external' => true]);
 
     expect($exportUserRow($user)[6])->toBe('true');
 });
 
-it('exports a blank roles value when the user has no web-guard roles', function () use ($exportUserRow) {
+it('exports a blank roles value when the user has no web-guard roles', function () use ($exportUserRow): void {
     $user = User::factory()->create();
 
     expect(blank($exportUserRow($user)[22]))->toBeTrue();

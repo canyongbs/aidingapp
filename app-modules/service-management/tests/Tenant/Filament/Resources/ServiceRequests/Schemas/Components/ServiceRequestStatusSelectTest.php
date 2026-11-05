@@ -51,7 +51,7 @@ $optionIdsFor = function (Select $select): array {
         ->all();
 };
 
-it('builds a status_id select with no default by default', function () {
+it('builds a status_id select with no default by default', function (): void {
     $select = ServiceRequestStatusSelect::make();
 
     expect($select)->toBeInstanceOf(Select::class)
@@ -59,7 +59,7 @@ it('builds a status_id select with no default by default', function () {
         ->and($select->getDefaultState())->toBeNull();
 });
 
-it('builds a select for a custom field name', function () {
+it('builds a select for a custom field name', function (): void {
     ServiceRequestStatus::factory()->create([
         'classification' => SystemServiceRequestClassification::Open,
     ]);
@@ -69,7 +69,7 @@ it('builds a select for a custom field name', function () {
     expect($select->getName())->toBe('automated_status_id');
 });
 
-it('applies a chained default when provided', function () {
+it('applies a chained default when provided', function (): void {
     $status = ServiceRequestStatus::factory()->create([
         'classification' => SystemServiceRequestClassification::Open,
     ]);
@@ -79,8 +79,8 @@ it('applies a chained default when provided', function () {
     expect($select->getDefaultState())->toBe($status->getKey());
 });
 
-describe('archiving', function () use ($optionIdsFor) {
-    it('does not offer archived service request statuses', function () use ($optionIdsFor) {
+describe('archiving', function () use ($optionIdsFor): void {
+    it('does not offer archived service request statuses', function () use ($optionIdsFor): void {
         $active = ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
         ]);
@@ -94,7 +94,7 @@ describe('archiving', function () use ($optionIdsFor) {
             ->and($optionIds)->not->toContain($archived->getKey());
     });
 
-    it('offers the currently selected status even when it is archived', function () use ($optionIdsFor) {
+    it('offers the currently selected status even when it is archived', function () use ($optionIdsFor): void {
         $archived = ServiceRequestStatus::factory()->archived()->create([
             'classification' => SystemServiceRequestClassification::Open,
         ]);
@@ -104,7 +104,7 @@ describe('archiving', function () use ($optionIdsFor) {
         expect($optionIds)->toContain($archived->getKey());
     });
 
-    it('does not offer an archived status other than the selected one', function () use ($optionIdsFor) {
+    it('does not offer an archived status other than the selected one', function () use ($optionIdsFor): void {
         $selected = ServiceRequestStatus::factory()->archived()->create([
             'classification' => SystemServiceRequestClassification::Open,
         ]);
@@ -119,8 +119,8 @@ describe('archiving', function () use ($optionIdsFor) {
     });
 });
 
-describe('soft deleted statuses', function () use ($optionIdsFor) {
-    it('does not offer soft deleted service request statuses', function () use ($optionIdsFor) {
+describe('soft deleted statuses', function () use ($optionIdsFor): void {
+    it('does not offer soft deleted service request statuses', function () use ($optionIdsFor): void {
         $active = ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
         ]);
@@ -135,7 +135,7 @@ describe('soft deleted statuses', function () use ($optionIdsFor) {
             ->and($optionIds)->not->toContain($trashed->getKey());
     });
 
-    it('offers the currently selected status even when it is soft deleted', function () use ($optionIdsFor) {
+    it('offers the currently selected status even when it is soft deleted', function () use ($optionIdsFor): void {
         $trashed = ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
         ]);

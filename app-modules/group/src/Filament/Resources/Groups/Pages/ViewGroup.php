@@ -56,7 +56,6 @@ class ViewGroup extends ViewRecord
                         TextEntry::make('name')
                             ->columnSpanFull(),
                         TextEntry::make('description')
-                            ->placeholder('N/A')
                             ->columnSpanFull(),
                     ]),
             ]);

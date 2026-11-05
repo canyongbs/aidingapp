@@ -47,7 +47,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-it('A non-super admin user cannot assign the super admin role.', function () {
+it('A non-super admin user cannot assign the super admin role.', function (): void {
     $loggedInUser = User::factory()->create();
 
     $user = User::factory()->create();
@@ -82,7 +82,7 @@ it('A non-super admin user cannot assign the super admin role.', function () {
     expect($user->roles)->not->toContain($superAdminRole);
 });
 
-it('allows user which has sass global admin role to assign sass global admin role to other user', function () {
+it('allows user which has sass global admin role to assign sass global admin role to other user', function (): void {
     $user = User::factory()->create();
     $superAdminRole = Role::query()->where('name', Authenticatable::SUPER_ADMIN_ROLE)->firstOrFail();
     $user->assignRole($superAdminRole);
@@ -101,7 +101,7 @@ it('allows user which has sass global admin role to assign sass global admin rol
         'pageClass' => EditUser::class,
     ])
         ->mountTableAction(AttachAction::class)
-        ->assertFormFieldExists('recordId', checkFieldUsing: function (Select $select) {
+        ->assertFormFieldExists('recordId', checkFieldUsing: function (Select $select): bool {
             $options = $select->getSearchResults(Authenticatable::SUPER_ADMIN_ROLE);
 
             return ! empty($options) ? true : false;
@@ -114,7 +114,7 @@ it('allows user which has sass global admin role to assign sass global admin rol
     expect($secondUser->roles->pluck('id'))->toContain($superAdminRole->getKey());
 });
 
-it('does not display the Saas Global Admin role if the user is not itself a Saas Global Admin', function () {
+it('does not display the Saas Global Admin role if the user is not itself a Saas Global Admin', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo(
         'role.view-any',
@@ -144,7 +144,7 @@ it('does not display the Saas Global Admin role if the user is not itself a Saas
         'pageClass' => EditUser::class,
     ])
         ->mountTableAction(AttachAction::class)
-        ->assertFormFieldExists('recordId', checkFieldUsing: function (Select $select) {
+        ->assertFormFieldExists('recordId', checkFieldUsing: function (Select $select): bool {
             $options = $select->getSearchResults(Authenticatable::SUPER_ADMIN_ROLE);
 
             return empty($options) ? true : false;
@@ -152,7 +152,7 @@ it('does not display the Saas Global Admin role if the user is not itself a Saas
         ->assertSuccessful();
 });
 
-it('only shows the attach role action to a user with the user.update permission', function () {
+it('only shows the attach role action to a user with the user.update permission', function (): void {
     $user = User::factory()->create();
 
     $loggedInUser = User::factory()->create();

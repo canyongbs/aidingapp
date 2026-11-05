@@ -36,12 +36,12 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
 
-use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Filament\Resources\Projects\Actions\EditProjectAction;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\Scopes\WithProgressCounts;
-use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\EditAction;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Widgets\Widget;
@@ -63,15 +63,14 @@ class ProjectDashboardHeaderWidget extends Widget implements HasActions, HasSche
     #[On('projectPipelineUpdated')]
     public function refreshOnPipelineUpdate(): void {}
 
-    public function editProjectAction(): Action
+    public function editProjectAction(): EditAction
     {
-        return Action::make('editProject')
-            ->label('Edit Project')
+        return EditProjectAction::make('editProject')
+            ->record($this->record)
             ->icon('heroicon-m-pencil-square')
             ->color('primary')
             ->extraAttributes(['class' => 'grow'])
-            ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
-            ->url(fn (): string => ProjectResource::getUrl('edit', ['record' => $this->record]));
+            ->after(fn () => $this->dispatch('projectUpdated'));
     }
 
     public function getProgress(): int

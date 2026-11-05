@@ -56,7 +56,7 @@ class CheckOutAssetHeaderAction extends Action
 
         $this->label(__('Check Out'));
 
-        $this->modalHeading(function () {
+        $this->modalHeading(function (): string {
             assert($this->getRecord() instanceof Asset);
 
             return __("Check out {$this->getRecord()->name}");
@@ -64,7 +64,7 @@ class CheckOutAssetHeaderAction extends Action
 
         $this->modalSubmitActionLabel(__('Done'));
 
-        $this->successNotificationTitle(function () {
+        $this->successNotificationTitle(function (): string {
             assert($this->getRecord() instanceof Asset);
 
             return __("Successfully checked out {$this->getRecord()->name}");
@@ -73,7 +73,7 @@ class CheckOutAssetHeaderAction extends Action
         $this->schema([
             Select::make('checked_out_to_id')
                 ->label('Select Contact')
-                ->options(Contact::all()->pluck('full_name', 'id'))
+                ->options(Contact::query()->withoutArchived()->get()->pluck('full_name', 'id'))
                 ->searchable()
                 ->required(),
             Textarea::make('notes')

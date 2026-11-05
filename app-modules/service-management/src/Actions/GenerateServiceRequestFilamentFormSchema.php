@@ -68,7 +68,7 @@ class GenerateServiceRequestFilamentFormSchema
         $schema = [];
 
         if ($includePriority) {
-            $priorities = $form->type->priorities->map(function (ServiceRequestPriority $priority) {
+            $priorities = $form->type->priorities->map(function (ServiceRequestPriority $priority): array {
                 return [
                     'label' => $priority->name,
                     'value' => $priority->id,
@@ -174,9 +174,8 @@ class GenerateServiceRequestFilamentFormSchema
 
     /**
      * @param  class-string  $blockClass
-     * @param mixed $field
      */
-    protected function getFilamentComponentFromBlock(string $blockClass, $field): Component
+    protected function getFilamentComponentFromBlock(string $blockClass, SubmissibleField $field): Component
     {
         $description = $field->config['description'] ?? null;
 
@@ -387,7 +386,7 @@ class GenerateServiceRequestFilamentFormSchema
      */
     protected function wizardContent(array $blocks, ServiceRequestForm $form): array
     {
-        $steps = $form->steps->map(function (SubmissibleStep $step) use ($blocks) {
+        $steps = $form->steps->map(function (SubmissibleStep $step) use ($blocks): Step {
             /** @var array{content?: array<string, mixed>} $content */
             $content = $step->content ?? [];
 

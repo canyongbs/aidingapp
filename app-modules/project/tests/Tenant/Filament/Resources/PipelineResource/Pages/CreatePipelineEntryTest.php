@@ -63,7 +63,7 @@ $baseKanbanEntryData = function (string $name = 'Test Entry'): array {
     ];
 };
 
-it('can render create pipeline entry with proper permission', function () {
+it('can render create pipeline entry with proper permission', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -85,7 +85,7 @@ it('can render create pipeline entry with proper permission', function () {
         ->assertActionVisible('addEntry');
 });
 
-it('can create a pipeline entry via the kanban add entry action', function () use ($baseKanbanEntryData) {
+it('can create a pipeline entry via the kanban add entry action', function () use ($baseKanbanEntryData): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -107,7 +107,7 @@ it('can create a pipeline entry via the kanban add entry action', function () us
     ]);
 });
 
-it('can create a kanban entry with description and due date', function () use ($baseKanbanEntryData) {
+it('can create a kanban entry with description and due date', function () use ($baseKanbanEntryData): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -133,7 +133,7 @@ it('can create a kanban entry with description and due date', function () use ($
     ]);
 });
 
-it('can create a kanban entry with an assigned user', function () use ($baseKanbanEntryData) {
+it('can create a kanban entry with an assigned user', function () use ($baseKanbanEntryData): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -159,7 +159,7 @@ it('can create a kanban entry with an assigned user', function () use ($baseKanb
     ]);
 });
 
-it('can create a kanban entry with an assigned contact', function () use ($baseKanbanEntryData) {
+it('can create a kanban entry with an assigned contact', function () use ($baseKanbanEntryData): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -186,7 +186,7 @@ it('can create a kanban entry with an assigned contact', function () use ($baseK
     ]);
 });
 
-it('can create a kanban entry with no assigned user', function () use ($baseKanbanEntryData) {
+it('can create a kanban entry with no assigned user', function () use ($baseKanbanEntryData): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -211,7 +211,7 @@ it('can create a kanban entry with no assigned user', function () use ($baseKanb
     ]);
 });
 
-it('persists related milestones, assets, and service requests via the kanban add entry action', function () use ($baseKanbanEntryData) {
+it('persists related milestones, assets, and service requests via the kanban add entry action', function () use ($baseKanbanEntryData): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -242,7 +242,7 @@ it('persists related milestones, assets, and service requests via the kanban add
     expect($entry->serviceRequests->pluck('id')->all())->toBe([$serviceRequest->id]);
 });
 
-it('requires a name when creating a kanban entry', function () use ($baseKanbanEntryData) {
+it('requires a name when creating a kanban entry', function () use ($baseKanbanEntryData): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -260,7 +260,7 @@ it('requires a name when creating a kanban entry', function () use ($baseKanbanE
         ->assertHasActionErrors(['name' => 'required']);
 });
 
-it('validates assigned_to_id must be a valid user id in the kanban action', function () use ($baseKanbanEntryData) {
+it('validates assigned_to_id must be a valid user id in the kanban action', function () use ($baseKanbanEntryData): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -279,7 +279,7 @@ it('validates assigned_to_id must be a valid user id in the kanban action', func
         ->assertHasActionErrors(['assigned_to_id']);
 });
 
-it('validates assigned_to_id must be a valid contact id in the kanban action', function () use ($baseKanbanEntryData) {
+it('validates assigned_to_id must be a valid contact id in the kanban action', function () use ($baseKanbanEntryData): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -298,7 +298,7 @@ it('validates assigned_to_id must be a valid contact id in the kanban action', f
         ->assertHasActionErrors(['assigned_to_id']);
 });
 
-it('sends notification when creating a kanban entry with an assigned user', function () use ($baseKanbanEntryData) {
+it('sends notification when creating a kanban entry with an assigned user', function () use ($baseKanbanEntryData): void {
     Notification::fake();
 
     asSuperAdmin();
@@ -322,7 +322,7 @@ it('sends notification when creating a kanban entry with an assigned user', func
     Notification::assertSentTo($user, PipelineEntryAssignedToUserNotification::class);
 });
 
-it('does not send notification when creating a kanban entry with no assigned user', function () use ($baseKanbanEntryData) {
+it('does not send notification when creating a kanban entry with no assigned user', function () use ($baseKanbanEntryData): void {
     Notification::fake();
 
     asSuperAdmin();

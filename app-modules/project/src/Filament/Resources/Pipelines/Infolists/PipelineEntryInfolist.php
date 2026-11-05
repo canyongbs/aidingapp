@@ -88,7 +88,7 @@ class PipelineEntryInfolist
                             }
 
                             return match (true) {
-                                $assignee instanceof User => $assignee->name,
+                                $assignee instanceof User => $assignee->full_name,
                                 $assignee instanceof Contact => $assignee->full_name,
                                 default => null,
                             };

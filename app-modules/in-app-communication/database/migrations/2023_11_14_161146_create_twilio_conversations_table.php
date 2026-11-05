@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('twilio_conversations', function (Blueprint $table) {
+        Schema::create('twilio_conversations', function (Blueprint $table): void {
             $table->string('sid')->primary();
 
             $table->string('friendly_name')->nullable();

@@ -144,7 +144,7 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
             ->model(PipelineEntry::class)
             ->authorize(fn (): bool => auth()->user()->can('update', $this->pipeline))
             ->schema(PipelineEntryForm::components($this->pipeline, isStageVisible: false))
-            ->action(function (array $data, array $arguments, Action $action) {
+            ->action(function (array $data, array $arguments, Action $action): void {
                 $stage = $this->pipeline->stages()->whereKey($arguments['stage'] ?? null)->first();
 
                 if (! $stage) {

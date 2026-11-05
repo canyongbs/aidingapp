@@ -39,7 +39,7 @@ use AidingApp\Engagement\Models\EmailTemplate;
 use function Tests\richContentText;
 use function Tests\richContentWith;
 
-it('converts a literal merge tag when creating', function () {
+it('converts a literal merge tag when creating', function (): void {
     $emailTemplate = EmailTemplate::factory()->create([
         'content' => richContentText('Hello {{ contact full name }}!'),
     ]);
@@ -51,7 +51,7 @@ it('converts a literal merge tag when creating', function () {
     ]));
 });
 
-it('converts a literal merge tag when updating', function () {
+it('converts a literal merge tag when updating', function (): void {
     $emailTemplate = EmailTemplate::factory()->create([
         'content' => richContentText('Nothing to convert.'),
     ]);
@@ -67,7 +67,7 @@ it('converts a literal merge tag when updating', function () {
     ]));
 });
 
-it('leaves text that does not match a merge tag untouched', function () {
+it('leaves text that does not match a merge tag untouched', function (): void {
     $content = richContentText('Hello {{ not a merge tag }}!');
 
     $emailTemplate = EmailTemplate::factory()->create([

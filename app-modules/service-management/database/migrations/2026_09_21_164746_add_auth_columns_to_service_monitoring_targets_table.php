@@ -41,7 +41,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+        Schema::table('service_monitoring_targets', function (Blueprint $table): void {
             $table->string('auth_type')->initial('none');
             $table->text('auth_username')->nullable();
             $table->text('auth_password')->nullable();
@@ -50,7 +50,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+        Schema::table('service_monitoring_targets', function (Blueprint $table): void {
             $table->dropColumn(['auth_type', 'auth_username', 'auth_password']);
         });
     }

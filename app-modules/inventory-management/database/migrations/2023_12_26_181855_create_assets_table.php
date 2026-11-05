@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('assets', function (Blueprint $table) {
+        Schema::create('assets', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
             $table->string('serial_number');

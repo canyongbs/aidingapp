@@ -60,7 +60,7 @@ class ConversationParticipantResource extends JsonResource
             'participant_type' => $this->participant_type,
             'participant' => $participantModel instanceof User ? [
                 'id' => $participantModel->getKey(),
-                'name' => $participantModel->name,
+                'name' => $participantModel->full_name,
                 'avatar_url' => Filament::getUserAvatarUrl($participantModel),
             ] : null,
             'is_manager' => $this->is_manager,

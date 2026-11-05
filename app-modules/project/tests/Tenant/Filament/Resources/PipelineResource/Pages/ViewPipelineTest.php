@@ -47,7 +47,7 @@ use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 use function Tests\htmlText;
 
-it('can render with proper permission', function () {
+it('can render with proper permission', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -77,7 +77,7 @@ it('can render with proper permission', function () {
         ->assertSuccessful();
 });
 
-it('can view a pipeline', function () {
+it('can view a pipeline', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -92,7 +92,7 @@ it('can view a pipeline', function () {
         ->assertSuccessful();
 });
 
-it('does not resolve a pipeline whose parent project is archived', function () {
+it('does not resolve a pipeline whose parent project is archived', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -109,7 +109,7 @@ it('does not resolve a pipeline whose parent project is archived', function () {
         ->assertNotFound();
 });
 
-it('displays correct pipeline details', function () {
+it('displays correct pipeline details', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -131,7 +131,7 @@ it('displays correct pipeline details', function () {
         ]);
 });
 
-it('displays pipeline with multiple stages', function () {
+it('displays pipeline with multiple stages', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -169,7 +169,7 @@ it('displays pipeline with multiple stages', function () {
         ->toContain('Initial Contact', 'Follow Up');
 });
 
-it('can access pipeline from project context', function () {
+it('can access pipeline from project context', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();

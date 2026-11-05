@@ -44,7 +44,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->contractManagement = false;
@@ -70,7 +70,7 @@ it('is gated with proper access control', function () {
     get(ListContractTypes::getUrl())->assertSuccessful();
 });
 
-it('only shows the bulk delete action to a user with the settings.delete permission', function () {
+it('only shows the bulk delete action to a user with the settings.delete permission', function (): void {
     ContractType::factory(15)->create();
 
     $user = User::factory()

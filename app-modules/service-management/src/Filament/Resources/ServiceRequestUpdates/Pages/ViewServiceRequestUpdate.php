@@ -93,7 +93,7 @@ class ViewServiceRequestUpdate extends ViewRecord
                         TextEntry::make('createdBy')
                             ->label('Created By')
                             ->getStateUsing(fn (ServiceRequestUpdate $record): string => match ($record->createdBy::class) {
-                                User::class => $record->createdBy->name,
+                                User::class => $record->createdBy->full_name,
                                 Contact::class => $record->createdBy->full_name,
                                 SystemUser::class => $record->createdBy->name,
                                 ServiceRequest::class => 'AI',

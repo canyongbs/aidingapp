@@ -33,18 +33,14 @@
 -->
 <script setup>
     import BaseBadge from '@common/BaseBadge.vue';
-    import Pagination from '@common/portal/Pagination.vue';
-    import { defineEmits, defineProps } from 'vue';
+    import BaseTable from '@common/BaseTable.vue';
+    import BaseTableBody from '@common/BaseTableBody.vue';
+    import BaseTableCell from '@common/BaseTableCell.vue';
+    import BaseTableCellText from '@common/BaseTableCellText.vue';
+    import BaseTableHeader from '@common/BaseTableHeader.vue';
+    import BaseTableHeaderCell from '@common/BaseTableHeaderCell.vue';
+    import BaseTableRow from '@common/BaseTableRow.vue';
     import formatDateTime from '../../Services/FormatDateTime.js';
-    import BaseTable from '../ui/BaseTable.vue';
-    import BaseTableBody from '../ui/BaseTableBody.vue';
-    import BaseTableCell from '../ui/BaseTableCell.vue';
-    import BaseTableCellText from '../ui/BaseTableCellText.vue';
-    import BaseTableEmptyState from '../ui/BaseTableEmptyState.vue';
-    import BaseTableHeader from '../ui/BaseTableHeader.vue';
-    import BaseTableHeaderCell from '../ui/BaseTableHeaderCell.vue';
-    import BaseTableLoadingState from '../ui/BaseTableLoadingState.vue';
-    import BaseTableRow from '../ui/BaseTableRow.vue';
 
     defineProps({
         assets: {
@@ -53,39 +49,9 @@
         },
         loading: {
             type: Boolean,
-            required: true,
-        },
-        loadingPage: {
-            type: Number,
-            default: null,
-        },
-        activeFilter: {
-            type: String,
-            required: true,
-        },
-        currentPage: {
-            type: Number,
-            required: true,
-        },
-        lastPage: {
-            type: Number,
-            required: true,
-        },
-        fromItem: {
-            type: Number,
-            required: true,
-        },
-        toItem: {
-            type: Number,
-            required: true,
-        },
-        totalItems: {
-            type: Number,
-            required: true,
+            default: false,
         },
     });
-
-    const emit = defineEmits(['fetchPage']);
 
     function serialDisplay(asset) {
         const serial = asset?.serial_number;
@@ -94,109 +60,56 @@
 </script>
 
 <template>
-    <Transition name="assets-fade" mode="out-in">
-        <BaseTableLoadingState
-            v-if="loading"
-            key="skeleton"
-            :columns="6"
-            :rows="7"
-            label="Loading assets, please wait…"
-            class="mt-1"
-        />
+    <BaseTable :loading="loading">
+        <template v-if="$slots.toolbar" #toolbar>
+            <slot name="toolbar" />
+        </template>
 
-        <BaseTableEmptyState v-else-if="assets.length === 0" key="empty" class="mt-1">
-            <template v-if="activeFilter === 'returned'">
-                <p class="text-base font-semibold text-gray-700">No returned assets</p>
-                <p class="mt-1 text-sm text-gray-400 max-w-xs mx-auto">No assets have been returned yet.</p>
-            </template>
-            <template v-else-if="activeFilter === 'checked_out'">
-                <p class="text-base font-semibold text-gray-700">No assets currently checked out</p>
-                <p class="mt-1 text-sm text-gray-400 max-w-xs mx-auto">
-                    You don't currently have any assets checked out.
-                </p>
-            </template>
-            <template v-else>
-                <p class="text-base font-semibold text-gray-700">No assets found</p>
-                <p class="mt-1 text-sm text-gray-400 max-w-xs mx-auto">No assets have been assigned to your account.</p>
-            </template>
-        </BaseTableEmptyState>
+        <template v-if="$slots.empty" #empty>
+            <slot name="empty" />
+        </template>
 
-        <div
-            v-else
-            key="table"
-            :id="`assets-panel-${activeFilter}`"
-            :aria-labelledby="`assets-tab-${activeFilter}`"
-            role="tabpanel"
-            aria-live="polite"
-            class="mt-1"
-        >
-            <BaseTable>
-                <BaseTableHeader>
-                    <tr>
-                        <BaseTableHeaderCell class="w-64">Name</BaseTableHeaderCell>
-                        <BaseTableHeaderCell>Type</BaseTableHeaderCell>
-                        <BaseTableHeaderCell>Serial Number</BaseTableHeaderCell>
-                        <BaseTableHeaderCell>Status</BaseTableHeaderCell>
-                        <BaseTableHeaderCell>Checkout Date</BaseTableHeaderCell>
-                        <BaseTableHeaderCell>Return Date</BaseTableHeaderCell>
-                    </tr>
-                </BaseTableHeader>
-                <BaseTableBody>
-                    <BaseTableRow v-for="(item, idx) in assets" :key="item.id" :delay="idx * 30">
-                        <BaseTableCell>
-                            <BaseTableCellText :text="item.asset?.name" :sub-text="item.asset?.description" />
-                        </BaseTableCell>
+        <template v-if="$slots.footer" #footer>
+            <slot name="footer" />
+        </template>
 
-                        <BaseTableCell class="text-sm text-gray-600">
-                            {{ item.asset?.type?.name ?? '—' }}
-                        </BaseTableCell>
+        <BaseTableHeader>
+            <tr>
+                <BaseTableHeaderCell class="w-64">Name</BaseTableHeaderCell>
+                <BaseTableHeaderCell>Type</BaseTableHeaderCell>
+                <BaseTableHeaderCell>Serial Number</BaseTableHeaderCell>
+                <BaseTableHeaderCell>Status</BaseTableHeaderCell>
+                <BaseTableHeaderCell>Checkout Date</BaseTableHeaderCell>
+                <BaseTableHeaderCell>Return Date</BaseTableHeaderCell>
+            </tr>
+        </BaseTableHeader>
+        <BaseTableBody>
+            <BaseTableRow v-for="(item, idx) in assets" :key="item.id" :delay="idx * 30">
+                <BaseTableCell>
+                    <BaseTableCellText :text="item.asset?.name" :sub-text="item.asset?.description" />
+                </BaseTableCell>
 
-                        <BaseTableCell>
-                            <BaseBadge color="gray" class="font-mono">{{ serialDisplay(item.asset) }}</BaseBadge>
-                        </BaseTableCell>
+                <BaseTableCell class="text-sm text-gray-600">
+                    {{ item.asset?.type?.name ?? '—' }}
+                </BaseTableCell>
 
-                        <BaseTableCell>
-                            <BaseBadge v-if="item.status === 'returned'" color="success">Returned</BaseBadge>
-                            <BaseBadge v-else color="warning">Checked Out</BaseBadge>
-                        </BaseTableCell>
+                <BaseTableCell>
+                    <BaseBadge color="gray" class="font-mono">{{ serialDisplay(item.asset) }}</BaseBadge>
+                </BaseTableCell>
 
-                        <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
-                            {{ formatDateTime(item.checked_out_at) ?? '—' }}
-                        </BaseTableCell>
+                <BaseTableCell>
+                    <BaseBadge v-if="item.status === 'returned'" color="success">Returned</BaseBadge>
+                    <BaseBadge v-else color="warning">Checked Out</BaseBadge>
+                </BaseTableCell>
 
-                        <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
-                            {{ formatDateTime(item.checked_in_at) ?? '' }}
-                        </BaseTableCell>
-                    </BaseTableRow>
-                </BaseTableBody>
-            </BaseTable>
+                <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
+                    {{ formatDateTime(item.checked_out_at) ?? '—' }}
+                </BaseTableCell>
 
-            <Pagination
-                v-if="lastPage > 1"
-                :current-page="currentPage"
-                :last-page="lastPage"
-                :from-item="fromItem"
-                :to-item="toItem"
-                :total-items="totalItems"
-                :loading-page="loadingPage"
-                @fetchPreviousPage="emit('fetchPage', currentPage - 1)"
-                @fetchNextPage="emit('fetchPage', currentPage + 1)"
-                @fetchPage="emit('fetchPage', $event)"
-            />
-        </div>
-    </Transition>
+                <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
+                    {{ formatDateTime(item.checked_in_at) ?? '' }}
+                </BaseTableCell>
+            </BaseTableRow>
+        </BaseTableBody>
+    </BaseTable>
 </template>
-
-<style>
-    .assets-fade-enter-active,
-    .assets-fade-leave-active {
-        transition:
-            opacity 0.16s ease,
-            transform 0.16s ease;
-    }
-    .assets-fade-enter-from,
-    .assets-fade-leave-to {
-        opacity: 0;
-        transform: translateY(5px);
-    }
-</style>

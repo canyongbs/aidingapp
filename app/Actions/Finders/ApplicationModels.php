@@ -36,7 +36,6 @@
 
 namespace App\Actions\Finders;
 
-use App\Models\BaseModel;
 use Illuminate\Container\Container;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -52,7 +51,7 @@ class ApplicationModels
     public function all(): Collection
     {
         return collect(File::allFiles(app_path()))
-            ->map(function (SplFileInfo $item) {
+            ->map(function (SplFileInfo $item): string {
                 $path = $item->getRelativePathName();
                 $class = sprintf(
                     '\%s%s',
@@ -62,12 +61,12 @@ class ApplicationModels
 
                 return $class;
             })
-            ->filter(function (string $class) {
+            ->filter(function (string $class): bool {
                 $isModel = false;
 
                 if (class_exists($class)) {
                     $reflection = new ReflectionClass($class);
-                    $isModel = ($reflection->isSubclassOf(Model::class) || $reflection->isSubclassOf(BaseModel::class)) &&
+                    $isModel = $reflection->isSubclassOf(Model::class) &&
                     ! $reflection->isAbstract();
                 }
 

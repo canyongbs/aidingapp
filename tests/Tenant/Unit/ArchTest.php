@@ -37,6 +37,8 @@
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\File;
 use InterNACHI\Modular\Support\ModuleConfig;
 use InterNACHI\Modular\Support\ModuleRegistry;
 use PHPUnit\Framework\Assert;
@@ -54,13 +56,13 @@ $modulesPath = dirname(__DIR__, 3) . '/app-modules';
 $modules = (new ModuleRegistry(
     modules_path: $modulesPath,
     modules_loader: fn () => collect(glob($modulesPath . '/*/composer.json'))
-        ->map(fn (string $path) => ModuleConfig::fromComposerFile(
+        ->map(fn (string $path): ModuleConfig => ModuleConfig::fromComposerFile(
             new SplFileInfo($path, dirname($path), $path)
         ))
-        ->keyBy(fn (ModuleConfig $module) => $module->name),
+        ->keyBy(fn (ModuleConfig $module): string => $module->name),
 ))->modules();
 
-$modules->each(function (ModuleConfig $module) use ($legacyV4UuidModels) {
+$modules->each(function (ModuleConfig $module) use ($legacyV4UuidModels): void {
     arch("All {$module->name} Models should not use HasVersion4Uuids trait")
         ->expect($module->namespace() . 'Models')
         ->extending(Model::class)
@@ -68,7 +70,7 @@ $modules->each(function (ModuleConfig $module) use ($legacyV4UuidModels) {
         ->ignoring($legacyV4UuidModels);
 });
 
-test('Legacy models must not use HasUuids (UUIDv7)', function () {
+test('Legacy models must not use HasUuids (UUIDv7)', function (): void {
     $legacyModels = require __DIR__ . '/legacy-v4-uuid-models.php';
 
     foreach ($legacyModels as $class) {
@@ -84,4 +86,24 @@ test('Legacy models must not use HasUuids (UUIDv7)', function () {
             "Class [{$class}] uses HasUuids (UUIDv7) directly. Legacy models must use HasVersion4Uuids instead.",
         );
     }
+});
+
+test('Only the listed legacy models use HasVersion4Uuids', function () use ($modules): void {
+    $legacyModels = require __DIR__ . '/legacy-v4-uuid-models.php';
+
+    // The arch rules above miss traits inherited from a parent class, and ignoring() matches by prefix
+    // (ServiceRequestType exempts ServiceRequestTypeCategory), so check every model exactly here.
+    $classesInDirectory = fn (string $directory, string $namespace): Collection => collect(File::allFiles($directory))
+        ->filter(fn (SplFileInfo $file): bool => $file->getExtension() === 'php')
+        ->map(fn (SplFileInfo $file): string => $namespace . str_replace('/', '\\', substr($file->getRelativePathname(), 0, -4)));
+
+    $unlistedModels = $classesInDirectory(app_path(), 'App\\')
+        ->merge($modules->flatMap(fn (ModuleConfig $module): Collection => $classesInDirectory($module->path('src'), $module->namespace())))
+        ->filter(fn (string $class): bool => class_exists($class) && is_subclass_of($class, Model::class))
+        ->filter(fn (string $class): bool => in_array(HasVersion4Uuids::class, class_uses_recursive($class), true))
+        ->reject(fn (string $class): bool => in_array($class, $legacyModels, true))
+        ->values()
+        ->all();
+
+    expect($unlistedModels)->toBe([]);
 });

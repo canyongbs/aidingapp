@@ -41,7 +41,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('knowledge_base_articles', function (Blueprint $table) {
+        Schema::table('knowledge_base_articles', function (Blueprint $table): void {
             $table->dropForeign(['quality_id']);
             $table->dropColumn('quality_id');
         });
@@ -49,7 +49,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('knowledge_base_articles', function (Blueprint $table) {
+        Schema::table('knowledge_base_articles', function (Blueprint $table): void {
             $table->foreignUuid('quality_id')->nullable()->references('id')->on('knowledge_base_qualities');
         });
     }

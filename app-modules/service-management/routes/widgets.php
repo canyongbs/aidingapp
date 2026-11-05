@@ -50,10 +50,10 @@ Route::middleware([
 ])
     ->prefix('widgets/service-requests')
     ->name('widgets.service-requests.')
-    ->group(function () {
+    ->group(function (): void {
         Route::prefix('forms')
             ->name('forms.')
-            ->group(function () {
+            ->group(function (): void {
                 // Service request forms are no longer embeddable; this route only serves the
                 // widget assets used to render the admin preview of a form.
                 // This route MUST remain at /widgets/... in order to catch requests to asset files and return the correct headers
@@ -69,14 +69,14 @@ Route::middleware([
                 EnsureFrontendRequestsAreStateful::class,
                 // CORS middlware is not included in this since there is no way to embed this outside of Aiding App at the moment.
             ])
-            ->group(function () {
+            ->group(function (): void {
                 Route::prefix('api/{serviceRequest}')
                     ->name('api.')
                     ->middleware([
                         FeedbackManagementIsOn::class,
                         ServiceRequestTypeFeedbackIsOn::class,
                     ])
-                    ->group(function () {
+                    ->group(function (): void {
                         Route::get('', [ServiceRequestFeedbackFormWidgetController::class, 'assets'])
                             ->name('assets');
 

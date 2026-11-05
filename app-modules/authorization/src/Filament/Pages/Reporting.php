@@ -38,10 +38,16 @@ namespace AidingApp\Authorization\Filament\Pages;
 
 use AidingApp\Authorization\Filament\Actions\ManageReportAssignmentsBulkAction;
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
+use AidingApp\Report\Actions\AssignReportGroups;
 use AidingApp\Report\Enums\ReportAccessKey;
 use AidingApp\Report\Models\ReportDepartmentAccess;
+use AidingApp\Report\Models\ReportGroupAccess;
 use AidingApp\Report\Models\ReportUserAccess;
 use App\Enums\NavigationGroup;
+use App\Features\ReportGroupAccessFeature;
+use App\Models\Scopes\OrderByFullName;
+use App\Models\Scopes\WhereFullNameLike;
 use App\Models\Scopes\WithoutAnyAdmin;
 use App\Models\User;
 use Filament\Actions\Action;
@@ -165,9 +171,12 @@ class Reporting extends Page implements HasActions, HasForms, HasTable
     {
         $usersQuery = User::query()
             ->tap(new WithoutAnyAdmin())
-            ->orderBy('name');
+            ->tap(new OrderByFullName());
 
         $departmentsQuery = Department::query()
+            ->orderBy('name');
+
+        $groupsQuery = Group::query()
             ->orderBy('name');
 
         return Action::make('manage')
@@ -176,7 +185,9 @@ class Reporting extends Page implements HasActions, HasForms, HasTable
             ->slideOver()
             ->authorize(fn (): bool => auth()->user()->can('reporting.*.update'))
             ->modalHeading(fn (array $record): string => "Manage Access: {$record['name']}")
-            ->modalDescription('Grant access to this report by assigning individual users and/or departments.')
+            ->modalDescription(fn (): string => ReportGroupAccessFeature::active()
+                ? 'Grant access to this report by assigning individual users, departments, and/or groups.'
+                : 'Grant access to this report by assigning individual users and/or departments.')
             ->fillForm(fn (array $record): array => [
                 'users' => ReportUserAccess::query()
                     ->where('report_key', $record['report_key'])
@@ -186,6 +197,12 @@ class Reporting extends Page implements HasActions, HasForms, HasTable
                     ->where('report_key', $record['report_key'])
                     ->pluck('department_id')
                     ->all(),
+                'groups' => ReportGroupAccessFeature::active()
+                    ? ReportGroupAccess::query()
+                        ->where('report_key', $record['report_key'])
+                        ->pluck('group_id')
+                        ->all()
+                    : [],
             ])
             ->schema([
                 Select::make('users')
@@ -195,20 +212,23 @@ class Reporting extends Page implements HasActions, HasForms, HasTable
                     ->options(
                         fn (): array => $usersQuery
                             ->limit(50)
-                            ->pluck('name', 'id')
+                            ->get()
+                            ->pluck('full_name', 'id')
                             ->all(),
                     )
                     ->getSearchResultsUsing(
                         fn (string $search): array => $usersQuery
-                            ->where(new Expression('lower(name)'), 'like', '%' . Str::lower($search) . '%')
+                            ->tap(new WhereFullNameLike($search))
                             ->limit(50)
-                            ->pluck('name', 'id')
+                            ->get()
+                            ->pluck('full_name', 'id')
                             ->all(),
                     )
                     ->getOptionLabelsUsing(
                         fn (array $values): array => $usersQuery
                             ->whereKey($values)
-                            ->pluck('name', 'id')
+                            ->get()
+                            ->pluck('full_name', 'id')
                             ->all(),
                     ),
                 Select::make('departments')
@@ -234,12 +254,43 @@ class Reporting extends Page implements HasActions, HasForms, HasTable
                             ->pluck('name', 'id')
                             ->all(),
                     ),
+                Select::make('groups')
+                    ->label('Groups')
+                    ->multiple()
+                    ->searchable()
+                    ->visible(fn (): bool => ReportGroupAccessFeature::active())
+                    ->options(
+                        fn (): array => $groupsQuery
+                            ->clone()
+                            ->limit(50)
+                            ->pluck('name', 'id')
+                            ->all(),
+                    )
+                    ->getSearchResultsUsing(
+                        fn (string $search): array => $groupsQuery
+                            ->clone()
+                            ->where(new Expression('lower(name)'), 'like', '%' . Str::lower($search) . '%')
+                            ->limit(50)
+                            ->pluck('name', 'id')
+                            ->all(),
+                    )
+                    ->getOptionLabelsUsing(
+                        fn (array $values): array => $groupsQuery
+                            ->clone()
+                            ->whereKey($values)
+                            ->pluck('name', 'id')
+                            ->all(),
+                    ),
             ])
-            ->action(function (array $record, array $data): void {
+            ->action(function (array $record, array $data, AssignReportGroups $assignReportGroups): void {
                 try {
                     DB::beginTransaction();
                     $this->syncUserAccess($record['report_key'], $data['users'] ?? []);
                     $this->syncDepartmentAccess($record['report_key'], $data['departments'] ?? []);
+
+                    if (ReportGroupAccessFeature::active()) {
+                        $assignReportGroups($record['report_key'], $data['groups'] ?? [], removeUnlisted: true);
+                    }
 
                     $this->resetTable();
                     DB::commit();

@@ -54,7 +54,8 @@ class UsersTable
             ->filters([
                 QueryBuilder::make()
                     ->constraints([
-                        TextConstraint::make('name'),
+                        TextConstraint::make('first_name'),
+                        TextConstraint::make('last_name'),
                         DateConstraint::make('created_at')
                             ->icon('heroicon-m-calendar'),
                         TextConstraint::make('email')
@@ -73,7 +74,7 @@ class UsersTable
             ->recordActions([
                 ViewAction::make()
                     ->authorize('view')
-                    ->url(fn (User $record) => UserResource::getUrl('view', ['record' => $record])),
+                    ->url(fn (User $record): string => UserResource::getUrl('view', ['record' => $record])),
             ]);
     }
 }

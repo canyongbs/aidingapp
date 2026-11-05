@@ -45,7 +45,7 @@ use function Pest\Laravel\assertDatabaseMissing;
 
 beforeEach(fn () => Event::fake());
 
-it('removes a participant from a channel conversation', function () {
+it('removes a participant from a channel conversation', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -65,7 +65,7 @@ it('removes a participant from a channel conversation', function () {
     assertDatabaseCount(ConversationParticipant::class, 0);
 });
 
-it('returns false when participant does not exist', function () {
+it('returns false when participant does not exist', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -77,7 +77,7 @@ it('returns false when participant does not exist', function () {
     expect($result)->toBeFalse();
 });
 
-it('throws exception when removing participant from direct message', function () {
+it('throws exception when removing participant from direct message', function (): void {
     $conversation = Conversation::factory()->direct()->create();
     $user = User::factory()->create();
 
@@ -87,7 +87,7 @@ it('throws exception when removing participant from direct message', function ()
     );
 })->throws(InvalidArgumentException::class, 'Cannot remove participants from direct message conversations.');
 
-it('throws exception when removing the last manager from a public channel', function () {
+it('throws exception when removing the last manager from a public channel', function (): void {
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => false,
     ]);
@@ -104,7 +104,7 @@ it('throws exception when removing the last manager from a public channel', func
     );
 })->throws(InvalidArgumentException::class, 'Cannot remove the last manager from a channel.');
 
-it('allows removing a manager when other managers exist', function () {
+it('allows removing a manager when other managers exist', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $manager1 = User::factory()->create();
     $manager2 = User::factory()->create();
@@ -135,7 +135,7 @@ it('allows removing a manager when other managers exist', function () {
     ]);
 });
 
-it('allows removing non-manager participants regardless of manager count', function () {
+it('allows removing non-manager participants regardless of manager count', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $manager = User::factory()->create();
     $regularUser = User::factory()->create();
@@ -161,7 +161,7 @@ it('allows removing non-manager participants regardless of manager count', funct
     assertDatabaseCount(ConversationParticipant::class, 1);
 });
 
-it('allows last manager to leave a private channel when they are the only participant', function () {
+it('allows last manager to leave a private channel when they are the only participant', function (): void {
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => true,
     ]);
@@ -183,7 +183,7 @@ it('allows last manager to leave a private channel when they are the only partic
     assertDatabaseCount(ConversationParticipant::class, 0);
 });
 
-it('throws exception when last manager tries to leave a private channel with other participants', function () {
+it('throws exception when last manager tries to leave a private channel with other participants', function (): void {
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => true,
     ]);
@@ -206,7 +206,7 @@ it('throws exception when last manager tries to leave a private channel with oth
     );
 })->throws(InvalidArgumentException::class, 'Cannot remove the last manager from a channel.');
 
-it('throws exception when last manager tries to leave a public channel even as only participant', function () {
+it('throws exception when last manager tries to leave a public channel even as only participant', function (): void {
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => false,
     ]);

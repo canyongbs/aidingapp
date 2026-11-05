@@ -39,7 +39,7 @@ use AidingApp\ServiceManagement\Models\Secret;
 use App\Jobs\PruneModels;
 use Illuminate\Support\Facades\Exceptions;
 
-it('prunes stale records and keeps recent ones', function () {
+it('prunes stale records and keeps recent ones', function (): void {
     $stale = Audit::factory()->create();
     Audit::query()->whereKey($stale->getKey())->update(['created_at' => now()->subDays(120)]);
 
@@ -53,7 +53,7 @@ it('prunes stale records and keeps recent ones', function () {
         ->and(Audit::query()->whereKey($recent->getKey())->exists())->toBeTrue();
 });
 
-it('prunes stale secrets', function () {
+it('prunes stale secrets', function (): void {
     $secret = Secret::factory()->create(['related_id' => null, 'related_type' => null]);
     Secret::query()->whereKey($secret->getKey())->update(['updated_at' => now()->subDays(2)]);
 
@@ -62,7 +62,7 @@ it('prunes stale secrets', function () {
     expect(Secret::query()->whereKey($secret->getKey())->exists())->toBeFalse();
 });
 
-it('reports a failing model and still prunes the rest', function () {
+it('reports a failing model and still prunes the rest', function (): void {
     Exceptions::fake();
 
     $job = new class () extends PruneModels {
@@ -85,5 +85,5 @@ it('reports a failing model and still prunes the rest', function () {
 
     expect($job->laterPrunerRan)->toBeTrue();
 
-    Exceptions::assertReported(fn (RuntimeException $throw) => $throw->getMessage() === 'prune failed');
+    Exceptions::assertReported(fn (RuntimeException $throw): bool => $throw->getMessage() === 'prune failed');
 });

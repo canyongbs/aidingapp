@@ -32,10 +32,10 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import BaseSection from '@common/BaseSection.vue';
     import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/16/solid';
     import { ClockIcon, Cog6ToothIcon, LinkIcon, Square3Stack3DIcon } from '@heroicons/vue/24/outline';
     import { computed, defineProps } from 'vue';
-    import BaseCard from '../ui/BaseCard.vue';
 
     const props = defineProps({
         monitor: {
@@ -49,13 +49,8 @@
 </script>
 
 <template>
-    <BaseCard class="h-full">
-        <h2 class="flex items-center gap-2 text-base font-semibold text-gray-900">
-            <Cog6ToothIcon class="size-5 text-gray-500" aria-hidden="true" />
-            Monitoring details
-        </h2>
-
-        <dl class="mt-5 grid gap-5">
+    <BaseSection heading="Monitoring details" :icon="Cog6ToothIcon" class="h-full">
+        <dl class="grid gap-5">
             <div class="flex gap-3">
                 <Square3Stack3DIcon class="size-5 shrink-0 text-gray-400" aria-hidden="true" />
                 <div class="grid min-w-0 flex-1 gap-1 sm:grid-cols-[9rem_1fr] sm:gap-3">
@@ -74,7 +69,7 @@
                             :href="monitor.domain"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="inline-flex items-start gap-1 break-all text-[rgba(var(--primary-600),1)] hover:underline"
+                            class="inline-flex items-start gap-1 break-all text-brand-600 hover:underline"
                         >
                             {{ monitor.domain }}
                             <ArrowTopRightOnSquareIcon class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
@@ -93,5 +88,5 @@
                 </div>
             </div>
         </dl>
-    </BaseCard>
+    </BaseSection>
 </template>

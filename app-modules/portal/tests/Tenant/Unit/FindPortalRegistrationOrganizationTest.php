@@ -37,7 +37,7 @@
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Portal\Actions\FindPortalRegistrationOrganization;
 
-test('it returns organization for exact matching domain', function () {
+test('it returns organization for exact matching domain', function (): void {
     $organization = Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [
@@ -51,7 +51,7 @@ test('it returns organization for exact matching domain', function () {
         ->and($result?->is($organization))->toBeTrue();
 });
 
-test('it matches case-insensitive email domain', function () {
+test('it matches case-insensitive email domain', function (): void {
     $organization = Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [
@@ -65,7 +65,7 @@ test('it matches case-insensitive email domain', function () {
         ->and($result?->is($organization))->toBeTrue();
 });
 
-test('it normalizes stored www domain for matching', function () {
+test('it normalizes stored www domain for matching', function (): void {
     $organization = Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [
@@ -79,7 +79,7 @@ test('it normalizes stored www domain for matching', function () {
         ->and($result?->is($organization))->toBeTrue();
 });
 
-test('it does not match when only email domain includes www', function () {
+test('it does not match when only email domain includes www', function (): void {
     Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [
@@ -92,7 +92,7 @@ test('it does not match when only email domain includes www', function () {
     expect($result)->toBeNull();
 });
 
-test('it ignores organizations where contact generation is disabled', function () {
+test('it ignores organizations where contact generation is disabled', function (): void {
     Organization::factory()->create([
         'is_contact_generation_enabled' => false,
         'domains' => [
@@ -105,9 +105,20 @@ test('it ignores organizations where contact generation is disabled', function (
     expect($result)->toBeNull();
 });
 
-test('it returns null for invalid email format', function () {
+test('it returns null for invalid email format', function (): void {
     $action = app(FindPortalRegistrationOrganization::class);
 
     expect($action('invalid-email'))->toBeNull()
         ->and($action('myemail@'))->toBeNull();
+});
+
+test('it ignores archived organizations', function (): void {
+    Organization::factory()->archived()->create([
+        'is_contact_generation_enabled' => true,
+        'domains' => [
+            ['domain' => 'example.com'],
+        ],
+    ]);
+
+    expect(app(FindPortalRegistrationOrganization::class)('myemail@example.com'))->toBeNull();
 });

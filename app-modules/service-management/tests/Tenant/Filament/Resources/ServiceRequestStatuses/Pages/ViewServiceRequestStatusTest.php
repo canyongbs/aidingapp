@@ -45,7 +45,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('The correct details are displayed on the ViewServiceRequestStatus page', function () {
+test('The correct details are displayed on the ViewServiceRequestStatus page', function (): void {
     $serviceRequestStatus = ServiceRequestStatus::factory()->create();
 
     asSuperAdmin();
@@ -61,7 +61,7 @@ test('The correct details are displayed on the ViewServiceRequestStatus page', f
 
 // Permission Tests
 
-test('ViewServiceRequestStatus is gated with proper access control', function () {
+test('ViewServiceRequestStatus is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $contactSource = ServiceRequestStatus::factory()->create();
@@ -84,7 +84,7 @@ test('ViewServiceRequestStatus is gated with proper access control', function ()
         )->assertSuccessful();
 });
 
-test('ViewServiceRequestStatus is gated with proper feature access control', function () {
+test('ViewServiceRequestStatus is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -117,7 +117,7 @@ test('ViewServiceRequestStatus is gated with proper feature access control', fun
         )->assertSuccessful();
 });
 
-it('displays the edit action and not the lock when the service request status is not system protected', function () {
+it('displays the edit action and not the lock when the service request status is not system protected', function (): void {
     $serviceRequestStatus = ServiceRequestStatus::factory()->create();
 
     asSuperAdmin();
@@ -130,7 +130,7 @@ it('displays the edit action and not the lock when the service request status is
         ->assertActionEnabled('edit');
 });
 
-it('displays the lock icon rather than the edit action when the service request status is system protected', function () {
+it('displays the lock icon rather than the edit action when the service request status is system protected', function (): void {
     $serviceRequestStatus = ServiceRequestStatus::factory()->create([
         'is_system_protected' => true,
     ]);

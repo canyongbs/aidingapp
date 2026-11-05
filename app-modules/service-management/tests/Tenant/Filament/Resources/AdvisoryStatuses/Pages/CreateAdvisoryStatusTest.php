@@ -46,7 +46,7 @@ use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
-test('CreateAdvisoryStatus requires valid data', function (AdvisoryStatusRequestFactory $data, array $errors) {
+test('CreateAdvisoryStatus requires valid data', function (AdvisoryStatusRequestFactory $data, array $errors): void {
     asSuperAdmin();
 
     $advisoryStatus = AdvisoryStatusRequestFactory::new($data)->create();
@@ -76,7 +76,7 @@ test('CreateAdvisoryStatus requires valid data', function (AdvisoryStatusRequest
     ]
 );
 
-test('CreateAdvisoryStatus is gated with proper access control', function () {
+test('CreateAdvisoryStatus is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)

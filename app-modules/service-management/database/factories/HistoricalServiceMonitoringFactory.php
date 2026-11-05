@@ -62,7 +62,7 @@ class HistoricalServiceMonitoringFactory extends Factory
 
     public function failed(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'response' => 500,
             'succeeded' => false,
         ]);

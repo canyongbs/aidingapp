@@ -42,7 +42,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             Schema::dropIfExists('service_monitoring_target_report_user');
             Schema::dropIfExists('service_monitoring_target_report_department');
             Schema::dropIfExists('service_monitoring_target_report_contact');
@@ -51,8 +51,8 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
-            Schema::create('service_monitoring_target_report_user', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::create('service_monitoring_target_report_user', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
 
                 $table->foreignUuid('service_monitoring_target_id')->constrained()->cascadeOnDelete();
@@ -61,7 +61,7 @@ return new class () extends Migration {
                 $table->timestamps();
             });
 
-            Schema::create('service_monitoring_target_report_department', function (Blueprint $table) {
+            Schema::create('service_monitoring_target_report_department', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
 
                 $table->foreignUuid('service_monitoring_target_id')->constrained()->cascadeOnDelete();
@@ -70,7 +70,7 @@ return new class () extends Migration {
                 $table->timestamps();
             });
 
-            Schema::create('service_monitoring_target_report_contact', function (Blueprint $table) {
+            Schema::create('service_monitoring_target_report_contact', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
 
                 $table->foreignUuid('service_monitoring_target_id')->constrained()->cascadeOnDelete();

@@ -37,8 +37,13 @@
 namespace AidingApp\Authorization\Filament\Actions;
 
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
+use AidingApp\Report\Actions\AssignReportGroups;
 use AidingApp\Report\Models\ReportDepartmentAccess;
 use AidingApp\Report\Models\ReportUserAccess;
+use App\Features\ReportGroupAccessFeature;
+use App\Models\Scopes\OrderByFullName;
+use App\Models\Scopes\WhereFullNameLike;
 use App\Models\Scopes\WithoutAnyAdmin;
 use App\Models\User;
 use Filament\Actions\BulkAction;
@@ -57,9 +62,12 @@ class ManageReportAssignmentsBulkAction
     {
         $usersQuery = User::query()
             ->tap(new WithoutAnyAdmin())
-            ->orderBy('name');
+            ->tap(new OrderByFullName());
 
         $departmentsQuery = Department::query()
+            ->orderBy('name');
+
+        $groupsQuery = Group::query()
             ->orderBy('name');
 
         return BulkAction::make('manageReportAssignments')
@@ -67,7 +75,9 @@ class ManageReportAssignmentsBulkAction
             ->label('Manage Assignments')
             ->authorize(fn (): bool => auth()->user()->can('reporting.*.update'))
             ->modalHeading(fn (Collection $records): string => 'Manage Assignments for ' . $records->count() . ' ' . str('Report')->plural($records->count()))
-            ->modalDescription('Grant access to the selected reports by assigning individual users and/or departments.')
+            ->modalDescription(fn (): string => ReportGroupAccessFeature::active()
+                ? 'Grant access to the selected reports by assigning individual users, departments, and/or groups.'
+                : 'Grant access to the selected reports by assigning individual users and/or departments.')
             ->form([
                 Select::make('users')
                     ->label('Users')
@@ -76,20 +86,23 @@ class ManageReportAssignmentsBulkAction
                     ->options(
                         fn (): array => $usersQuery
                             ->limit(50)
-                            ->pluck('name', 'id')
+                            ->get()
+                            ->pluck('full_name', 'id')
                             ->all(),
                     )
                     ->getSearchResultsUsing(
                         fn (string $search): array => $usersQuery
-                            ->where(new Expression('lower(name)'), 'like', '%' . Str::lower($search) . '%')
+                            ->tap(new WhereFullNameLike($search))
                             ->limit(50)
-                            ->pluck('name', 'id')
+                            ->get()
+                            ->pluck('full_name', 'id')
                             ->all(),
                     )
                     ->getOptionLabelsUsing(
                         fn (array $values): array => $usersQuery
                             ->whereKey($values)
-                            ->pluck('name', 'id')
+                            ->get()
+                            ->pluck('full_name', 'id')
                             ->all(),
                     ),
                 Select::make('departments')
@@ -115,19 +128,47 @@ class ManageReportAssignmentsBulkAction
                             ->pluck('name', 'id')
                             ->all(),
                     ),
+                Select::make('groups')
+                    ->label('Groups')
+                    ->multiple()
+                    ->searchable()
+                    ->visible(fn (): bool => ReportGroupAccessFeature::active())
+                    ->options(
+                        fn (): array => $groupsQuery
+                            ->clone()
+                            ->limit(50)
+                            ->pluck('name', 'id')
+                            ->all(),
+                    )
+                    ->getSearchResultsUsing(
+                        fn (string $search): array => $groupsQuery
+                            ->clone()
+                            ->where(new Expression('lower(name)'), 'like', '%' . Str::lower($search) . '%')
+                            ->limit(50)
+                            ->pluck('name', 'id')
+                            ->all(),
+                    )
+                    ->getOptionLabelsUsing(
+                        fn (array $values): array => $groupsQuery
+                            ->clone()
+                            ->whereKey($values)
+                            ->pluck('name', 'id')
+                            ->all(),
+                    ),
                 Toggle::make('sync')
                     ->label('Replace existing assignments?')
                     ->default(false)
-                    ->hintIconTooltip('If checked, all existing user and department assignments will be removed and replaced with the selections above.'),
+                    ->hintIconTooltip('If checked, all existing user, department, and group assignments will be removed and replaced with the selections above.'),
             ])
-            ->action(function (array $data, Collection $records): void {
+            ->action(function (array $data, Collection $records, AssignReportGroups $assignReportGroups): void {
                 $userIds = $data['users'] ?? [];
                 $departmentIds = $data['departments'] ?? [];
+                $groupIds = $data['groups'] ?? [];
                 $sync = $data['sync'];
 
                 try {
-                    DB::transaction(function () use ($records, $userIds, $departmentIds, $sync): void {
-                        $records->each(function (array $record) use ($userIds, $departmentIds, $sync): void {
+                    DB::transaction(function () use ($records, $userIds, $departmentIds, $groupIds, $sync, $assignReportGroups): void {
+                        $records->each(function (array $record) use ($userIds, $departmentIds, $groupIds, $sync, $assignReportGroups): void {
                             $reportKey = $record['report_key'];
 
                             if ($sync) {
@@ -164,6 +205,10 @@ class ManageReportAssignmentsBulkAction
                                     'report_key' => $reportKey,
                                     'department_id' => $departmentId,
                                 ]);
+                            }
+
+                            if (ReportGroupAccessFeature::active()) {
+                                $assignReportGroups($reportKey, $groupIds, removeUnlisted: $sync);
                             }
                         });
                     });

@@ -65,7 +65,7 @@ class ChangeRequestAwaitingApprovalNotification extends BaseNotification impleme
     {
         return MailMessage::make()
             ->subject('A Change Request is awaiting your approval')
-            ->line("Hello {$notifiable->name}, the following Change Request is awaiting your approval:")
+            ->line("Hello {$notifiable->full_name}, the following Change Request is awaiting your approval:")
             ->line("{$this->changeRequest->title}")
             ->line("{$this->changeRequest->description}")
             ->line('You can view more details about this Change Request by clicking the button below.')

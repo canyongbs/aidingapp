@@ -46,13 +46,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 use function Tests\asSuperAdmin;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 });
 
-it('stores encrypted secrets authored by the staff user', function () {
+it('stores encrypted secrets authored by the staff user', function (): void {
     $user = User::factory()->create();
     asSuperAdmin($user);
 
@@ -69,7 +69,7 @@ it('stores encrypted secrets authored by the staff user', function () {
         ->and($secret->related_id)->toBeNull();
 });
 
-it('denies staff users without permission to create service requests', function () {
+it('denies staff users without permission to create service requests', function (): void {
     actingAs(User::factory()->create());
 
     postJson(route('service-request.store-secret'), [
@@ -79,7 +79,7 @@ it('denies staff users without permission to create service requests', function 
     expect(Secret::query()->exists())->toBeFalse();
 });
 
-it('denies unauthenticated staff secret storage', function () {
+it('denies unauthenticated staff secret storage', function (): void {
     postJson(route('service-request.store-secret'), [
         'value' => 'service-request-password',
     ])->assertUnauthorized();
@@ -87,7 +87,7 @@ it('denies unauthenticated staff secret storage', function () {
     expect(Secret::query()->exists())->toBeFalse();
 });
 
-it('rate limits staff secret storage per user', function () {
+it('rate limits staff secret storage per user', function (): void {
     $user = User::factory()->create();
     asSuperAdmin($user);
 

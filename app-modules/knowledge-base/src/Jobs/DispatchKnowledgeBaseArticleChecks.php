@@ -55,7 +55,7 @@ class DispatchKnowledgeBaseArticleChecks implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-        KnowledgeBaseItem::each(function (KnowledgeBaseItem $article) {
+        KnowledgeBaseItem::each(function (KnowledgeBaseItem $article): void {
             CheckKnowledgeBaseArticleLinksJob::dispatch($article);
             CheckKnowledgeBaseArticleImagesJob::dispatch($article);
         });

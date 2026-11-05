@@ -41,14 +41,14 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('roles', function (Blueprint $table) {
+        Schema::table('roles', function (Blueprint $table): void {
             $table->text('description')->nullable();
         });
     }
 
     public function down(): void
     {
-        Schema::table('roles', function (Blueprint $table) {
+        Schema::table('roles', function (Blueprint $table): void {
             $table->dropColumn('description');
         });
     }

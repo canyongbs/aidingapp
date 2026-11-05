@@ -61,7 +61,7 @@ class ReportFrequencyInfolistSection
                     ->listWithLineBreaks()
                     ->limitList(3)
                     ->expandableLimitedList()
-                    ->state(fn (ServiceMonitoringTarget $record): array => $record->reportConfigurationFor($frequency)?->reportUsers->pluck('name')->all() ?? [])
+                    ->state(fn (ServiceMonitoringTarget $record): array => $record->reportConfigurationFor($frequency)?->reportUsers->pluck('full_name')->all() ?? [])
                     ->visible(fn (ServiceMonitoringTarget $record): bool => filled($record->reportConfigurationFor($frequency)?->reportUsers)),
                 TextEntry::make("reportConfigurations.{$frequency->value}.departments")
                     ->label('Departments')

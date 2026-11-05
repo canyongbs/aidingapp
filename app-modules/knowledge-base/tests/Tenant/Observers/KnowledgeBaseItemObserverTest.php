@@ -36,7 +36,7 @@
 
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 
-it('assigns a public ID when creating an article', function () {
+it('assigns a public ID when creating an article', function (): void {
     $article = KnowledgeBaseItem::factory()->create();
 
     expect($article->public_id)

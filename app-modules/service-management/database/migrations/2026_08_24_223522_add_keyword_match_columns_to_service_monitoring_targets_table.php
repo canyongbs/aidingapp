@@ -41,7 +41,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+        Schema::table('service_monitoring_targets', function (Blueprint $table): void {
             $table->string('monitor_type')->initial('availability');
             $table->jsonb('should_contain')->nullable();
             $table->jsonb('should_not_contain')->nullable();
@@ -50,7 +50,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+        Schema::table('service_monitoring_targets', function (Blueprint $table): void {
             $table->dropColumn('monitor_type');
             $table->dropColumn('should_contain');
             $table->dropColumn('should_not_contain');

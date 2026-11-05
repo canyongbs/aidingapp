@@ -41,15 +41,19 @@ use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\InventoryManagement\Models\AssetCheckIn;
 use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use App\Http\Controllers\Controller;
+use App\Settings\LicenseSettings;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Symfony\Component\HttpFoundation\Response;
 
 class AssetManagementPortalController extends Controller
 {
     public function __invoke(Request $request): JsonResponse
     {
+        abort_unless(resolve(LicenseSettings::class)->data?->addons->assetManagement, Response::HTTP_FORBIDDEN);
+
         $contact = auth('contact')->user();
 
         $request->validate(['filter' => 'in:all,checked_out,returned']);

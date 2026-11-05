@@ -42,7 +42,7 @@ use AidingApp\Project\Models\Project;
 use function Pest\Laravel\assertDatabaseHas;
 use function Tests\asSuperAdmin;
 
-it('stores each classification value correctly', function () {
+it('stores each classification value correctly', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -61,7 +61,7 @@ it('stores each classification value correctly', function () {
     }
 });
 
-it('returns proper labels for each classification', function () {
+it('returns proper labels for each classification', function (): void {
     expect(PipelineStageClassification::Planning->getLabel())->toBe('Planning');
     expect(PipelineStageClassification::InProgress->getLabel())->toBe('In Progress');
     expect(PipelineStageClassification::Complete->getLabel())->toBe('Complete');

@@ -44,7 +44,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-test('List OrganizationType is gated with proper access control', function () {
+test('List OrganizationType is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -60,7 +60,7 @@ test('List OrganizationType is gated with proper access control', function () {
         )->assertSuccessful();
 });
 
-it('only shows the bulk delete action to a user with the settings.delete permission', function () {
+it('only shows the bulk delete action to a user with the settings.delete permission', function (): void {
     OrganizationType::factory(15)->create();
 
     $user = User::factory()

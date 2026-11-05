@@ -38,6 +38,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Enums\PortalType;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Settings\PortalSettings;
+use App\Features\ContactArchivingFeature;
 use App\Support\AuthenticationCodeRateLimiter;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
@@ -62,14 +63,14 @@ $assistantAuthenticate = function (PortalAuthentication $authentication, array $
     return postJson($url, $body, ['Origin' => config('app.url')]);
 };
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->ai_support_assistant = true;
     $settings->save();
 });
 
-test('it authenticates the contact when the code is valid', function () use ($assistantAuthenticate) {
+test('it authenticates the contact when the code is valid', function () use ($assistantAuthenticate): void {
     $contact = Contact::factory()->create();
 
     $plainCode = 123456;
@@ -92,7 +93,7 @@ test('it authenticates the contact when the code is valid', function () use ($as
         ->and(auth('contact')->check())->toBeTrue();
 });
 
-test('it returns a validation error when the code is invalid', function () use ($assistantAuthenticate) {
+test('it returns a validation error when the code is invalid', function () use ($assistantAuthenticate): void {
     $contact = Contact::factory()->create();
 
     $authentication = PortalAuthentication::factory()->create([
@@ -110,7 +111,7 @@ test('it returns a validation error when the code is invalid', function () use (
     expect(auth('contact')->check())->toBeFalse();
 });
 
-test('it returns expired when the authentication has expired', function () use ($assistantAuthenticate) {
+test('it returns expired when the authentication has expired', function () use ($assistantAuthenticate): void {
     $contact = Contact::factory()->create();
 
     $plainCode = 445566;
@@ -130,7 +131,55 @@ test('it returns expired when the authentication has expired', function () use (
     expect(auth('contact')->check())->toBeFalse();
 });
 
-test('it locks the authentication after too many invalid code attempts and rejects even the correct code', function () use ($assistantAuthenticate) {
+test('it does not authenticate an archived contact', function () use ($assistantAuthenticate): void {
+    $contact = Contact::factory()->create();
+
+    $plainCode = 445566;
+
+    $authentication = PortalAuthentication::factory()->create([
+        'portal_type' => PortalType::KnowledgeManagement,
+        'code' => Hash::make((string) $plainCode),
+        'created_at' => now(),
+    ]);
+    $authentication->educatable()->associate($contact);
+    $authentication->save();
+
+    $contact->archive();
+
+    $assistantAuthenticate($authentication, ['code' => $plainCode])
+        ->assertStatus(422)
+        ->assertJsonPath('is_expired', true);
+
+    expect(auth('contact')->guest())->toBeTrue()
+        ->and($contact->tokens()->doesntExist())->toBeTrue();
+});
+
+test('it authenticates an archived contact when the contact archiving feature is inactive', function () use ($assistantAuthenticate): void {
+    ContactArchivingFeature::deactivate();
+
+    $contact = Contact::factory()->archived()->create();
+
+    $plainCode = 123456;
+
+    $authentication = PortalAuthentication::factory()->create([
+        'portal_type' => PortalType::KnowledgeManagement,
+        'code' => Hash::make((string) $plainCode),
+        'created_at' => now(),
+    ]);
+    $authentication->educatable()->associate($contact);
+    $authentication->save();
+
+    $response = $assistantAuthenticate($authentication, ['code' => $plainCode]);
+
+    $response
+        ->assertOk()
+        ->assertJsonPath('success', true);
+
+    expect($response->json('token'))->not()->toBeEmpty()
+        ->and(auth('contact')->check())->toBeTrue();
+});
+
+test('it locks the authentication after too many invalid code attempts and rejects even the correct code', function () use ($assistantAuthenticate): void {
     $contact = Contact::factory()->create();
 
     $plainCode = 778899;

@@ -45,7 +45,7 @@ use Illuminate\Support\Facades\Queue;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     Event::fake();
     Queue::fake();
 
@@ -54,7 +54,7 @@ beforeEach(function () {
     $settings->save();
 });
 
-it('returns messages for a conversation', function () {
+it('returns messages for a conversation', function (): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
@@ -76,7 +76,7 @@ it('returns messages for a conversation', function () {
         ->assertJsonPath('data.0.id', $message->getKey());
 });
 
-it('returns messages in descending order by default', function () {
+it('returns messages in descending order by default', function (): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
@@ -104,7 +104,7 @@ it('returns messages in descending order by default', function () {
         ->assertJsonPath('data.1.id', $olderMessage->getKey());
 });
 
-it('limits messages by the limit parameter', function () {
+it('limits messages by the limit parameter', function (): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
@@ -125,7 +125,7 @@ it('limits messages by the limit parameter', function () {
         ->assertJsonPath('meta.has_more', true);
 });
 
-it('returns messages before a specific message', function () {
+it('returns messages before a specific message', function (): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
@@ -160,7 +160,7 @@ it('returns messages before a specific message', function () {
         ->assertJsonPath('data.1.id', $message1->getKey());
 });
 
-it('returns messages after a specific message', function () {
+it('returns messages after a specific message', function (): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
@@ -195,7 +195,7 @@ it('returns messages after a specific message', function () {
         ->assertJsonPath('data.1.id', $message3->getKey());
 });
 
-it('indicates when there are more messages available', function () {
+it('indicates when there are more messages available', function (): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
@@ -215,7 +215,7 @@ it('indicates when there are more messages available', function () {
         ->assertJsonPath('meta.has_more', true);
 });
 
-it('indicates when there are no more messages', function () {
+it('indicates when there are no more messages', function (): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
@@ -235,7 +235,7 @@ it('indicates when there are no more messages', function () {
         ->assertJsonPath('meta.has_more', false);
 });
 
-it('validates request', function (array $data, array $expectedErrors) {
+it('validates request', function (array $data, array $expectedErrors): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
@@ -271,7 +271,7 @@ it('validates request', function (array $data, array $expectedErrors) {
     ],
 ]);
 
-it('requires participant to view messages', function () {
+it('requires participant to view messages', function (): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create(['is_private' => true]);
@@ -281,14 +281,14 @@ it('requires participant to view messages', function () {
         ->assertForbidden();
 });
 
-it('requires authentication', function () {
+it('requires authentication', function (): void {
     $conversation = Conversation::factory()->channel()->create();
 
     getJson(route('in-app-communication.conversations.messages.index', $conversation))
         ->assertUnauthorized();
 });
 
-it('requires the realtime chat feature to be enabled', function () {
+it('requires the realtime chat feature to be enabled', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->realtimeChat = false;
     $settings->save();

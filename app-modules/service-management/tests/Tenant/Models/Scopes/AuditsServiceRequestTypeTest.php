@@ -40,7 +40,7 @@ use AidingApp\ServiceManagement\Models\Scopes\AuditsServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 
-it('includes direct and department auditors of the type', function () {
+it('includes direct and department auditors of the type', function (): void {
     $type = ServiceRequestType::factory()->create();
     $directAuditor = User::factory()->create();
     $type->auditorUsers()->attach($directAuditor);
@@ -55,7 +55,7 @@ it('includes direct and department auditors of the type', function () {
     expect($ids->all())->toContain($directAuditor->getKey(), $departmentAuditor->getKey());
 });
 
-it('includes users that belong to an auditor group of the type', function () {
+it('includes users that belong to an auditor group of the type', function (): void {
     $type = ServiceRequestType::factory()->create();
     $group = Group::factory()->create();
     $type->auditorGroups()->attach($group);

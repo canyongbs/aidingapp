@@ -42,8 +42,8 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('pipeline_entries', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('pipeline_entries', function (Blueprint $table): void {
                 $table->string('assigned_to_type')->nullable();
                 $table->uuid('assigned_to_id')->nullable();
                 $table->index(['assigned_to_type', 'assigned_to_id']);
@@ -56,35 +56,35 @@ return new class () extends Migration {
                     'assigned_to_id' => DB::raw('"assigned_to"'),
                 ]);
 
-            Schema::table('pipeline_entries', function (Blueprint $table) {
+            Schema::table('pipeline_entries', function (Blueprint $table): void {
                 $table->dropForeign(['assigned_to']);
                 $table->dropColumn('assigned_to');
             });
 
-            Schema::table('pipeline_entries', function (Blueprint $table) {
+            Schema::table('pipeline_entries', function (Blueprint $table): void {
                 $table->dropForeign(['related_to']);
                 $table->dropColumn('related_to');
             });
 
-            Schema::table('pipeline_entries', function (Blueprint $table) {
+            Schema::table('pipeline_entries', function (Blueprint $table): void {
                 $table->boolean('is_visible_to_guests')->default(true);
             });
 
-            Schema::create('pipeline_entry_milestones', function (Blueprint $table) {
+            Schema::create('pipeline_entry_milestones', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
                 $table->foreignUuid('pipeline_entry_id')->constrained()->cascadeOnDelete();
                 $table->foreignUuid('project_milestone_id')->constrained()->cascadeOnDelete();
                 $table->timestamps();
             });
 
-            Schema::create('pipeline_entry_assets', function (Blueprint $table) {
+            Schema::create('pipeline_entry_assets', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
                 $table->foreignUuid('pipeline_entry_id')->constrained()->cascadeOnDelete();
                 $table->foreignUuid('asset_id')->constrained()->cascadeOnDelete();
                 $table->timestamps();
             });
 
-            Schema::create('pipeline_entry_service_requests', function (Blueprint $table) {
+            Schema::create('pipeline_entry_service_requests', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
                 $table->foreignUuid('pipeline_entry_id')->constrained()->cascadeOnDelete();
                 $table->foreignUuid('service_request_id')->constrained()->cascadeOnDelete();
@@ -95,20 +95,20 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             Schema::dropIfExists('pipeline_entry_service_requests');
             Schema::dropIfExists('pipeline_entry_assets');
             Schema::dropIfExists('pipeline_entry_milestones');
 
-            Schema::table('pipeline_entries', function (Blueprint $table) {
+            Schema::table('pipeline_entries', function (Blueprint $table): void {
                 $table->dropColumn('is_visible_to_guests');
             });
 
-            Schema::table('pipeline_entries', function (Blueprint $table) {
+            Schema::table('pipeline_entries', function (Blueprint $table): void {
                 $table->foreignUuid('related_to')->nullable()->constrained('contacts')->nullOnDelete();
             });
 
-            Schema::table('pipeline_entries', function (Blueprint $table) {
+            Schema::table('pipeline_entries', function (Blueprint $table): void {
                 $table->foreignUuid('assigned_to')->nullable()->constrained('users')->nullOnDelete();
             });
 
@@ -119,7 +119,7 @@ return new class () extends Migration {
                     'assigned_to' => DB::raw('"assigned_to_id"'),
                 ]);
 
-            Schema::table('pipeline_entries', function (Blueprint $table) {
+            Schema::table('pipeline_entries', function (Blueprint $table): void {
                 $table->dropIndex(['assigned_to_type', 'assigned_to_id']);
                 $table->dropColumn(['assigned_to_type', 'assigned_to_id']);
             });

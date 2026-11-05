@@ -39,20 +39,25 @@ namespace AidingApp\ServiceManagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Database\Factories\AdvisoryFactory;
-use App\Models\BaseModel;
+use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperAdvisory
  */
-class Advisory extends BaseModel implements Auditable
+class Advisory extends Model implements Auditable
 {
     use AuditableTrait;
     use SoftDeletes;
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
 
     /** @use HasFactory<AdvisoryFactory> */
     use HasFactory;
@@ -97,5 +102,19 @@ class Advisory extends BaseModel implements Auditable
     public function advisoryUpdates(): HasMany
     {
         return $this->hasMany(AdvisoryUpdate::class, 'advisory_id');
+    }
+
+    /**
+     * Requires the `WithLastUpdatedAt` scope to have been applied to the query.
+     */
+    public function getLastUpdatedAt(): CarbonInterface
+    {
+        assert(array_key_exists('last_updated_at', $this->getAttributes()), 'The `WithLastUpdatedAt` scope must be applied to the query.');
+
+        $lastUpdatedAt = $this->getAttribute('last_updated_at');
+
+        assert($lastUpdatedAt instanceof CarbonInterface);
+
+        return $lastUpdatedAt;
     }
 }

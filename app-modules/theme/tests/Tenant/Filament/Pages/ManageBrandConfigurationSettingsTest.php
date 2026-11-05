@@ -43,14 +43,14 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-it('allows a super admin to access the branding page', function () {
+it('allows a super admin to access the branding page', function (): void {
     asSuperAdmin();
 
     get(ManageBrandConfigurationSettings::getUrl())
         ->assertSuccessful();
 });
 
-it('can update the profile menu link and login and home target settings', function () {
+it('can update the profile menu link and login and home target settings', function (): void {
     asSuperAdmin();
 
     Livewire::test(ManageBrandConfigurationSettings::class)
@@ -76,7 +76,7 @@ it('can update the profile menu link and login and home target settings', functi
         ->and($settings->product_resource_hub_url)->toBe('https://example.com/hub');
 });
 
-it('hides the support url input when the support toggle is disabled', function () {
+it('hides the support url input when the support toggle is disabled', function (): void {
     asSuperAdmin();
 
     Livewire::test(ManageBrandConfigurationSettings::class)
@@ -86,7 +86,7 @@ it('hides the support url input when the support toggle is disabled', function (
         ->assertFormFieldHidden('support_url');
 });
 
-it('hides the recent updates url input when the recent updates toggle is disabled', function () {
+it('hides the recent updates url input when the recent updates toggle is disabled', function (): void {
     asSuperAdmin();
 
     Livewire::test(ManageBrandConfigurationSettings::class)
@@ -96,8 +96,8 @@ it('hides the recent updates url input when the recent updates toggle is disable
         ->assertFormFieldHidden('recent_updates_url');
 });
 
-describe('authorization', function () {
-    it('denies access to the branding page for a non super admin', function () {
+describe('authorization', function (): void {
+    it('denies access to the branding page for a non super admin', function (): void {
         actingAs(User::factory()->create());
 
         get(ManageBrandConfigurationSettings::getUrl())

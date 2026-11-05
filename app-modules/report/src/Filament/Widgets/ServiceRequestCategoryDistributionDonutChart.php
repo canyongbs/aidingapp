@@ -118,7 +118,7 @@ class ServiceRequestCategoryDistributionDonutChart extends ChartReportWidget
         foreach (ServiceRequestCategory::cases() as $case) {
             $query = ServiceRequest::where('category', $case->value);
 
-            if ($startDate && $endDate) {
+            if ($startDate instanceof Carbon && $endDate instanceof Carbon) {
                 $query->whereBetween('created_at', [$startDate, $endDate]);
             }
 

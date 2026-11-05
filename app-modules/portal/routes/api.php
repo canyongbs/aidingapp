@@ -56,6 +56,7 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagem
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\LicenseManagementPortalController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceMonitorStatusController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceRequestTypesController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ShowAdvisoryController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ShowPortalProjectController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ShowServiceMonitorStatusController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreKnowledgeBaseArticleVoteController;
@@ -64,6 +65,7 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequ
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequestUpdateController;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
+use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalServiceManagementIsEnabled;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestMediaDownloadController;
 use App\Http\Middleware\TrackContactPresence;
 use Illuminate\Support\Facades\Route;
@@ -78,8 +80,8 @@ Route::prefix('api')
         EnsureKnowledgeManagementPortalIsEnabled::class,
         EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized::class,
     ])
-    ->group(function () {
-        Route::middleware(['auth:sanctum'])->group(function () {
+    ->group(function (): void {
+        Route::middleware(['auth:sanctum'])->group(function (): void {
             Route::get('/user', fn () => auth('contact')->user() ?? response()->json(status: Response::HTTP_UNAUTHORIZED))
                 ->name('user.auth-check');
         });
@@ -87,7 +89,7 @@ Route::prefix('api')
         Route::prefix('portal')
             ->name('portal.')
             ->middleware(TrackContactPresence::class)
-            ->group(function () {
+            ->group(function (): void {
                 Route::get('/', [KnowledgeManagementPortalController::class, 'show'])
                     ->name('define');
 
@@ -124,43 +126,48 @@ Route::prefix('api')
                 Route::get('/articles/{article}', [KnowledgeManagementPortalArticleController::class, 'show'])
                     ->name('article.show-canonical');
 
-                Route::get('/service-request-type/select', [ServiceRequestTypesController::class, 'index'])
-                    ->name('service-request-type.index');
-
-                Route::get('/service-requests', [GetServiceRequestsController::class, 'index'])
-                    ->name('service-request.index');
-
-                Route::get('/service-request/create/{type}', GetServiceRequestFormController::class)
-                    ->name('service-request.create');
-
-                Route::post('/service-request/create/{type}', StoreServiceRequestController::class)
-                    ->middleware(['auth:sanctum'])
-                    ->name('service-request.store');
-
-                Route::post('/service-request/create/{type}/generate-questions', GenerateServiceRequestQuestionsController::class)
-                    ->middleware(['auth:sanctum'])
-                    ->name('service-request.generate-questions');
-
-                Route::post('/service-request/create/{type}/evaluate-ai-resolution', EvaluateServiceRequestAiResolutionController::class)
-                    ->middleware(['auth:sanctum'])
-                    ->name('service-request.evaluate-ai-resolution');
-
-                Route::get('/service-request/request-upload-url', GetServiceRequestUploadUrl::class)
-                    ->middleware(['auth:sanctum'])
-                    ->name('service-request.request-upload-url');
-
-                Route::post('/service-request/store-secret', StoreServiceRequestSecretController::class)
-                    ->middleware(['auth:sanctum', 'throttle:service-request-secrets'])
-                    ->name('service-request.store-secret');
-
                 Route::get('/tags', GetKnowledgeManagementPortalTagsController::class)
                     ->name('tags.index');
-                Route::get('/service-request/{serviceRequest}', [GetServiceRequestsController::class, 'show'])
-                    ->name('service-request.show');
-                Route::post('/service-request-update/store', StoreServiceRequestUpdateController::class)
-                    ->name('service-request-update.storeServiceRequestUpdate');
-                Route::get('/service-request/media/{media}/download', ServiceRequestMediaDownloadController::class)
-                    ->name('service-request.media.download');
+
+                Route::middleware(EnsureKnowledgeManagementPortalServiceManagementIsEnabled::class)->group(function (): void {
+                    Route::get('/service-request-type/select', [ServiceRequestTypesController::class, 'index'])
+                        ->name('service-request-type.index');
+
+                    Route::get('/service-requests', [GetServiceRequestsController::class, 'index'])
+                        ->name('service-request.index');
+
+                    Route::get('/service-request/create/{type}', GetServiceRequestFormController::class)
+                        ->name('service-request.create');
+
+                    Route::post('/service-request/create/{type}', StoreServiceRequestController::class)
+                        ->middleware(['auth:sanctum'])
+                        ->name('service-request.store');
+
+                    Route::post('/service-request/create/{type}/generate-questions', GenerateServiceRequestQuestionsController::class)
+                        ->middleware(['auth:sanctum'])
+                        ->name('service-request.generate-questions');
+
+                    Route::post('/service-request/create/{type}/evaluate-ai-resolution', EvaluateServiceRequestAiResolutionController::class)
+                        ->middleware(['auth:sanctum'])
+                        ->name('service-request.evaluate-ai-resolution');
+
+                    Route::get('/service-request/request-upload-url', GetServiceRequestUploadUrl::class)
+                        ->middleware(['auth:sanctum'])
+                        ->name('service-request.request-upload-url');
+
+                    Route::post('/service-request/store-secret', StoreServiceRequestSecretController::class)
+                        ->middleware(['auth:sanctum', 'throttle:service-request-secrets'])
+                        ->name('service-request.store-secret');
+
+                    Route::get('/service-request/{serviceRequest}', [GetServiceRequestsController::class, 'show'])
+                        ->middleware(['auth:sanctum'])
+                        ->name('service-request.show');
+                    Route::post('/service-request-update/store', StoreServiceRequestUpdateController::class)
+                        ->name('service-request-update.storeServiceRequestUpdate');
+                    Route::get('/service-request/media/{media}/download', ServiceRequestMediaDownloadController::class)
+                        ->name('service-request.media.download');
+                });
+
                 Route::get('/knowledge-base-article/media/{media}/download', KnowledgeBaseArticleMediaDownloadController::class)
                     ->name('knowledge-base-article.media.download');
                 Route::post('/knowledge_base_article_vote/store', StoreKnowledgeBaseArticleVoteController::class)
@@ -173,6 +180,10 @@ Route::prefix('api')
                 Route::get('/advisories', AdvisoryController::class)
                     ->middleware(['auth:sanctum'])
                     ->name('advisories');
+                Route::get('/advisories/{advisory}', ShowAdvisoryController::class)
+                    ->middleware(['auth:sanctum'])
+                    ->whereUuid('advisory')
+                    ->name('advisories.show');
                 Route::get('/status', ServiceMonitorStatusController::class)
                     ->middleware(['auth:sanctum'])
                     ->name('status');

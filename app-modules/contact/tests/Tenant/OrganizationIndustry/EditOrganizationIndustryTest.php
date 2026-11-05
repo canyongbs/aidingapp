@@ -46,7 +46,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-test('Edit Organization Industry is gated with proper access control', function () {
+test('Edit Organization Industry is gated with proper access control', function (): void {
     $user = User::factory()->create();
     $organizationIndustry = OrganizationIndustry::factory()->create();
 
@@ -76,7 +76,7 @@ test('Edit Organization Industry is gated with proper access control', function 
     ])
         ->assertSuccessful();
 });
-test('Edit Organization Industry Record', function () {
+test('Edit Organization Industry Record', function (): void {
     $user = User::factory()->create();
     $organizationIndustry = OrganizationIndustry::factory()->create();
 
@@ -99,7 +99,7 @@ test('Edit Organization Industry Record', function () {
     expect($organizationIndustry->name)->toEqual($request->get('name'));
 });
 
-test('the organization industry name must be unique among other non-trashed industries', function () {
+test('the organization industry name must be unique among other non-trashed industries', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
@@ -118,7 +118,7 @@ test('the organization industry name must be unique among other non-trashed indu
         ->assertHasFormErrors(['name' => 'unique']);
 });
 
-test('an organization industry can keep its own name when editing', function () {
+test('an organization industry can keep its own name when editing', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
@@ -136,7 +136,7 @@ test('an organization industry can keep its own name when editing', function () 
         ->assertHasNoFormErrors();
 });
 
-test('does not apply the unique form rule when the feature is disabled', function () {
+test('does not apply the unique form rule when the feature is disabled', function (): void {
     OrganizationTypeAndIndustryNameUniquenessFeature::deactivate();
 
     $user = User::factory()->create();

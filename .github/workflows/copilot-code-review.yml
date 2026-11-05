@@ -32,7 +32,7 @@ jobs:
         steps:
             - name: Setup cache environment
               id: extcache
-              uses: shivammathur/cache-extensions@22e24453af1bf3851994136f122ce065ab828a74 #1.15.2
+              uses: shivammathur/cache-extensions@38b47b5568926cb949d3c946e30cf8eab5326c39 #1.15.5
               with:
                   php-version: '8.4'
                   extensions: gd, gmp, redis, mailparse

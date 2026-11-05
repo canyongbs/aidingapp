@@ -88,7 +88,7 @@ Broadcast::channel('conversation.{conversationId}', function (User $user, string
     // Return user data for presence channel
     return [
         'id' => $user->getKey(),
-        'name' => $user->name,
+        'name' => $user->full_name,
     ];
 });
 

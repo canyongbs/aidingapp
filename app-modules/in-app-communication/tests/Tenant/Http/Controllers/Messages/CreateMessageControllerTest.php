@@ -43,7 +43,7 @@ use Illuminate\Support\Facades\Queue;
 
 use function Pest\Laravel\actingAs;
 
-beforeEach(function () {
+beforeEach(function (): void {
     Event::fake();
     Queue::fake();
 
@@ -52,7 +52,7 @@ beforeEach(function () {
     $settings->save();
 });
 
-it('validates request', function (array $data, array $expectedErrors) {
+it('validates request', function (array $data, array $expectedErrors): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
@@ -76,7 +76,7 @@ it('validates request', function (array $data, array $expectedErrors) {
     ],
 ]);
 
-it('requires participant to send messages', function () {
+it('requires participant to send messages', function (): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();

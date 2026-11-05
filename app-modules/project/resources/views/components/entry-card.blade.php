@@ -57,7 +57,7 @@
     $assignedName = match (true) {
         blank($assignedTo) => 'None',
         $assignedTo instanceof Contact => $assignedTo->full_name ?? 'None',
-        default => $assignedTo->name ?? 'None',
+        default => $assignedTo->full_name ?? 'None',
     };
 
     $assignedLabel = filled($assignedType) && $assignedName !== 'None' ? sprintf('%s (%s)', $assignedName, $assignedType) : $assignedName;

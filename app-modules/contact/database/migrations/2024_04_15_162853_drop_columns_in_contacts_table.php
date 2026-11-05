@@ -42,7 +42,7 @@ return new class () extends Migration {
     public function up(): void
     {
         if (Schema::hasTable('contacts')) {
-            Schema::table('contacts', function (Blueprint $table) {
+            Schema::table('contacts', function (Blueprint $table): void {
                 $table->dropColumn(['birthdate', 'hsgrad', 'email_2']);
             });
         }
@@ -50,7 +50,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('contacts', function (Blueprint $table) {
+        Schema::table('contacts', function (Blueprint $table): void {
             $table->date('birthdate')->nullable();
             $table->string('hsgrad')->nullable();
             $table->string('email_2')->nullable();

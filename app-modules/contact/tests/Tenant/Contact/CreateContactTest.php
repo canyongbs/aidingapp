@@ -35,9 +35,14 @@
 */
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
+use AidingApp\Contact\Filament\Tables\OrganizationsTable;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\CreateContactRequestFactory;
+use App\Features\ContactArchivingFeature;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
+use Filament\Forms\Components\TableSelect\Livewire\TableSelectLivewireComponent;
 use Filament\Forms\Components\TextInput;
 use Livewire\Livewire;
 
@@ -46,14 +51,14 @@ use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
-it('renders successfully with no record', function () {
+it('renders successfully with no record', function (): void {
     asSuperAdmin();
 
     Livewire::test(CreateContact::class)
         ->assertSuccessful();
 });
 
-it('does not show an email health hint icon on the email field', function () {
+it('does not show an email health hint icon on the email field', function (): void {
     asSuperAdmin();
 
     $component = Livewire::test(CreateContact::class)
@@ -75,7 +80,7 @@ it('does not show an email health hint icon on the email field', function () {
 
 // Permission Tests
 
-test('CreateContact is gated with proper access control', function () {
+test('CreateContact is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -108,7 +113,7 @@ test('CreateContact is gated with proper access control', function () {
     assertDatabaseHas(Contact::class, $request->toArray());
 });
 
-test('CreateContact rejects a duplicate email case-insensitively', function () {
+test('CreateContact rejects a duplicate email case-insensitively', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('contact.view-any');
     $user->givePermissionTo('contact.create');
@@ -130,7 +135,7 @@ test('CreateContact rejects a duplicate email case-insensitively', function () {
     assertCount(1, Contact::all());
 });
 
-test('CreateContact allows reusing a soft-deleted contact email', function () {
+test('CreateContact allows reusing a soft-deleted contact email', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('contact.view-any');
     $user->givePermissionTo('contact.create');
@@ -150,4 +155,85 @@ test('CreateContact allows reusing a soft-deleted contact email', function () {
         ->assertHasNoFormErrors();
 
     expect(Contact::query()->where('email', 'reuse@example.com')->exists())->toBeTrue();
+});
+
+it('does not create a contact with the email of an archived contact', function (): void {
+    $user = User::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contact.create');
+
+    Contact::factory()->archived()->create(['email' => 'archived@example.com']);
+
+    $request = collect(CreateContactRequestFactory::new()->create([
+        'email' => 'Archived@Example.com',
+        'created_by_id' => $user->id,
+    ]));
+
+    actingAs($user);
+
+    $component = Livewire::test(CreateContact::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors(['email' => 'An archived contact with this email already exists.']);
+
+    expect($component->errors()->get('data.email'))->toBe(['An archived contact with this email already exists.']);
+
+    assertCount(1, Contact::all());
+});
+
+it('rejects the email of an archived contact with the unique message while contact archiving is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contact.create');
+
+    Contact::factory()->archived()->create(['email' => 'archived@example.com']);
+
+    $request = collect(CreateContactRequestFactory::new()->create([
+        'email' => 'archived@example.com',
+        'created_by_id' => $user->id,
+    ]));
+
+    actingAs($user);
+
+    $component = Livewire::test(CreateContact::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors(['email' => 'unique']);
+
+    expect($component->errors()->get('data.email'))->not->toContain('An archived contact with this email already exists.');
+
+    assertCount(1, Contact::all());
+});
+
+describe('organization picker', function (): void {
+    it('lists active organizations and not archived ones', function (): void {
+        asSuperAdmin();
+
+        $organization = Organization::factory()->create();
+        $archivedOrganization = Organization::factory()->archived()->create();
+
+        Livewire::test(TableSelectLivewireComponent::class, [
+            'tableConfiguration' => base64_encode(OrganizationsTable::class),
+            'model' => Contact::class,
+            'relationshipName' => 'organization',
+        ])
+            ->assertCanSeeTableRecords([$organization])
+            ->assertCanNotSeeTableRecords([$archivedOrganization]);
+    });
+
+    it('lists archived organizations when organization archiving is inactive', function (): void {
+        OrganizationArchivingFeature::deactivate();
+        asSuperAdmin();
+
+        $archivedOrganization = Organization::factory()->archived()->create();
+
+        Livewire::test(TableSelectLivewireComponent::class, [
+            'tableConfiguration' => base64_encode(OrganizationsTable::class),
+            'model' => Contact::class,
+            'relationshipName' => 'organization',
+        ])
+            ->assertCanSeeTableRecords([$archivedOrganization]);
+    });
 });

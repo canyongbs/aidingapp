@@ -41,7 +41,7 @@ use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Exists;
 
-it('builds a priority_id toggle buttons field with no default by default', function () {
+it('builds a priority_id toggle buttons field with no default by default', function (): void {
     $toggleButtons = ServiceRequestPriorityToggleButtons::make(ServiceRequestType::factory()->create()->getKey());
 
     expect($toggleButtons->getName())->toBe('priority_id')
@@ -49,13 +49,13 @@ it('builds a priority_id toggle buttons field with no default by default', funct
         ->and($toggleButtons->isInline())->toBeTrue();
 });
 
-it('builds a toggle buttons field for a custom field name', function () {
+it('builds a toggle buttons field for a custom field name', function (): void {
     $toggleButtons = ServiceRequestPriorityToggleButtons::make(ServiceRequestType::factory()->create()->getKey(), 'automated_priority_id');
 
     expect($toggleButtons->getName())->toBe('automated_priority_id');
 });
 
-it('scopes options to priorities belonging to the given type', function () {
+it('scopes options to priorities belonging to the given type', function (): void {
     $type = ServiceRequestType::factory()->create();
 
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
@@ -71,13 +71,13 @@ it('scopes options to priorities belonging to the given type', function () {
         ->toHaveCount(1);
 });
 
-it('has no options when no type is given', function () {
+it('has no options when no type is given', function (): void {
     $toggleButtons = ServiceRequestPriorityToggleButtons::make('');
 
     expect($toggleButtons->getOptions())->toBeEmpty();
 });
 
-it('constrains the exists validation rule to priorities belonging to the given type', function () {
+it('constrains the exists validation rule to priorities belonging to the given type', function (): void {
     $type = ServiceRequestType::factory()->create();
 
     $matchingPriority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);

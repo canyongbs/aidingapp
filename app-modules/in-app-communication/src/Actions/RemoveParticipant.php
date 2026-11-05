@@ -56,7 +56,7 @@ class RemoveParticipant
 
         $userId = $user->getKey();
 
-        $result = DB::transaction(function () use ($conversation, $user) {
+        $result = DB::transaction(function () use ($conversation, $user): bool {
             $participant = ConversationParticipant::query()
                 ->whereBelongsTo($conversation)
                 ->whereMorphedTo('participant', $user)

@@ -40,7 +40,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
-it('returns correct service request statistics within the given date range', function () {
+it('returns correct service request statistics within the given date range', function (): void {
     $startDate = now()->subDays(10);
     $endDate = now()->subDays(5);
 
@@ -91,7 +91,7 @@ it('returns correct service request statistics within the given date range', fun
         ->and($stats[3]->getValue())->toEqual('8.5');
 });
 
-it('returns correct statistics filtered by date range and service request types', function () {
+it('returns correct statistics filtered by date range and service request types', function (): void {
     $startDate = now()->subDays(10);
     $endDate = now()->subDays(5);
 

@@ -40,7 +40,7 @@ use Illuminate\Support\Facades\URL;
 use function Pest\Laravel\freezeTime;
 use function Pest\Laravel\get;
 
-it('requires a valid signed URL', function () {
+it('requires a valid signed URL', function (): void {
     $otpCode = OtpLoginCode::factory()->create();
 
     get(route('otp-code.login', [
@@ -49,7 +49,7 @@ it('requires a valid signed URL', function () {
         ->assertForbidden();
 });
 
-it('rejects an OTP code that is older than 20 minutes', function () {
+it('rejects an OTP code that is older than 20 minutes', function (): void {
     $otpCode = OtpLoginCode::factory()->create([
         'created_at' => now()->subMinutes(21),
     ]);
@@ -64,7 +64,7 @@ it('rejects an OTP code that is older than 20 minutes', function () {
         ->assertForbidden();
 });
 
-it('rejects an OTP code that has already been used', function () {
+it('rejects an OTP code that has already been used', function (): void {
     $otpCode = OtpLoginCode::factory()->used()->create();
 
     get(URL::temporarySignedRoute(
@@ -77,7 +77,7 @@ it('rejects an OTP code that has already been used', function () {
         ->assertForbidden();
 });
 
-it('renders the OTP entry view for a valid OTP code', function () {
+it('renders the OTP entry view for a valid OTP code', function (): void {
     $otpCode = OtpLoginCode::factory()->create();
 
     get(URL::temporarySignedRoute(
@@ -92,8 +92,8 @@ it('renders the OTP entry view for a valid OTP code', function () {
         ->assertViewHas('verifyUrl');
 });
 
-it('rejects an OTP code that is exactly at the 20 minute boundary', function () {
-    freezeTime(function () {
+it('rejects an OTP code that is exactly at the 20 minute boundary', function (): void {
+    freezeTime(function (): void {
         $otpCode = OtpLoginCode::factory()->create([
             'created_at' => now()->subMinutes(20),
         ]);
@@ -109,8 +109,8 @@ it('rejects an OTP code that is exactly at the 20 minute boundary', function () 
     });
 });
 
-it('allows an OTP code that is just under 20 minutes old', function () {
-    freezeTime(function () {
+it('allows an OTP code that is just under 20 minutes old', function (): void {
+    freezeTime(function (): void {
         $otpCode = OtpLoginCode::factory()->create([
             'created_at' => now()->subMinutes(19)->subSeconds(59),
         ]);
@@ -127,7 +127,7 @@ it('allows an OTP code that is just under 20 minutes old', function () {
     });
 });
 
-it('does not mark the OTP code as used when viewing the entry page', function () {
+it('does not mark the OTP code as used when viewing the entry page', function (): void {
     $otpCode = OtpLoginCode::factory()->create();
 
     get(URL::temporarySignedRoute(

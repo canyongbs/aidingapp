@@ -39,19 +39,23 @@ namespace AidingApp\ServiceManagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\ChangeRequestStatusFactory;
 use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
-use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperChangeRequestStatus
  */
-class ChangeRequestStatus extends BaseModel implements Auditable
+class ChangeRequestStatus extends Model implements Auditable
 {
     use SoftDeletes;
     use AuditableTrait;
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
 
     /** @use HasFactory<ChangeRequestStatusFactory> */
     use HasFactory;

@@ -52,7 +52,7 @@ use function PHPUnit\Framework\assertEquals;
 
 // Permission Tests
 
-test('EditKnowledgeBaseStatus is gated with proper access control', function () {
+test('EditKnowledgeBaseStatus is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $knowledgeBaseStatus = KnowledgeBaseStatus::factory()->create();
@@ -91,7 +91,7 @@ test('EditKnowledgeBaseStatus is gated with proper access control', function () 
     assertEquals($request['name'], $knowledgeBaseStatus->fresh()->name);
 });
 
-test('EditKnowledgeBaseStatus is gated with proper feature access control', function () {
+test('EditKnowledgeBaseStatus is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = false;
@@ -140,7 +140,7 @@ test('EditKnowledgeBaseStatus is gated with proper feature access control', func
     assertEquals($request['name'], $knowledgeBaseStatus->fresh()->name);
 });
 
-test('EditKnowledgeBaseStatus prevents renaming to a case-insensitive duplicate name', function () {
+test('EditKnowledgeBaseStatus prevents renaming to a case-insensitive duplicate name', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.*.update');
@@ -160,7 +160,7 @@ test('EditKnowledgeBaseStatus prevents renaming to a case-insensitive duplicate 
     expect($knowledgeBaseStatus->fresh()->name)->toBe('Draft');
 });
 
-test('EditKnowledgeBaseStatus allows saving a status without changing its name', function () {
+test('EditKnowledgeBaseStatus allows saving a status without changing its name', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.*.update');

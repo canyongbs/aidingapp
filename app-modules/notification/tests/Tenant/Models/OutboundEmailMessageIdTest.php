@@ -38,7 +38,7 @@ use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Notification\Models\OutboundEmailMessageId;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 
-it('trackable relationship returns the correct model', function () {
+it('trackable relationship returns the correct model', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $outbound = $serviceRequest->outboundEmailMessageIds()->create([
@@ -51,7 +51,7 @@ it('trackable relationship returns the correct model', function () {
         ->and($outbound->trackable->is($serviceRequest))->toBeTrue();
 });
 
-it('emailMessage relationship returns the correct EmailMessage', function () {
+it('emailMessage relationship returns the correct EmailMessage', function (): void {
     $emailMessage = EmailMessage::factory()->create([
         'outbound_message_id' => '0101019d9205135c-e21c7d7b-f8bc-44fa-9c51-46d5decf9c65-000000',
     ]);
@@ -67,7 +67,7 @@ it('emailMessage relationship returns the correct EmailMessage', function () {
         ->and($outbound->emailMessage->is($emailMessage))->toBeTrue();
 });
 
-it('EmailMessage outboundEmailMessageId relationship returns the correct OutboundEmailMessageId', function () {
+it('EmailMessage outboundEmailMessageId relationship returns the correct OutboundEmailMessageId', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $outbound = $serviceRequest->outboundEmailMessageIds()->create([

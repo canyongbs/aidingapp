@@ -40,7 +40,7 @@ use Illuminate\Support\Facades\Event;
 
 use function Pest\Laravel\actingAs;
 
-beforeEach(function () {
+beforeEach(function (): void {
     Event::fake();
 
     $settings = app(LicenseSettings::class);
@@ -48,7 +48,7 @@ beforeEach(function () {
     $settings->save();
 });
 
-it('creates a channel conversation', function () {
+it('creates a channel conversation', function (): void {
     $user = User::factory()->create();
     $participant = User::factory()->create();
 
@@ -65,7 +65,7 @@ it('creates a channel conversation', function () {
         ->assertJsonPath('data.is_private', true);
 });
 
-it('creates a direct message conversation', function () {
+it('creates a direct message conversation', function (): void {
     $user = User::factory()->create();
     $participant = User::factory()->create();
 
@@ -78,7 +78,7 @@ it('creates a direct message conversation', function () {
         ->assertJsonPath('data.type', 'direct');
 });
 
-it('requires exactly one participant for direct messages', function () {
+it('requires exactly one participant for direct messages', function (): void {
     $user = User::factory()->create();
     $participant1 = User::factory()->create();
     $participant2 = User::factory()->create();
@@ -91,7 +91,7 @@ it('requires exactly one participant for direct messages', function () {
         ->assertStatus(422);
 });
 
-it('requires at least one participant for direct messages', function () {
+it('requires at least one participant for direct messages', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -102,7 +102,7 @@ it('requires at least one participant for direct messages', function () {
         ->assertStatus(422);
 });
 
-it('validates request', function (array $data, array $expectedErrors) {
+it('validates request', function (array $data, array $expectedErrors): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -144,7 +144,7 @@ it('validates request', function (array $data, array $expectedErrors) {
     ],
 ]);
 
-it('creates a confidential channel', function () {
+it('creates a confidential channel', function (): void {
     $user = User::factory()->create();
     $participant = User::factory()->create();
 
@@ -162,7 +162,7 @@ it('creates a confidential channel', function () {
         ->assertJsonPath('data.is_private', true);
 });
 
-it('forces a confidential channel to be private', function () {
+it('forces a confidential channel to be private', function (): void {
     $user = User::factory()->create();
     $participant = User::factory()->create();
 
@@ -179,7 +179,7 @@ it('forces a confidential channel to be private', function () {
         ->assertJsonPath('data.is_confidential', true);
 });
 
-it('creates a confidential channel with no ephemeral period', function () {
+it('creates a confidential channel with no ephemeral period', function (): void {
     $user = User::factory()->create();
     $participant = User::factory()->create();
 

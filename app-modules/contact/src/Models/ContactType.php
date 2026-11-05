@@ -39,23 +39,26 @@ namespace AidingApp\Contact\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Database\Factories\ContactTypeFactory;
 use AidingApp\Contact\Observers\ContactTypeObserver;
-use App\Models\BaseModel;
 use CanyonGBS\Common\Enums\Color;
-use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperContactType
  */
 #[ObservedBy([ContactTypeObserver::class])]
-class ContactType extends BaseModel implements Auditable
+class ContactType extends Model implements Auditable
 {
     use SoftDeletes;
     use AuditableTrait;
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
 
     /** @use HasFactory<ContactTypeFactory> */
     use HasFactory;
@@ -99,10 +102,5 @@ class ContactType extends BaseModel implements Auditable
             'color' => Color::class,
             'is_default' => 'boolean',
         ];
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 }

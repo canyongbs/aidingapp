@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\Event;
 
 beforeEach(fn () => Event::fake());
 
-it('updates the conversation name', function () {
+it('updates the conversation name', function (): void {
     $conversation = Conversation::factory()->channel()->create([
         'name' => 'Original Name',
     ]);
@@ -55,7 +55,7 @@ it('updates the conversation name', function () {
     expect($conversation->fresh()->name)->toBe('New Name');
 });
 
-it('updates the conversation privacy setting', function () {
+it('updates the conversation privacy setting', function (): void {
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => true,
     ]);
@@ -69,7 +69,7 @@ it('updates the conversation privacy setting', function () {
     expect($conversation->fresh()->is_private)->toBeFalse();
 });
 
-it('updates both name and privacy setting', function () {
+it('updates both name and privacy setting', function (): void {
     $conversation = Conversation::factory()->channel()->create([
         'name' => 'Original Name',
         'is_private' => true,
@@ -85,7 +85,7 @@ it('updates both name and privacy setting', function () {
     expect($result->is_private)->toBeFalse();
 });
 
-it('does not save when no changes are made', function () {
+it('does not save when no changes are made', function (): void {
     $conversation = Conversation::factory()->channel()->create([
         'name' => 'Original Name',
     ]);
@@ -102,7 +102,7 @@ it('does not save when no changes are made', function () {
     expect($conversation->fresh()->updated_at->equalTo($originalUpdatedAt))->toBeTrue();
 });
 
-it('broadcasts `ConversationUpdated` event when name is updated', function () {
+it('broadcasts `ConversationUpdated` event when name is updated', function (): void {
     $conversation = Conversation::factory()->channel()->create([
         'name' => 'Original Name',
     ]);
@@ -112,12 +112,12 @@ it('broadcasts `ConversationUpdated` event when name is updated', function () {
         name: 'New Name',
     );
 
-    Event::assertDispatched(ConversationUpdated::class, function (ConversationUpdated $event) use ($conversation) {
+    Event::assertDispatched(ConversationUpdated::class, function (ConversationUpdated $event) use ($conversation): bool {
         return $event->conversation->is($conversation) && $event->conversation->name === 'New Name';
     });
 });
 
-it('broadcasts `ConversationUpdated` event when privacy is updated', function () {
+it('broadcasts `ConversationUpdated` event when privacy is updated', function (): void {
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => true,
     ]);
@@ -127,12 +127,12 @@ it('broadcasts `ConversationUpdated` event when privacy is updated', function ()
         isPrivate: false,
     );
 
-    Event::assertDispatched(ConversationUpdated::class, function (ConversationUpdated $event) use ($conversation) {
+    Event::assertDispatched(ConversationUpdated::class, function (ConversationUpdated $event) use ($conversation): bool {
         return $event->conversation->is($conversation) && $event->conversation->is_private === false;
     });
 });
 
-it('does not broadcast `ConversationUpdated` event when no changes are made', function () {
+it('does not broadcast `ConversationUpdated` event when no changes are made', function (): void {
     $conversation = Conversation::factory()->channel()->create();
 
     app(UpdateConversation::class)(
@@ -142,7 +142,7 @@ it('does not broadcast `ConversationUpdated` event when no changes are made', fu
     Event::assertNotDispatched(ConversationUpdated::class);
 });
 
-it('does not let a confidential channel be made public', function () {
+it('does not let a confidential channel be made public', function (): void {
     $conversation = Conversation::factory()->confidential()->create();
 
     expect(fn () => app(UpdateConversation::class)(
@@ -155,7 +155,7 @@ it('does not let a confidential channel be made public', function () {
     Event::assertNotDispatched(ConversationUpdated::class);
 });
 
-it('still renames a confidential channel', function () {
+it('still renames a confidential channel', function (): void {
     $conversation = Conversation::factory()->confidential()->create([
         'name' => 'Original Name',
     ]);

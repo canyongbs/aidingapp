@@ -36,7 +36,7 @@
 
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 
-it('assigns a public ID when creating a category', function () {
+it('assigns a public ID when creating a category', function (): void {
     $category = KnowledgeBaseCategory::factory()->create();
 
     expect($category->public_id)
@@ -44,7 +44,7 @@ it('assigns a public ID when creating a category', function () {
         ->toMatch('/^[0-9A-Za-z]{8}$/');
 });
 
-it('auto assigns sort when creating a parent category without sort', function () {
+it('auto assigns sort when creating a parent category without sort', function (): void {
     $category1 = KnowledgeBaseCategory::factory()->create();
     $category2 = KnowledgeBaseCategory::factory()->create();
     $category3 = KnowledgeBaseCategory::factory()->create();
@@ -54,7 +54,7 @@ it('auto assigns sort when creating a parent category without sort', function ()
     expect($category3->fresh()->sort)->toBe(3);
 });
 
-it('auto assigns sort when creating a sub category without sort', function () {
+it('auto assigns sort when creating a sub category without sort', function (): void {
     $parent = KnowledgeBaseCategory::factory()->create();
 
     $sub1 = KnowledgeBaseCategory::factory()->create(['parent_id' => $parent->id]);
@@ -66,13 +66,13 @@ it('auto assigns sort when creating a sub category without sort', function () {
     expect($sub3->fresh()->sort)->toBe(3);
 });
 
-it('does not override sort when explicitly provided', function () {
+it('does not override sort when explicitly provided', function (): void {
     $category = KnowledgeBaseCategory::factory()->create(['sort' => 10]);
 
     expect($category->fresh()->sort)->toBe(10);
 });
 
-it('scopes sort independently for parent and sub categories', function () {
+it('scopes sort independently for parent and sub categories', function (): void {
     $parent1 = KnowledgeBaseCategory::factory()->create();
     $parent2 = KnowledgeBaseCategory::factory()->create();
 
@@ -92,7 +92,7 @@ it('scopes sort independently for parent and sub categories', function () {
     expect($sub1OfParent2->fresh()->sort)->toBe(1);
 });
 
-it('returns sub categories ordered by sort', function () {
+it('returns sub categories ordered by sort', function (): void {
     $parent = KnowledgeBaseCategory::factory()->create();
 
     $sub3 = KnowledgeBaseCategory::factory()->create(['parent_id' => $parent->id, 'sort' => 3]);
@@ -105,7 +105,7 @@ it('returns sub categories ordered by sort', function () {
         ->toBe([$sub1->id, $sub2->id, $sub3->id]);
 });
 
-it('assigns sort correctly after soft-deleted categories exist', function () {
+it('assigns sort correctly after soft-deleted categories exist', function (): void {
     $category1 = KnowledgeBaseCategory::factory()->create();
     $category2 = KnowledgeBaseCategory::factory()->create();
 
@@ -118,7 +118,7 @@ it('assigns sort correctly after soft-deleted categories exist', function () {
     expect($category3->fresh()->sort)->toBe(3);
 });
 
-it('assigns sort correctly for sub categories after some are soft-deleted', function () {
+it('assigns sort correctly for sub categories after some are soft-deleted', function (): void {
     $parent = KnowledgeBaseCategory::factory()->create();
 
     $sub1 = KnowledgeBaseCategory::factory()->create(['parent_id' => $parent->id]);
@@ -132,7 +132,7 @@ it('assigns sort correctly for sub categories after some are soft-deleted', func
     expect($sub3->fresh()->sort)->toBe(3);
 });
 
-it('assigns sort based on max value when non-sequential sort values exist', function () {
+it('assigns sort based on max value when non-sequential sort values exist', function (): void {
     $parent = KnowledgeBaseCategory::factory()->create();
 
     KnowledgeBaseCategory::factory()->create(['parent_id' => $parent->id, 'sort' => 5]);

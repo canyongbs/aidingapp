@@ -38,7 +38,7 @@ use AidingApp\Contact\Jobs\MatchUnaffiliatedContactsJob;
 use AidingApp\Contact\Models\Organization;
 use Illuminate\Support\Facades\Queue;
 
-it('dispatches targeted matching when an organization is created with domains', function () {
+it('dispatches targeted matching when an organization is created with domains', function (): void {
     Queue::fake([MatchUnaffiliatedContactsJob::class]);
 
     $organization = Organization::factory()->create([
@@ -52,7 +52,7 @@ it('dispatches targeted matching when an organization is created with domains', 
     );
 });
 
-it('dispatches targeted matching when organization domains change', function () {
+it('dispatches targeted matching when organization domains change', function (): void {
     $organization = Organization::factory()->create([
         'domains' => [['domain' => 'old.example']],
     ]);
@@ -67,7 +67,7 @@ it('dispatches targeted matching when organization domains change', function () 
     );
 });
 
-it('does not dispatch targeted matching when another organization attribute changes', function () {
+it('does not dispatch targeted matching when another organization attribute changes', function (): void {
     $organization = Organization::factory()->create([
         'domains' => [['domain' => 'example.com']],
     ]);
@@ -79,7 +79,7 @@ it('does not dispatch targeted matching when another organization attribute chan
     Queue::assertNotPushed(MatchUnaffiliatedContactsJob::class);
 });
 
-it('does not dispatch targeted matching when organization domains are cleared', function () {
+it('does not dispatch targeted matching when organization domains are cleared', function (): void {
     $organization = Organization::factory()->create([
         'domains' => [['domain' => 'example.com']],
     ]);

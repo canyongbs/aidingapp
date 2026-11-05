@@ -50,15 +50,17 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\Select;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('The correct details are displayed on the ListServiceRequests page', function () {
+test('The correct details are displayed on the ListServiceRequests page', function (): void {
     asSuperAdmin();
 
     $openStatus = ServiceRequestStatus::factory()->open()->create();
@@ -134,7 +136,7 @@ test('The correct details are displayed on the ListServiceRequests page', functi
     );
 });
 
-test('The correct details are displayed on the ListServiceRequests page via direct user manager', function () {
+test('The correct details are displayed on the ListServiceRequests page via direct user manager', function (): void {
     asSuperAdmin();
 
     $openStatus = ServiceRequestStatus::factory()->open()->create();
@@ -185,7 +187,7 @@ test('The correct details are displayed on the ListServiceRequests page via dire
         ->assertSee('Resolution:')
         ->assertSee('Created:')
         ->assertSee('Updated:')
-        ->assertSee($user->name)
+        ->assertSee($user->full_name)
         ->assertSeeInOrder(['CSAT:', 'N/A', 'NPS:', 'N/A']);
 
     $serviceRequests->each(
@@ -204,7 +206,7 @@ test('The correct details are displayed on the ListServiceRequests page via dire
     );
 });
 
-it('lists service requests for manager and auditor group members', function () {
+it('lists service requests for manager and auditor group members', function (): void {
     $openStatus = ServiceRequestStatus::factory()->open()->create();
 
     $user = User::factory()->create();
@@ -236,7 +238,7 @@ it('lists service requests for manager and auditor group members', function () {
         ->assertCanNotSeeTableRecords([$hiddenRequest]);
 });
 
-test('category is rendered inline with the service request number on the ListServiceRequests page', function () {
+test('category is rendered inline with the service request number on the ListServiceRequests page', function (): void {
     asSuperAdmin();
 
     $openStatus = ServiceRequestStatus::factory()->open()->create();
@@ -253,7 +255,7 @@ test('category is rendered inline with the service request number on the ListSer
         ->assertSee(ServiceRequestCategory::Incident->getLabel());
 });
 
-test('can filter service request by category', function () {
+test('can filter service request by category', function (): void {
     asSuperAdmin();
 
     $openStatus = ServiceRequestStatus::factory()->open()->create();
@@ -279,7 +281,7 @@ test('can filter service request by category', function () {
         ->assertCanNotSeeTableRecords($requestServiceRequests);
 });
 
-test('can sort service requests by type', function () {
+test('can sort service requests by type', function (): void {
     asSuperAdmin();
 
     $openStatus = ServiceRequestStatus::factory()->open()->create();
@@ -300,7 +302,7 @@ test('can sort service requests by type', function () {
         ->assertCanSeeTableRecords([$secondServiceRequest, $firstServiceRequest], inOrder: true);
 });
 
-test('type column displays the correct service request type name', function () {
+test('type column displays the correct service request type name', function (): void {
     asSuperAdmin();
 
     $openStatus = ServiceRequestStatus::factory()->open()->create();
@@ -323,7 +325,7 @@ test('type column displays the correct service request type name', function () {
 
 // Permission Tests
 
-test('ListServiceRequests is gated with proper access control', function () {
+test('ListServiceRequests is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -339,7 +341,7 @@ test('ListServiceRequests is gated with proper access control', function () {
         )->assertSuccessful();
 });
 
-test('ListServiceRequests is gated with proper feature access control', function () {
+test('ListServiceRequests is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -365,7 +367,7 @@ test('ListServiceRequests is gated with proper feature access control', function
         )->assertSuccessful();
 });
 
-test('can filter service request by organization', function () {
+test('can filter service request by organization', function (): void {
     asSuperAdmin();
 
     $openStatus = ServiceRequestStatus::factory()->open()->create();
@@ -392,7 +394,7 @@ test('can filter service request by organization', function () {
         ->assertCanNotSeeTableRecords($serviceRequestsNotInOrganization);
 });
 
-test('service requests only visible to service request type managers', function () {
+test('service requests only visible to service request type managers', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -437,7 +439,7 @@ test('service requests only visible to service request type managers', function 
         ->assertCanNotSeeTableRecords($serviceRequests);
 });
 
-test('service requests only visible to direct user service request type managers', function () {
+test('service requests only visible to direct user service request type managers', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -476,7 +478,7 @@ test('service requests only visible to direct user service request type managers
         ->assertCanNotSeeTableRecords($serviceRequests);
 });
 
-test('service requests only visible to service request type auditors', function () {
+test('service requests only visible to service request type auditors', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -521,7 +523,7 @@ test('service requests only visible to service request type auditors', function 
         ->assertCanNotSeeTableRecords($serviceRequests);
 });
 
-test('service requests only visible to direct user service request type auditors', function () {
+test('service requests only visible to direct user service request type auditors', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -560,7 +562,7 @@ test('service requests only visible to direct user service request type auditors
         ->assertCanNotSeeTableRecords($serviceRequests);
 });
 
-test('can list audit member to service request type', function () {
+test('can list audit member to service request type', function (): void {
     $user = User::factory()->create();
     $department = Department::factory()->create();
     $user->department()->associate($department)->save();
@@ -602,7 +604,7 @@ test('can list audit member to service request type', function () {
         ->assertCanNotSeeTableRecords($serviceRequestsWithoutManager);
 });
 
-test('can list direct user manager to service request type', function () {
+test('can list direct user manager to service request type', function (): void {
     $user = User::factory()->create();
 
     $contact = Contact::factory()->create();
@@ -641,7 +643,7 @@ test('can list direct user manager to service request type', function () {
         ->assertCanNotSeeTableRecords($serviceRequestsWithoutManager);
 });
 
-it('can filter service requests by assigned to with unassigned option', function () {
+it('can filter service requests by assigned to with unassigned option', function (): void {
     $openStatus = ServiceRequestStatus::factory()->open()->create();
 
     $unassignedRequest = ServiceRequest::factory()->create(['status_id' => $openStatus->getKey()]);
@@ -735,7 +737,7 @@ it('can filter service requests by assigned to with unassigned option', function
         ]);
 });
 
-it('can filter service requests by assigned to with unassigned option via direct user manager', function () {
+it('can filter service requests by assigned to with unassigned option via direct user manager', function (): void {
     $openStatus = ServiceRequestStatus::factory()->open()->create();
 
     $unassignedRequest = ServiceRequest::factory()->create(['status_id' => $openStatus->getKey()]);
@@ -792,7 +794,7 @@ it('can filter service requests by assigned to with unassigned option via direct
         ]);
 });
 
-it('can filter service requests by searched assigned user outside initial preload options', function () {
+it('can filter service requests by searched assigned user outside initial preload options', function (): void {
     asSuperAdmin();
 
     $openStatus = ServiceRequestStatus::factory()->open()->create();
@@ -853,7 +855,7 @@ it('can filter service requests by searched assigned user outside initial preloa
         ->assertCanNotSeeTableRecords([$nonMatchingRequest]);
 });
 
-it('default non closed service request will not display', function () {
+it('default non closed service request will not display', function (): void {
     $nonClosedServiceRequests = ServiceRequest::factory()
         ->for(
             ServiceRequestStatus::factory()
@@ -881,7 +883,7 @@ it('default non closed service request will not display', function () {
         ->assertCanSeeTableRecords($nonClosedServiceRequests->merge($closedServiceRequests));
 });
 
-it('can filter service requests by type', function () {
+it('can filter service requests by type', function (): void {
     asSuperAdmin();
 
     $openStatus = ServiceRequestStatus::factory()->open()->create();
@@ -912,7 +914,7 @@ it('can filter service requests by type', function () {
         ->assertCanNotSeeTableRecords($serviceRequestsTypeB);
 });
 
-it('can filter service requests by multiple types', function () {
+it('can filter service requests by multiple types', function (): void {
     asSuperAdmin();
 
     $openStatus = ServiceRequestStatus::factory()->open()->create();
@@ -952,7 +954,7 @@ it('can filter service requests by multiple types', function () {
         ->assertCanNotSeeTableRecords($serviceRequestsTypeC);
 });
 
-it('shows all service requests when no type filter is selected', function () {
+it('shows all service requests when no type filter is selected', function (): void {
     asSuperAdmin();
 
     $openStatus = ServiceRequestStatus::factory()->open()->create();
@@ -981,7 +983,7 @@ it('shows all service requests when no type filter is selected', function () {
         ->assertCanSeeTableRecords($serviceRequestsTypeA->merge($serviceRequestsTypeB));
 });
 
-it('builds type tree options with categories as groups and types as selectable items', function () {
+it('builds type tree options with categories as groups and types as selectable items', function (): void {
     ServiceRequestType::query()->delete();
     ServiceRequestTypeCategory::query()->delete();
 
@@ -1033,7 +1035,7 @@ it('builds type tree options with categories as groups and types as selectable i
     expect($tree[1]['children'][0]['value'])->toBe($typeB1->getKey());
 });
 
-it('builds type tree options with nested categories maintaining sort order', function () {
+it('builds type tree options with nested categories maintaining sort order', function (): void {
     ServiceRequestType::query()->delete();
     ServiceRequestTypeCategory::query()->delete();
 
@@ -1078,7 +1080,7 @@ it('builds type tree options with nested categories maintaining sort order', fun
     expect($tree[0]['children'][1]['value'])->toBe($parentType->getKey());
 });
 
-it('builds type tree options with uncategorized types at root level', function () {
+it('builds type tree options with uncategorized types at root level', function (): void {
     ServiceRequestType::query()->delete();
     ServiceRequestTypeCategory::query()->delete();
 
@@ -1112,7 +1114,7 @@ it('builds type tree options with uncategorized types at root level', function (
     expect($tree[1]['children'][0]['name'])->toBe('Categorized Type');
 });
 
-it('filters out empty categories from type tree options', function () {
+it('filters out empty categories from type tree options', function (): void {
     ServiceRequestType::query()->delete();
     ServiceRequestTypeCategory::query()->delete();
 
@@ -1141,7 +1143,7 @@ it('filters out empty categories from type tree options', function () {
     expect($tree[0]['children'][0]['name'])->toBe('Type A');
 });
 
-it('filters out nested empty categories from type tree options', function () {
+it('filters out nested empty categories from type tree options', function (): void {
     ServiceRequestType::query()->delete();
     ServiceRequestTypeCategory::query()->delete();
 
@@ -1171,7 +1173,7 @@ it('filters out nested empty categories from type tree options', function () {
     expect($tree[0]['children'][0]['value'])->toBe($type->getKey());
 });
 
-it('only shows the bulk delete action to a user with the service_request.delete permission', function () {
+it('only shows the bulk delete action to a user with the service_request.delete permission', function (): void {
     ServiceRequest::factory(15)->create();
 
     $user = User::factory()
@@ -1189,7 +1191,7 @@ it('only shows the bulk delete action to a user with the service_request.delete 
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
 
-it('places a type under every category it belongs to in the type filter tree', function () {
+it('places a type under every category it belongs to in the type filter tree', function (): void {
     ServiceRequestType::query()->delete();
     ServiceRequestTypeCategory::query()->delete();
 
@@ -1206,4 +1208,45 @@ it('places a type under every category it belongs to in the type filter tree', f
 
     expect(collect($nodeA['children'])->pluck('value'))->toContain($type->getKey())
         ->and(collect($nodeB['children'])->pluck('value'))->toContain($type->getKey());
+});
+
+it('does not offer archived organizations in the organization filter', function (): void {
+    asSuperAdmin();
+
+    $organization = Organization::factory()->create();
+    $archivedOrganization = Organization::factory()->archived()->create();
+
+    $select = Livewire::test(ListServiceRequests::class)
+        ->instance()
+        ->getTableFiltersForm()
+        ->getComponentByStatePath('organization.value');
+
+    assert($select instanceof Select);
+
+    $options = $select->getOptions();
+
+    expect($options)
+        ->toHaveKey($organization->getKey())
+        ->not()->toHaveKey($archivedOrganization->getKey());
+});
+
+it('offers every organization in the organization filter when archiving is inactive', function (): void {
+    OrganizationArchivingFeature::deactivate();
+    asSuperAdmin();
+
+    $organization = Organization::factory()->create();
+    $archivedOrganization = Organization::factory()->archived()->create();
+
+    $select = Livewire::test(ListServiceRequests::class)
+        ->instance()
+        ->getTableFiltersForm()
+        ->getComponentByStatePath('organization.value');
+
+    assert($select instanceof Select);
+
+    $options = $select->getOptions();
+
+    expect($options)
+        ->toHaveKey($organization->getKey())
+        ->toHaveKey($archivedOrganization->getKey());
 });

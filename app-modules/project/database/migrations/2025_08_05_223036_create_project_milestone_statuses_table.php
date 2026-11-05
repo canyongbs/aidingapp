@@ -42,7 +42,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('project_milestone_statuses', function (Blueprint $table) {
+        Schema::create('project_milestone_statuses', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->string('name');
             $table->string('description')->nullable();

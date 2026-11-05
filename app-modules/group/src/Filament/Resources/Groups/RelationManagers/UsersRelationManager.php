@@ -36,6 +36,7 @@
 
 namespace AidingApp\Group\Filament\Resources\Groups\RelationManagers;
 
+use App\Filament\Tables\Columns\UserFullNameColumn;
 use App\Models\Scopes\WithoutAnyAdmin;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
@@ -55,9 +56,7 @@ class UsersRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                TextColumn::make('name')
-                    ->searchable()
-                    ->sortable(),
+                UserFullNameColumn::make(),
                 TextColumn::make('email')
                     ->searchable()
                     ->sortable(),

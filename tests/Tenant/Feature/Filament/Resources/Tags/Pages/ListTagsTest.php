@@ -43,7 +43,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->knowledgeManagement = false;
     $settings->save();
@@ -65,7 +65,7 @@ it('is gated with proper access control', function () {
     Livewire::test(ListTags::class)->assertOk();
 });
 
-it('only shows the bulk delete action to a user with the tag.delete permission', function () {
+it('only shows the bulk delete action to a user with the tag.delete permission', function (): void {
     Tag::factory(15)->create();
 
     $user = User::factory()

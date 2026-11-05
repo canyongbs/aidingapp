@@ -46,7 +46,7 @@ use function PHPUnit\Framework\assertCount;
 
 // Permission Tests
 
-test('CreateDepartment is gated with proper access control', function () {
+test('CreateDepartment is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)

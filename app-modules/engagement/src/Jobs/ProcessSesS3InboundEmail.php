@@ -39,6 +39,7 @@ namespace AidingApp\Engagement\Jobs;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Support\OrganizationEmailDomainLookup;
 use AidingApp\Engagement\Enums\EngagementResponseType;
 use AidingApp\Engagement\Exceptions\SesS3InboundServiceRequestTypeNotFound;
 use AidingApp\Engagement\Exceptions\SesS3InboundSpamOrVirusDetected;
@@ -52,11 +53,13 @@ use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\ReopenServiceRequestAction;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateCondition;
+use AidingApp\ServiceManagement\Enums\ServiceRequestFileUploadType;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
+use App\Features\ContactArchivingFeature;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV3;
 use Aws\Kms\KmsClient;
@@ -118,7 +121,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             $sender = $parser->getAddresses('from')[0]['address'];
 
-            $classified->each(function (array $entry) use ($parser, $content, $sender) {
+            $classified->each(function (array $entry) use ($parser, $content, $sender): void {
                 $type = $entry['type'];
                 $tenant = $entry['tenant'];
                 $srTypeDomain = $entry['srTypeDomain'] ?? null;
@@ -176,7 +179,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
     {
         /** @var Collection<int, array{type: string, tenant: Tenant, srTypeDomain?: TenantServiceRequestTypeDomain, sr_number?: string}> */
         return $this->recipientCandidates($parser)
-            ->map(function (string $address) {
+            ->map(function (string $address): ?array {
                 $localPart = filter_var($address, FILTER_VALIDATE_EMAIL) ? explode('@', $address)[0] : null;
 
                 if ($localPart === null) {
@@ -308,8 +311,9 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
     protected function handleEngagement(Tenant $tenant, Parser $parser, string $content, string $sender): void
     {
-        $tenant->execute(function () use ($parser, $content, $sender) {
+        $tenant->execute(function () use ($parser, $content, $sender): void {
             $contacts = Contact::query()
+                ->withoutArchived()
                 ->where('email', $sender)
                 ->get();
 
@@ -322,14 +326,14 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                     'sender' => $sender,
                 ]);
 
-                collect($parser->getAttachments())->each(function (Attachment $attachment) use ($unmatchedCommunication) {
+                collect($parser->getAttachments())->each(function (Attachment $attachment) use ($unmatchedCommunication): void {
                     $this->storeAttachmentMedia($unmatchedCommunication, $attachment, 'attachments');
                 });
 
                 return;
             }
 
-            $contacts->each(function (Contact $contact) use ($parser, $content) {
+            $contacts->each(function (Contact $contact) use ($parser, $content): void {
                 $engagementResponse = $contact->engagementResponses()
                     ->create([
                         'subject' => $parser->getHeader('subject'),
@@ -339,7 +343,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                         'raw' => $content,
                     ]);
 
-                collect($parser->getAttachments())->each(function (Attachment $attachment) use ($engagementResponse, $contact) {
+                collect($parser->getAttachments())->each(function (Attachment $attachment) use ($engagementResponse, $contact): void {
                     $this->storeAttachmentMedia($engagementResponse, $attachment, 'attachments', $contact);
                 });
             });
@@ -348,7 +352,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
     protected function handleServiceRequestReply(Tenant $tenant, Parser $parser, string $sender, ?string $srNumber = null): void
     {
-        $tenant->execute(function () use ($parser, $sender, $srNumber) {
+        $tenant->execute(function () use ($parser, $sender, $srNumber): void {
             $serviceRequest = null;
 
             // Strategy 1: Plus-addressed SR number
@@ -474,7 +478,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
     protected function handleServiceRequestType(TenantServiceRequestTypeDomain $serviceRequestTypeDomain, Parser $parser, string $sender): void
     {
-        $serviceRequestTypeDomain->tenant->execute(function () use ($serviceRequestTypeDomain, $parser, $sender) {
+        $serviceRequestTypeDomain->tenant->execute(function () use ($serviceRequestTypeDomain, $parser, $sender): void {
             $serviceRequestType = $serviceRequestTypeDomain->serviceRequestType;
 
             if (is_null($serviceRequestType)) {
@@ -503,6 +507,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
             $effectiveNotificationBody = $forwarded['body'] ?? $parser->getMessageBody('htmlEmbedded');
 
             $contacts = Contact::query()
+                ->withoutArchived()
                 ->where('email', $effectiveSender)
                 ->get();
 
@@ -520,11 +525,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 $organization = null;
 
                 if ($serviceRequestType->email_automatic_creation_contact_create_condition === EmailAutomaticCreationContactCreateCondition::IfEligible) {
-                    $domain = Str::afterLast($effectiveSender, '@');
-
-                    $organization = Organization::query()
-                        ->whereRaw('LOWER(?) = ANY (SELECT LOWER(value) FROM jsonb_array_elements_text(domains))', [mb_strtolower($domain)])
-                        ->first();
+                    $organization = app(OrganizationEmailDomainLookup::class)->find($effectiveSender);
 
                     if (! $organization) {
                         Notification::route('mail', $effectiveSender)
@@ -537,7 +538,12 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                     }
                 }
 
-                $contacts = $contacts->add($this->buildContactFromSender($effectiveSender, $effectiveSenderName, $organization));
+                $contacts = $contacts->add($this->buildContactFromSender(
+                    $effectiveSender,
+                    $effectiveSenderName,
+                    $organization,
+                    restoredContactSenderName: $forwarded === null ? $effectiveSenderName : $forwarded['senderName'],
+                ));
             }
 
             $serviceRequestStatus = ServiceRequestStatus::query()
@@ -548,7 +554,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             $createServiceRequestAction = app(CreateServiceRequestAction::class);
 
-            $contacts->each(function (Contact $contact) use ($serviceRequestType, $parser, $effectiveSubject, $effectiveBody, $serviceRequestStatus, $createServiceRequestAction) {
+            $contacts->each(function (Contact $contact) use ($serviceRequestType, $parser, $effectiveSubject, $effectiveBody, $serviceRequestStatus, $createServiceRequestAction): void {
                 $serviceRequest = $createServiceRequestAction->execute(
                     ServiceRequestDataObject::fromData([
                         'type_id' => $serviceRequestType->getKey(),
@@ -561,7 +567,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 );
 
                 foreach ($parser->getAttachments() as $attachment) {
-                    $this->storeAttachmentMedia($serviceRequest, $attachment, 'uploads', $contact);
+                    $this->storeAttachmentMedia($serviceRequest, $attachment, 'uploads', $contact, ServiceRequestFileUploadType::RequestSubmission);
                 }
             });
         });
@@ -694,12 +700,27 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
         return trim(implode("\n", array_slice($lines, $index)));
     }
 
-    protected function buildContactFromSender(string $sender, ?string $senderName, ?Organization $organization = null): Contact
+    /**
+     * @param ?string $restoredContactSenderName The name to give a restored archived contact. Unlike `$senderName`, it never falls back to a forwarder's name.
+     */
+    protected function buildContactFromSender(string $sender, ?string $senderName, ?Organization $organization = null, ?string $restoredContactSenderName = null): Contact
     {
         $senderName = trim((string) $senderName);
 
-        $firstName = Str::before($senderName, ' ') ?: 'Unknown';
-        $lastName = Str::after($senderName, ' ') ?: 'Unknown';
+        // Archived contacts are included here, and another worker may have unarchived this one since the caller's lookup.
+        $existingContact = ContactArchivingFeature::active()
+            ? Contact::query()->where('email', $sender)->first()
+            : null;
+
+        if ($existingContact !== null) {
+            if (! $existingContact->isArchived()) {
+                return $existingContact;
+            }
+
+            return $this->restoreArchivedContact($existingContact, $sender, trim((string) $restoredContactSenderName), $organization);
+        }
+
+        [$firstName, $lastName] = $this->splitSenderName($senderName);
 
         $contact = Contact::query()->make([
             'email' => $sender,
@@ -721,9 +742,41 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
         return $contact;
     }
 
+    protected function restoreArchivedContact(Contact $contact, string $sender, string $senderName, ?Organization $organization): Contact
+    {
+        // A bare From address is parsed with the address itself as its display name.
+        if ($senderName !== '' && Str::lower($senderName) !== Str::lower($sender)) {
+            [$firstName, $lastName] = $this->splitSenderName($senderName);
+
+            $contact->first_name = $firstName;
+            $contact->last_name = $lastName;
+            $contact->full_name = $firstName . ' ' . $lastName;
+        }
+
+        if ($organization !== null && blank($contact->organization_id)) {
+            $contact->organization()->associate($organization);
+        }
+
+        $contact->save();
+        $contact->unarchive();
+
+        return $contact;
+    }
+
+    /**
+     * @return array{string, string}
+     */
+    protected function splitSenderName(string $senderName): array
+    {
+        return [
+            Str::before($senderName, ' ') ?: 'Unknown',
+            Str::after($senderName, ' ') ?: 'Unknown',
+        ];
+    }
+
     protected function handleLegacyAddress(Tenant $tenant, Parser $parser, string $sender): void
     {
-        $tenant->execute(function () use ($parser, $sender) {
+        $tenant->execute(function () use ($parser, $sender): void {
             $unmatchedCommunication = UnmatchedInboundCommunication::create([
                 'type' => EngagementResponseType::Email,
                 'subject' => $parser->getHeader('subject'),
@@ -732,7 +785,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 'sender' => $sender,
             ]);
 
-            collect($parser->getAttachments())->each(function (Attachment $attachment) use ($unmatchedCommunication) {
+            collect($parser->getAttachments())->each(function (Attachment $attachment) use ($unmatchedCommunication): void {
                 $this->storeAttachmentMedia($unmatchedCommunication, $attachment, 'attachments');
             });
         });
@@ -808,6 +861,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
         Attachment $attachment,
         string $collection,
         ?Contact $createdBy = null,
+        ?ServiceRequestFileUploadType $uploadType = null,
     ): void {
         try {
             $fileName = $attachment->getFilename();
@@ -831,6 +885,12 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             if ($createdBy !== null) {
                 $fileAdder->createdBy($createdBy);
+            }
+
+            if (filled($uploadType)) {
+                $fileAdder->withCustomProperties([
+                    ServiceRequestFileUploadType::CUSTOM_PROPERTY => $uploadType->value,
+                ]);
             }
 
             $fileAdder->toMediaCollection($collection);

@@ -62,11 +62,11 @@ class AssetFactory extends Factory
 
     public function available(): self
     {
-        return $this->state(fn () => ['status_id' => AssetStatus::factory()->available()->create()]);
+        return $this->state(fn (): array => ['status_id' => AssetStatus::factory()->available()->create()]);
     }
 
     public function unavailable(): self
     {
-        return $this->state(fn () => ['status_id' => AssetStatus::factory()->unavailable()->create()]);
+        return $this->state(fn (): array => ['status_id' => AssetStatus::factory()->unavailable()->create()]);
     }
 }

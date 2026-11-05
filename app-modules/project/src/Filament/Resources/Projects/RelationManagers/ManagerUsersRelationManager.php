@@ -36,12 +36,16 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
 
+use App\Filament\Tables\Columns\UserFullNameColumn;
+use App\Models\Scopes\OrderByFullName;
+use App\Models\Scopes\WhereFullNameLike;
+use App\Models\User;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ManagerUsersRelationManager extends RelationManager
 {
@@ -55,12 +59,15 @@ class ManagerUsersRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('name')
+            ->recordTitle(fn (User $record): string => $record->full_name)
             ->columns([
-                TextColumn::make('name'),
+                UserFullNameColumn::make(),
             ])
             ->headerActions([
                 AttachAction::make()
+                    ->recordSelectOptionsQuery(fn (Builder $query, ?string $search): Builder => $query
+                        ->tap(new OrderByFullName())
+                        ->when(filled($search), fn (Builder $query): Builder => $query->tap(new WhereFullNameLike($search))))
                     ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->recordActions([

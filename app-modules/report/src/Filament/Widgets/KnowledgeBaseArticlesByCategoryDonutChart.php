@@ -124,7 +124,7 @@ class KnowledgeBaseArticlesByCategoryDonutChart extends ChartReportWidget
     private function getArticlesByCategoryData(?array $categories = null): Collection
     {
         return KnowledgeBaseCategory::withCount([
-            'knowledgeBaseItems' => function (Builder $query) use ($categories) {
+            'knowledgeBaseItems' => function (Builder $query) use ($categories): void {
                 $query->when(
                     $categories,
                     fn (Builder $query): Builder => $query->whereIn('category_id', $categories)

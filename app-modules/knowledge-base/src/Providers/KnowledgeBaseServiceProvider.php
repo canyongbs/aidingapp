@@ -49,7 +49,13 @@ class KnowledgeBaseServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new KnowledgeBasePlugin()));
+        Panel::configureUsing(function (Panel $panel): void {
+            if ($panel->getId() !== 'admin') {
+                return;
+            }
+
+            $panel->plugin(new KnowledgeBasePlugin());
+        });
     }
 
     public function boot(): void

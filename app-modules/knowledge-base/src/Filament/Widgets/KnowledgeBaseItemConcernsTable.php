@@ -65,7 +65,7 @@ class KnowledgeBaseItemConcernsTable extends TableWidget
         return $table
             ->query(fn () => KnowledgeBaseItemConcern::whereBelongsTo($this->record, 'knowledgeBaseItem'))
             ->columns([
-                TextColumn::make('createdBy.name')
+                TextColumn::make('createdBy.full_name')
                     ->label('Name'),
                 TextColumn::make('description')
                     ->label('Concern'),

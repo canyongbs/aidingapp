@@ -41,7 +41,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('conversations', function (Blueprint $table) {
+        Schema::create('conversations', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->string('type');
             $table->string('name')->nullable();

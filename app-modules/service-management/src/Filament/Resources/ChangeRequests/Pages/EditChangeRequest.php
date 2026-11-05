@@ -66,7 +66,7 @@ class EditChangeRequest extends EditRecord
         return $schema
             ->components([
                 Section::make('Change Request Details')
-                    ->description(function (ChangeRequest $record) {
+                    ->description(function (ChangeRequest $record): ?string {
                         return $record->isNotNew()
                             ? "This change request {$record->status->classification->getDescription()} and can no longer be edited."
                             : null;
@@ -75,11 +75,11 @@ class EditChangeRequest extends EditRecord
                         TextInput::make('title')
                             ->required()
                             ->columnSpanFull()
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
+                            ->disabled(fn (ChangeRequest $record): bool => $record->isNotNew()),
                         TextInput::make('description')
                             ->required()
                             ->columnSpanFull()
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
+                            ->disabled(fn (ChangeRequest $record): bool => $record->isNotNew()),
                         Select::make('change_request_type_id')
                             ->relationship('type', 'name', fn (ChangeRequest $record, Builder $query) => $query->withTrashed()
                                 ->whereKey($record->change_request_type_id)
@@ -87,7 +87,7 @@ class EditChangeRequest extends EditRecord
                             ->preload()
                             ->required()
                             ->columnSpan(1)
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew())
+                            ->disabled(fn (ChangeRequest $record): bool => $record->isNotNew())
                             ->disableOptionWhen(fn (string $value) => $disabledTypes->contains($value)),
                         Select::make('change_request_status_id')
                             ->relationship('status', 'name', fn (ChangeRequest $record, Builder $query) => $query->withTrashed()
@@ -103,18 +103,18 @@ class EditChangeRequest extends EditRecord
                             ->rows(5)
                             ->required()
                             ->columnSpanFull()
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
+                            ->disabled(fn (ChangeRequest $record): bool => $record->isNotNew()),
                         Textarea::make('backout_strategy')
                             ->rows(5)
                             ->required()
                             ->columnSpanFull()
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
+                            ->disabled(fn (ChangeRequest $record): bool => $record->isNotNew()),
                         DateTimePicker::make('start_time')
                             ->required()
                             ->columnSpan(1)
                             ->live(onBlur: true)
                             ->afterStateUpdated(static::calculateEndTime(...))
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
+                            ->disabled(fn (ChangeRequest $record): bool => $record->isNotNew()),
                         TextInput::make('duration')
                             ->required()
                             ->integer()
@@ -124,7 +124,7 @@ class EditChangeRequest extends EditRecord
                             ->columnSpan(1)
                             ->dehydrated(false)
                             ->afterStateHydrated(function (Set $set, ?ChangeRequest $record): void {
-                                if (! $record || blank($record->start_time) || blank($record->end_time)) {
+                                if (! $record instanceof ChangeRequest || blank($record->start_time) || blank($record->end_time)) {
                                     return;
                                 }
 
@@ -132,7 +132,7 @@ class EditChangeRequest extends EditRecord
                             })
                             ->live(onBlur: true)
                             ->afterStateUpdated(static::calculateEndTime(...))
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
+                            ->disabled(fn (ChangeRequest $record): bool => $record->isNotNew()),
                         DateTimePicker::make('end_time')
                             ->required()
                             ->columnSpan(1)
@@ -150,7 +150,7 @@ class EditChangeRequest extends EditRecord
                             ->minValue(1)
                             ->maxValue(5)
                             ->columnSpan(1)
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
+                            ->disabled(fn (ChangeRequest $record): bool => $record->isNotNew()),
                         TextInput::make('likelihood')
                             ->reactive()
                             ->helperText('Please enter a number between 1 and 5.')
@@ -159,7 +159,7 @@ class EditChangeRequest extends EditRecord
                             ->minValue(1)
                             ->maxValue(5)
                             ->columnSpan(1)
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
+                            ->disabled(fn (ChangeRequest $record): bool => $record->isNotNew()),
                         ViewField::make('risk_score')
                             ->view('filament.forms.components.change-request.calculated-risk-score'),
                     ])

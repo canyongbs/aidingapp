@@ -45,7 +45,7 @@ use Illuminate\Support\Testing\Fakes\PendingBatchFake;
 
 use function Pest\Laravel\assertDatabaseCount;
 
-it('will create an engagement batch', function () {
+it('will create an engagement batch', function (): void {
     Bus::fake();
 
     assertDatabaseCount(EngagementBatch::class, 0);

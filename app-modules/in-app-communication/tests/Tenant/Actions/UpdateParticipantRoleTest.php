@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Event;
 
 beforeEach(fn () => Event::fake());
 
-it('promotes a participant to manager', function () {
+it('promotes a participant to manager', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -61,7 +61,7 @@ it('promotes a participant to manager', function () {
     expect($participant)->not()->toBeNull()->and($participant->is_manager)->toBeTrue();
 });
 
-it('demotes a manager to regular participant when other managers exist', function () {
+it('demotes a manager to regular participant when other managers exist', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $manager1 = User::factory()->create();
     $manager2 = User::factory()->create();
@@ -85,7 +85,7 @@ it('demotes a manager to regular participant when other managers exist', functio
     expect($participant)->not()->toBeNull()->and($participant->is_manager)->toBeFalse();
 });
 
-it('returns null when participant does not exist', function () {
+it('returns null when participant does not exist', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -98,7 +98,7 @@ it('returns null when participant does not exist', function () {
     expect($participant)->toBeNull();
 });
 
-it('throws exception when demoting the last manager', function () {
+it('throws exception when demoting the last manager', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $manager = User::factory()->create();
 
@@ -114,7 +114,7 @@ it('throws exception when demoting the last manager', function () {
     );
 })->throws(InvalidArgumentException::class, 'Cannot remove the last manager from a channel.');
 
-it('throws exception when updating role in direct message', function () {
+it('throws exception when updating role in direct message', function (): void {
     $conversation = Conversation::factory()->direct()->create();
     $user = User::factory()->create();
 
@@ -125,7 +125,7 @@ it('throws exception when updating role in direct message', function () {
     );
 })->throws(InvalidArgumentException::class, 'Cannot update participant roles in direct message conversations.');
 
-it('allows setting manager to true when already a manager', function () {
+it('allows setting manager to true when already a manager', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $manager = User::factory()->create();
 

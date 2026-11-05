@@ -63,7 +63,7 @@ class ShowConversationController extends Controller
         $conversation = Conversation::query()
             ->select('conversations.*')
             ->selectRaw('conversation_participants.unread_count as unread_count')
-            ->leftJoin('conversation_participants', function (JoinClause $join) use ($userType, $userId) {
+            ->leftJoin('conversation_participants', function (JoinClause $join) use ($userType, $userId): void {
                 $join->on('conversation_participants.conversation_id', '=', 'conversations.id')
                     ->where('conversation_participants.participant_type', '=', $userType)
                     ->where('conversation_participants.participant_id', '=', $userId);
@@ -89,11 +89,11 @@ class ShowConversationController extends Controller
             $avatarUrl = null;
         } else {
             $otherParticipant = $conversation->conversationParticipants
-                ->first(fn (ConversationParticipant $conversationParticipant) => $conversationParticipant->participant_id !== $userId);
+                ->first(fn (ConversationParticipant $conversationParticipant): bool => $conversationParticipant->participant_id !== $userId);
             $otherUser = $otherParticipant?->participant;
 
             $displayName = match (true) {
-                $otherUser instanceof User => $otherUser->name,
+                $otherUser instanceof User => $otherUser->full_name,
                 $otherUser instanceof Contact => $otherUser->full_name,
                 default => 'Unknown User',
             };

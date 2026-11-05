@@ -36,9 +36,12 @@
 
 use AidingApp\Authorization\Filament\Pages\Reporting;
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
 use AidingApp\Report\Enums\ReportAccessKey;
 use AidingApp\Report\Models\ReportDepartmentAccess;
+use AidingApp\Report\Models\ReportGroupAccess;
 use AidingApp\Report\Models\ReportUserAccess;
+use App\Features\ReportGroupAccessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
@@ -47,7 +50,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
-it('cannot be accessed by a user without the reporting permission', function () {
+it('cannot be accessed by a user without the reporting permission', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -55,7 +58,7 @@ it('cannot be accessed by a user without the reporting permission', function () 
     get(Reporting::getUrl())->assertForbidden();
 });
 
-it('can be accessed by a user with the reporting permission', function () {
+it('can be accessed by a user with the reporting permission', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('reporting.view-any');
@@ -65,7 +68,7 @@ it('can be accessed by a user with the reporting permission', function () {
     get(Reporting::getUrl())->assertSuccessful();
 });
 
-it('always lists reports that require no feature addon', function () {
+it('always lists reports that require no feature addon', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = false;
     $settings->data->addons->knowledgeManagement = false;
@@ -92,7 +95,7 @@ it('always lists reports that require no feature addon', function () {
         ]);
 });
 
-it('only lists a report when the required feature addon is enabled for the tenant', function (Closure $enableReport, ReportAccessKey $case) {
+it('only lists a report when the required feature addon is enabled for the tenant', function (Closure $enableReport, ReportAccessKey $case): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = false;
     $settings->data->addons->knowledgeManagement = false;
@@ -121,51 +124,51 @@ it('only lists a report when the required feature addon is enabled for the tenan
         ->assertCanSeeTableRecords([$case->value]);
 })->with([
     ReportAccessKey::ServiceRequests->value => [
-        fn (LicenseSettings $settings) => $settings->data->addons->serviceManagement = true,
+        fn (LicenseSettings $settings): true => $settings->data->addons->serviceManagement = true,
         ReportAccessKey::ServiceRequests,
     ],
     ReportAccessKey::ServiceRequestFeedback->value => [
-        function (LicenseSettings $settings) {
+        function (LicenseSettings $settings): void {
             $settings->data->addons->serviceManagement = true;
             $settings->data->addons->feedbackManagement = true;
         },
         ReportAccessKey::ServiceRequestFeedback,
     ],
     ReportAccessKey::KnowledgeBase->value => [
-        fn (LicenseSettings $settings) => $settings->data->addons->knowledgeManagement = true,
+        fn (LicenseSettings $settings): true => $settings->data->addons->knowledgeManagement = true,
         ReportAccessKey::KnowledgeBase,
     ],
     ReportAccessKey::AssetManagement->value => [
-        fn (LicenseSettings $settings) => $settings->data->addons->assetManagement = true,
+        fn (LicenseSettings $settings): true => $settings->data->addons->assetManagement = true,
         ReportAccessKey::AssetManagement,
     ],
     ReportAccessKey::AdvisoryManagement->value => [
-        fn (LicenseSettings $settings) => $settings->data->addons->advisoryManagement = true,
+        fn (LicenseSettings $settings): true => $settings->data->addons->advisoryManagement = true,
         ReportAccessKey::AdvisoryManagement,
     ],
     ReportAccessKey::ContractManagement->value => [
-        fn (LicenseSettings $settings) => $settings->data->addons->contractManagement = true,
+        fn (LicenseSettings $settings): true => $settings->data->addons->contractManagement = true,
         ReportAccessKey::ContractManagement,
     ],
     ReportAccessKey::LicenseManagement->value => [
-        fn (LicenseSettings $settings) => $settings->data->addons->licenseManagement = true,
+        fn (LicenseSettings $settings): true => $settings->data->addons->licenseManagement = true,
         ReportAccessKey::LicenseManagement,
     ],
     ReportAccessKey::ChangeManagement->value => [
-        fn (LicenseSettings $settings) => $settings->data->addons->changeManagement = true,
+        fn (LicenseSettings $settings): true => $settings->data->addons->changeManagement = true,
         ReportAccessKey::ChangeManagement,
     ],
     ReportAccessKey::ServiceMonitoring->value => [
-        fn (LicenseSettings $settings) => $settings->data->addons->serviceMonitoring = true,
+        fn (LicenseSettings $settings): true => $settings->data->addons->serviceMonitoring = true,
         ReportAccessKey::ServiceMonitoring,
     ],
     ReportAccessKey::Projects->value => [
-        fn (LicenseSettings $settings) => $settings->data->addons->projectManagement = true,
+        fn (LicenseSettings $settings): true => $settings->data->addons->projectManagement = true,
         ReportAccessKey::Projects,
     ],
 ]);
 
-it('can search reports by name', function () {
+it('can search reports by name', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->projectManagement = true;
     $settings->save();
@@ -181,7 +184,7 @@ it('can search reports by name', function () {
         ->assertCanNotSeeTableRecords([ReportAccessKey::AiSupportAssistant->value]);
 });
 
-it('can filter reports by category', function () {
+it('can filter reports by category', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('reporting.view-any');
 
@@ -193,7 +196,7 @@ it('can filter reports by category', function () {
         ->assertCanNotSeeTableRecords([ReportAccessKey::Projects->value]);
 });
 
-it('manage report action is visible with appropriate permissions', function () {
+it('manage report action is visible with appropriate permissions', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('reporting.view-any');
     $user->givePermissionTo('reporting.*.update');
@@ -204,7 +207,7 @@ it('manage report action is visible with appropriate permissions', function () {
         ->assertActionVisible(TestAction::make('manage')->table(ReportAccessKey::AiSupportAssistant->value));
 });
 
-it('can not manage report action without appropriate permissions', function () {
+it('can not manage report action without appropriate permissions', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('reporting.view-any');
 
@@ -214,7 +217,7 @@ it('can not manage report action without appropriate permissions', function () {
         ->assertActionHidden(TestAction::make('manage')->table(ReportAccessKey::AiSupportAssistant->value));
 });
 
-it('assigns users to a report through the manage action', function () {
+it('assigns users to a report through the manage action', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('reporting.view-any');
     $user->givePermissionTo('reporting.*.update');
@@ -238,7 +241,7 @@ it('assigns users to a report through the manage action', function () {
     )->toBeTrue();
 });
 
-it('assigns departments to a report through the manage action', function () {
+it('assigns departments to a report through the manage action', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('reporting.view-any');
     $user->givePermissionTo('reporting.*.update');
@@ -262,7 +265,107 @@ it('assigns departments to a report through the manage action', function () {
     )->toBeTrue();
 });
 
-it('removes access that is no longer selected when managing a report', function () {
+it('assigns groups to a report through the manage action', function (): void {
+    $user = User::factory()->create();
+    $user->givePermissionTo('reporting.view-any');
+    $user->givePermissionTo('reporting.*.update');
+
+    $group = Group::factory()->create();
+
+    actingAs($user);
+
+    expect(ReportGroupAccess::query()->where('report_key', ReportAccessKey::AiSupportAssistant->value)->exists())->toBeFalse();
+
+    Livewire::test(Reporting::class)
+        ->callAction(TestAction::make('manage')->table(ReportAccessKey::AiSupportAssistant->value), [
+            'users' => [],
+            'departments' => [],
+            'groups' => [$group->getKey()],
+        ])
+        ->assertNotified();
+
+    expect(
+        ReportGroupAccess::query()
+            ->where('report_key', ReportAccessKey::AiSupportAssistant->value)
+            ->where('group_id', $group->getKey())
+            ->exists()
+    )->toBeTrue();
+});
+
+it('does not assign groups to a report through the manage action when the group access feature is inactive', function (): void {
+    ReportGroupAccessFeature::deactivate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('reporting.view-any');
+    $user->givePermissionTo('reporting.*.update');
+
+    $group = Group::factory()->create();
+
+    actingAs($user);
+
+    Livewire::test(Reporting::class)
+        ->callAction(TestAction::make('manage')->table(ReportAccessKey::AiSupportAssistant->value), [
+            'users' => [],
+            'departments' => [],
+            'groups' => [$group->getKey()],
+        ])
+        ->assertNotified();
+
+    expect(ReportGroupAccess::query()->where('report_key', ReportAccessKey::AiSupportAssistant->value)->exists())->toBeFalse();
+});
+
+it('counts members of an assigned group in the access count without duplicates', function (): void {
+    $group = Group::factory()->create();
+
+    $member = User::factory()->create();
+    $group->users()->attach($member);
+
+    ReportUserAccess::factory()->create([
+        'report_key' => ReportAccessKey::AiSupportAssistant->value,
+        'user_id' => $member->getKey(),
+    ]);
+
+    ReportGroupAccess::factory()->create([
+        'report_key' => ReportAccessKey::AiSupportAssistant->value,
+        'group_id' => $group->getKey(),
+    ]);
+
+    expect(ReportAccessKey::AiSupportAssistant->accessCount())->toEqual(1);
+});
+
+it('bulk manage assignments action assigns and replaces groups', function (): void {
+    $user = User::factory()->create();
+    $user->givePermissionTo('reporting.view-any');
+    $user->givePermissionTo('reporting.*.update');
+
+    $existingGroup = Group::factory()->create();
+    $newGroup = Group::factory()->create();
+
+    ReportGroupAccess::factory()->create([
+        'report_key' => ReportAccessKey::AiSupportAssistant->value,
+        'group_id' => $existingGroup->getKey(),
+    ]);
+
+    actingAs($user);
+
+    Livewire::test(Reporting::class)
+        ->callTableBulkAction('manageReportAssignments', [ReportAccessKey::AiSupportAssistant->value], [
+            'users' => [],
+            'departments' => [],
+            'groups' => [$newGroup->getKey()],
+            'sync' => true,
+        ])
+        ->assertNotified();
+
+    expect(
+        ReportGroupAccess::query()
+            ->where('report_key', ReportAccessKey::AiSupportAssistant->value)
+            ->pluck('group_id')
+            ->all()
+    )->toBe([$newGroup->getKey()]);
+});
+
+it('removes access that is no longer selected when managing a report', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('reporting.view-any');
     $user->givePermissionTo('reporting.*.update');
@@ -291,7 +394,7 @@ it('removes access that is no longer selected when managing a report', function 
     )->toBeFalse();
 });
 
-it('counts a user with both direct and department access only once', function () {
+it('counts a user with both direct and department access only once', function (): void {
     $department = Department::factory()->create();
 
     $user = User::factory()->create(['department_id' => $department->getKey()]);
@@ -309,7 +412,7 @@ it('counts a user with both direct and department access only once', function ()
     expect(ReportAccessKey::AiSupportAssistant->accessCount())->toEqual(1);
 });
 
-it('bulk manage assignments action is visible for user with update permission', function () {
+it('bulk manage assignments action is visible for user with update permission', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('reporting.view-any');
     $user->givePermissionTo('reporting.*.update');
@@ -320,7 +423,7 @@ it('bulk manage assignments action is visible for user with update permission', 
         ->assertTableBulkActionVisible('manageReportAssignments');
 });
 
-it('bulk manage assignments action is not visible for user without update permission', function () {
+it('bulk manage assignments action is not visible for user without update permission', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('reporting.view-any');
 
@@ -330,7 +433,7 @@ it('bulk manage assignments action is not visible for user without update permis
         ->assertTableBulkActionHidden('manageReportAssignments');
 });
 
-it('bulk manage assignments action adds users and departments to selected reports additively', function () {
+it('bulk manage assignments action adds users and departments to selected reports additively', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('reporting.view-any');
     $user->givePermissionTo('reporting.*.update');
@@ -376,7 +479,7 @@ it('bulk manage assignments action adds users and departments to selected report
     )->toBeTrue();
 });
 
-it('bulk manage assignments action replaces users and departments when sync is enabled', function () {
+it('bulk manage assignments action replaces users and departments when sync is enabled', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('reporting.view-any');
     $user->givePermissionTo('reporting.*.update');

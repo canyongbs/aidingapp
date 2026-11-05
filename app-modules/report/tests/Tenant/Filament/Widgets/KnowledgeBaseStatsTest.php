@@ -39,7 +39,7 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\Report\Filament\Widgets\KnowledgeBaseStats;
 
-it('returns correct knowledge base statistics without filters', function () {
+it('returns correct knowledge base statistics without filters', function (): void {
     $status = KnowledgeBaseStatus::factory()->create();
     $category = KnowledgeBaseCategory::factory()->create();
 
@@ -60,7 +60,7 @@ it('returns correct knowledge base statistics without filters', function () {
         ->and($stats[2]->getValue())->toEqual('30');
 });
 
-it('returns correct knowledge base statistics with category filter', function () {
+it('returns correct knowledge base statistics with category filter', function (): void {
     $status = KnowledgeBaseStatus::factory()->create();
     $categoryA = KnowledgeBaseCategory::factory()->create();
     $categoryB = KnowledgeBaseCategory::factory()->create();

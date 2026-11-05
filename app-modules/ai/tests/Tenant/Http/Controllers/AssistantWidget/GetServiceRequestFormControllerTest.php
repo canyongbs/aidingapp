@@ -63,14 +63,14 @@ $widgetFormRequestAsContact = function (Contact $contact, ServiceRequestType $ty
     );
 };
 
-beforeEach(function () {
+beforeEach(function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->ai_support_assistant = true;
     $portalSettings->save();
 });
 
-it('blocks widget contacts of a non-matching contact type from loading a restricted type form', function () use ($widgetFormRequestAsContact) {
+it('blocks widget contacts of a non-matching contact type from loading a restricted type form', function () use ($widgetFormRequestAsContact): void {
     $allowedContactType = ContactType::factory()->create();
     $otherContactType = ContactType::factory()->create();
 
@@ -83,7 +83,7 @@ it('blocks widget contacts of a non-matching contact type from loading a restric
         ->assertNotFound();
 });
 
-it('allows widget contacts of a matching contact type to load a restricted type form', function () use ($widgetFormRequestAsContact) {
+it('allows widget contacts of a matching contact type to load a restricted type form', function () use ($widgetFormRequestAsContact): void {
     $allowedContactType = ContactType::factory()->create();
 
     $restrictedType = ServiceRequestType::factory()->create(['is_visibility_restricted' => true]);
@@ -95,7 +95,7 @@ it('allows widget contacts of a matching contact type to load a restricted type 
         ->assertOk();
 });
 
-it('includes secure password fields in assistant forms', function () use ($widgetFormRequestAsContact) {
+it('includes secure password fields in assistant forms', function () use ($widgetFormRequestAsContact): void {
     $type = ServiceRequestType::factory()->create();
     $form = ServiceRequestForm::factory()->wizard()->for($type, 'type')->create();
     $step = new ServiceRequestFormStep([
@@ -137,7 +137,7 @@ it('includes secure password fields in assistant forms', function () use ($widge
         ]);
 });
 
-it('blocks a widget type nested under a restricted area from a non-matching contact', function () use ($widgetFormRequestAsContact) {
+it('blocks a widget type nested under a restricted area from a non-matching contact', function () use ($widgetFormRequestAsContact): void {
     $allowedContactType = ContactType::factory()->create();
     $otherContactType = ContactType::factory()->create();
 

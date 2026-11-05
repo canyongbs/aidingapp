@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Rules;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
+use App\Models\Scopes\OrderByFullName;
 use App\Models\Scopes\WithoutAnyAdmin;
 use App\Models\User;
 use Closure;
@@ -148,8 +149,9 @@ abstract class RecipientsMustHaveConfidentialAccess implements ValidationRule
                 filled($this->creatorId),
                 fn (Builder $query) => $query->whereKeyNot($this->creatorId),
             )
-            ->orderBy('name')
-            ->pluck('name');
+            ->tap(new OrderByFullName())
+            ->get()
+            ->pluck('full_name');
     }
 
     /**

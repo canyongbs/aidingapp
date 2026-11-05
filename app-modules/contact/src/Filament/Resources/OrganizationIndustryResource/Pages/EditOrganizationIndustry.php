@@ -67,7 +67,7 @@ class EditOrganizationIndustry extends EditRecord
                             ->string()
                             ->when(
                                 OrganizationTypeAndIndustryNameUniquenessFeature::active(),
-                                fn (TextInput $input) => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
+                                fn (TextInput $input): TextInput => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
                             ),
 
                         Toggle::make('is_default')

@@ -45,7 +45,7 @@ use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
 
-it('shows the assignment date on one line and the time on a separate line without duplication', function () {
+it('shows the assignment date on one line and the time on a separate line without duplication', function (): void {
     asSuperAdmin();
 
     $timezone = app(DisplaySettings::class)->getTimezone();

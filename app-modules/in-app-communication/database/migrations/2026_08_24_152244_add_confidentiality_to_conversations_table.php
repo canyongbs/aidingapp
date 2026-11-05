@@ -41,7 +41,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('conversations', function (Blueprint $table) {
+        Schema::table('conversations', function (Blueprint $table): void {
             $table->boolean('is_confidential')->default(false);
             $table->string('ephemeral_period')->nullable();
 
@@ -51,7 +51,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('conversations', function (Blueprint $table) {
+        Schema::table('conversations', function (Blueprint $table): void {
             $table->dropIndex('conversations_ephemeral_lookup_index');
             $table->dropColumn(['is_confidential', 'ephemeral_period']);
         });

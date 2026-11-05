@@ -43,14 +43,12 @@ class ContactEmailHealthCallout
 {
     public static function make(Contact $contact): Callout
     {
-        $status = $contact->getEmailHealthStatus();
-
         return Callout::make()
             ->key('email-health-callout')
-            ->color($status->getColor())
-            ->icon($status->getIcon())
-            ->description($status->getCalloutText())
-            ->visible(filled($status->getCalloutText()))
+            ->color(fn (): string => $contact->getEmailHealthStatus()->getColor())
+            ->icon(fn (): string => $contact->getEmailHealthStatus()->getIcon())
+            ->description(fn (): ?string => $contact->getEmailHealthStatus()->getCalloutText())
+            ->visible(fn (): bool => filled($contact->getEmailHealthStatus()->getCalloutText()))
             ->columnSpanFull();
     }
 }

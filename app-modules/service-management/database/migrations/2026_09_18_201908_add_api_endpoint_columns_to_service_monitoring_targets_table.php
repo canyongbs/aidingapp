@@ -41,7 +41,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+        Schema::table('service_monitoring_targets', function (Blueprint $table): void {
             $table->boolean('follow_redirection')->initial(true);
             $table->jsonb('successful_status_codes')->nullable();
             $table->unsignedInteger('max_latency_ms')->nullable();
@@ -54,7 +54,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+        Schema::table('service_monitoring_targets', function (Blueprint $table): void {
             $table->dropColumn([
                 'follow_redirection',
                 'successful_status_codes',

@@ -44,6 +44,7 @@ use App\Filament\Resources\Users\Actions\AssignDepartmentBulkAction;
 use App\Filament\Resources\Users\Actions\AssignGroupsBulkAction;
 use App\Filament\Resources\Users\Actions\AssignRolesBulkAction;
 use App\Filament\Resources\Users\UserResource;
+use App\Models\Scopes\WhereFullNameLike;
 use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -95,15 +96,17 @@ class ListUsers extends ListRecords
                 'auditableServiceRequestTypes',
             ]))
             ->columns([
-                TextColumn::make('name')
+                TextColumn::make('full_name')
                     ->label('User')
                     ->weight(FontWeight::Bold)
-                    ->searchable(['name', 'email'])
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query
+                        ->tap(new WhereFullNameLike($search))
+                        ->orWhere(new Expression('lower(email)'), 'like', '%' . Str::lower($search) . '%'))
                     ->icon(fn (User $record): string => $record->presenceStatus()->getIcon())
                     ->iconColor(fn (User $record): string => $record->presenceStatus()->getColor())
                     ->tooltip(fn (User $record): string => 'Presence: ' . $record->presenceStatus()->getLabel())
                     ->extraAttributes(fn (User $record): array => [
-                        'aria-label' => "{$record->name} (Presence: {$record->presenceStatus()->getLabel()})",
+                        'aria-label' => "{$record->full_name} (Presence: {$record->presenceStatus()->getLabel()})",
                     ])
                     ->description(fn (User $record): View => view('filament.tables.columns.copyable-description', [
                         'text' => $record->email,

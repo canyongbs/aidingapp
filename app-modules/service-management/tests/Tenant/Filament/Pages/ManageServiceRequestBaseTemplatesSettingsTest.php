@@ -51,14 +51,14 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-test('it prevents access when the user does not have permission', function () {
+test('it prevents access when the user does not have permission', function (): void {
     actingAs(User::factory()->create());
 
     get(ManageServiceRequestBaseTemplatesSettings::getUrl())
         ->assertForbidden();
 });
 
-test('it prevents access for ai admins', function () {
+test('it prevents access for ai admins', function (): void {
     $user = User::factory()->create();
     $user->assignRole(Authenticatable::AI_ADMIN_ROLE);
 
@@ -68,14 +68,14 @@ test('it prevents access for ai admins', function () {
         ->assertForbidden();
 });
 
-test('it allows access for super admins', function () {
+test('it allows access for super admins', function (): void {
     asSuperAdmin();
 
     get(ManageServiceRequestBaseTemplatesSettings::getUrl())
         ->assertSuccessful();
 });
 
-test('it disables the unsaved data changes alert to avoid false positives on this complex form', function () {
+test('it disables the unsaved data changes alert to avoid false positives on this complex form', function (): void {
     $page = new ManageServiceRequestBaseTemplatesSettings();
 
     $hasUnsavedDataChangesAlert = (new ReflectionClass($page))
@@ -85,7 +85,7 @@ test('it disables the unsaved data changes alert to avoid false positives on thi
     expect($hasUnsavedDataChangesAlert)->toBeFalse();
 });
 
-test('it leaves existing templates untouched when saving without changes', function () {
+test('it leaves existing templates untouched when saving without changes', function (): void {
     asSuperAdmin();
 
     $existing = collect([
@@ -114,7 +114,7 @@ test('it leaves existing templates untouched when saving without changes', funct
     }
 });
 
-test('it does not create empty templates when nothing has been filled in', function () {
+test('it does not create empty templates when nothing has been filled in', function (): void {
     asSuperAdmin();
 
     Livewire::test(ManageServiceRequestBaseTemplatesSettings::class)
@@ -124,7 +124,7 @@ test('it does not create empty templates when nothing has been filled in', funct
     expect(ServiceRequestNotificationAutomationEmailTemplate::query()->exists())->toBeFalse();
 });
 
-test('it deletes a template that is left with no example subject, body, or ai instructions', function () {
+test('it deletes a template that is left with no example subject, body, or ai instructions', function (): void {
     asSuperAdmin();
 
     $existing = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
@@ -144,7 +144,7 @@ test('it deletes a template that is left with no example subject, body, or ai in
     expect(ServiceRequestNotificationAutomationEmailTemplate::query()->whereKey($existing->getKey())->exists())->toBeFalse();
 });
 
-test('it keeps a template with ai instructions when the example subject and body are cleared', function () {
+test('it keeps a template with ai instructions when the example subject and body are cleared', function (): void {
     asSuperAdmin();
 
     $existing = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
@@ -168,7 +168,7 @@ test('it keeps a template with ai instructions when the example subject and body
     expect($existing->ai_instructions)->toBe('Keep it friendly.');
 });
 
-test('it saves the example subject and body without touching ai instructions', function () {
+test('it saves the example subject and body without touching ai instructions', function (): void {
     asSuperAdmin();
 
     $existing = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
@@ -216,7 +216,7 @@ test('it saves the example subject and body without touching ai instructions', f
     expect($existing->ai_instructions)->toBe('Keep it friendly.');
 });
 
-test('it persists example subject/body and ai instructions correctly when saved from both pages', function () {
+test('it persists example subject/body and ai instructions correctly when saved from both pages', function (): void {
     asSuperAdmin();
 
     $type = ServiceRequestEmailTemplateType::Created;
@@ -283,7 +283,7 @@ test('it persists example subject/body and ai instructions correctly when saved 
     expect($template->ai_instructions)->toBe('Be concise and friendly.');
 });
 
-test('it applies base templates to all service request types by default', function (int $typeIndex) {
+test('it applies base templates to all service request types by default', function (int $typeIndex): void {
     asSuperAdmin();
 
     $baseTemplate = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
@@ -313,7 +313,7 @@ test('it applies base templates to all service request types by default', functi
     'second type' => 1,
 ]);
 
-test('it does not double encode the subject and body when applying base templates', function () {
+test('it does not double encode the subject and body when applying base templates', function (): void {
     asSuperAdmin();
 
     $subject = [
@@ -365,7 +365,7 @@ test('it does not double encode the subject and body when applying base template
     expect(json_decode($rawTemplate->body, associative: true))->toEqual($body);
 });
 
-test('it converts literal merge tags when applying base templates', function () {
+test('it converts literal merge tags when applying base templates', function (): void {
     asSuperAdmin();
 
     $baseTemplate = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
@@ -419,7 +419,7 @@ test('it converts literal merge tags when applying base templates', function () 
     ]);
 });
 
-test('it applies base templates only to the selected service request types', function () {
+test('it applies base templates only to the selected service request types', function (): void {
     asSuperAdmin();
 
     $baseTemplate = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
@@ -448,7 +448,7 @@ test('it applies base templates only to the selected service request types', fun
         ->exists())->toBeFalse();
 });
 
-test('it requires at least one selected service request type when applying to a selection', function () {
+test('it requires at least one selected service request type when applying to a selection', function (): void {
     asSuperAdmin();
 
     ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
@@ -464,7 +464,7 @@ test('it requires at least one selected service request type when applying to a 
         ->assertHasFormErrors(['service_request_type_ids' => ['required']]);
 });
 
-test('it warns when there are no base templates with content to apply', function () {
+test('it warns when there are no base templates with content to apply', function (): void {
     asSuperAdmin();
 
     $emptyDoc = [
@@ -490,7 +490,7 @@ test('it warns when there are no base templates with content to apply', function
     expect(ServiceRequestTypeEmailTemplate::query()->exists())->toBeFalse();
 });
 
-test('it warns when there are no service request types to apply templates to', function () {
+test('it warns when there are no service request types to apply templates to', function (): void {
     asSuperAdmin();
 
     ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
@@ -507,7 +507,7 @@ test('it warns when there are no service request types to apply templates to', f
     expect(ServiceRequestTypeEmailTemplate::query()->exists())->toBeFalse();
 });
 
-test('it prevents applying base templates when the service management feature is disabled', function () {
+test('it prevents applying base templates when the service management feature is disabled', function (): void {
     asSuperAdmin();
 
     $settings = app(LicenseSettings::class);
@@ -529,7 +529,7 @@ test('it prevents applying base templates when the service management feature is
         ->exists())->toBeFalse();
 });
 
-test('it prevents applying base templates for authenticated users who are not super admins', function () {
+test('it prevents applying base templates for authenticated users who are not super admins', function (): void {
     actingAs(User::factory()->create());
 
     ServiceRequestNotificationAutomationEmailTemplate::factory()->create([

@@ -36,9 +36,11 @@
 
 namespace AidingApp\Form\Models;
 
-use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @property string $id
@@ -49,8 +51,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read Submissible $submissible
  * @property-read SubmissibleStep $step
  */
-abstract class SubmissibleField extends BaseModel
+abstract class SubmissibleField extends Model
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
+
     /**
      * @return BelongsTo<Submissible, $this>
      */
@@ -62,7 +67,7 @@ abstract class SubmissibleField extends BaseModel
     abstract public function step(): BelongsTo;
 
     /**
-     * @return Attribute<string, never>
+     * @return Attribute<bool, never>
      */
     protected function isRequired(): Attribute
     {

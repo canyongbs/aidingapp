@@ -40,17 +40,17 @@ use App\Settings\LicenseSettings;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->realtimeChat = true;
     $settings->save();
 });
 
-it('returns users matching the search query by name', function () {
-    $user = User::factory()->create(['name' => 'Searcher', 'email' => 'searcher@example.com']);
+it('returns users matching the search query by name', function (): void {
+    $user = User::factory()->create(['first_name' => 'Searcher', 'email' => 'searcher@example.com']);
 
-    User::factory()->create(['name' => 'John Doe', 'email' => 'johndoe@example.com']);
-    User::factory()->create(['name' => 'Jane Smith', 'email' => 'janesmith@example.com']);
+    User::factory()->create(['first_name' => 'John', 'last_name' => 'Doe', 'email' => 'johndoe@example.com']);
+    User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Smith', 'email' => 'janesmith@example.com']);
 
     actingAs($user)
         ->getJson(route('in-app-communication.users.search', ['query' => 'John']))
@@ -59,10 +59,10 @@ it('returns users matching the search query by name', function () {
         ->assertJsonPath('data.0.name', 'John Doe');
 });
 
-it('searches users case insensitively by name', function () {
-    $user = User::factory()->create(['name' => 'Searcher', 'email' => 'searcher@example.com']);
+it('searches users case insensitively by name', function (): void {
+    $user = User::factory()->create(['first_name' => 'Searcher', 'email' => 'searcher@example.com']);
 
-    User::factory()->create(['name' => 'John Doe', 'email' => 'johndoe@example.com']);
+    User::factory()->create(['first_name' => 'John', 'last_name' => 'Doe', 'email' => 'johndoe@example.com']);
 
     actingAs($user)
         ->getJson(route('in-app-communication.users.search', ['query' => 'john']))
@@ -71,10 +71,10 @@ it('searches users case insensitively by name', function () {
         ->assertJsonPath('data.0.name', 'John Doe');
 });
 
-it('searches users case insensitively by email', function () {
-    $user = User::factory()->create(['name' => 'Searcher', 'email' => 'searcher@example.com']);
+it('searches users case insensitively by email', function (): void {
+    $user = User::factory()->create(['first_name' => 'Searcher', 'email' => 'searcher@example.com']);
 
-    User::factory()->create(['name' => 'Target User', 'email' => 'John.Doe@Example.com']);
+    User::factory()->create(['first_name' => 'Target', 'last_name' => 'User', 'email' => 'John.Doe@Example.com']);
 
     actingAs($user)
         ->getJson(route('in-app-communication.users.search', ['query' => 'john.doe@example']))
@@ -83,11 +83,11 @@ it('searches users case insensitively by email', function () {
         ->assertJsonPath('data.0.email', 'John.Doe@Example.com');
 });
 
-it('returns users matching the search query by email', function () {
-    $user = User::factory()->create(['name' => 'Searcher', 'email' => 'searcher@example.com']);
+it('returns users matching the search query by email', function (): void {
+    $user = User::factory()->create(['first_name' => 'Searcher', 'email' => 'searcher@example.com']);
 
-    $matchingUser = User::factory()->create(['name' => 'Matching User', 'email' => 'john@example.com']);
-    $nonMatchingUser = User::factory()->create(['name' => 'Non Matching User', 'email' => 'jane@example.com']);
+    $matchingUser = User::factory()->create(['first_name' => 'Matching', 'last_name' => 'User', 'email' => 'john@example.com']);
+    $nonMatchingUser = User::factory()->create(['first_name' => 'Non', 'last_name' => 'Matching User', 'email' => 'jane@example.com']);
 
     actingAs($user)
         ->getJson(route('in-app-communication.users.search', ['query' => 'john@']))
@@ -96,9 +96,9 @@ it('returns users matching the search query by email', function () {
         ->assertJsonPath('data.0.email', 'john@example.com');
 });
 
-it('excludes the current user from search results', function () {
-    $user = User::factory()->create(['name' => 'Current User', 'email' => 'current@example.com']);
-    $otherUser = User::factory()->create(['name' => 'Other User', 'email' => 'other@example.com']);
+it('excludes the current user from search results', function (): void {
+    $user = User::factory()->create(['first_name' => 'Current', 'last_name' => 'User', 'email' => 'current@example.com']);
+    $otherUser = User::factory()->create(['first_name' => 'Other', 'last_name' => 'User', 'email' => 'other@example.com']);
 
     actingAs($user)
         ->getJson(route('in-app-communication.users.search', ['query' => 'User']))
@@ -107,7 +107,7 @@ it('excludes the current user from search results', function () {
         ->assertJsonPath('data.0.name', 'Other User');
 });
 
-it('returns all users when no search query is provided', function () {
+it('returns all users when no search query is provided', function (): void {
     $user = User::factory()->create();
 
     User::factory()->count(5)->create();
@@ -118,7 +118,7 @@ it('returns all users when no search query is provided', function () {
         ->assertJsonCount(5, 'data');
 });
 
-it('limits results to 25 users', function () {
+it('limits results to 25 users', function (): void {
     $user = User::factory()->create();
 
     User::factory()->count(30)->create();
@@ -129,11 +129,12 @@ it('limits results to 25 users', function () {
         ->assertJsonCount(25, 'data');
 });
 
-it('returns user data with correct structure', function () {
+it('returns user data with correct structure', function (): void {
     $user = User::factory()->create();
 
     $searchUser = User::factory()->create([
-        'name' => 'Test User',
+        'first_name' => 'Test',
+        'last_name' => 'User',
         'email' => 'test@example.com',
     ]);
 
@@ -149,7 +150,7 @@ it('returns user data with correct structure', function () {
         ->assertJsonPath('data.0.email', 'test@example.com');
 });
 
-it('validates request', function (array $data, array $expectedErrors) {
+it('validates request', function (array $data, array $expectedErrors): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -163,12 +164,12 @@ it('validates request', function (array $data, array $expectedErrors) {
     ],
 ]);
 
-it('requires authentication', function () {
+it('requires authentication', function (): void {
     getJson(route('in-app-communication.users.search'))
         ->assertUnauthorized();
 });
 
-it('requires the realtime chat feature to be enabled', function () {
+it('requires the realtime chat feature to be enabled', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->realtimeChat = false;
     $settings->save();

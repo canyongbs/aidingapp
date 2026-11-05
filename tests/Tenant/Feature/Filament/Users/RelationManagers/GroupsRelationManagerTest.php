@@ -46,7 +46,7 @@ use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
 
-it('can associate multiple groups with a user', function () {
+it('can associate multiple groups with a user', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -65,7 +65,7 @@ it('can associate multiple groups with a user', function () {
         ->toEqualCanonicalizing($groups->modelKeys());
 });
 
-it('can detach a group from a user', function () {
+it('can detach a group from a user', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -81,7 +81,7 @@ it('can detach a group from a user', function () {
     expect($user->groups()->pluck('groups.id')->all())->not->toContain($group->getKey());
 });
 
-it('excludes archived groups from the associate groups selection', function () {
+it('excludes archived groups from the associate groups selection', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();

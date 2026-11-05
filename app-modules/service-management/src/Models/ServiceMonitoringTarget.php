@@ -48,12 +48,12 @@ use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringStatus;
 use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
 use AidingApp\ServiceManagement\Observers\ServiceMonitoringTargetObserver;
-use App\Models\BaseModel;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -62,14 +62,18 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperServiceMonitoringTarget
  */
 #[ObservedBy([ServiceMonitoringTargetObserver::class])]
 #[ScopedBy(ServiceMonitoringTargetVisibilityScope::class)]
-class ServiceMonitoringTarget extends BaseModel implements Auditable
+class ServiceMonitoringTarget extends Model implements Auditable
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
+
     /** @use HasFactory<ServiceMonitoringTargetFactory> */
     use HasFactory;
 

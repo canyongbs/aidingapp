@@ -48,7 +48,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertSoftDeleted;
 use function Tests\asSuperAdmin;
 
-test('A successful action on the ManageServiceRequestTypePriorities page', function () {
+test('A successful action on the ManageServiceRequestTypePriorities page', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     asSuperAdmin()
@@ -60,7 +60,7 @@ test('A successful action on the ManageServiceRequestTypePriorities page', funct
         ->assertSuccessful();
 });
 
-it('enables customer defined priorities when no default priority is configured', function () {
+it('enables customer defined priorities when no default priority is configured', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     asSuperAdmin();
@@ -75,7 +75,7 @@ it('enables customer defined priorities when no default priority is configured',
         ->assertSchemaComponentHidden('default_priority_id', 'configurationForm');
 });
 
-it('configures a default priority when customer defined priorities are disabled', function () {
+it('configures a default priority when customer defined priorities are disabled', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()
         ->for($serviceRequestType, 'type')
@@ -96,7 +96,7 @@ it('configures a default priority when customer defined priorities are disabled'
     expect($serviceRequestType->refresh()->default_priority_id)->toBe($priority->getKey());
 });
 
-it('requires a default priority when customer defined priorities are disabled', function () {
+it('requires a default priority when customer defined priorities are disabled', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     asSuperAdmin();
@@ -112,7 +112,7 @@ it('requires a default priority when customer defined priorities are disabled', 
         ->assertHasFormErrors(['default_priority_id' => 'required'], 'configurationForm');
 });
 
-it('can create a service request priority', function () {
+it('can create a service request priority', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $createRequest = CreateServiceRequestPriorityRequestFactory::new()->create();
@@ -134,7 +134,7 @@ it('can create a service request priority', function () {
     )->toBeTrue();
 });
 
-it('can edit a service request priority', function () {
+it('can edit a service request priority', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $priority = ServiceRequestPriority::factory()
@@ -154,7 +154,7 @@ it('can edit a service request priority', function () {
     expect($priority->refresh()->name)->toBe($editRequest['name']);
 });
 
-it('can delete a service request priority', function () {
+it('can delete a service request priority', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $priority = ServiceRequestPriority::factory()
@@ -172,7 +172,7 @@ it('can delete a service request priority', function () {
     assertSoftDeleted(ServiceRequestPriority::class, ['id' => $priority->getKey()]);
 });
 
-it('cannot delete a service request priority configured as its type default', function () {
+it('cannot delete a service request priority configured as its type default', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $priority = ServiceRequestPriority::factory()
@@ -191,7 +191,7 @@ it('cannot delete a service request priority configured as its type default', fu
     expect($priority->refresh()->trashed())->toBeFalse();
 });
 
-it('validates required fields when creating a service request priority', function (array $data, array $errors) {
+it('validates required fields when creating a service request priority', function (array $data, array $errors): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     asSuperAdmin();
@@ -208,7 +208,7 @@ it('validates required fields when creating a service request priority', functio
     'order not an integer' => [['name' => 'Test Priority', 'order' => 'abc'], ['order' => 'integer']],
 ]);
 
-it('validates unique name scoped to type when creating a service request priority', function () {
+it('validates unique name scoped to type when creating a service request priority', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $existingPriority = ServiceRequestPriority::factory()
@@ -227,7 +227,7 @@ it('validates unique name scoped to type when creating a service request priorit
         ->assertHasTableActionErrors(['name' => 'unique']);
 });
 
-it('validates required fields when editing a service request priority', function () {
+it('validates required fields when editing a service request priority', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $priority = ServiceRequestPriority::factory()
@@ -243,7 +243,7 @@ it('validates required fields when editing a service request priority', function
         ->assertHasTableActionErrors(['name' => 'required']);
 });
 
-test('ManageServiceRequestTypePriorities is gated with proper access control', function () {
+test('ManageServiceRequestTypePriorities is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -272,7 +272,7 @@ test('ManageServiceRequestTypePriorities is gated with proper access control', f
         )->assertSuccessful();
 });
 
-test('ManageServiceRequestTypePriorities is gated with proper feature access control', function () {
+test('ManageServiceRequestTypePriorities is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;

@@ -244,7 +244,7 @@ class ServiceRequestInfolist
                     TextEntry::make('time_to_resolution')
                         ->label('Time to Resolution')
                         ->placeholder('-')
-                        ->formatStateUsing(function (int $state) {
+                        ->formatStateUsing(function (int $state): string {
                             $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds($state));
                             $days = $interval->d;
                             $hours = $interval->h;

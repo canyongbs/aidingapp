@@ -48,7 +48,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('editTitle action is visible for manager department member with update permission', function () {
+test('editTitle action is visible for manager department member with update permission', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -80,7 +80,7 @@ test('editTitle action is visible for manager department member with update perm
         ->assertActionVisible(TestAction::make('editTitle')->schemaComponent('request.title::section'));
 });
 
-test('editTitle action is hidden for user without update permission', function () {
+test('editTitle action is hidden for user without update permission', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -112,7 +112,7 @@ test('editTitle action is hidden for user without update permission', function (
         ->assertActionDoesNotExist(TestAction::make('editTitle')->schemaComponent('request.title::section'));
 });
 
-test('editTitle requires title', function () {
+test('editTitle requires title', function (): void {
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
@@ -130,7 +130,7 @@ test('editTitle requires title', function () {
         ->assertHasFormErrors(['title' => 'required']);
 });
 
-test('editTitle limits title to 255 characters', function () {
+test('editTitle limits title to 255 characters', function (): void {
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
@@ -148,7 +148,7 @@ test('editTitle limits title to 255 characters', function () {
         ->assertHasFormErrors(['title' => 'max']);
 });
 
-test('can update the service request title', function () {
+test('can update the service request title', function (): void {
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,

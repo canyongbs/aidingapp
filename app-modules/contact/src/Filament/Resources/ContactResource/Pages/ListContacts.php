@@ -37,16 +37,20 @@
 namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource\Tables\Columns\ContactIdentifiersColumn;
+use AidingApp\Contact\Filament\Resources\ContactResource\Tables\Columns\ContactNameColumn;
 use AidingApp\Contact\Imports\ContactImporter;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use App\Features\ContactArchivingFeature;
+use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\ViewColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -58,6 +62,9 @@ class ListContacts extends ListRecords
     public function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (Contact $record): ?string => ContactResource::canView($record)
+                ? ContactResource::getUrl('view', ['record' => $record])
+                : null)
             ->modifyQueryUsing(fn (Builder $query): Builder => $query
                 ->with(['type', 'organization'])
                 ->withCount([
@@ -69,19 +76,29 @@ class ListContacts extends ListRecords
                     ),
                 ]))
             ->columns([
-                ViewColumn::make('contact')
-                    ->label('Contact')
-                    ->view('filament.tables.columns.contact.contact')
-                    ->searchable(['full_name', 'email']),
-                ViewColumn::make('classification')
+                ContactNameColumn::make(),
+                TextColumn::make('type.name')
                     ->label('Classification')
-                    ->view('filament.tables.columns.contact.classification'),
-                ViewColumn::make('identifiers')
-                    ->label('Identifiers')
-                    ->view('filament.tables.columns.contact.identifiers'),
-                ViewColumn::make('history')
+                    ->badge()
+                    ->color(fn (Contact $record): string => $record->type->color->value)
+                    ->description(fn (Contact $record): ?string => $record->organization?->name),
+                ContactIdentifiersColumn::make(),
+                TextColumn::make('open_service_requests_count')
                     ->label('History')
-                    ->view('filament.tables.columns.contact.history'),
+                    ->badge()
+                    ->formatStateUsing(fn (int $state): string => "{$state} Open")
+                    ->color(fn (int $state): string => $state > 0 ? 'warning' : 'gray')
+                    ->description(fn (Contact $record): string => "{$record->service_requests_count} Total"),
+                TextColumn::make('created_at')
+                    ->label('Created At')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->label('Updated At')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('type_id')
@@ -92,8 +109,9 @@ class ListContacts extends ListRecords
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->authorizeIndividualRecords('delete'),
+                    ContactArchivingFeature::active()
+                        ? ArchiveBulkAction::make()->authorizeIndividualRecords('delete')
+                        : DeleteBulkAction::make()->authorizeIndividualRecords('delete'),
                     BulkEngagementAction::make(context: 'contacts'),
                 ]),
             ]);

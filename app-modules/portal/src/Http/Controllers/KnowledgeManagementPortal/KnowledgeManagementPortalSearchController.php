@@ -46,6 +46,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Scopes\SearchBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\AbstractPaginator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Enumerable;
 use Illuminate\Support\Stringable;
 
 class KnowledgeManagementPortalSearchController extends Controller
@@ -60,11 +63,11 @@ class KnowledgeManagementPortalSearchController extends Controller
             ->trim()
             ->when(
                 fn (Stringable $string) => $string->isEmpty(),
-                fn () => collect(),
+                fn (): Collection => collect(),
                 fn (Stringable $string) => $string->explode(',')
             );
 
-        $mapArticle = function (KnowledgeBaseItem $article) {
+        $mapArticle = function (KnowledgeBaseItem $article): array {
             $category = $article->category;
 
             return [
@@ -73,7 +76,7 @@ class KnowledgeManagementPortalSearchController extends Controller
                 'name' => $article->title,
                 'tags' => $article->tags
                     ->sortBy('name')
-                    ->map(fn ($tag) => [
+                    ->map(fn ($tag): array => [
                         'id' => $tag->id,
                         'name' => $tag->name,
                     ])
@@ -97,7 +100,7 @@ class KnowledgeManagementPortalSearchController extends Controller
             ];
         };
 
-        $articlesFor = function (string $filter) use ($search, $tags, $mapArticle) {
+        $articlesFor = function (string $filter) use ($search, $tags, $mapArticle): AbstractPaginator|Enumerable {
             return KnowledgeBaseArticleData::collect(
                 KnowledgeBaseItem::query()
                     ->with(['category.parentCategory', 'tags'])
@@ -116,10 +119,10 @@ class KnowledgeManagementPortalSearchController extends Controller
                             ->orderBy('id')
                     )
                     ->when($tags->isNotEmpty(), fn (Builder $query) => $query->whereHas('tags', fn (Builder $query) => $query->whereIn('id', $tags)))
-                    ->when($filter === 'featured', function (Builder $query) {
+                    ->when($filter === 'featured', function (Builder $query): void {
                         $query->where('is_featured', true);
                     })
-                    ->when($filter === 'most-viewed', function (Builder $query) {
+                    ->when($filter === 'most-viewed', function (Builder $query): void {
                         $query->where('portal_view_count', '>', 0)->orderBy('portal_view_count', 'desc');
                     })
                     ->paginate(5)
@@ -132,7 +135,7 @@ class KnowledgeManagementPortalSearchController extends Controller
                 ->with('parentCategory')
                 ->tap(new SearchBy('name', $search))
                 ->get()
-                ->map(function (KnowledgeBaseCategory $category) {
+                ->map(function (KnowledgeBaseCategory $category): array {
                     return [
                         'slug' => $category->slug,
                         'name' => $category->name,

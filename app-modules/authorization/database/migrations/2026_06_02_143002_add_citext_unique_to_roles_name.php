@@ -46,12 +46,12 @@ return new class () extends Migration {
 
     public function up(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             DB::statement('ALTER TABLE roles DROP CONSTRAINT IF EXISTS roles_name_guard_name_unique');
 
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
 
-            Schema::table($this->table, function (Blueprint $table) {
+            Schema::table($this->table, function (Blueprint $table): void {
                 $table->unique([$this->column, 'guard_name'], 'roles_name_guard_name_unique');
             });
         });
@@ -64,7 +64,7 @@ return new class () extends Migration {
 
         DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
 
-        Schema::table($this->table, function (Blueprint $table) {
+        Schema::table($this->table, function (Blueprint $table): void {
             $table->unique([$this->column, 'guard_name'], 'roles_name_guard_name_unique');
         });
     }

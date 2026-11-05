@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Event;
 
 use function Pest\Laravel\actingAs;
 
-beforeEach(function () {
+beforeEach(function (): void {
     Event::fake();
 
     $settings = app(LicenseSettings::class);
@@ -50,7 +50,7 @@ beforeEach(function () {
     $settings->save();
 });
 
-it('returns conversation details for a participant', function () {
+it('returns conversation details for a participant', function (): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create(['name' => 'Test Channel']);
@@ -67,7 +67,7 @@ it('returns conversation details for a participant', function () {
         ->assertJsonPath('data.type', 'channel');
 });
 
-it('allows viewing public channels without being a participant', function () {
+it('allows viewing public channels without being a participant', function (): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create([
@@ -81,7 +81,7 @@ it('allows viewing public channels without being a participant', function () {
         ->assertJsonPath('data.name', 'Public Channel');
 });
 
-it('denies viewing private channels without being a participant', function () {
+it('denies viewing private channels without being a participant', function (): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create([

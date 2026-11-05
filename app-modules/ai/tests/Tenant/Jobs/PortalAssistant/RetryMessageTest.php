@@ -45,13 +45,13 @@ use AidingApp\Ai\Support\StreamingChunks\Finish;
 use AidingApp\Ai\Support\StreamingChunks\Text;
 use Illuminate\Support\Facades\Event;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(AiIntegratedAssistantSettings::class);
     $settings->default_model = AiModel::Test;
     $settings->save();
 });
 
-it('reuses the existing user message when retrying instead of duplicating it', function () {
+it('reuses the existing user message when retrying instead of duplicating it', function (): void {
     Event::fake([PortalAssistantMessageChunk::class]);
 
     $thread = PortalAssistantThread::factory()->create();

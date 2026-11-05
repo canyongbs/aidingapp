@@ -64,7 +64,7 @@ return new class () extends Migration {
     public function up(): void
     {
         collect($this->guards)
-            ->each(function (string $guard) {
+            ->each(function (string $guard): void {
                 $this->createPermissions($this->permissions, $guard);
             });
     }
@@ -72,7 +72,7 @@ return new class () extends Migration {
     public function down(): void
     {
         collect($this->guards)
-            ->each(function (string $guard) {
+            ->each(function (string $guard): void {
                 $this->deletePermissions(array_keys($this->permissions), $guard);
             });
     }

@@ -46,7 +46,7 @@ use App\Settings\LicenseSettings;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-it('can be accessed by a super admin', function () {
+it('can be accessed by a super admin', function (): void {
     $user = User::factory()->create();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -65,7 +65,7 @@ it('can be accessed by a super admin', function () {
         )->assertSuccessful();
 });
 
-it('cannot be accessed when the `RealtimeChat` feature is disabled', function () {
+it('cannot be accessed when the `RealtimeChat` feature is disabled', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->realtimeChat = false;
@@ -100,7 +100,7 @@ it('cannot be accessed when the `RealtimeChat` feature is disabled', function ()
         )->assertSuccessful();
 });
 
-it('cannot be accessed by a user who is not a manager or auditor of the service request type', function () {
+it('cannot be accessed by a user who is not a manager or auditor of the service request type', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->realtimeChat = true;
@@ -129,7 +129,7 @@ it('cannot be accessed by a user who is not a manager or auditor of the service 
         )->assertForbidden();
 });
 
-it('can be accessed by a user who is a manager of the service request type', function () {
+it('can be accessed by a user who is a manager of the service request type', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->realtimeChat = true;
@@ -167,7 +167,7 @@ it('can be accessed by a user who is a manager of the service request type', fun
         )->assertSuccessful();
 });
 
-it('returns 404 when the `ServiceRequestConversation` does not belong to the service request', function () {
+it('returns 404 when the `ServiceRequestConversation` does not belong to the service request', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->realtimeChat = true;
@@ -193,7 +193,7 @@ it('returns 404 when the `ServiceRequestConversation` does not belong to the ser
         )->assertNotFound();
 });
 
-it('returns 404 when the `ServiceRequestConversation` has no `conversation_id`', function () {
+it('returns 404 when the `ServiceRequestConversation` has no `conversation_id`', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->realtimeChat = true;

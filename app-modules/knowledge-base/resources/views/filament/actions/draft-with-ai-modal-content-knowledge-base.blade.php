@@ -40,7 +40,7 @@
         <p
             x-data="{ content: '' }"
             x-init="
-                const message = @js('Hi ' . auth()->user()->name . ", I am happy to help you draft your knowledge base item for {$recordTitle}. Please describe what information you would like in the item and I will take it from there:")
+                const message = @js('Hi ' . auth()->user()->full_name . ", I am happy to help you draft your knowledge base item for {$recordTitle}. Please describe what information you would like in the item and I will take it from there:")
 
                 const typeWord = async (word, delay) => {
                     content += word + ' '

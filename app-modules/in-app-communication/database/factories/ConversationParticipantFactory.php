@@ -66,14 +66,14 @@ class ConversationParticipantFactory extends Factory
 
     public function manager(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'is_manager' => true,
         ]);
     }
 
     public function pinned(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'is_pinned' => true,
         ]);
     }

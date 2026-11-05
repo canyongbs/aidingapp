@@ -38,7 +38,7 @@ use App\Models\User;
 use App\Support\AuthenticationCodeRateLimiter;
 use Illuminate\Validation\ValidationException;
 
-it('allows the first code request and blocks a rapid second request for the same target', function () {
+it('allows the first code request and blocks a rapid second request for the same target', function (): void {
     $rateLimiter = new AuthenticationCodeRateLimiter();
 
     $user = User::factory()->create();
@@ -50,7 +50,7 @@ it('allows the first code request and blocks a rapid second request for the same
         ->toThrow(ValidationException::class);
 });
 
-it('scopes the code-request cooldown per target', function () {
+it('scopes the code-request cooldown per target', function (): void {
     $rateLimiter = new AuthenticationCodeRateLimiter();
 
     $user = User::factory()->create();

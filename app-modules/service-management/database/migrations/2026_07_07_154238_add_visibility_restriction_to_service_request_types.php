@@ -42,16 +42,16 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_request_types', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('service_request_types', function (Blueprint $table): void {
                 $table->boolean('is_visibility_restricted')->default(false);
             });
 
-            Schema::table('service_request_type_categories', function (Blueprint $table) {
+            Schema::table('service_request_type_categories', function (Blueprint $table): void {
                 $table->boolean('is_visibility_restricted')->default(false);
             });
 
-            Schema::create('service_request_type_visibility_contact_types', function (Blueprint $table) {
+            Schema::create('service_request_type_visibility_contact_types', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
                 $table->foreignUuid('service_request_type_id')->constrained('service_request_types')->cascadeOnDelete();
                 $table->foreignUuid('contact_type_id')->constrained('contact_types')->cascadeOnDelete();
@@ -60,7 +60,7 @@ return new class () extends Migration {
                 $table->unique(['service_request_type_id', 'contact_type_id'], 'srt_visibility_contact_type_unique');
             });
 
-            Schema::create('service_request_type_category_visibility_contact_types', function (Blueprint $table) {
+            Schema::create('service_request_type_category_visibility_contact_types', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
                 $table->foreignUuid('service_request_type_category_id')->constrained('service_request_type_categories')->cascadeOnDelete();
                 $table->foreignUuid('contact_type_id')->constrained('contact_types')->cascadeOnDelete();
@@ -73,15 +73,15 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             Schema::dropIfExists('service_request_type_category_visibility_contact_types');
             Schema::dropIfExists('service_request_type_visibility_contact_types');
 
-            Schema::table('service_request_type_categories', function (Blueprint $table) {
+            Schema::table('service_request_type_categories', function (Blueprint $table): void {
                 $table->dropColumn('is_visibility_restricted');
             });
 
-            Schema::table('service_request_types', function (Blueprint $table) {
+            Schema::table('service_request_types', function (Blueprint $table): void {
                 $table->dropColumn('is_visibility_restricted');
             });
         });

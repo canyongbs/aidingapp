@@ -44,7 +44,7 @@ class ServiceRequestUpdateSeeder extends Seeder
 {
     public function run(): void
     {
-        ServiceRequest::each(function (ServiceRequest $serviceRequest) {
+        ServiceRequest::each(function (ServiceRequest $serviceRequest): void {
             ServiceRequestUpdate::factory()
                 ->count(3)
                 ->for($serviceRequest, 'serviceRequest')

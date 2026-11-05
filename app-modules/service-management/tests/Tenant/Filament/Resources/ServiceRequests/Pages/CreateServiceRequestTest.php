@@ -35,7 +35,6 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\Organization;
 use AidingApp\Department\Models\Department;
 use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema;
@@ -44,6 +43,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Forms\Components\ServiceRequestPasswordInput;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\CreateServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Filament\Tables\CreateServiceRequestContactsTable;
 use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
@@ -55,6 +55,7 @@ use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateServiceReque
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
+use Filament\Forms\Components\ModalTableSelect;
 use Filament\Forms\Components\Select;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Collection;
@@ -68,7 +69,7 @@ use function Pest\Laravel\postJson;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
-test('A successful action on the CreateServiceRequest page', function () {
+test('A successful action on the CreateServiceRequest page', function (): void {
     asSuperAdmin()
         ->get(
             ServiceRequestResource::getUrl('create')
@@ -109,27 +110,27 @@ test('A successful action on the CreateServiceRequest page', function () {
         ->toEqual($request->get('category'));
 });
 
-it('omits the unaffiliated placeholder from the contact option label and includes the organization name when present', function () {
+it('uses a modal table select wired to the contacts table for choosing the customer contact', function (): void {
     asSuperAdmin();
 
-    $organization = Organization::factory()->create(['name' => 'Acme University']);
-    $contactWithOrganization = Contact::factory()->create(['organization_id' => $organization->getKey()]);
-    $contactWithoutOrganization = Contact::factory()->create(['organization_id' => null]);
+    $contact = Contact::factory()->create();
 
     $field = Livewire::test(CreateServiceRequest::class)
         ->assertSuccessful()
         ->instance()
         ->getSchema('form')
-        ->getComponent(fn ($component): bool => $component instanceof Select && $component->getName() === 'respondent_id');
+        ->getComponent(fn ($component): bool => $component instanceof ModalTableSelect && $component->getName() === 'respondent_id');
 
     expect($field)->not()->toBeNull()
-        ->and($field->getOptionLabelFromRecord($contactWithOrganization))
-        ->toContain('Acme University')
-        ->and($field->getOptionLabelFromRecord($contactWithoutOrganization))
-        ->not()->toContain('Unaffiliated');
+        ->and($field->getTableConfiguration())->toBe(CreateServiceRequestContactsTable::class)
+        ->and($field->isRequired())->toBeTrue();
+
+    $field->state($contact->getKey());
+
+    expect($field->getOptionLabel())->toBe($contact->full_name);
 });
 
-it('securely stores password fields on staff-created service requests', function () {
+it('securely stores password fields on staff-created service requests', function (): void {
     asSuperAdmin();
 
     $author = auth()->user();
@@ -207,7 +208,7 @@ it('securely stores password fields on staff-created service requests', function
         ->toBe('service-request-password');
 });
 
-test('CreateServiceRequest requires valid data', function (CreateServiceRequestRequestFactory $data, array $errors, ?Closure $setup = null) {
+test('CreateServiceRequest requires valid data', function (CreateServiceRequestRequestFactory $data, array $errors, ?Closure $setup = null): void {
     if ($setup) {
         $setup();
     }
@@ -238,7 +239,7 @@ test('CreateServiceRequest requires valid data', function (CreateServiceRequestR
     ]
 );
 
-test('type afterStateUpdated sets category from default_category', function () {
+test('type afterStateUpdated sets category from default_category', function (): void {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create([
@@ -256,7 +257,7 @@ test('type afterStateUpdated sets category from default_category', function () {
 
 // Permission Tests
 
-test('CreateServiceRequest is gated with proper access control', function () {
+test('CreateServiceRequest is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -323,7 +324,7 @@ test('CreateServiceRequest is gated with proper access control', function () {
         ->toEqual($request->get('priority_id'));
 });
 
-test('CreateServiceRequest is gated with proper access control via direct user manager', function () {
+test('CreateServiceRequest is gated with proper access control via direct user manager', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -384,7 +385,7 @@ test('CreateServiceRequest is gated with proper access control via direct user m
         ->toEqual($request->get('priority_id'));
 });
 
-test('CreateServiceRequest is gated with proper feature access control', function () {
+test('CreateServiceRequest is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -442,7 +443,7 @@ test('CreateServiceRequest is gated with proper feature access control', functio
     assertDatabaseHas(ServiceRequest::class, $request->except(['respondent_id', 'type_id'])->toArray());
 });
 
-test('CreateServiceRequest is gated with proper feature access control via direct user manager', function () {
+test('CreateServiceRequest is gated with proper feature access control via direct user manager', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -494,7 +495,7 @@ test('CreateServiceRequest is gated with proper feature access control via direc
     assertDatabaseHas(ServiceRequest::class, $request->except(['respondent_id', 'type_id'])->toArray());
 });
 
-test('cannot create service requests if user is manager of any service request type', function () {
+test('cannot create service requests if user is manager of any service request type', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -530,7 +531,7 @@ test('cannot create service requests if user is manager of any service request t
         )->assertForbidden();
 });
 
-test('displays only service request types managed by the current user', function () {
+test('displays all service request types including those the current user does not manage', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -575,11 +576,11 @@ test('displays only service request types managed by the current user', function
                 });
 
             return in_array($serviceRequestTypesWithManagers->getKey(), $flattenedValues, true) &&
-                ! in_array($serviceRequestTypesWithoutManagers->getKey(), $flattenedValues, true);
+                in_array($serviceRequestTypesWithoutManagers->getKey(), $flattenedValues, true);
         });
 });
 
-test('displays only service request types where current user is a direct manager', function () {
+test('displays all service request types including those where the current user is not a direct manager', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -618,11 +619,11 @@ test('displays only service request types where current user is a direct manager
                 });
 
             return in_array($serviceRequestTypesWithManagers->getKey(), $flattenedValues, true) &&
-                ! in_array($serviceRequestTypesWithoutManagers->getKey(), $flattenedValues, true);
+                in_array($serviceRequestTypesWithoutManagers->getKey(), $flattenedValues, true);
         });
 });
 
-test('create service requests if user is manager of any service request type', function () {
+test('create service requests if user is manager of any service request type', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -667,7 +668,7 @@ test('create service requests if user is manager of any service request type', f
     assertDatabaseHas(ServiceRequest::class, $request->except(['respondent_id', 'type_id'])->toArray());
 });
 
-test('create service requests if user is direct manager of any service request type', function () {
+test('create service requests if user is direct manager of any service request type', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -706,7 +707,7 @@ test('create service requests if user is direct manager of any service request t
     assertDatabaseHas(ServiceRequest::class, $request->except(['respondent_id', 'type_id'])->toArray());
 });
 
-test('validate service requests type if user is manager of any service request type', function () {
+test('allows selecting a service request type the user does not manage, warning they will lose access', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -728,29 +729,31 @@ test('validate service requests type if user is manager of any service request t
 
     $request = collect(CreateServiceRequestRequestFactory::new()->create());
 
-    $serviceRequestTypesWithoutManagers = ServiceRequestType::factory()->count(2)->create();
+    $serviceRequestTypeWithoutManagers = ServiceRequestType::factory()->create();
 
-    $serviceRequestTypesWithManagers = ServiceRequestType::factory()->count(2)->create();
-
-    $serviceRequestTypesWithManagers->each(function (ServiceRequestType $serviceRequest) use ($department) {
-        $serviceRequest->managerDepartments()->attach($department);
-    });
-
-    $serviceRequestTypes = $serviceRequestTypesWithoutManagers->toBase()->merge($serviceRequestTypesWithManagers);
+    $serviceRequestTypeWithManagers = ServiceRequestType::factory()
+        ->hasAttached($department, [], 'managerDepartments')
+        ->create();
 
     Livewire::test(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->fillForm([
             'respondent_id' => Contact::factory()->create()->getKey(),
+            'type_id' => $serviceRequestTypeWithoutManagers->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
-                'type_id' => $serviceRequestTypes->first()->getKey(),
+                'type_id' => $serviceRequestTypeWithoutManagers->getKey(),
             ])->getKey(),
         ])
+        ->assertSee(CreateServiceRequest::inaccessibleTypeWarningMessage($serviceRequestTypeWithoutManagers->name))
         ->call('create')
-        ->assertHasFormErrors(['type_id']);
+        ->assertHasNoFormErrors();
+
+    assertCount(1, ServiceRequest::all());
+
+    expect(ServiceRequest::first()->priority->type->is($serviceRequestTypeWithoutManagers))->toBeTrue();
 });
 
-test('validate service requests type if user is direct manager of any service request type', function () {
+test('allows selecting a service request type where the user is not a direct manager, warning they will lose access', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -766,30 +769,102 @@ test('validate service requests type if user is direct manager of any service re
 
     $request = collect(CreateServiceRequestRequestFactory::new()->create());
 
-    $serviceRequestTypesWithoutManagers = ServiceRequestType::factory()->count(2)->create();
+    $serviceRequestTypeWithoutManagers = ServiceRequestType::factory()->create();
 
-    $serviceRequestTypesWithManagers = ServiceRequestType::factory()->count(2)->create();
-
-    $serviceRequestTypesWithManagers->each(function (ServiceRequestType $serviceRequest) use ($user) {
-        $serviceRequest->managerUsers()->attach($user);
-    });
-
-    $serviceRequestTypes = $serviceRequestTypesWithoutManagers->toBase()->merge($serviceRequestTypesWithManagers);
+    $serviceRequestTypeWithManagers = ServiceRequestType::factory()
+        ->hasAttached($user, [], 'managerUsers')
+        ->create();
 
     Livewire::test(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->fillForm([
             'respondent_id' => Contact::factory()->create()->getKey(),
+            'type_id' => $serviceRequestTypeWithoutManagers->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
-                'type_id' => $serviceRequestTypes->first()->getKey(),
+                'type_id' => $serviceRequestTypeWithoutManagers->getKey(),
             ])->getKey(),
         ])
+        ->assertSee(CreateServiceRequest::inaccessibleTypeWarningMessage($serviceRequestTypeWithoutManagers->name))
         ->call('create')
-        ->assertHasFormErrors(['type_id']);
+        ->assertHasNoFormErrors();
+
+    assertCount(1, ServiceRequest::all());
+
+    expect(ServiceRequest::first()->priority->type->is($serviceRequestTypeWithoutManagers))->toBeTrue();
 });
 
-describe('archiving', function () {
-    test('the status select does not offer archived statuses', function () {
+describe('inaccessible type warning banner', function (): void {
+    beforeEach(function (): void {
+        $settings = app(LicenseSettings::class);
+
+        $settings->data->addons->serviceManagement = true;
+
+        $settings->save();
+    });
+
+    test('is shown when a manager selects a type they neither manage nor audit', function (): void {
+        $user = User::factory()->create();
+
+        $user->givePermissionTo('service_request.view-any');
+        $user->givePermissionTo('service_request.create');
+
+        ServiceRequestType::factory()->hasAttached($user, [], 'managerUsers')->create();
+
+        $inaccessibleType = ServiceRequestType::factory()->create();
+
+        actingAs($user);
+
+        Livewire::test(CreateServiceRequest::class)
+            ->assertDontSee(CreateServiceRequest::inaccessibleTypeWarningMessage($inaccessibleType->name))
+            ->set('data.type_id', $inaccessibleType->getKey())
+            ->assertSee(CreateServiceRequest::inaccessibleTypeWarningMessage($inaccessibleType->name));
+    });
+
+    test('is not shown when the selected type is managed by the user', function (): void {
+        $user = User::factory()->create();
+
+        $user->givePermissionTo('service_request.view-any');
+        $user->givePermissionTo('service_request.create');
+
+        $managedType = ServiceRequestType::factory()->hasAttached($user, [], 'managerUsers')->create();
+
+        actingAs($user);
+
+        Livewire::test(CreateServiceRequest::class)
+            ->set('data.type_id', $managedType->getKey())
+            ->assertDontSee(CreateServiceRequest::inaccessibleTypeWarningMessage($managedType->name));
+    });
+
+    test('is not shown when the selected type is audited by the user', function (): void {
+        $user = User::factory()->create();
+
+        $user->givePermissionTo('service_request.view-any');
+        $user->givePermissionTo('service_request.create');
+
+        ServiceRequestType::factory()->hasAttached($user, [], 'managerUsers')->create();
+
+        $auditedType = ServiceRequestType::factory()->hasAttached($user, [], 'auditorUsers')->create();
+
+        actingAs($user);
+
+        Livewire::test(CreateServiceRequest::class)
+            ->set('data.type_id', $auditedType->getKey())
+            ->assertDontSee(CreateServiceRequest::inaccessibleTypeWarningMessage($auditedType->name));
+    });
+
+    test('is not shown for a super admin', function (): void {
+        asSuperAdmin();
+
+        $type = ServiceRequestType::factory()->create();
+
+        Livewire::test(CreateServiceRequest::class)
+            ->set('data.type_id', $type->getKey())
+            ->assertDontSee(CreateServiceRequest::inaccessibleTypeWarningMessage($type->name));
+    });
+});
+
+describe('archiving', function (): void {
+    test('the status select does not offer archived statuses', function (): void {
         asSuperAdmin();
 
         $activeStatus = ServiceRequestStatus::factory()->create();

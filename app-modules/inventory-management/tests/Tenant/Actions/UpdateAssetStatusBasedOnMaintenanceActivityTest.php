@@ -41,11 +41,11 @@ use AidingApp\InventoryManagement\Models\MaintenanceActivity;
 
 use function Pest\Laravel\seed;
 
-beforeEach(function () {
+beforeEach(function (): void {
     seed(AssetStatusSeeder::class);
 });
 
-it('will update an asset to an unavailable classification when an in progress maintenance activity is created', function () {
+it('will update an asset to an unavailable classification when an in progress maintenance activity is created', function (): void {
     // Given that we have an asset that is currently available
     $asset = Asset::factory()->available()->create();
 
@@ -63,7 +63,7 @@ it('will update an asset to an unavailable classification when an in progress ma
     expect($asset->status->name)->toBe('Under Maintenance');
 });
 
-it('will update an asset to an available classification when a maintenance activity is completed', function () {
+it('will update an asset to an available classification when a maintenance activity is completed', function (): void {
     // Given that we have an asset that is currently unavailable
     $asset = Asset::factory()->unavailable()->create();
 

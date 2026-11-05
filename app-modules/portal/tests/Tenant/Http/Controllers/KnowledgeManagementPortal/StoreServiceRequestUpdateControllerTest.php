@@ -48,7 +48,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\postJson;
 use function Tests\asSuperAdmin;
 
-it('validates the inputs', function (array $data, array $error) {
+it('validates the inputs', function (array $data, array $error): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->knowledge_management_portal_service_management = true;
@@ -104,7 +104,7 @@ it('validates the inputs', function (array $data, array $error) {
         ],
     ]);
 
-it('stores a new service request update', function () {
+it('stores a new service request update', function (): void {
     Queue::fake();
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
@@ -173,7 +173,7 @@ it('stores a new service request update', function () {
     Storage::assertExists($media->getPathRelativeToRoot());
 });
 
-it('reopens a closed service request when a portal update is submitted', function () {
+it('reopens a closed service request when a portal update is submitted', function (): void {
     Queue::fake();
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;

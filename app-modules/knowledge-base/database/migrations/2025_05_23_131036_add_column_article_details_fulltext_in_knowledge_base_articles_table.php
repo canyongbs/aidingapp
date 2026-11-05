@@ -43,7 +43,7 @@ return new class () extends Migration {
     // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function up(): void
     {
-        Schema::table('knowledge_base_articles', function (Blueprint $table) {
+        Schema::table('knowledge_base_articles', function (Blueprint $table): void {
             $table->text('article_details_fulltext')->nullable();
 
             $table->tsVector('search_vector')->storedAs("
@@ -60,7 +60,7 @@ return new class () extends Migration {
     {
         DB::statement('DROP INDEX IF EXISTS knowledge_base_articles_search_vector_idx');
 
-        Schema::table('knowledge_base_articles', function (Blueprint $table) {
+        Schema::table('knowledge_base_articles', function (Blueprint $table): void {
             $table->dropColumn('search_vector');
             $table->dropColumn('article_details_fulltext');
         });

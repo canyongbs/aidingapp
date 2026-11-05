@@ -47,7 +47,7 @@ use function Sentry\configureScope;
 use Sentry\Event;
 use Sentry\State\Scope;
 
-it('dispatches its job for each eligible tenant', function () {
+it('dispatches its job for each eligible tenant', function (): void {
     $dispatcher = new class () extends DispatchForEachTenant {
         protected function jobForTenant(Tenant $tenant): object
         {
@@ -66,7 +66,7 @@ it('dispatches its job for each eligible tenant', function () {
     Queue::assertCount(1);
 });
 
-it('does not dispatch for ineligible tenants', function () {
+it('does not dispatch for ineligible tenants', function (): void {
     $expiredTenant = Tenant::factory()->create([
         'domain' => 'expired-subscription.aidingapp.local',
         'setup_complete' => true,
@@ -102,7 +102,7 @@ it('does not dispatch for ineligible tenants', function () {
     $incompleteTenant->delete();
 });
 
-it('does not dispatch when the job for a tenant resolves to null', function () {
+it('does not dispatch when the job for a tenant resolves to null', function (): void {
     $dispatcher = new class () extends DispatchForEachTenant {
         protected function jobForTenant(Tenant $tenant): ?object
         {
@@ -117,7 +117,7 @@ it('does not dispatch when the job for a tenant resolves to null', function () {
     Queue::assertNothingPushed();
 });
 
-it('reports the failure and continues dispatching for the remaining tenants', function () {
+it('reports the failure and continues dispatching for the remaining tenants', function (): void {
     $secondEligibleTenant = Tenant::factory()->create([
         'domain' => 'second-eligible.aidingapp.local',
         'setup_complete' => true,
@@ -149,7 +149,7 @@ it('reports the failure and continues dispatching for the remaining tenants', fu
 
     $dispatcher->handle();
 
-    Exceptions::assertReported(fn (RuntimeException $throw) => $throw->getMessage() === 'Boom');
+    Exceptions::assertReported(fn (RuntimeException $throw): bool => $throw->getMessage() === 'Boom');
 
     // The first tenant threw; the single push proves the loop moved on and dispatched for the other tenant.
     Queue::assertCount(1);
@@ -158,7 +158,7 @@ it('reports the failure and continues dispatching for the remaining tenants', fu
     $secondEligibleTenant->delete();
 });
 
-it('tags the failure report with the tenant it failed for', function () {
+it('tags the failure report with the tenant it failed for', function (): void {
     $tenant = Tenant::query()->firstOrFail();
 
     $reportedTags = null;

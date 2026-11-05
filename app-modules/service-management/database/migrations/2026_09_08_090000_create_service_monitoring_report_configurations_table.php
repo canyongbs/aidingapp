@@ -41,7 +41,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('service_monitoring_report_configurations', function (Blueprint $table) {
+        Schema::create('service_monitoring_report_configurations', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
             // Explicit short names: the default names both truncate to the same 63-char Postgres identifier limit and collide

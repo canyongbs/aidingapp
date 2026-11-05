@@ -43,7 +43,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
 
-it('cascade deletes priorities when a service request type is deleted', function () {
+it('cascade deletes priorities when a service request type is deleted', function (): void {
     $serviceRequestType = ServiceRequestType::factory()
         ->has(ServiceRequestPriority::factory()->count(3), 'priorities')
         ->create();
@@ -65,7 +65,7 @@ it('cascade deletes priorities when a service request type is deleted', function
     }
 });
 
-it('preloads base templates onto a new service request type when preloading is enabled', function () {
+it('preloads base templates onto a new service request type when preloading is enabled', function (): void {
     $settings = app(ServiceRequestNotificationAutomationSettings::class);
     $settings->preload_new_service_request_types = true;
     $settings->save();
@@ -87,7 +87,7 @@ it('preloads base templates onto a new service request type when preloading is e
     expect($template->body)->toEqual($baseTemplate->body);
 });
 
-it('does not preload base templates onto a new service request type when preloading is disabled', function () {
+it('does not preload base templates onto a new service request type when preloading is disabled', function (): void {
     $settings = app(ServiceRequestNotificationAutomationSettings::class);
     $settings->preload_new_service_request_types = false;
     $settings->save();
@@ -104,7 +104,7 @@ it('does not preload base templates onto a new service request type when preload
         ->exists())->toBeFalse();
 });
 
-it('does not preload base templates that have no content', function () {
+it('does not preload base templates that have no content', function (): void {
     $settings = app(ServiceRequestNotificationAutomationSettings::class);
     $settings->preload_new_service_request_types = true;
     $settings->save();
@@ -130,7 +130,7 @@ it('does not preload base templates that have no content', function () {
         ->exists())->toBeFalse();
 });
 
-it('preloads custom templates instead of base templates onto a new service request type when custom templates are enabled', function () {
+it('preloads custom templates instead of base templates onto a new service request type when custom templates are enabled', function (): void {
     $settings = app(ServiceRequestNotificationAutomationSettings::class);
     $settings->preload_new_service_request_types = true;
     $settings->use_custom_templates = true;

@@ -59,11 +59,6 @@ enum ProjectTab: string implements HasLabel
         };
     }
 
-    public static function default(): self
-    {
-        return self::Access;
-    }
-
     public function canView(Project $project): bool
     {
         return match ($this) {

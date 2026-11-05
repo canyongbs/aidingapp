@@ -50,18 +50,20 @@ use AidingApp\IntegrationAwsSesEventHandling\Events\SesSubscriptionEvent;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use Exception;
+use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class AwsSesInboundWebhookController extends Controller
 {
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): ResponseFactory|Response
     {
         $data = SesEventData::fromRequest($request);
 
         /** @var Tenant $tenant */
         $tenant = Tenant::query()->findOrFail(data_get($data->mail->tags, 'tenant_id'))->first();
 
-        $tenant->execute(function () use ($data) {
+        $tenant->execute(function () use ($data): void {
             match ($data->eventType) {
                 'Bounce' => SesBounceEvent::dispatch($data),
                 'Click' => SesClickEvent::dispatch($data),

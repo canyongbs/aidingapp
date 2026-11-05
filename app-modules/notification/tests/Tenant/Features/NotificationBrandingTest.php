@@ -40,7 +40,7 @@ use App\Settings\NotificationSettings;
 use CanyonGBS\Common\Enums\Color;
 use Filament\Support\Colors\Color as FilamentColor;
 
-it('renders the notification mail with the configured `primary_color`', function () {
+it('renders the notification mail with the configured `primary_color`', function (): void {
     $user = User::factory()->create();
 
     $expected = FilamentColor::convertToRgb(FilamentColor::all()[Color::Gray->value][600]);

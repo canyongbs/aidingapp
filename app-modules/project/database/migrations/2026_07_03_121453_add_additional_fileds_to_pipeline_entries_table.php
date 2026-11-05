@@ -41,7 +41,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('pipeline_entries', function (Blueprint $table) {
+        Schema::table('pipeline_entries', function (Blueprint $table): void {
             $table->text('description')->nullable();
             $table->timestamp('due')->nullable();
             $table->foreignUuid('assigned_to')->nullable()->constrained('users')->nullOnDelete();
@@ -52,7 +52,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('pipeline_entries', function (Blueprint $table) {
+        Schema::table('pipeline_entries', function (Blueprint $table): void {
             $table->dropForeign(['assigned_to']);
             $table->dropForeign(['created_by']);
             $table->dropForeign(['related_to']);

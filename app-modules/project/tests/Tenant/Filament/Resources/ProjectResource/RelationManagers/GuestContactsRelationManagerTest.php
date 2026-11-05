@@ -48,7 +48,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-it('can list guest contacts', function () {
+it('can list guest contacts', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -64,7 +64,7 @@ it('can list guest contacts', function () {
         ->assertCanSeeTableRecords($contacts);
 });
 
-it('can attach a guest contact to a project', function () {
+it('can attach a guest contact to a project', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -83,7 +83,38 @@ it('can attach a guest contact to a project', function () {
     expect($project->guestContacts()->where('contacts.id', $contact->getKey())->exists())->toBeTrue();
 });
 
-it('can detach a guest contact from a project', function () {
+it('does not offer archived contacts to attach', function (): void {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $contact = Contact::factory()->create();
+    $archivedContact = Contact::factory()->archived()->create();
+
+    Livewire::test(GuestContactsRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManageGuests::class,
+    ])
+        ->callAction(TestAction::make(AttachAction::class)->table(), data: [
+            'recordId' => $archivedContact->getKey(),
+        ])
+        ->assertHasFormErrors(['recordId']);
+
+    expect($project->guestContacts()->where('contacts.id', $archivedContact->getKey())->exists())->toBeFalse();
+
+    Livewire::test(GuestContactsRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManageGuests::class,
+    ])
+        ->callAction(TestAction::make(AttachAction::class)->table(), data: [
+            'recordId' => $contact->getKey(),
+        ])
+        ->assertHasNoFormErrors();
+
+    expect($project->guestContacts()->where('contacts.id', $contact->getKey())->exists())->toBeTrue();
+});
+
+it('can detach a guest contact from a project', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -102,7 +133,7 @@ it('can detach a guest contact from a project', function () {
     expect($project->guestContacts()->where('contacts.id', $contact->getKey())->exists())->toBeFalse();
 });
 
-it('can bulk detach guest contacts from a project', function () {
+it('can bulk detach guest contacts from a project', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -122,8 +153,8 @@ it('can bulk detach guest contacts from a project', function () {
     expect($project->guestContacts()->count())->toBe(0);
 });
 
-describe('authorization', function () {
-    it('allows a super admin to attach a guest contact', function () {
+describe('authorization', function (): void {
+    it('allows a super admin to attach a guest contact', function (): void {
         asSuperAdmin();
 
         $project = Project::factory()->create();
@@ -143,7 +174,7 @@ describe('authorization', function () {
         expect($project->guestContacts()->where('contacts.id', $contact->getKey())->exists())->toBeTrue();
     });
 
-    it('allows the project creator with the update permission to attach a guest contact', function () {
+    it('allows the project creator with the update permission to attach a guest contact', function (): void {
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');
@@ -169,7 +200,7 @@ describe('authorization', function () {
         expect($project->guestContacts()->where('contacts.id', $contact->getKey())->exists())->toBeTrue();
     });
 
-    it('allows an assigned project manager with the update permission to attach a guest contact', function () {
+    it('allows an assigned project manager with the update permission to attach a guest contact', function (): void {
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');
@@ -197,7 +228,7 @@ describe('authorization', function () {
         expect($project->guestContacts()->where('contacts.id', $contact->getKey())->exists())->toBeTrue();
     });
 
-    it('hides the attach action when the user has no update permission', function () {
+    it('hides the attach action when the user has no update permission', function (): void {
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');
@@ -214,7 +245,7 @@ describe('authorization', function () {
             ->assertActionHidden(TestAction::make(AttachAction::class)->table());
     });
 
-    it('hides the attach action when the user has the update permission but is unrelated to the project', function () {
+    it('hides the attach action when the user has the update permission but is unrelated to the project', function (): void {
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');

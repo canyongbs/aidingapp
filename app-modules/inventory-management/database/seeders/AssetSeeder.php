@@ -47,7 +47,7 @@ class AssetSeeder extends Seeder
         Asset::factory()
             ->count(10)
             ->create()
-            ->each(function (Asset $asset) {
+            ->each(function (Asset $asset): void {
                 $entityCount = rand(0, 10);
 
                 for ($index = 0; $index < $entityCount; $index++) {

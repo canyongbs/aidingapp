@@ -41,52 +41,52 @@ use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\deleteJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     config()->set('audit.enabled', false);
 });
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $targetUser = User::factory()->create();
 
     $user = SystemUser::factory()->create();
     Sanctum::actingAs($user, ['api']);
-    deleteJson(route('api.v1.users.destroy', ['user' => $targetUser], false))
+    deleteJson(route('api.v1.users.delete', ['user' => $targetUser], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.view-any');
     Sanctum::actingAs($user, ['api']);
-    deleteJson(route('api.v1.users.destroy', ['user' => $targetUser], false))
+    deleteJson(route('api.v1.users.delete', ['user' => $targetUser], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.*.delete');
     Sanctum::actingAs($user, ['api']);
-    deleteJson(route('api.v1.users.destroy', ['user' => $targetUser], false))
+    deleteJson(route('api.v1.users.delete', ['user' => $targetUser], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['user.view-any', 'user.*.delete']);
     Sanctum::actingAs($user, ['api']);
-    deleteJson(route('api.v1.users.destroy', ['user' => $targetUser], false))
+    deleteJson(route('api.v1.users.delete', ['user' => $targetUser], false))
         ->assertNoContent();
 });
 
-it('can soft-delete a user with valid permissions', function () {
+it('can soft-delete a user with valid permissions', function (): void {
     $targetUser = User::factory()->create();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['user.view-any', 'user.*.delete']);
     Sanctum::actingAs($user, ['api']);
 
-    $response = deleteJson(route('api.v1.users.destroy', ['user' => $targetUser], false));
+    $response = deleteJson(route('api.v1.users.delete', ['user' => $targetUser], false));
 
     $response->assertNoContent();
 
     expect($targetUser->fresh()->trashed())->toBeTrue();
 });
 
-it('returns 404 when the requested user has an admin role', function (string $adminRole) {
+it('returns 404 when the requested user has an admin role', function (string $adminRole): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['user.view-any', 'user.*.delete']);
     Sanctum::actingAs($user, ['api']);
@@ -94,7 +94,7 @@ it('returns 404 when the requested user has an admin role', function (string $ad
     $adminUser = User::factory()->create();
     $adminUser->assignRole($adminRole);
 
-    deleteJson(route('api.v1.users.destroy', ['user' => $adminUser], false))
+    deleteJson(route('api.v1.users.delete', ['user' => $adminUser], false))
         ->assertNotFound();
 
     expect($adminUser->fresh()->trashed())->toBeFalse();
@@ -104,30 +104,30 @@ it('returns 404 when the requested user has an admin role', function (string $ad
     'AI Admin' => [Authenticatable::AI_ADMIN_ROLE],
 ]);
 
-it('returns 404 for a non-existent user', function () {
+it('returns 404 for a non-existent user', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['user.view-any', 'user.*.delete']);
     Sanctum::actingAs($user, ['api']);
 
-    deleteJson(route('api.v1.users.destroy', ['user' => 'non-existent-id'], false))
+    deleteJson(route('api.v1.users.delete', ['user' => 'non-existent-id'], false))
         ->assertNotFound();
 });
 
-it('rejects unauthenticated requests', function () {
+it('rejects unauthenticated requests', function (): void {
     $targetUser = User::factory()->create();
 
-    deleteJson(route('api.v1.users.destroy', ['user' => $targetUser], false))
+    deleteJson(route('api.v1.users.delete', ['user' => $targetUser], false))
         ->assertUnauthorized();
 });
 
-it('does not permanently delete the user', function () {
+it('does not permanently delete the user', function (): void {
     $targetUser = User::factory()->create();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['user.view-any', 'user.*.delete']);
     Sanctum::actingAs($user, ['api']);
 
-    deleteJson(route('api.v1.users.destroy', ['user' => $targetUser], false))
+    deleteJson(route('api.v1.users.delete', ['user' => $targetUser], false))
         ->assertNoContent();
 
     expect(User::withTrashed()->find($targetUser->id))->not->toBeNull();

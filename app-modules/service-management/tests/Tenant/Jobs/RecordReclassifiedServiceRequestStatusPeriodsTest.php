@@ -44,7 +44,7 @@ use Illuminate\Support\Facades\Notification;
 
 use function Pest\Laravel\travelTo;
 
-it('appends a status period for every request currently in the reclassified status', function () {
+it('appends a status period for every request currently in the reclassified status', function (): void {
     Notification::fake();
 
     $start = CarbonImmutable::parse('2026-01-01 00:00:00');
@@ -75,7 +75,7 @@ it('appends a status period for every request currently in the reclassified stat
     }
 });
 
-it('splits the sla calculation at the reclassification boundary', function () {
+it('splits the sla calculation at the reclassification boundary', function (): void {
     Notification::fake();
 
     $start = CarbonImmutable::parse('2026-01-01 00:00:00');

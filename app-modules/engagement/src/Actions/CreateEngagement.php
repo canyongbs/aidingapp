@@ -57,7 +57,7 @@ class CreateEngagement
             $engagement->dispatched_at = now();
         }
 
-        DB::transaction(function () use ($data, $engagement) {
+        DB::transaction(function () use ($data, $engagement): void {
             $engagement->save();
 
             if ($data->schema) {

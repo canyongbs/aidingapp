@@ -66,9 +66,4 @@ enum ServiceRequestTab: string implements HasLabel
             self::Timeline => 'Timeline',
         };
     }
-
-    public static function default(): self
-    {
-        return self::Request;
-    }
 }

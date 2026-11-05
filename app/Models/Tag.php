@@ -37,13 +37,19 @@
 namespace App\Models;
 
 use Database\Factories\TagFactory;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperTag
  */
-class Tag extends BaseModel
+class Tag extends Model
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
+
     /** @use HasFactory<TagFactory> */
     use HasFactory;
 

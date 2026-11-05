@@ -51,6 +51,8 @@ use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Enums\Width;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Vite;
 
 class RelationManagerDraftWithAiAction extends Action
@@ -68,7 +70,7 @@ class RelationManagerDraftWithAiAction extends Action
             ->label('Draft with AI Assistant')
             ->link()
             ->icon('heroicon-m-pencil')
-            ->modalContent(fn (RelationManager $livewire) => view('engagement::filament.actions.draft-with-ai-modal-content', [
+            ->modalContent(fn (RelationManager $livewire): Factory|View => view('engagement::filament.actions.draft-with-ai-modal-content', [
                 'recordTitle' => (function () use ($livewire) {
                     $record = $livewire->getOwnerRecord();
                     assert($record instanceof Educatable);
@@ -87,10 +89,10 @@ class RelationManagerDraftWithAiAction extends Action
                     ->placeholder('What do you want to write about?')
                     ->required(),
             ])
-            ->action(function (array $data, Set $set, ManageRelatedRecords | RelationManager $livewire) {
+            ->action(function (array $data, Set $set, ManageRelatedRecords | RelationManager $livewire): void {
                 $model = app(AiIntegratedAssistantSettings::class)->getDefaultModel();
 
-                $userName = auth()->user()->name;
+                $userName = auth()->user()->full_name;
                 $userJobTitle = auth()->user()->job_title ?? 'staff member';
                 $clientName = app(LicenseSettings::class)->data->subscription->clientName;
 

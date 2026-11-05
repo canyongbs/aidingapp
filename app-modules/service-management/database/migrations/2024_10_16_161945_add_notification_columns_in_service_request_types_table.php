@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('service_request_types', function (Blueprint $table) {
+        Schema::table('service_request_types', function (Blueprint $table): void {
             $table->boolean('is_managers_service_request_created_email_enabled')->default(false);
             $table->boolean('is_managers_service_request_created_notification_enabled')->default(false);
             $table->boolean('is_managers_service_request_assigned_email_enabled')->default(false);
@@ -59,7 +59,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('service_request_types', function (Blueprint $table) {
+        Schema::table('service_request_types', function (Blueprint $table): void {
             $table->dropColumn([
                 'is_managers_service_request_created_email_enabled',
                 'is_managers_service_request_created_notification_enabled',

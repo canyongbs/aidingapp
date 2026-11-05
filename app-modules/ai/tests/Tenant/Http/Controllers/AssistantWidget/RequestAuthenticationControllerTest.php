@@ -59,14 +59,14 @@ $requestAssistantAuthentication = function (array $body): TestResponse {
     return postJson($url, $body, ['Origin' => config('app.url')]);
 };
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->ai_support_assistant = true;
     $settings->save();
 });
 
-test('it sends assistant authentication for an existing contact', function () use ($requestAssistantAuthentication) {
+test('it sends assistant authentication for an existing contact', function () use ($requestAssistantAuthentication): void {
     Notification::fake();
 
     $contact = Contact::factory()->create([
@@ -86,7 +86,7 @@ test('it sends assistant authentication for an existing contact', function () us
     Notification::assertSentOnDemand(AuthenticatePortalNotification::class);
 });
 
-test('it resolves an existing contact when the email case differs', function () use ($requestAssistantAuthentication) {
+test('it resolves an existing contact when the email case differs', function () use ($requestAssistantAuthentication): void {
     Notification::fake();
 
     $contact = Contact::factory()->create([
@@ -104,7 +104,7 @@ test('it resolves an existing contact when the email case differs', function () 
     expect($authentication?->educatable_id)->toBe($contact->getKey());
 });
 
-test('it returns a validation error when no contact matches the email', function () use ($requestAssistantAuthentication) {
+test('it returns a validation error when no contact matches the email', function () use ($requestAssistantAuthentication): void {
     $response = $requestAssistantAuthentication(['email' => 'missing@example.com']);
 
     $response
@@ -112,7 +112,7 @@ test('it returns a validation error when no contact matches the email', function
         ->assertJsonValidationErrors(['email']);
 });
 
-test('it throttles repeated assistant authentication requests for the same contact', function () use ($requestAssistantAuthentication) {
+test('it throttles repeated assistant authentication requests for the same contact', function () use ($requestAssistantAuthentication): void {
     $contact = Contact::factory()->create([
         'email' => 'contact@example.com',
     ]);
@@ -126,7 +126,7 @@ test('it throttles repeated assistant authentication requests for the same conta
     expect(PortalAuthentication::query()->count())->toBe(1);
 });
 
-test('it invalidates a contact\'s prior authentication when a new assistant code is requested', function () use ($requestAssistantAuthentication) {
+test('it invalidates a contact\'s prior authentication when a new assistant code is requested', function () use ($requestAssistantAuthentication): void {
     Notification::fake();
 
     $contact = Contact::factory()->create([

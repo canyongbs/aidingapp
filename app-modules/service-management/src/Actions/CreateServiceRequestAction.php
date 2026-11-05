@@ -55,7 +55,7 @@ class CreateServiceRequestAction
 
     public function execute(ServiceRequestDataObject $serviceRequestDataObject): ServiceRequest
     {
-        return DB::transaction(function () use ($serviceRequestDataObject) {
+        return DB::transaction(function () use ($serviceRequestDataObject): ServiceRequest {
             $serviceRequest = new ServiceRequest($serviceRequestDataObject->toArray());
             $serviceRequest->save();
 

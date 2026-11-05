@@ -39,6 +39,8 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\Schemas;
 use AidingApp\Contact\Filament\Tables\OrganizationsTable;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
+use AidingApp\Contact\Rules\ContactEmailNotArchived;
+use App\Features\ContactArchivingFeature;
 use App\Filament\Forms\Components\AddressInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TableSelect;
@@ -148,12 +150,18 @@ class ContactFormSchema
                 ->label('Email')
                 ->email()
                 ->maxLength(255)
+                // Stops at the first failure, so an archived match shows its own message instead of the generic unique one.
+                ->rule('bail', fn (): bool => ContactArchivingFeature::active())
+                ->rule(
+                    fn (?Contact $record): ContactEmailNotArchived => new ContactEmailNotArchived(ignore: $ignoreRecord ? $record : null),
+                    fn (): bool => ContactArchivingFeature::active(),
+                )
                 ->unique(ignoreRecord: $ignoreRecord, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())
                 ->hintIcon(
-                    fn (?Contact $record) => $record?->getEmailHealthStatus()->getIcon(),
-                    tooltip: fn (?Contact $record) => $record?->getEmailHealthStatus()->getTooltipText(),
+                    fn (?Contact $record): ?string => $record?->getEmailHealthStatus()->getIcon(),
+                    tooltip: fn (?Contact $record): ?string => $record?->getEmailHealthStatus()->getTooltipText(),
                 )
-                ->hintColor(fn (?Contact $record) => $record?->getEmailHealthStatus()->getColor()),
+                ->hintColor(fn (?Contact $record): ?string => $record?->getEmailHealthStatus()->getColor()),
             PhoneInput::make('mobile')
                 ->label('Mobile')
                 ->string(),
@@ -258,6 +266,7 @@ class ContactFormSchema
                 ->label('Organization')
                 ->relationship('organization')
                 ->tableConfiguration(OrganizationsTable::class)
+                ->tableArguments(fn (?Contact $record): array => ['selectedOrganizationId' => $record?->organization_id])
                 ->columnSpanFull(),
         ];
     }

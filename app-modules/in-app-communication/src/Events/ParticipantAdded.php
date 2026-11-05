@@ -68,7 +68,7 @@ class ParticipantAdded implements ShouldBroadcastNow
         $conversation = $this->participant->conversation;
         $conversation->load(['conversationParticipants.participant', 'latestMessage.author']);
 
-        $participants = $conversation->conversationParticipants->map(function (ConversationParticipant $conversationParticipant) {
+        $participants = $conversation->conversationParticipants->map(function (ConversationParticipant $conversationParticipant): array {
             $userModel = $conversationParticipant->participant;
 
             return [
@@ -77,7 +77,7 @@ class ParticipantAdded implements ShouldBroadcastNow
                 'participant_type' => $conversationParticipant->participant_type,
                 'participant' => $userModel instanceof User ? [
                     'id' => $userModel->getKey(),
-                    'name' => $userModel->name,
+                    'name' => $userModel->full_name,
                     'avatar_url' => Filament::getUserAvatarUrl($userModel),
                 ] : null,
                 'is_manager' => $conversationParticipant->is_manager,
@@ -89,9 +89,9 @@ class ParticipantAdded implements ShouldBroadcastNow
             $avatarUrl = null;
         } else {
             $otherParticipant = $conversation->conversationParticipants
-                ->first(fn (ConversationParticipant $conversationParticipant) => $conversationParticipant->participant_id !== $this->participant->participant_id);
+                ->first(fn (ConversationParticipant $conversationParticipant): bool => $conversationParticipant->participant_id !== $this->participant->participant_id);
             $otherUser = $otherParticipant?->participant;
-            $displayName = $otherUser instanceof User ? $otherUser->name : 'Unknown User';
+            $displayName = $otherUser instanceof User ? $otherUser->full_name : 'Unknown User';
             $avatarUrl = $otherUser instanceof User ? Filament::getUserAvatarUrl($otherUser) : null;
         }
 
@@ -103,7 +103,7 @@ class ParticipantAdded implements ShouldBroadcastNow
                 'content' => $conversation->latestMessage->content,
                 'author_id' => $conversation->latestMessage->author_id,
                 'author_name' => $conversation->latestMessage->author instanceof User
-                    ? $conversation->latestMessage->author->name
+                    ? $conversation->latestMessage->author->full_name
                     : null,
                 'created_at' => $conversation->latestMessage->created_at->toIso8601String(),
             ];
@@ -116,7 +116,7 @@ class ParticipantAdded implements ShouldBroadcastNow
             'participant_type' => $this->participant->participant_type,
             'participant' => $participantModel instanceof User ? [
                 'id' => $participantModel->getKey(),
-                'name' => $participantModel->name,
+                'name' => $participantModel->full_name,
                 'avatar_url' => Filament::getUserAvatarUrl($participantModel),
             ] : null,
             'is_manager' => $this->participant->is_manager,

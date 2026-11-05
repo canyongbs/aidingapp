@@ -38,6 +38,7 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageGuests;
 use AidingApp\Project\Filament\Resources\Projects\RelationManagers\GuestOrganizationsRelationManager;
 use AidingApp\Project\Models\Project;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
@@ -48,7 +49,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-it('can list guest organizations', function () {
+it('can list guest organizations', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -64,7 +65,7 @@ it('can list guest organizations', function () {
         ->assertCanSeeTableRecords($organizations);
 });
 
-it('can attach a guest organization to a project', function () {
+it('can attach a guest organization to a project', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -83,7 +84,97 @@ it('can attach a guest organization to a project', function () {
     expect($project->guestOrganizations()->where('organizations.id', $organization->getKey())->exists())->toBeTrue();
 });
 
-it('can detach a guest organization from a project', function () {
+it('does not offer archived organizations to attach', function (): void {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $organization = Organization::factory()->create();
+    $archivedOrganization = Organization::factory()->archived()->create();
+
+    Livewire::test(GuestOrganizationsRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManageGuests::class,
+    ])
+        ->callAction(TestAction::make(AttachAction::class)->table(), data: [
+            'recordId' => $archivedOrganization->getKey(),
+        ])
+        ->assertHasFormErrors(['recordId']);
+
+    expect($project->guestOrganizations()->where('organizations.id', $archivedOrganization->getKey())->exists())->toBeFalse();
+
+    Livewire::test(GuestOrganizationsRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManageGuests::class,
+    ])
+        ->callAction(TestAction::make(AttachAction::class)->table(), data: [
+            'recordId' => $organization->getKey(),
+        ])
+        ->assertHasNoFormErrors();
+
+    expect($project->guestOrganizations()->where('organizations.id', $organization->getKey())->exists())->toBeTrue();
+});
+
+it('still lists and can detach an already attached archived organization', function (): void {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $archivedOrganization = Organization::factory()->archived()->create();
+
+    $project->guestOrganizations()->attach($archivedOrganization->getKey());
+
+    Livewire::test(GuestOrganizationsRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManageGuests::class,
+    ])
+        ->assertCanSeeTableRecords([$archivedOrganization])
+        ->callAction(TestAction::make(DetachAction::class)->table($archivedOrganization));
+
+    expect($project->guestOrganizations()->where('organizations.id', $archivedOrganization->getKey())->exists())->toBeFalse();
+});
+
+it('marks only archived guest organizations with the archived indicator', function (): void {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $organization = Organization::factory()->create();
+    $archivedOrganization = Organization::factory()->archived()->create();
+
+    $project->guestOrganizations()->attach([$organization->getKey(), $archivedOrganization->getKey()]);
+
+    $html = Livewire::test(GuestOrganizationsRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManageGuests::class,
+    ])
+        ->assertCanSeeTableRecords([$organization, $archivedOrganization])
+        ->html();
+
+    expect(substr_count($html, 'This organization is archived.'))->toBe(substr_count(view('filament.tables.columns.organization.archived-name', ['name' => 'x'])->render(), 'This organization is archived.'))
+        ->toBeGreaterThan(0);
+});
+
+it('does not mark archived guest organizations while organization archiving is inactive', function (): void {
+    OrganizationArchivingFeature::deactivate();
+
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $archivedOrganization = Organization::factory()->archived()->create();
+
+    $project->guestOrganizations()->attach($archivedOrganization->getKey());
+
+    Livewire::test(GuestOrganizationsRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManageGuests::class,
+    ])
+        ->assertCanSeeTableRecords([$archivedOrganization])
+        ->assertDontSee('This organization is archived.');
+});
+
+it('can detach a guest organization from a project', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -102,7 +193,7 @@ it('can detach a guest organization from a project', function () {
     expect($project->guestOrganizations()->where('organizations.id', $organization->getKey())->exists())->toBeFalse();
 });
 
-it('can bulk detach guest organizations from a project', function () {
+it('can bulk detach guest organizations from a project', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -122,8 +213,8 @@ it('can bulk detach guest organizations from a project', function () {
     expect($project->guestOrganizations()->count())->toBe(0);
 });
 
-describe('authorization', function () {
-    it('allows a super admin to attach a guest organization', function () {
+describe('authorization', function (): void {
+    it('allows a super admin to attach a guest organization', function (): void {
         asSuperAdmin();
 
         $project = Project::factory()->create();
@@ -143,7 +234,7 @@ describe('authorization', function () {
         expect($project->guestOrganizations()->where('organizations.id', $organization->getKey())->exists())->toBeTrue();
     });
 
-    it('allows the project creator with the update permission to attach a guest organization', function () {
+    it('allows the project creator with the update permission to attach a guest organization', function (): void {
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');
@@ -169,7 +260,7 @@ describe('authorization', function () {
         expect($project->guestOrganizations()->where('organizations.id', $organization->getKey())->exists())->toBeTrue();
     });
 
-    it('allows an assigned project manager with the update permission to attach a guest organization', function () {
+    it('allows an assigned project manager with the update permission to attach a guest organization', function (): void {
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');
@@ -197,7 +288,7 @@ describe('authorization', function () {
         expect($project->guestOrganizations()->where('organizations.id', $organization->getKey())->exists())->toBeTrue();
     });
 
-    it('hides the attach action when the user has no update permission', function () {
+    it('hides the attach action when the user has no update permission', function (): void {
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');
@@ -214,7 +305,7 @@ describe('authorization', function () {
             ->assertActionHidden(TestAction::make(AttachAction::class)->table());
     });
 
-    it('hides the attach action when the user has the update permission but is unrelated to the project', function () {
+    it('hides the attach action when the user has the update permission but is unrelated to the project', function (): void {
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');

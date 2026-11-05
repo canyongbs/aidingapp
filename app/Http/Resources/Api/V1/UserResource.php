@@ -52,7 +52,7 @@ class UserResource extends JsonResource
     {
         return [
             'id' => $this->resource->id,
-            'name' => $this->resource->name,
+            'name' => $this->resource->full_name,
             'first_name' => $this->resource->first_name,
             'last_name' => $this->resource->last_name,
             'preferred_name' => $this->resource->preferred_name,

@@ -74,7 +74,7 @@ class ListContracts extends ListRecords
                 SelectFilter::make('contract_type')
                     ->relationship('contractType', 'name'),
                 SelectFilter::make('status')
-                    ->options(collect(ContractStatus::cases())->mapWithKeys(fn (ContractStatus $contractStatus) => [
+                    ->options(collect(ContractStatus::cases())->mapWithKeys(fn (ContractStatus $contractStatus): array => [
                         $contractStatus->value => $contractStatus->getLabel(),
                     ]))
                     ->query(function (Builder $query, array $state) {

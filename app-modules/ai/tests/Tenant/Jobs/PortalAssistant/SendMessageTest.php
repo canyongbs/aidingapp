@@ -45,13 +45,13 @@ use AidingApp\Ai\Support\StreamingChunks\Finish;
 use AidingApp\Ai\Support\StreamingChunks\Text;
 use Illuminate\Support\Facades\Event;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(AiIntegratedAssistantSettings::class);
     $settings->default_model = AiModel::Test;
     $settings->save();
 });
 
-it('surfaces the rate limit reset time and does not persist a partial response when the stream is rate limited', function () {
+it('surfaces the rate limit reset time and does not persist a partial response when the stream is rate limited', function (): void {
     Event::fake([PortalAssistantMessageChunk::class]);
 
     $thread = PortalAssistantThread::factory()->create();
@@ -77,7 +77,7 @@ it('surfaces the rate limit reset time and does not persist a partial response w
     );
 });
 
-it('completes and persists the response when the stream finishes normally', function () {
+it('completes and persists the response when the stream finishes normally', function (): void {
     Event::fake([PortalAssistantMessageChunk::class]);
 
     $thread = PortalAssistantThread::factory()->create();

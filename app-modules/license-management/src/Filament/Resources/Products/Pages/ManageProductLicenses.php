@@ -36,8 +36,10 @@
 
 namespace AidingApp\LicenseManagement\Filament\Resources\Products\Pages;
 
+use AidingApp\Contact\Models\Builders\ContactBuilder;
 use AidingApp\LicenseManagement\Filament\Resources\Products\ProductResource;
 use AidingApp\LicenseManagement\Models\ProductLicense;
+use App\Features\ContactArchivingFeature;
 use App\Filament\Infolists\Components\MaskedTextEntry;
 use App\Filament\Tables\Columns\MaskedTextColumn;
 use Filament\Actions\BulkActionGroup;
@@ -80,10 +82,15 @@ class ManageProductLicenses extends ManageRelatedRecords
                     ->string()
                     ->required()
                     ->password(),
+                // Filament also applies this query when resolving the saved selection's label, so the license's current
+                // contact stays selectable; otherwise a license assigned to an archived contact could not be saved
                 Select::make('assigned_to')
                     ->relationship(
                         name: 'contact',
                         titleAttribute: 'full_name',
+                        modifyQueryUsing: fn (ContactBuilder $query, ?ProductLicense $record): ContactBuilder => ContactArchivingFeature::active()
+                            ? $query->where(fn (ContactBuilder $query): ContactBuilder => $query->withoutArchived()->when($record?->assigned_to, fn (ContactBuilder $query, string $contactId): ContactBuilder => $query->orWhereKey($contactId)))
+                            : $query,
                     )
                     ->label('Assigned To')
                     ->preload()
@@ -101,14 +108,14 @@ class ManageProductLicenses extends ManageRelatedRecords
                     ->native(false)
                     ->live()
                     ->afterStateUpdated(
-                        fn (Get $get, Set $set) => $get('start_date') > $get('expiration_date') ? $set('expiration_date', '') : ''
+                        fn (Get $get, Set $set): mixed => $get('start_date') > $get('expiration_date') ? $set('expiration_date', '') : ''
                     ),
                 Group::make([
                     Checkbox::make('license_does_not_expire')
                         ->label('License Does Not Expire')
                         ->live()
-                        ->afterStateHydrated(function (Set $set, mixed $state, ?ProductLicense $record) {
-                            if ($record && is_null($record->expiration_date)) {
+                        ->afterStateHydrated(function (Set $set, mixed $state, ?ProductLicense $record): void {
+                            if ($record instanceof ProductLicense && is_null($record->expiration_date)) {
                                 $set('license_does_not_expire', true);
                             }
                         }),
@@ -116,9 +123,9 @@ class ManageProductLicenses extends ManageRelatedRecords
                         ->label('Expiration Date')
                         ->default('No Expiration')
                         ->closeOnDateSelection()
-                        ->required(fn (Get $get) => ! $get('license_does_not_expire'))
-                        ->disabled(fn (Get $get) => $get('license_does_not_expire'))
-                        ->minDate(fn (Get $get) => $get('start_date'))
+                        ->required(fn (Get $get): bool => ! $get('license_does_not_expire'))
+                        ->disabled(fn (Get $get): mixed => $get('license_does_not_expire'))
+                        ->minDate(fn (Get $get): mixed => $get('start_date'))
                         ->after('start_date')
                         ->live(onBlur: true)
                         ->native(false),

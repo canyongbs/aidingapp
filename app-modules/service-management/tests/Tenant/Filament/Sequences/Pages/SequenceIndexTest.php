@@ -37,7 +37,7 @@ use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 
-test('the sequences list page can not be rendered without permissions', function () {
+test('the sequences list page can not be rendered without permissions', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -45,7 +45,7 @@ test('the sequences list page can not be rendered without permissions', function
         ->assertForbidden();
 });
 
-test('the sequences list page can be rendered with auth', function () {
+test('the sequences list page can be rendered with auth', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');

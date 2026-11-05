@@ -39,19 +39,23 @@ namespace AidingApp\ServiceManagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\AdvisoryStatusFactory;
 use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
-use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperAdvisoryStatus
  */
-class AdvisoryStatus extends BaseModel implements Auditable
+class AdvisoryStatus extends Model implements Auditable
 {
     use AuditableTrait;
     use SoftDeletes;
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
 
     /** @use HasFactory<AdvisoryStatusFactory> */
     use HasFactory;

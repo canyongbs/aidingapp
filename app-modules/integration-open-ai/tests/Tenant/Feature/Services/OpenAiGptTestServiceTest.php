@@ -44,7 +44,7 @@ use Illuminate\Support\Str;
 
 use function Pest\Laravel\assertSoftDeleted;
 
-it('skips uploading a file that has no parsing results instead of sending an empty file to OpenAI', function () {
+it('skips uploading a file that has no parsing results instead of sending an empty file to OpenAI', function (): void {
     Http::fake([
         '*/files*' => Http::response([
             'id' => fake()->uuid(),
@@ -70,7 +70,7 @@ it('skips uploading a file that has no parsing results instead of sending an emp
         ->toBeNull();
 });
 
-it('uploads files with parsing results while excluding files that have none', function () {
+it('uploads files with parsing results while excluding files that have none', function (): void {
     Http::fake([
         '*/files*' => Http::response([
             'id' => $fileId = fake()->uuid(),
@@ -96,7 +96,7 @@ it('uploads files with parsing results while excluding files that have none', fu
         ->toBeNull();
 });
 
-it('removes an indexed knowledge base item when it no longer has parsing results', function () {
+it('removes an indexed knowledge base item when it no longer has parsing results', function (): void {
     Http::fake([
         '*/vector_stores/*/files*' => Http::response([
             'data' => [['id' => $fileId = (string) Str::uuid()]],

@@ -40,13 +40,13 @@ use AidingApp\Portal\Settings\PortalSettings;
 
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
 });
 
-it('returns parent categories ordered by sort on the portal', function () {
+it('returns parent categories ordered by sort on the portal', function (): void {
     $zebra = KnowledgeBaseCategory::factory()->create(['name' => 'Zebra', 'sort' => 3]);
     $apple = KnowledgeBaseCategory::factory()->create(['name' => 'Apple', 'sort' => 1]);
     $mango = KnowledgeBaseCategory::factory()->create(['name' => 'Mango', 'sort' => 2]);
@@ -64,7 +64,7 @@ it('returns parent categories ordered by sort on the portal', function () {
     expect($names)->toBe(['Apple', 'Mango', 'Zebra']);
 });
 
-it('returns sub categories ordered by sort on the portal', function () {
+it('returns sub categories ordered by sort on the portal', function (): void {
     $parent = KnowledgeBaseCategory::factory()->create(['name' => 'Parent', 'sort' => 1]);
 
     KnowledgeBaseCategory::factory()->create(['name' => 'Zebra Sub', 'parent_id' => $parent->id, 'sort' => 3]);

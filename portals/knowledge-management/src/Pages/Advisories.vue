@@ -32,168 +32,213 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import BaseBadge from '@common/BaseBadge.vue';
     import BaseButton from '@common/BaseButton.vue';
-    import LoadingSpinner from '@common/LoadingSpinner.vue';
+    import BaseCallout from '@common/BaseCallout.vue';
+    import BaseSearchInput from '@common/BaseSearchInput.vue';
+    import BaseSelect from '@common/BaseSelect.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
-    import { ref, watch } from 'vue';
+    import Pagination from '@common/portal/Pagination.vue';
+    import Tabs from '@common/portal/Tabs.vue';
+    import { ClipboardDocumentCheckIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
+    import { computed, ref, watch } from 'vue';
+    import AdvisoriesTable from '../Components/Advisories/AdvisoriesTable.vue';
+    import { DEFAULT_SORT, SORT_OPTIONS } from '../Components/Advisories/advisoryPresentation.js';
+    import LoadFailedState from '../Components/LoadFailedState.vue';
+    import { usePaginatedEnvelope } from '../Composables/usePaginatedEnvelope.js';
     import { apiGet } from '../Services/api.js';
-    import formatDateTime from '../Services/FormatDateTime.js';
     import { useAdvisoriesData } from './loaders.js';
 
-    // Page 1 arrives via the route data loader; "Load More" appends further pages.
+    const DEFAULT_CLASSIFICATION = 'open';
+
+    // Page 1 of the active advisories with the default sort arrives via the route data loader; any other view is fetched on demand.
     const { data: initialData } = useAdvisoriesData();
 
-    const advisories = ref([]);
-    const loading = ref(false);
-    const currentPage = ref(1);
-    const nextPageUrl = ref(null);
-    const prevPageUrl = ref(null);
-    const lastPage = ref(null);
-    const perPage = ref(10);
-    const hasMore = ref(false);
+    const classification = ref(DEFAULT_CLASSIFICATION);
+    const search = ref('');
+    const severity = ref('');
+    const status = ref('');
+    const sort = ref(DEFAULT_SORT);
 
-    function applyPage(response, { append = false } = {}) {
-        const data = response?.data;
+    const appliedSearch = computed(() => search.value.trim());
 
-        if (!data) {
-            return;
-        }
+    const isFiltered = computed(() => appliedSearch.value !== '' || severity.value !== '' || status.value !== '');
 
-        if (append) {
-            advisories.value.push(...data.data);
-        } else {
-            advisories.value = [...data.data];
-        }
+    const { currentPage, shownEnvelope, isFetching, loadFailed, pagination, refetch } = usePaginatedEnvelope({
+        initialEnvelope: initialData,
+        usesInitialEnvelope: (page) =>
+            classification.value === DEFAULT_CLASSIFICATION &&
+            page === 1 &&
+            !isFiltered.value &&
+            sort.value === DEFAULT_SORT,
+        key: (page) => [
+            'knowledge-management',
+            'advisories',
+            classification.value,
+            page,
+            appliedSearch.value,
+            severity.value,
+            status.value,
+            sort.value,
+        ],
+        query: (page) =>
+            apiGet('/advisories', {
+                classification: classification.value,
+                page,
+                search: appliedSearch.value || undefined,
+                severity: severity.value || undefined,
+                status: status.value || undefined,
+                sort: sort.value,
+            }),
+    });
 
-        currentPage.value = data.current_page;
-        nextPageUrl.value = data.next_page_url;
-        prevPageUrl.value = data.prev_page_url;
-        lastPage.value = data.last_page;
-        perPage.value = data.per_page;
-        hasMore.value = nextPageUrl.value !== null;
+    // Each tab has its own statuses, so a status picked on one tab can never match on the other.
+    watch(classification, () => {
+        status.value = '';
+    });
+
+    watch([classification, appliedSearch, severity, status, sort], () => {
+        currentPage.value = 1;
+    });
+
+    const advisories = computed(() => shownEnvelope.value?.data ?? []);
+    const counts = computed(() => shownEnvelope.value?.counts ?? { open: 0, resolved: 0 });
+
+    const tabs = computed(() => [
+        { value: 'open', label: 'Active', badge: counts.value.open },
+        { value: 'resolved', label: 'Resolved', badge: counts.value.resolved },
+    ]);
+
+    const hasAdvisoriesInTab = computed(() => counts.value[classification.value] > 0);
+    const showsEmptyState = computed(
+        () => loadFailed.value || !hasAdvisoriesInTab.value || advisories.value.length === 0,
+    );
+
+    const severityOptions = computed(() => [
+        { value: '', label: 'All severities' },
+        ...(shownEnvelope.value?.severities ?? []).map((option) => ({ value: option.id, label: option.name })),
+    ]);
+
+    const statusOptions = computed(() => [
+        { value: '', label: 'All statuses' },
+        ...(shownEnvelope.value?.statuses ?? []).map((option) => ({ value: option.id, label: option.name })),
+    ]);
+
+    function clearFilters() {
+        search.value = '';
+        severity.value = '';
+        status.value = '';
     }
-
-    watch(initialData, (data) => applyPage(data), { immediate: true });
-
-    const severityTextColor = (severity) => {
-        const allowedColors = {
-            slate: 'text-slate-600',
-            gray: 'text-gray-600',
-            zinc: 'text-zinc-600',
-            neutral: 'text-neutral-600',
-            stone: 'text-stone-600',
-            red: 'text-red-600',
-            orange: 'text-orange-600',
-            amber: 'text-amber-600',
-            yellow: 'text-yellow-600',
-            lime: 'text-lime-600',
-            green: 'text-green-600',
-            emerald: 'text-emerald-600',
-            teal: 'text-teal-600',
-            cyan: 'text-cyan-600',
-            sky: 'text-sky-600',
-            blue: 'text-blue-600',
-            indigo: 'text-indigo-600',
-            violet: 'text-violet-600',
-            purple: 'text-purple-600',
-            fuchsia: 'text-fuchsia-600',
-            pink: 'text-pink-600',
-            rose: 'text-rose-600',
-        };
-
-        return allowedColors[severity?.color] || 'text-gray-600';
-    };
-
-    const loadMore = async () => {
-        if (!nextPageUrl.value) {
-            return;
-        }
-
-        loading.value = true;
-
-        try {
-            const response = await apiGet('/advisories', { page: currentPage.value + 1, per_page: perPage.value });
-            applyPage(response, { append: true });
-        } catch (error) {
-            console.error('Error fetching advisories:', error);
-        } finally {
-            loading.value = false;
-        }
-    };
 </script>
+
 <template>
     <Page>
-        <template #heading> Advisory History </template>
-        <template #description> Important notices and security advisories </template>
+        <template #heading>Advisories</template>
+        <template #description>Important notices and security advisories</template>
 
         <template #breadcrumbs>
             <Breadcrumbs :currentCrumb="'Advisories'" />
         </template>
 
-        <div v-if="advisories.length > 0" class="flex flex-col gap-3">
-            <div
-                v-for="(advisory, index) in advisories"
-                :key="advisory.id || index"
-                class="overflow-hidden rounded-xl bg-white ring-1 ring-gray-950/5"
-            >
-                <div class="mt-0.5 grid flex-1 gap-1 min-w-0 px-6 py-4">
-                    <div class="flex items-start justify-between gap-4">
-                        <h3 class="text-sm font-semibold" :class="severityTextColor(advisory.severity)">
-                            {{ advisory.title }}
-                        </h3>
-                        <BaseBadge
-                            v-if="advisory.status"
-                            :color="advisory.status.classification === 'resolved' ? 'success' : 'danger'"
-                            class="shrink-0"
+        <template v-if="shownEnvelope">
+            <BaseCallout
+                v-if="counts.open > 0"
+                tone="warning"
+                title="Active advisories"
+                :description="`There ${counts.open === 1 ? 'is' : 'are'} currently ${counts.open} active ${counts.open === 1 ? 'advisory' : 'advisories'}.`"
+            />
+            <BaseCallout
+                v-else
+                tone="success"
+                title="No active advisories"
+                description="There are currently no active advisories."
+            />
+
+            <div class="flex flex-col gap-y-4">
+                <Tabs v-model="classification" :tabs="tabs" label="Advisory tabs" id-prefix="advisories" />
+
+                <AdvisoriesTable
+                    :id="`advisories-panel-${classification}`"
+                    role="tabpanel"
+                    :aria-labelledby="`advisories-tab-${classification}`"
+                    :advisories="advisories"
+                    :loading="isFetching"
+                >
+                    <template v-if="hasAdvisoriesInTab" #toolbar>
+                        <div class="flex flex-col gap-3 lg:flex-row lg:items-center">
+                            <BaseSearchInput
+                                v-model="search"
+                                :debounce="300"
+                                label="Search advisories"
+                                placeholder="Search advisories…"
+                                class="lg:max-w-sm"
+                            />
+                            <BaseSelect
+                                v-model="severity"
+                                :options="severityOptions"
+                                label="Severity"
+                                class="lg:w-48"
+                            />
+                            <BaseSelect v-model="status" :options="statusOptions" label="Status" class="lg:w-48" />
+                            <BaseSelect
+                                v-model="sort"
+                                :options="SORT_OPTIONS"
+                                label="Sort"
+                                class="lg:ml-auto lg:w-56"
+                            />
+                        </div>
+                    </template>
+
+                    <template v-if="showsEmptyState" #empty>
+                        <LoadFailedState v-if="loadFailed" heading="Could not load advisories" @retry="refetch" />
+
+                        <EmptyState
+                            role="status"
+                            v-else-if="!hasAdvisoriesInTab && classification === 'open'"
+                            :icon="ClipboardDocumentCheckIcon"
+                            :contained="false"
                         >
-                            {{ advisory.status.name }}
-                        </BaseBadge>
-                    </div>
-                    <p
-                        v-if="advisory.description"
-                        class="overflow-hidden text-sm text-pretty break-words text-gray-500 pr-4"
-                    >
-                        {{ advisory.description }}
-                    </p>
-                    <time class="text-xs text-gray-400">{{ formatDateTime(advisory.created_at) }}</time>
-                </div>
+                            <template #heading>No active advisories</template>
+                            <template #description>{{
+                                counts.resolved > 0
+                                    ? 'Resolved advisories are available in the history.'
+                                    : 'There are no advisories to show yet.'
+                            }}</template>
+                            <template v-if="counts.resolved > 0" #actions>
+                                <BaseButton color="gray" size="md" @click="classification = 'resolved'">
+                                    View resolved advisories
+                                </BaseButton>
+                            </template>
+                        </EmptyState>
 
-                <template v-if="advisory.advisory_updates?.length">
-                    <hr class="border-gray-200" />
-                    <ol class="relative ms-6 border-s border-gray-200">
-                        <li
-                            v-for="(updateData, i) in advisory.advisory_updates"
-                            :key="updateData.id"
-                            class="ms-4 pt-4"
-                            :class="i < advisory.advisory_updates.length - 1 ? 'mb-4' : 'pb-4'"
+                        <EmptyState
+                            role="status"
+                            v-else-if="!hasAdvisoriesInTab"
+                            :icon="ClipboardDocumentCheckIcon"
+                            :contained="false"
                         >
-                            <div
-                                class="absolute w-3 h-3 rounded-full bg-gray-300 border-2 border-white -inset-s-1.5"
-                            ></div>
-                            <time class="block text-sm font-normal leading-none text-gray-400">{{
-                                formatDateTime(updateData.date ?? updateData.created_at)
-                            }}</time>
-                            <p v-if="updateData.title" class="mt-1 text-sm font-semibold text-gray-700">
-                                {{ updateData.title }}
-                            </p>
-                            <p class="mt-1 text-sm text-gray-700">{{ updateData.update }}</p>
-                        </li>
-                    </ol>
-                </template>
-            </div>
+                            <template #heading>No resolved advisories</template>
+                            <template #description>Advisories will appear here once they have been resolved.</template>
+                        </EmptyState>
 
-            <div v-if="loading" class="flex justify-center py-4">
-                <LoadingSpinner size="sm" />
-            </div>
-            <div v-if="hasMore && !loading" class="flex justify-center py-4">
-                <BaseButton color="gray" size="md" @click="loadMore"> Load More </BaseButton>
-            </div>
-        </div>
+                        <EmptyState role="status" v-else :icon="MagnifyingGlassIcon" :contained="false">
+                            <template #heading>No advisories match your search</template>
+                            <template #description>Try a different search or clear the filters.</template>
+                            <template v-if="isFiltered" #actions>
+                                <BaseButton color="gray" size="md" @click="clearFilters">Clear filters</BaseButton>
+                            </template>
+                        </EmptyState>
+                    </template>
 
-        <EmptyState v-if="advisories.length === 0">
+                    <template v-if="!showsEmptyState" #footer>
+                        <Pagination v-bind="pagination" />
+                    </template>
+                </AdvisoriesTable>
+            </div>
+        </template>
+
+        <EmptyState v-else :icon="ClipboardDocumentCheckIcon">
             <template #heading>There are no advisories to display.</template>
             <template #actions>
                 <BaseButton tag="router-link" :to="{ name: 'home' }" color="gray" size="md"> Return Home </BaseButton>

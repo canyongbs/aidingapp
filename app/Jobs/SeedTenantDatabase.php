@@ -71,7 +71,7 @@ class SeedTenantDatabase implements ShouldQueue, NotTenantAware
 
     public function handle(): void
     {
-        $this->tenant->execute(function () {
+        $this->tenant->execute(function (): void {
             $currentQueueFailedConnection = config('queue.failed.database');
 
             config(['queue.failed.database' => 'landlord']);

@@ -37,24 +37,29 @@
 use AidingApp\Department\Models\Department;
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ListProjects;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectDashboardHeaderWidget;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Tests\Tenant\Filament\Resources\ProjectResource\RequestFactory\CreateProjectRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Action;
 use Filament\Actions\Testing\TestAction;
 use Filament\Tables\Columns\Column;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-it('cannot render without proper permission.', function () {
+it('cannot render without proper permission.', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -63,7 +68,7 @@ it('cannot render without proper permission.', function () {
         ->assertForbidden();
 });
 
-it('can render with proper permission.', function () {
+it('can render with proper permission.', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('project.view-any');
@@ -77,7 +82,7 @@ it('can render with proper permission.', function () {
         ->assertSuccessful();
 });
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->projectManagement = false;
@@ -103,7 +108,7 @@ it('is gated with proper access control', function () {
     get(ListProjects::getUrl())->assertSuccessful();
 });
 
-it('can list records', function () {
+it('can list records', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('project.view-any');
@@ -119,7 +124,174 @@ it('can list records', function () {
         ->assertSuccessful();
 });
 
-it('does not list archived projects', function () {
+it('only shows the create action to users with the `project.create` permission', function (): void {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('project.view-any', 'project.*.view');
+
+    actingAs($user);
+
+    Livewire::test(ListProjects::class)
+        ->assertActionHidden(TestAction::make('create'))
+        ->mountAction('create')
+        ->assertActionNotMounted();
+
+    $user->givePermissionTo('project.create');
+
+    Livewire::test(ListProjects::class)
+        ->assertActionVisible(TestAction::make('create'));
+});
+
+it('opens the create form in a slide-over instead of redirecting to a page', function (): void {
+    asSuperAdmin();
+
+    Livewire::test(ListProjects::class)
+        ->assertActionExists(TestAction::make('create'), fn (Action $action): bool => $action->isModalSlideOver())
+        ->mountAction('create')
+        ->assertActionMounted('create')
+        ->assertNoRedirect()
+        ->assertSeeInOrder(['Properties', 'Iconography', 'Details']);
+});
+
+it('creates a project from the slide-over', function (): void {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('project.view-any', 'project.*.view', 'project.create');
+
+    actingAs($user);
+
+    $request = CreateProjectRequestFactory::new()->create();
+
+    assertDatabaseMissing(Project::class, ['name' => $request['name']]);
+
+    Livewire::test(ListProjects::class)
+        ->callAction(TestAction::make('create'), $request)
+        ->assertHasNoFormErrors()
+        ->assertNotified();
+
+    assertDatabaseHas(Project::class, [
+        'name' => $request['name'],
+        'description' => $request['description'],
+        'department_id' => $request['department_id'],
+        'start_date' => $request['start_date'],
+        'target_completion_date' => null,
+    ]);
+});
+
+it('creates a project with a target completion date from the slide-over', function (): void {
+    asSuperAdmin();
+
+    $request = CreateProjectRequestFactory::new()->withTargetCompletionDate()->create();
+
+    Livewire::test(ListProjects::class)
+        ->callAction(TestAction::make('create'), $request)
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(Project::class, [
+        'name' => $request['name'],
+        'target_completion_date' => $request['target_completion_date'],
+    ]);
+});
+
+it('redirects to the new project after creating it when the user can view it', function (): void {
+    asSuperAdmin();
+
+    $request = CreateProjectRequestFactory::new()->create();
+
+    Livewire::test(ListProjects::class)
+        ->callAction(TestAction::make('create'), $request)
+        ->assertRedirect(ProjectResource::getUrl('view', ['record' => Project::query()->where('name', $request['name'])->firstOrFail()]));
+});
+
+it('does not redirect after creating a project without the `project.*.view` permission', function (): void {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('project.view-any', 'project.create');
+
+    actingAs($user);
+
+    $request = CreateProjectRequestFactory::new()->create();
+
+    assertDatabaseMissing(Project::class, ['name' => $request['name']]);
+
+    Livewire::test(ListProjects::class)
+        ->callAction(TestAction::make('create'), $request)
+        ->assertHasNoFormErrors()
+        ->assertNotified()
+        ->assertNoRedirect();
+
+    assertDatabaseHas(Project::class, ['name' => $request['name']]);
+});
+
+it('validates the inputs when creating a project', function (CreateProjectRequestFactory $data, array $errors): void {
+    asSuperAdmin();
+
+    Project::factory()->create(['name' => 'Test Project']);
+
+    $request = CreateProjectRequestFactory::new($data)->create();
+
+    Livewire::test(ListProjects::class)
+        ->callAction(TestAction::make('create'), $request)
+        ->assertHasFormErrors($errors);
+
+    assertDatabaseCount(Project::class, 1);
+})->with([
+    'name required' => [
+        CreateProjectRequestFactory::new()->without('name'),
+        ['name' => 'required'],
+    ],
+    'name string' => [
+        CreateProjectRequestFactory::new()->state(['name' => 1]),
+        ['name' => 'string'],
+    ],
+    'name max' => [
+        CreateProjectRequestFactory::new()->state(['name' => str()->random(256)]),
+        ['name' => 'max'],
+    ],
+    'name unique' => [
+        CreateProjectRequestFactory::new()->state(['name' => 'Test Project']),
+        ['name' => 'unique'],
+    ],
+    'description string' => [
+        CreateProjectRequestFactory::new()->state(['description' => 1]),
+        ['description' => 'string'],
+    ],
+    'description max' => [
+        CreateProjectRequestFactory::new()->state(['description' => str()->random(65536)]),
+        ['description' => 'max'],
+    ],
+    'icon required' => [
+        CreateProjectRequestFactory::new()->state(['icon' => null]),
+        ['icon' => 'required'],
+    ],
+    'color required' => [
+        CreateProjectRequestFactory::new()->state(['color' => null]),
+        ['color' => 'required'],
+    ],
+    'color invalid' => [
+        CreateProjectRequestFactory::new()->state(['color' => 'not-a-color']),
+        ['color' => 'in'],
+    ],
+]);
+
+it('hides the create action when the license addon is disabled after the page loads', function (): void {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('project.view-any', 'project.*.view', 'project.create');
+
+    actingAs($user);
+
+    $component = Livewire::test(ListProjects::class)
+        ->assertActionVisible(TestAction::make('create'));
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->projectManagement = false;
+    $settings->save();
+
+    $component->assertActionHidden(TestAction::make('create'));
+});
+
+it('does not list archived projects', function (): void {
     asSuperAdmin();
 
     $activeProject = Project::factory()->create();
@@ -132,7 +304,7 @@ it('does not list archived projects', function () {
         ->assertSuccessful();
 });
 
-it('can see project in list if logged in user is a superadmin, the creator, a manager, or an auditor of the project.', function () {
+it('can see project in list if logged in user is a superadmin, the creator, a manager, or an auditor of the project.', function (): void {
     $user = User::factory()->create();
     $secondUser = User::factory()->create();
 
@@ -211,7 +383,7 @@ it('can see project in list if logged in user is a superadmin, the creator, a ma
         ->assertSuccessful();
 });
 
-it('only shows archive actions to a user with the project.delete permission', function () {
+it('only shows the archive bulk action to a user with the project.delete permission', function (): void {
     $user = User::factory()
         ->create()
         ->givePermissionTo('project.view-any', 'project.*.view');
@@ -221,38 +393,25 @@ it('only shows archive actions to a user with the project.delete permission', fu
     $project = Project::factory()->for($user, 'createdBy')->create();
 
     Livewire::test(ListProjects::class)
-        ->assertActionHidden(TestAction::make('archive')->table($project))
         ->assertActionHidden(TestAction::make('archive')->table()->bulk());
 
     $user->givePermissionTo('project.*.delete');
 
     Livewire::test(ListProjects::class)
-        ->assertActionVisible(TestAction::make('archive')->table($project))
         ->assertActionVisible(TestAction::make('archive')->table()->bulk());
 });
 
-it('can archive a project from the list row action', function () {
+it('does not expose an archive row action on the list table', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
 
-    expect($project->isArchived())->toBeFalse();
-
     Livewire::test(ListProjects::class)
         ->assertSuccessful()
-        ->callAction(TestAction::make('archive')->table($project))
-        ->assertNotified();
-
-    expect($project->refresh()->isArchived())->toBeTrue()
-        ->and($project->trashed())->toBeFalse();
-
-    assertDatabaseHas('projects', [
-        'id' => $project->getKey(),
-        'deleted_at' => null,
-    ]);
+        ->assertActionDoesNotExist(TestAction::make('archive')->table($project));
 });
 
-it('can archive multiple projects from the list bulk action', function () {
+it('can archive multiple projects from the list bulk action', function (): void {
     asSuperAdmin();
 
     $projects = Project::factory()->count(3)->create();
@@ -272,31 +431,14 @@ it('can archive multiple projects from the list bulk action', function () {
     });
 });
 
-it('does not show the archive row action to an auditor who is neither a manager nor the creator', function () {
-    $user = User::factory()
-        ->create()
-        ->givePermissionTo('project.view-any', 'project.*.view', 'project.*.delete');
-
-    actingAs($user);
-
-    $project = Project::factory()
-        ->for(User::factory(), 'createdBy')
-        ->hasAttached($user, relationship: 'auditorUsers')
-        ->create();
-
-    Livewire::test(ListProjects::class)
-        ->assertCanSeeTableRecords([$project])
-        ->assertActionHidden(TestAction::make('archive')->table($project));
-});
-
-it('displays project name, manager(s), department, start date, target date, and progress columns', function () {
+it('displays project name, manager(s), department, start date, target date, and progress columns', function (): void {
     asSuperAdmin();
 
     $department = Department::factory()->create(['name' => 'Enrollment']);
 
     $project = Project::factory()
         ->for($department)
-        ->hasAttached(User::factory()->state(['name' => 'Casey Manager']), relationship: 'managerUsers')
+        ->hasAttached(User::factory()->state(['first_name' => 'Casey', 'last_name' => 'Manager']), relationship: 'managerUsers')
         ->create([
             'start_date' => '2026-01-15',
             'target_completion_date' => null,
@@ -335,7 +477,7 @@ it('displays project name, manager(s), department, start date, target date, and 
         ->assertTableColumnStateSet('progress', 50, $project)
         ->assertTableColumnExists(
             'managers',
-            fn (Column $column): bool => $column->getState()->pluck('name')->all() === ['Casey Manager'],
+            fn (Column $column): bool => $column->getState()->pluck('full_name')->all() === ['Casey Manager'],
             $project,
         )
         ->assertTableColumnExists(
@@ -348,7 +490,7 @@ it('displays project name, manager(s), department, start date, target date, and 
         ->assertTableColumnDoesNotExist('milestones_count');
 });
 
-it('shows N/A when a project has no managers, no department, or no start date', function () {
+it('shows N/A when a project has no managers, no department, or no start date', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create([
@@ -378,19 +520,19 @@ it('shows N/A when a project has no managers, no department, or no start date', 
         );
 });
 
-it('can search projects by project name, manager name, and department name', function () {
+it('can search projects by project name, manager name, and department name', function (): void {
     asSuperAdmin();
 
     $matchingByName = Project::factory()->create(['name' => 'Onboarding Revamp']);
     $matchingByManager = Project::factory()->create(['name' => 'Unrelated Project']);
-    $manager = User::factory()->create(['name' => 'Jordan Searchable']);
+    $manager = User::factory()->create(['first_name' => 'Jordan', 'last_name' => 'Searchable']);
     $matchingByManager->managerUsers()->attach($manager->getKey());
 
     $department = Department::factory()->create(['name' => 'Searchable Department']);
     $matchingByDepartment = Project::factory()->for($department)->create(['name' => 'Another Project']);
 
     $otherDepartment = Department::factory()->create(['name' => 'Other Department']);
-    User::factory()->for($otherDepartment)->create(['name' => 'Taylor Delegate']);
+    User::factory()->for($otherDepartment)->create(['first_name' => 'Taylor', 'last_name' => 'Delegate']);
 
     $matchingByDepartmentManager = Project::factory()
         ->hasAttached($otherDepartment, relationship: 'managerDepartments')
@@ -419,12 +561,12 @@ it('can search projects by project name, manager name, and department name', fun
         ->assertCanNotSeeTableRecords([$matchingByName, $notMatching]);
 });
 
-it('caps the manager avatars it renders but keeps every manager searchable', function () {
+it('caps the manager avatars it renders but keeps every manager searchable', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()
         ->hasAttached(User::factory()->count(24), relationship: 'managerUsers')
-        ->hasAttached(User::factory()->state(['name' => 'Wilhelmina Ashgrove']), relationship: 'managerUsers')
+        ->hasAttached(User::factory()->state(['first_name' => 'Wilhelmina', 'last_name' => 'Ashgrove']), relationship: 'managerUsers')
         ->create(['name' => 'Crowded Project']);
 
     Livewire::test(ListProjects::class)
@@ -441,7 +583,7 @@ it('caps the manager avatars it renders but keeps every manager searchable', fun
         ->assertCanSeeTableRecords([$project]);
 });
 
-it('shows the same managers on the list as the project dashboard', function () {
+it('shows the same managers on the list as the project dashboard', function (): void {
     asSuperAdmin();
 
     $department = Department::factory()
@@ -471,7 +613,7 @@ it('shows the same managers on the list as the project dashboard', function () {
         );
 });
 
-it('shows the same progress on the list as the project dashboard', function () {
+it('shows the same progress on the list as the project dashboard', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -502,11 +644,11 @@ it('shows the same progress on the list as the project dashboard', function () {
         ->assertTableColumnStateSet('progress', $dashboardProgress, $project);
 });
 
-it('ranks a project named Test above a project managed by someone named Test', function () {
+it('ranks a project named Test above a project managed by someone named Test', function (): void {
     asSuperAdmin();
 
     $managedByTest = Project::factory()
-        ->hasAttached(User::factory()->state(['name' => 'Test']), relationship: 'managerUsers')
+        ->hasAttached(User::factory()->state(['first_name' => 'Test']), relationship: 'managerUsers')
         ->create(['name' => 'Something Else']);
 
     $namedTest = Project::factory()->create(['name' => 'Test']);
@@ -516,7 +658,7 @@ it('ranks a project named Test above a project managed by someone named Test', f
         ->assertCanSeeTableRecords([$namedTest, $managedByTest], inOrder: true);
 });
 
-it('ranks project name matches above manager matches, and manager matches above department matches, when searching', function () {
+it('ranks project name matches above manager matches, and manager matches above department matches, when searching', function (): void {
     asSuperAdmin();
 
     $matchingByDepartment = Project::factory()
@@ -524,7 +666,7 @@ it('ranks project name matches above manager matches, and manager matches above 
         ->create(['name' => 'Gamma']);
 
     $matchingByManager = Project::factory()
-        ->hasAttached(User::factory()->state(['name' => 'Test Manager']), relationship: 'managerUsers')
+        ->hasAttached(User::factory()->state(['first_name' => 'Test', 'last_name' => 'Manager']), relationship: 'managerUsers')
         ->create(['name' => 'Beta']);
 
     $matchingByName = Project::factory()->create(['name' => 'Test Alpha']);
@@ -537,11 +679,11 @@ it('ranks project name matches above manager matches, and manager matches above 
         );
 });
 
-it('ranks project name matches first when the search words are given in another order', function () {
+it('ranks project name matches first when the search words are given in another order', function (): void {
     asSuperAdmin();
 
     $matchingByManager = Project::factory()
-        ->hasAttached(User::factory()->state(['name' => 'Casey Manager']), relationship: 'managerUsers')
+        ->hasAttached(User::factory()->state(['first_name' => 'Casey', 'last_name' => 'Manager']), relationship: 'managerUsers')
         ->create(['name' => 'Alpha']);
 
     $matchingByName = Project::factory()->create(['name' => 'Zulu Casey Onboarding Manager']);
@@ -551,11 +693,11 @@ it('ranks project name matches first when the search words are given in another 
         ->assertCanSeeTableRecords([$matchingByName, $matchingByManager], inOrder: true);
 });
 
-it('ranks project name matches first when the search is a quoted phrase', function () {
+it('ranks project name matches first when the search is a quoted phrase', function (): void {
     asSuperAdmin();
 
     $matchingByManager = Project::factory()
-        ->hasAttached(User::factory()->state(['name' => 'Casey Manager']), relationship: 'managerUsers')
+        ->hasAttached(User::factory()->state(['first_name' => 'Casey', 'last_name' => 'Manager']), relationship: 'managerUsers')
         ->create(['name' => 'Alpha']);
 
     $matchingByName = Project::factory()->create(['name' => 'Zulu Casey Manager Report']);
@@ -565,7 +707,7 @@ it('ranks project name matches first when the search is a quoted phrase', functi
         ->assertCanSeeTableRecords([$matchingByName, $matchingByManager], inOrder: true);
 });
 
-it('does not fail when the search contains no searchable words', function () {
+it('does not fail when the search contains no searchable words', function (): void {
     asSuperAdmin();
 
     Project::factory()->create(['name' => 'Alpha']);
@@ -575,13 +717,13 @@ it('does not fail when the search contains no searchable words', function () {
         ->assertSuccessful();
 });
 
-it('sorts by the selected column instead of search relevance when a sort is applied', function () {
+it('sorts by the selected column instead of search relevance when a sort is applied', function (): void {
     asSuperAdmin();
 
     $matchingByName = Project::factory()->create(['name' => 'Test Alpha']);
 
     $matchingByManager = Project::factory()
-        ->hasAttached(User::factory()->state(['name' => 'Test Manager']), relationship: 'managerUsers')
+        ->hasAttached(User::factory()->state(['first_name' => 'Test', 'last_name' => 'Manager']), relationship: 'managerUsers')
         ->create(['name' => 'Zulu Project']);
 
     Livewire::test(ListProjects::class)
@@ -590,7 +732,7 @@ it('sorts by the selected column instead of search relevance when a sort is appl
         ->assertCanSeeTableRecords([$matchingByManager, $matchingByName], inOrder: true);
 });
 
-it('can filter projects by department', function () {
+it('can filter projects by department', function (): void {
     asSuperAdmin();
 
     $department = Department::factory()->create();

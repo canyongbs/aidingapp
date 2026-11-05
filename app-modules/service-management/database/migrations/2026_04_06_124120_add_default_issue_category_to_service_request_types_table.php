@@ -42,14 +42,14 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('service_request_types', function (Blueprint $table) {
+        Schema::table('service_request_types', function (Blueprint $table): void {
             $table->string('default_issue_category')->initial(ServiceRequestCategory::Request->value);
         });
     }
 
     public function down(): void
     {
-        Schema::table('service_request_types', function (Blueprint $table) {
+        Schema::table('service_request_types', function (Blueprint $table): void {
             $table->dropColumn('default_issue_category');
         });
     }

@@ -39,7 +39,7 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\Report\Filament\Widgets\KnowledgeBaseArticlesByCategoryDonutChart;
 
-it('returns correct articles by category data without filters', function () {
+it('returns correct articles by category data without filters', function (): void {
     $status = KnowledgeBaseStatus::factory()->create();
     $categoryA = KnowledgeBaseCategory::factory()->create(['name' => 'Alpha']);
     $categoryB = KnowledgeBaseCategory::factory()->create(['name' => 'Beta']);
@@ -64,7 +64,7 @@ it('returns correct articles by category data without filters', function () {
         ->and($data['datasets'][0]['data'])->toContain(3, 2);
 });
 
-it('filters articles by category', function () {
+it('filters articles by category', function (): void {
     $status = KnowledgeBaseStatus::factory()->create();
     $categoryA = KnowledgeBaseCategory::factory()->create(['name' => 'Alpha']);
     $categoryB = KnowledgeBaseCategory::factory()->create(['name' => 'Beta']);

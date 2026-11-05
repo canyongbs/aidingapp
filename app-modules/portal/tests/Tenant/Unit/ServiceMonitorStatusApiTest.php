@@ -65,7 +65,7 @@ $getServiceMonitorStatuses = function (array $query = []): TestResponse {
     return getJson(URL::route('api.portal.status', $query, absolute: false));
 };
 
-test('returns all service monitoring targets with latest history when portal is enabled', function () {
+test('returns all service monitoring targets with latest history when portal is enabled', function (): void {
     $settings = app(PortalSettings::class);
 
     $settings->knowledge_management_portal_enabled = true;
@@ -98,7 +98,7 @@ test('returns all service monitoring targets with latest history when portal is 
     expect($response->json('data'))->toHaveCount(3);
 });
 
-test('excludes confidential service monitoring targets unless the contact is granted access', function () {
+test('excludes confidential service monitoring targets unless the contact is granted access', function (): void {
     $settings = app(PortalSettings::class);
 
     $settings->knowledge_management_portal_enabled = true;
@@ -125,7 +125,7 @@ test('excludes confidential service monitoring targets unless the contact is gra
     expect($response->json('data'))->toHaveCount(2);
 });
 
-it('lists service monitors with their status, uptime, and daily history', function () use ($getServiceMonitorStatuses) {
+it('lists service monitors with their status, uptime, and daily history', function () use ($getServiceMonitorStatuses): void {
     // Midday, so checks a few minutes old still land in today's history bucket.
     travelTo(today()->setTime(12, 0));
 
@@ -157,7 +157,7 @@ it('lists service monitors with their status, uptime, and daily history', functi
         ->assertJsonPath('meta.total', 1);
 });
 
-it('summarizes every service monitor the contact can see, regardless of the search', function () use ($getServiceMonitorStatuses) {
+it('summarizes every service monitor the contact can see, regardless of the search', function () use ($getServiceMonitorStatuses): void {
     freezeTime();
 
     $operationalTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Operational Monitor']);
@@ -183,7 +183,7 @@ it('summarizes every service monitor the contact can see, regardless of the sear
         ->assertJsonPath('summary.last_checked_at', now()->subMinutes(5)->toIso8601String());
 });
 
-it('summarizes the service monitors as operational when none have issues', function () use ($getServiceMonitorStatuses) {
+it('summarizes the service monitors as operational when none have issues', function () use ($getServiceMonitorStatuses): void {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
     HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->create();
 
@@ -194,7 +194,7 @@ it('summarizes the service monitors as operational when none have issues', funct
         ->assertJsonPath('summary.status', 'operational');
 });
 
-it('summarizes the service monitors as unknown when none have been checked', function () use ($getServiceMonitorStatuses) {
+it('summarizes the service monitors as unknown when none have been checked', function () use ($getServiceMonitorStatuses): void {
     ServiceMonitoringTarget::factory()->count(2)->create();
 
     $getServiceMonitorStatuses()
@@ -204,7 +204,7 @@ it('summarizes the service monitors as unknown when none have been checked', fun
         ->assertJsonPath('summary.last_checked_at', null);
 });
 
-it('can search by name and description', function () use ($getServiceMonitorStatuses) {
+it('can search by name and description', function () use ($getServiceMonitorStatuses): void {
     $matchingNameTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Student Portal', 'description' => null]);
     $matchingDescriptionTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Website', 'description' => 'The public portal']);
     $otherTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Email', 'description' => 'Outbound mail']);
@@ -217,7 +217,7 @@ it('can search by name and description', function () use ($getServiceMonitorStat
         ->assertJsonMissing(['id' => $otherTarget->getKey()]);
 });
 
-it('can sort by column', function (string $sort, string $direction, array $expectedOrder) use ($getServiceMonitorStatuses) {
+it('can sort by column', function (string $sort, string $direction, array $expectedOrder) use ($getServiceMonitorStatuses): void {
     freezeTime();
 
     $targets = collect([
@@ -256,7 +256,7 @@ it('can sort by column', function (string $sort, string $direction, array $expec
     'frequency descending' => ['frequency', 'desc', ['Charlie', 'Alpha', 'Delta', 'Bravo']],
 ]);
 
-it('includes the uptime of each monitor whether or not the list is sorted by it', function (string $sort) use ($getServiceMonitorStatuses) {
+it('includes the uptime of each monitor whether or not the list is sorted by it', function (string $sort) use ($getServiceMonitorStatuses): void {
     freezeTime();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -270,7 +270,7 @@ it('includes the uptime of each monitor whether or not the list is sorted by it'
         ->assertJsonPath('data.0.twelve_month_uptime_percentage', null);
 })->with(['name', 'status', 'thirty_day_uptime', 'twelve_month_uptime']);
 
-it('validates the inputs', function (array $query, string $error) use ($getServiceMonitorStatuses) {
+it('validates the inputs', function (array $query, string $error) use ($getServiceMonitorStatuses): void {
     $getServiceMonitorStatuses($query)->assertJsonValidationErrors($error);
 })->with([
     'search string' => [['search' => ['portal']], 'search'],
@@ -279,12 +279,12 @@ it('validates the inputs', function (array $query, string $error) use ($getServi
     'timezone max' => [['timezone' => str_repeat('a', 256)], 'timezone'],
 ]);
 
-it('does not reject a timezone the date extension cannot resolve by name', function () use ($getServiceMonitorStatuses) {
+it('does not reject a timezone the date extension cannot resolve by name', function () use ($getServiceMonitorStatuses): void {
     $getServiceMonitorStatuses(['timezone' => 'Asia/Calcutta'])->assertOk();
 });
 
-describe('authorization', function () use ($getServiceMonitorStatuses) {
-    it('requires contact authentication', function () {
+describe('authorization', function () use ($getServiceMonitorStatuses): void {
+    it('requires contact authentication', function (): void {
         $settings = app(PortalSettings::class);
         $settings->knowledge_management_portal_enabled = true;
         $settings->save();
@@ -292,7 +292,7 @@ describe('authorization', function () use ($getServiceMonitorStatuses) {
         getJson(URL::route('api.portal.status', absolute: false))->assertUnauthorized();
     });
 
-    it('denies access without the service monitoring add-on', function () use ($getServiceMonitorStatuses) {
+    it('denies access without the service monitoring add-on', function () use ($getServiceMonitorStatuses): void {
         $licenseSettings = app(LicenseSettings::class);
         $licenseSettings->data->addons->serviceMonitoring = false;
         $licenseSettings->save();

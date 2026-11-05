@@ -57,13 +57,13 @@ class UserImporter extends Importer
             ImportColumn::make('first_name')
                 ->label('First Name')
                 ->exampleHeader('First Name')
-                ->rules(['required', 'string', 'max:255'])
+                ->rules(['required', 'string', 'max:' . User::NAME_PART_MAX_LENGTH])
                 ->requiredMapping()
                 ->example('Jonathan'),
             ImportColumn::make('last_name')
                 ->label('Last Name')
                 ->exampleHeader('Last Name')
-                ->rules(['required', 'string', 'max:255'])
+                ->rules(['required', 'string', 'max:' . User::NAME_PART_MAX_LENGTH])
                 ->requiredMapping()
                 ->example('Smith'),
             ImportColumn::make('preferred_name')
@@ -215,8 +215,6 @@ class UserImporter extends Importer
         /** @var User $record */
         $record = $this->record;
         $record->is_external ??= true;
-
-        $record->name = trim("{$record->first_name} {$record->last_name}");
     }
 
     protected function afterSave(): void

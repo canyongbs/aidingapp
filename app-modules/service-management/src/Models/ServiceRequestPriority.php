@@ -38,23 +38,24 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestPriorityFactory;
-use App\Models\BaseModel;
-use DateTimeInterface;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperServiceRequestPriority
  */
-class ServiceRequestPriority extends BaseModel implements Auditable
+class ServiceRequestPriority extends Model implements Auditable
 {
     use SoftDeletes;
     use HasUuids;
     use AuditableTrait;
+    use UsesTenantConnection;
 
     /** @use HasFactory<ServiceRequestPriorityFactory> */
     use HasFactory;
@@ -94,10 +95,5 @@ class ServiceRequestPriority extends BaseModel implements Auditable
         return $this->type()
             ->where('default_priority_id', $this->getKey())
             ->exists();
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 }

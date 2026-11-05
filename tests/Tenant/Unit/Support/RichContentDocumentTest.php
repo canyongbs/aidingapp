@@ -58,10 +58,10 @@ dataset('populated rich content documents', [
     'text after an empty paragraph' => [['type' => 'doc', 'content' => [['type' => 'paragraph'], ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Body']]]]]],
 ]);
 
-test('it treats an empty document as having no content', function (mixed $document) {
+test('it treats an empty document as having no content', function (mixed $document): void {
     expect(RichContentDocument::hasContent($document))->toBeFalse();
 })->with('empty rich content documents');
 
-test('it treats a populated document as having content', function (mixed $document) {
+test('it treats a populated document as having content', function (mixed $document): void {
     expect(RichContentDocument::hasContent($document))->toBeTrue();
 })->with('populated rich content documents');

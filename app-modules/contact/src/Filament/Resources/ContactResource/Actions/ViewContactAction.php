@@ -92,7 +92,7 @@ class ViewContactAction
                     ]),
                 Tabs::make()
                     ->columnSpanFull()
-                    ->tabs(ContactInfolist::tabs($contact, ViewContact::class)),
+                    ->tabs(ContactInfolist::tabs($contact, ViewContact::class, readOnly: true)),
             ]);
     }
 }

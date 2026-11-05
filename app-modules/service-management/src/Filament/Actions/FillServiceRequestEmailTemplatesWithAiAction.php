@@ -87,13 +87,13 @@ class FillServiceRequestEmailTemplatesWithAiAction extends Action
                         ->label('Select roles to generate templates for')
                         ->options(
                             collect($allRoles)
-                                ->mapWithKeys(fn (ServiceRequestTypeEmailTemplateRole $role) => [$role->value => $role->getLabel()])
+                                ->mapWithKeys(fn (ServiceRequestTypeEmailTemplateRole $role): array => [$role->value => $role->getLabel()])
                                 ->all()
                         )
                         ->descriptions(
                             collect($allRoles)
-                                ->filter(fn (ServiceRequestTypeEmailTemplateRole $role) => ! in_array($role, $configuredRoles, true))
-                                ->mapWithKeys(fn (ServiceRequestTypeEmailTemplateRole $role) => [$role->value => 'Not configured. Contact your administrator to set up this template.'])
+                                ->filter(fn (ServiceRequestTypeEmailTemplateRole $role): bool => ! in_array($role, $configuredRoles, true))
+                                ->mapWithKeys(fn (ServiceRequestTypeEmailTemplateRole $role): array => [$role->value => 'Not configured. Contact your administrator to set up this template.'])
                                 ->all()
                         )
                         ->disableOptionWhen(fn (string $value): bool => ! in_array(
@@ -314,7 +314,7 @@ class FillServiceRequestEmailTemplatesWithAiAction extends Action
 
         return array_values(array_filter(
             $this->getAllRolesForEventType(),
-            fn (ServiceRequestTypeEmailTemplateRole $role) => in_array($role, $existingRoles),
+            fn (ServiceRequestTypeEmailTemplateRole $role): bool => in_array($role, $existingRoles),
         ));
     }
 }

@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('service_request_histories', function (Blueprint $table) {
+        Schema::create('service_request_histories', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
             $table->foreignUuid('service_request_id')->constrained('service_requests');

@@ -38,7 +38,7 @@ use AidingApp\KnowledgeBase\Jobs\DispatchKnowledgeBaseArticleChecks;
 use AidingApp\KnowledgeBase\Jobs\DispatchKnowledgeBaseArticleChecksForEachTenant;
 use Illuminate\Support\Facades\Queue;
 
-it('dispatches `DispatchKnowledgeBaseArticleChecks` for each eligible tenant', function () {
+it('dispatches `DispatchKnowledgeBaseArticleChecks` for each eligible tenant', function (): void {
     Queue::fake();
 
     (new DispatchKnowledgeBaseArticleChecksForEachTenant())->handle();

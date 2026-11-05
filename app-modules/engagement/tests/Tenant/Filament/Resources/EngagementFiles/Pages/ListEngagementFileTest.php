@@ -50,7 +50,7 @@ use function Pest\Laravel\actingAs;
 
 // Permission Tests
 
-test('ListEngagementFiles is gated with proper access control', function () {
+test('ListEngagementFiles is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -66,7 +66,7 @@ test('ListEngagementFiles is gated with proper access control', function () {
         )->assertSuccessful();
 });
 
-test('only shows the bulk delete action to a user with the engagement_file delete permission', function () {
+test('only shows the bulk delete action to a user with the engagement_file delete permission', function (): void {
     EngagementFile::factory(5)->create();
 
     $user = User::factory()

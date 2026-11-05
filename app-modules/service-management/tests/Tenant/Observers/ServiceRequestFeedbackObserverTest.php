@@ -38,7 +38,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
 use Illuminate\Support\Facades\Event;
 
-it('dispatches TimelineableRecordDeleted when a service request feedback is deleted', function () {
+it('dispatches TimelineableRecordDeleted when a service request feedback is deleted', function (): void {
     $serviceRequestFeedback = ServiceRequestFeedback::factory()->create();
 
     Event::fake([TimelineableRecordDeleted::class]);

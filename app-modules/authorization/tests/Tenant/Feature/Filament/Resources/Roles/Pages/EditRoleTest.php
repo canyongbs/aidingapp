@@ -49,8 +49,8 @@ use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
 dataset('admins', [
-    'super admin' => fn () => user(Authenticatable::SUPER_ADMIN_ROLE),
-    'partner admin' => fn () => user(Authenticatable::PARTNER_ADMIN_ROLE),
+    'super admin' => fn (): User => user(Authenticatable::SUPER_ADMIN_ROLE),
+    'partner admin' => fn (): User => user(Authenticatable::PARTNER_ADMIN_ROLE),
 ]);
 
 dataset('admin roles', [
@@ -59,8 +59,8 @@ dataset('admin roles', [
     'AI Admin role' => Authenticatable::AI_ADMIN_ROLE,
 ]);
 
-describe('deletion', function () {
-    it('can delete a role', function () {
+describe('deletion', function (): void {
+    it('can delete a role', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('role.view-any', 'role.*.view', 'role.*.update', 'role.*.delete');
         actingAs($user);
@@ -75,8 +75,8 @@ describe('deletion', function () {
     });
 });
 
-describe('authorization', function () {
-    it('denies access to the edit role page without the `role.*.update` permission', function () {
+describe('authorization', function (): void {
+    it('denies access to the edit role page without the `role.*.update` permission', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('role.view-any', 'role.*.view');
         actingAs($user);
@@ -87,7 +87,7 @@ describe('authorization', function () {
             ->assertForbidden();
     });
 
-    it('allows access to the edit role page with the `role.*.update` permission', function () {
+    it('allows access to the edit role page with the `role.*.update` permission', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('role.view-any', 'role.*.view', 'role.*.update');
         actingAs($user);
@@ -98,7 +98,7 @@ describe('authorization', function () {
             ->assertSuccessful();
     });
 
-    it('allows a super admin to access the edit role page', function () {
+    it('allows a super admin to access the edit role page', function (): void {
         asSuperAdmin();
 
         $role = Role::factory()->create();
@@ -107,7 +107,7 @@ describe('authorization', function () {
             ->assertSuccessful();
     });
 
-    it('allows a partner admin to access the edit role page without any explicit permissions', function () {
+    it('allows a partner admin to access the edit role page without any explicit permissions', function (): void {
         actingAs(user(Authenticatable::PARTNER_ADMIN_ROLE));
 
         $role = Role::factory()->create();
@@ -116,7 +116,7 @@ describe('authorization', function () {
             ->assertSuccessful();
     });
 
-    it('shows the `DeleteAction` action with the `role.*.delete` permission', function () {
+    it('shows the `DeleteAction` action with the `role.*.delete` permission', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('role.view-any', 'role.*.view', 'role.*.update', 'role.*.delete');
         actingAs($user);
@@ -127,7 +127,7 @@ describe('authorization', function () {
             ->assertActionVisible(DeleteAction::class);
     });
 
-    it('hides the `DeleteAction` action without the `role.*.delete` permission', function () {
+    it('hides the `DeleteAction` action without the `role.*.delete` permission', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('role.view-any', 'role.*.view', 'role.*.update');
         actingAs($user);
@@ -138,7 +138,7 @@ describe('authorization', function () {
             ->assertActionHidden(DeleteAction::class);
     });
 
-    it('does not delete a role without the `role.*.delete` permission', function () {
+    it('does not delete a role without the `role.*.delete` permission', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('role.view-any', 'role.*.view', 'role.*.update');
         actingAs($user);
@@ -152,7 +152,7 @@ describe('authorization', function () {
         assertModelExists($role);
     });
 
-    it('denies an admin access to edit or delete an admin role', function (User $admin, string $roleName) {
+    it('denies an admin access to edit or delete an admin role', function (User $admin, string $roleName): void {
         actingAs($admin);
 
         $role = Role::query()
