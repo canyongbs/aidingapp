@@ -38,7 +38,7 @@ namespace App\Features;
 
 use App\Support\AbstractFeatureFlag;
 
-class AdvisoryStatusAndSeverityNameUniquenessFeature extends AbstractFeatureFlag
+class AdvisoryStatusNameUniquenessFeature extends AbstractFeatureFlag
 {
     public function resolve(mixed $scope): mixed
     {

@@ -5,7 +5,8 @@ created: 2026-11-04
 
 ## Feature Flags
 
-- App\Features\AdvisoryStatusAndSeverityNameUniquenessFeature
+- App\Features\AdvisorySeverityNameUniquenessFeature
+- App\Features\AdvisoryStatusNameUniquenessFeature
 
 ## Temporary Migrations
 

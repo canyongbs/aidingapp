@@ -38,7 +38,9 @@ use AidingApp\ServiceManagement\Filament\Resources\AdvisoryStatuses\AdvisoryStat
 use AidingApp\ServiceManagement\Filament\Resources\AdvisoryStatuses\Pages\CreateAdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\AdvisoryStatusRequestFactory;
+use App\Features\AdvisoryStatusNameUniquenessFeature;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -48,6 +50,8 @@ use function Tests\asSuperAdmin;
 
 test('CreateAdvisoryStatus requires valid data', function (AdvisoryStatusRequestFactory $data, array $errors): void {
     asSuperAdmin();
+
+    AdvisoryStatus::factory()->create(['name' => 'Investigating']);
 
     $advisoryStatus = AdvisoryStatusRequestFactory::new($data)->create();
 
@@ -72,6 +76,14 @@ test('CreateAdvisoryStatus requires valid data', function (AdvisoryStatusRequest
         'classification required' => [
             AdvisoryStatusRequestFactory::new()->without('classification'),
             ['classification' => 'required'],
+        ],
+        'name unique' => [
+            AdvisoryStatusRequestFactory::new()->state(['name' => 'Investigating']),
+            ['name' => 'unique'],
+        ],
+        'name unique case insensitive' => [
+            AdvisoryStatusRequestFactory::new()->state(['name' => 'INVESTIGATING']),
+            ['name' => 'unique'],
         ],
     ]
 );
@@ -104,4 +116,36 @@ test('CreateAdvisoryStatus is gated with proper access control', function (): vo
     assertCount(1, AdvisoryStatus::all());
 
     assertDatabaseHas(AdvisoryStatus::class, $request);
+});
+
+test('CreateAdvisoryStatus allows the name of a soft deleted advisory status', function (): void {
+    asSuperAdmin();
+
+    AdvisoryStatus::factory()->create(['name' => 'Investigating'])->delete();
+
+    $request = AdvisoryStatusRequestFactory::new()->state(['name' => 'Investigating'])->create();
+
+    Livewire::test(CreateAdvisoryStatus::class)
+        ->fillForm($request)
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(AdvisoryStatus::query()->where('name', 'Investigating')->count())->toBe(1);
+});
+
+describe('name uniqueness feature flag', function (): void {
+    it('does not apply the unique form rule when the feature is disabled', function (): void {
+        AdvisoryStatusNameUniquenessFeature::deactivate();
+
+        asSuperAdmin();
+
+        AdvisoryStatus::factory()->create(['name' => 'Investigating']);
+
+        $request = AdvisoryStatusRequestFactory::new()->state(['name' => 'Investigating'])->create();
+
+        expect(fn () => Livewire::test(CreateAdvisoryStatus::class)
+            ->fillForm($request)
+            ->call('create'))
+            ->toThrow(UniqueConstraintViolationException::class);
+    });
 });

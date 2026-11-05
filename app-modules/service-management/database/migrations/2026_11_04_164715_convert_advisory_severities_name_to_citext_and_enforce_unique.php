@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use App\Features\AdvisoryStatusAndSeverityNameUniquenessFeature;
+use App\Features\AdvisorySeverityNameUniquenessFeature;
 use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
@@ -44,13 +44,13 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     /*
-     * TODO: Cleanup Task (advisory-status-and-severity-name-uniqueness): after AdvisoryStatusAndSeverityNameUniquenessFeature is removed:
-     * - remove the `FixesDuplicateNames` trait, the `$chunkSize` and `$usesSoftDeletes` properties, and the `fixDuplicates()` / `revertDuplicates()` calls
-     * - keep the citext column conversions and the unique indexes, they are permanent
+     * TODO: Cleanup Task (advisory-status-and-severity-name-uniqueness): after AdvisorySeverityNameUniquenessFeature is removed:
+     * - remove the `FixesDuplicateNames` trait, the `$chunkSize` and `$usesSoftDeletes` properties, and the `fixDuplicates()` call
+     * - keep the citext column conversion and the unique index, they are permanent
      */
     use FixesDuplicateNames;
 
-    private string $table = '';
+    private string $table = 'advisory_severities';
 
     private string $column = 'name';
 
@@ -58,48 +58,31 @@ return new class () extends Migration {
 
     private bool $usesSoftDeletes = true;
 
-    /**
-     * @var array<string>
-     */
-    private array $tables = [
-        'advisory_statuses',
-        'advisory_severities',
-    ];
-
     public function up(): void
     {
         DB::transaction(function (): void {
-            foreach ($this->tables as $table) {
-                $this->table = $table;
+            $this->fixDuplicates();
 
-                $this->fixDuplicates();
+            DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
 
-                DB::statement("ALTER TABLE {$table} ALTER COLUMN {$this->column} TYPE citext");
+            Schema::table($this->table, function (Blueprint $table): void {
+                $table->uniqueIndex($this->column, "{$this->table}_name_unique")
+                    ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
+            });
 
-                Schema::table($table, function (Blueprint $blueprint) use ($table): void {
-                    $blueprint->uniqueIndex($this->column, "{$table}_name_unique")
-                        ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
-                });
-            }
-
-            AdvisoryStatusAndSeverityNameUniquenessFeature::activate();
+            AdvisorySeverityNameUniquenessFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function (): void {
-            AdvisoryStatusAndSeverityNameUniquenessFeature::deactivate();
+            AdvisorySeverityNameUniquenessFeature::deactivate();
 
-            foreach ($this->tables as $table) {
-                $this->table = $table;
+            DB::statement("DROP INDEX IF EXISTS {$this->table}_name_unique");
 
-                DB::statement("DROP INDEX IF EXISTS {$table}_name_unique");
-
-                DB::statement("ALTER TABLE {$table} ALTER COLUMN {$this->column} TYPE varchar(255)");
-
-                $this->revertDuplicates();
-            }
+            // Names rewritten by `fixDuplicates()` are kept: the `-N` suffix cannot be told apart from a genuine name.
+            DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
         });
     }
 };

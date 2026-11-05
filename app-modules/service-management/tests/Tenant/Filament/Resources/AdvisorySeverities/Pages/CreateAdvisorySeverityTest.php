@@ -38,7 +38,9 @@ use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\AdvisorySe
 use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\Pages\CreateAdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\AdvisorySeverityRequestFactory;
+use App\Features\AdvisorySeverityNameUniquenessFeature;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -80,6 +82,8 @@ test('CreateAdvisorySeverity is gated with proper access control', function (): 
 test('CreateAdvisorySeverity validates the inputs', function (AdvisorySeverityRequestFactory $data, array $errors): void {
     asSuperAdmin();
 
+    AdvisorySeverity::factory()->create(['name' => 'Critical']);
+
     $request = AdvisorySeverityRequestFactory::new($data)->create();
 
     Livewire::test(CreateAdvisorySeverity::class)
@@ -104,5 +108,45 @@ test('CreateAdvisorySeverity validates the inputs', function (AdvisorySeverityRe
             AdvisorySeverityRequestFactory::new()->without('color'),
             ['color' => 'required'],
         ],
+        'name unique' => [
+            AdvisorySeverityRequestFactory::new()->state(['name' => 'Critical']),
+            ['name' => 'unique'],
+        ],
+        'name unique case insensitive' => [
+            AdvisorySeverityRequestFactory::new()->state(['name' => 'CRITICAL']),
+            ['name' => 'unique'],
+        ],
     ]
 );
+
+test('CreateAdvisorySeverity allows the name of a soft deleted advisory severity', function (): void {
+    asSuperAdmin();
+
+    AdvisorySeverity::factory()->create(['name' => 'Critical'])->delete();
+
+    $request = AdvisorySeverityRequestFactory::new()->state(['name' => 'Critical'])->create();
+
+    Livewire::test(CreateAdvisorySeverity::class)
+        ->fillForm($request)
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(AdvisorySeverity::query()->where('name', 'Critical')->count())->toBe(1);
+});
+
+describe('name uniqueness feature flag', function (): void {
+    it('does not apply the unique form rule when the feature is disabled', function (): void {
+        AdvisorySeverityNameUniquenessFeature::deactivate();
+
+        asSuperAdmin();
+
+        AdvisorySeverity::factory()->create(['name' => 'Critical']);
+
+        $request = AdvisorySeverityRequestFactory::new()->state(['name' => 'Critical'])->create();
+
+        expect(fn () => Livewire::test(CreateAdvisorySeverity::class)
+            ->fillForm($request)
+            ->call('create'))
+            ->toThrow(UniqueConstraintViolationException::class);
+    });
+});
