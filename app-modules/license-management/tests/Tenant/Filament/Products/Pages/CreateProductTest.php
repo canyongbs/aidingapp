@@ -34,10 +34,13 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\CreateProduct;
 use AidingApp\LicenseManagement\Filament\Resources\Products\ProductResource;
 use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\LicenseManagement\Tests\Tenant\Filament\Products\RequestFactories\CreateProductRequestFactory;
+use App\Features\LicensesPermissionsConsolidationFeature;
 use App\Features\ProductNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
@@ -158,4 +161,26 @@ describe('authorization', function (): void {
 
         Livewire::test(CreateProduct::class)->assertSuccessful();
     });
+});
+
+// TODO: Cleanup Task (licenses-permissions-consolidation): delete this test
+it('allows access to the create page with the legacy `product.create` permission while the consolidation flag is inactive', function (): void {
+    LicensesPermissionsConsolidationFeature::deactivate();
+
+    $legacyPermissions = ['product.view-any', 'product.create'];
+
+    $group = PermissionGroup::create(['name' => 'Product']);
+
+    foreach ($legacyPermissions as $name) {
+        Permission::factory()->create(['name' => $name, 'guard_name' => 'web', 'group_id' => $group->getKey()]);
+    }
+
+    $user = User::factory()->create();
+    actingAs($user);
+
+    get(ProductResource::getUrl('create'))->assertForbidden();
+
+    $user->givePermissionTo($legacyPermissions);
+
+    get(ProductResource::getUrl('create'))->assertSuccessful();
 });

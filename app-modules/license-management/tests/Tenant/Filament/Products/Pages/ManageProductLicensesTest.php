@@ -150,12 +150,18 @@ it('grants access with the legacy product and product license permissions while 
     $settings->data->addons->licenseManagement = true;
     $settings->save();
 
-    $legacyPermissions = ['product.view-any', 'product.*.view', 'product_license.view-any'];
+    $legacyPermissions = [
+        'product.view-any' => 'Product',
+        'product.*.view' => 'Product',
+        'product_license.view-any' => 'Product License',
+    ];
 
-    $group = PermissionGroup::create(['name' => 'Product']);
-
-    foreach ($legacyPermissions as $name) {
-        Permission::factory()->create(['name' => $name, 'guard_name' => 'web', 'group_id' => $group->getKey()]);
+    foreach ($legacyPermissions as $name => $groupName) {
+        Permission::factory()->create([
+            'name' => $name,
+            'guard_name' => 'web',
+            'group_id' => PermissionGroup::firstOrCreate(['name' => $groupName])->getKey(),
+        ]);
     }
 
     $user = User::factory()->create();
@@ -165,7 +171,7 @@ it('grants access with the legacy product and product license permissions while 
 
     get(ManageProductLicenses::getUrl(['record' => $product]))->assertForbidden();
 
-    $user->givePermissionTo($legacyPermissions);
+    $user->givePermissionTo(array_keys($legacyPermissions));
 
     get(ManageProductLicenses::getUrl(['record' => $product]))->assertSuccessful();
 });
