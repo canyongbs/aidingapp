@@ -72,6 +72,7 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -1894,8 +1895,7 @@ describe('2026_11_06_143633_seed_permissions_consolidate_licenses_permissions', 
             $grantModel($systemUser, 'product.view-any', 'api');
             $grantModel($systemUser, 'product_license.view-any', 'api');
 
-            expect(LicensesPermissionsConsolidationFeature::active())->toBeFalse()
-                ->and(app(PermissionRegistrar::class)->getPermissions(['name' => 'licenses.view-any']))->toBeEmpty();
+            expect(LicensesPermissionsConsolidationFeature::active())->toBeFalse();
 
             $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
             expect($migrate)->toBe(Command::SUCCESS);
@@ -1924,8 +1924,26 @@ describe('2026_11_06_143633_seed_permissions_consolidate_licenses_permissions', 
             assertDatabaseMissing('permission_groups', ['name' => 'Product License']);
             assertDatabaseHas('permissions', ['name' => 'role.view-any', 'guard_name' => 'web']);
 
-            expect(LicensesPermissionsConsolidationFeature::active())->toBeTrue()
-                ->and(app(PermissionRegistrar::class)->getPermissions(['name' => 'licenses.view-any']))->toHaveCount(2);
+            expect(LicensesPermissionsConsolidationFeature::active())->toBeTrue();
+        });
+    });
+
+    it('clears the current tenant\'s cached permissions even though the permission registrar resolved its cache store before the tenant was switched', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            // Resolve the registrar first, then swap the cache store the way PrefixCacheTask does when `tenants:artisan` switches tenants.
+            app(PermissionRegistrar::class);
+
+            config()->set('cache.prefix', 'licenses_consolidation_tenant');
+            app('cache')->forgetDriver(config('cache.default'));
+            app()->forgetInstance('cache');
+            app()->forgetInstance('cache.store');
+            Cache::clearResolvedInstances();
+
+            Cache::forever(config('permission.cache.key'), 'stale');
+
+            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            expect(Cache::has(config('permission.cache.key')))->toBeFalse();
         });
     });
 

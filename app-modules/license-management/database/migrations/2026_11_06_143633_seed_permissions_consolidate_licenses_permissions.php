@@ -38,8 +38,8 @@ use App\Features\LicensesPermissionsConsolidationFeature;
 use Database\Migrations\Concerns\CanModifyPermissions;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Spatie\Permission\PermissionRegistrar;
 
 return new class () extends Migration {
     use CanModifyPermissions;
@@ -101,8 +101,7 @@ return new class () extends Migration {
             // TODO: Cleanup Task (licenses-permissions-consolidation): remove this activate() call and the deactivate() call in down() once LicensesPermissionsConsolidationFeature is removed
             LicensesPermissionsConsolidationFeature::activate();
 
-            // The policies switch to the new permission names as soon as the flag is active, so the cached permission list must be rebuilt.
-            DB::afterCommit(fn () => app(PermissionRegistrar::class)->forgetCachedPermissions());
+            DB::afterCommit(fn () => $this->forgetCachedPermissions());
         });
     }
 
@@ -127,8 +126,20 @@ return new class () extends Migration {
                 $this->deletePermissions(array_keys($this->permissionsFor($this->prefix, $this->group)), $guard);
             });
 
-            DB::afterCommit(fn () => app(PermissionRegistrar::class)->forgetCachedPermissions());
+            DB::afterCommit(fn () => $this->forgetCachedPermissions());
         });
+    }
+
+    /**
+     * The policies switch permission names with the flag, so the tenant's cached permission list must be rebuilt.
+     * The cache is cleared through the Cache facade because Spatie's `PermissionRegistrar` keeps the cache store it
+     * resolved at boot, which still has the landlord prefix while `tenants:artisan` runs the migration for each tenant.
+     */
+    private function forgetCachedPermissions(): void
+    {
+        $store = config('permission.cache.store');
+
+        Cache::store($store === 'default' ? null : $store)->forget(config('permission.cache.key'));
     }
 
     /**
