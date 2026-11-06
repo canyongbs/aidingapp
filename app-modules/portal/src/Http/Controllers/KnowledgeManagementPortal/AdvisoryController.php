@@ -36,6 +36,8 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Portal\Actions\ResolvePortalContact;
 use AidingApp\Portal\DataTransferObjects\AdvisoryData;
 use AidingApp\Portal\DataTransferObjects\AdvisorySeverityData;
 use AidingApp\Portal\DataTransferObjects\AdvisoryStatusData;
@@ -45,6 +47,7 @@ use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Models\Scopes\RankedAdvisorySeverities;
+use AidingApp\ServiceManagement\Models\Scopes\VisibleToPortalContact;
 use AidingApp\ServiceManagement\Models\Scopes\WithLastUpdatedAt;
 use App\Settings\LicenseSettings;
 use Illuminate\Database\Eloquent\Builder;
@@ -56,7 +59,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AdvisoryController
 {
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(Request $request, ResolvePortalContact $resolvePortalContact): JsonResponse
     {
         abort_unless(resolve(LicenseSettings::class)->data?->addons->advisoryManagement, Response::HTTP_FORBIDDEN);
 
@@ -74,8 +77,11 @@ class AdvisoryController
         $statusId = $validated['status'] ?? null;
         $sort = AdvisorySort::tryFrom($validated['sort'] ?? '') ?? AdvisorySort::HighestSeverity;
 
+        $contact = $resolvePortalContact();
+
         $advisories = Advisory::query()
             ->with(['severity', 'status'])
+            ->tap(new VisibleToPortalContact($contact))
             ->tap(new WithLastUpdatedAt())
             ->whereHas('status', fn (Builder $query): Builder => $query->where('classification', $classification))
             ->when(filled($severityId), fn (Builder $query): Builder => $query->where('advisories.severity_id', $severityId))
@@ -109,7 +115,7 @@ class AdvisoryController
                 'total' => $advisories->total(),
                 'per_page' => $advisories->perPage(),
             ],
-            'counts' => $this->countByClassification(),
+            'counts' => $this->countByClassification($contact),
             'severities' => AdvisorySeverity::query()
                 ->tap(new RankedAdvisorySeverities())
                 ->get()
@@ -125,15 +131,16 @@ class AdvisoryController
     }
 
     /**
-     * Counts every advisory in each status classification, regardless of any search or filter.
+     * Counts every advisory the visitor can see in each status classification, regardless of any search or filter.
      *
      * @return array<string, int>
      */
-    protected function countByClassification(): array
+    protected function countByClassification(?Contact $contact): array
     {
         return collect(SystemAdvisoryStatusClassification::cases())
             ->mapWithKeys(fn (SystemAdvisoryStatusClassification $classification): array => [
                 $classification->value => Advisory::query()
+                    ->tap(new VisibleToPortalContact($contact))
                     ->whereHas('status', fn (Builder $query): Builder => $query->where('classification', $classification))
                     ->count(),
             ])

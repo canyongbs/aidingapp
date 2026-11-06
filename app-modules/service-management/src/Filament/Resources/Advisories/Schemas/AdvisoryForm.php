@@ -36,16 +36,21 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\Advisories\Schemas;
 
+use AidingApp\ServiceManagement\Enums\AdvisoryVisibility;
 use AidingApp\ServiceManagement\Filament\Tables\DepartmentsTable;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Models\Scopes\RankedAdvisorySeverities;
 use Filament\Forms\Components\Field;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TableSelect;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Illuminate\Database\Eloquent\Builder;
 
 class AdvisoryForm
 {
@@ -59,6 +64,12 @@ class AdvisoryForm
     {
         return Section::make('Tracking Details')
             ->schema(self::trackingComponents());
+    }
+
+    public static function visibilitySection(): Section
+    {
+        return Section::make('Advisory Visibility')
+            ->schema(self::visibilityComponents());
     }
 
     public static function assignmentSection(): Section
@@ -107,6 +118,40 @@ class AdvisoryForm
                 ->options(fn (): array => AdvisoryStatus::query()->orderBy('name')->pluck('name', 'id')->all())
                 ->exists((new AdvisoryStatus())->getTable(), 'id')
                 ->required()
+                ->columnSpanFull(),
+        ];
+    }
+
+    /**
+     * @return array<int, Field>
+     */
+    private static function visibilityComponents(): array
+    {
+        $isAuthenticated = fn (Get $get): bool => in_array($get('visibility'), [AdvisoryVisibility::Authenticated, AdvisoryVisibility::Authenticated->value], true);
+        $isRestrictedToContactTypes = fn (Get $get): bool => $isAuthenticated($get) && (bool) $get('is_visibility_restricted');
+
+        return [
+            ToggleButtons::make('visibility')
+                ->label('Visibility')
+                ->inline()
+                ->options(AdvisoryVisibility::class)
+                ->required()
+                ->live()
+                ->columnSpanFull(),
+            Toggle::make('is_visibility_restricted')
+                ->label('Restrict to Specific Contact Types')
+                ->live()
+                ->visible($isAuthenticated)
+                ->columnSpanFull(),
+            Select::make('restrictedToContactTypes')
+                ->label('Contact Types')
+                ->relationship('restrictedToContactTypes', 'name', fn (Builder $query): Builder => $query->orderBy('name'))
+                ->multiple()
+                ->searchable()
+                ->preload()
+                ->optionsLimit(50)
+                ->visible($isRestrictedToContactTypes)
+                ->required($isRestrictedToContactTypes)
                 ->columnSpanFull(),
         ];
     }

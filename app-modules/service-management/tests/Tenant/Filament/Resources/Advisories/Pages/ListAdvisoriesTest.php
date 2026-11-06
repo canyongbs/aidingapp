@@ -34,21 +34,27 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\Department\Models\Department;
+use AidingApp\ServiceManagement\Enums\AdvisoryVisibility;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ListAdvisories;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\AdvisoryRequestFactory;
+use App\Features\AdvisoryVisibilityFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use CanyonGBS\Common\Enums\Color;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\Select;
+use Illuminate\Database\Eloquent\Factories\Sequence;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Laravel\get;
 use function PHPUnit\Framework\assertCount;
@@ -370,4 +376,120 @@ test('the create advisory modal defaults the assigned department to the current 
     Livewire::test(ListAdvisories::class)
         ->mountAction('create')
         ->assertSchemaStateSet(['assigned_department_id' => $department->getKey()]);
+});
+
+describe('advisory visibility', function (): void {
+    it('defaults the visibility of a new advisory to public', function (): void {
+        asSuperAdmin();
+
+        $request = AdvisoryRequestFactory::new()->create();
+
+        Livewire::test(ListAdvisories::class)
+            ->callAction('create', $request)
+            ->assertHasNoActionErrors();
+
+        $advisory = Advisory::query()->sole();
+
+        expect($advisory->visibility)->toBe(AdvisoryVisibility::Public)
+            ->and($advisory->is_visibility_restricted)->toBeFalse()
+            ->and($advisory->restrictedToContactTypes)->toBeEmpty();
+    });
+
+    it('can create an advisory restricted to specific contact types', function (): void {
+        asSuperAdmin();
+
+        $contactTypes = ContactType::factory()->count(2)->create();
+
+        $request = AdvisoryRequestFactory::new()->create([
+            'visibility' => AdvisoryVisibility::Authenticated->value,
+            'is_visibility_restricted' => true,
+            'restrictedToContactTypes' => $contactTypes->pluck('id')->all(),
+        ]);
+
+        assertDatabaseMissing(Advisory::class, ['title' => $request['title']]);
+
+        Livewire::test(ListAdvisories::class)
+            ->callAction('create', $request)
+            ->assertHasNoActionErrors();
+
+        $advisory = Advisory::query()->where('title', $request['title'])->sole();
+
+        expect($advisory->visibility)->toBe(AdvisoryVisibility::Authenticated)
+            ->and($advisory->is_visibility_restricted)->toBeTrue()
+            ->and($advisory->restrictedToContactTypes->pluck('id')->sort()->values()->all())->toBe($contactTypes->pluck('id')->sort()->values()->all());
+    });
+
+    it('can create an authenticated advisory that is not restricted to contact types', function (): void {
+        asSuperAdmin();
+
+        $request = AdvisoryRequestFactory::new()->create([
+            'visibility' => AdvisoryVisibility::Authenticated->value,
+            'is_visibility_restricted' => false,
+        ]);
+
+        Livewire::test(ListAdvisories::class)
+            ->callAction('create', $request)
+            ->assertHasNoActionErrors();
+
+        $advisory = Advisory::query()->where('title', $request['title'])->sole();
+
+        expect($advisory->visibility)->toBe(AdvisoryVisibility::Authenticated)
+            ->and($advisory->is_visibility_restricted)->toBeFalse()
+            ->and($advisory->restrictedToContactTypes)->toBeEmpty();
+    });
+
+    it('validates the visibility inputs', function (array $overrides, array $errors): void {
+        asSuperAdmin();
+
+        $request = AdvisoryRequestFactory::new()->create($overrides);
+
+        Livewire::test(ListAdvisories::class)
+            ->callAction('create', $request)
+            ->assertHasActionErrors($errors);
+    })->with([
+        'visibility required' => [
+            ['visibility' => null],
+            ['visibility' => 'required'],
+        ],
+        'restricted contact types required when restricted' => [
+            ['visibility' => 'authenticated', 'is_visibility_restricted' => true, 'restrictedToContactTypes' => []],
+            ['restrictedToContactTypes' => 'required'],
+        ],
+    ]);
+
+    it('only offers the first fifty contact types in alphabetical order', function (): void {
+        asSuperAdmin();
+
+        $contactTypes = ContactType::factory()->count(55)->sequence(fn (Sequence $sequence): array => ['name' => sprintf('Type %02d', 55 - $sequence->index)])->create();
+
+        Livewire::test(ListAdvisories::class)
+            ->mountAction('create')
+            ->fillForm(['visibility' => AdvisoryVisibility::Authenticated->value, 'is_visibility_restricted' => true])
+            ->assertSchemaComponentExists('restrictedToContactTypes', 'mountedActionSchema0', function (Select $select) use ($contactTypes): bool {
+                $labels = array_values($select->getOptions());
+
+                return count($labels) === 50
+                    && $labels[0] === 'Type 01'
+                    && $labels[49] === 'Type 50'
+                    && $contactTypes->count() === 55;
+            });
+    });
+
+    it('does not offer the visibility section until the advisory visibility migration has run', function (): void {
+        AdvisoryVisibilityFeature::deactivate();
+
+        asSuperAdmin();
+
+        $request = AdvisoryRequestFactory::new()->create();
+
+        Livewire::test(ListAdvisories::class)
+            ->mountAction('create')
+            ->assertSchemaComponentDoesNotExist('visibility', 'mountedActionSchema0');
+
+        Livewire::test(ListAdvisories::class)
+            ->callAction('create', $request)
+            ->assertHasNoActionErrors();
+
+        assertDatabaseHas(Advisory::class, ['title' => $request['title']]);
+    });
 });
