@@ -36,6 +36,7 @@
 
 use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\Models\PermissionGroup;
+use AidingApp\Authorization\Models\Role;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ContractManagement\Models\ContractType;
 use AidingApp\Engagement\Models\EmailTemplate;
@@ -53,6 +54,7 @@ use App\Features\ContractNameUniquenessFeature;
 use App\Features\ContractTypeNameUniquenessFeature;
 use App\Features\EmailTemplateNameUniquenessFeature;
 use App\Features\KnowledgeBaseCategoryNameUniquenessFeature;
+use App\Features\LicensesPermissionsConsolidationFeature;
 use App\Features\MaintenanceProviderNameUniquenessFeature;
 use App\Features\PipelineNameUniquenessFeature;
 use App\Features\PipelineStageNameUniquenessFeature;
@@ -70,11 +72,14 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
+
+use Spatie\Permission\PermissionRegistrar;
 
 //describe('2025_01_01_165527_tmp_data_do_a_thing', function () {
 //    it('properly changed the data', function () {
@@ -1820,6 +1825,167 @@ describe('2026_11_04_120100_convert_contracts_name_to_citext_and_enforce_unique'
             expect(DB::table('contracts')->where('id', $firstId)->value('name'))->toBe('Master Agreement')
                 ->and(DB::table('contracts')->where('id', $secondId)->value('name'))->toBe('master agreement-2')
                 ->and(ContractNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+});
+
+// TODO: Cleanup Task (licenses-permissions-consolidation): delete this describe and the tests within
+describe('2026_11_06_143633_seed_permissions_consolidate_licenses_permissions', function (): void {
+    $migrationName = '2026_11_06_143633_seed_permissions_consolidate_licenses_permissions';
+    $migrationPath = "app-modules/license-management/database/migrations/{$migrationName}.php";
+
+    $operations = ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'];
+
+    $permissionId = fn (string $name, string $guard): ?string => DB::table('permissions')
+        ->where('name', $name)
+        ->where('guard_name', $guard)
+        ->value('id');
+
+    $roleGrants = fn (Role $role): array => DB::table('role_has_permissions')
+        ->join('permissions', 'permissions.id', '=', 'role_has_permissions.permission_id')
+        ->where('role_has_permissions.role_id', $role->getKey())
+        ->pluck('permissions.name')
+        ->sort()
+        ->values()
+        ->all();
+
+    $modelGrants = fn (Model $model): array => DB::table('model_has_permissions')
+        ->join('permissions', 'permissions.id', '=', 'model_has_permissions.permission_id')
+        ->where('model_has_permissions.model_type', $model->getMorphClass())
+        ->where('model_has_permissions.model_id', $model->getKey())
+        ->pluck('permissions.name')
+        ->sort()
+        ->values()
+        ->all();
+
+    it('carries every existing grant over to the consolidated Licenses permissions and removes the old groups', function () use ($migrationName, $migrationPath, $operations, $permissionId, $roleGrants, $modelGrants): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $operations, $permissionId, $roleGrants, $modelGrants): void {
+            $grantRole = fn (Role $role, string $name) => DB::table('role_has_permissions')->insert([
+                'role_id' => $role->getKey(),
+                'permission_id' => $permissionId($name, $role->guard_name),
+            ]);
+
+            $grantModel = fn (Model $model, string $name, string $guard) => DB::table('model_has_permissions')->insert([
+                'permission_id' => $permissionId($name, $guard),
+                'model_type' => $model->getMorphClass(),
+                'model_id' => $model->getKey(),
+            ]);
+
+            $productOnlyRole = Role::factory()->create(['guard_name' => 'web']);
+            $grantRole($productOnlyRole, 'product.*.update');
+
+            $productLicenseOnlyRole = Role::factory()->create(['guard_name' => 'web']);
+            $grantRole($productLicenseOnlyRole, 'product_license.view-any');
+
+            $bothGroupsRole = Role::factory()->create(['guard_name' => 'web']);
+            $grantRole($bothGroupsRole, 'product.*.delete');
+            $grantRole($bothGroupsRole, 'product_license.*.delete');
+            $grantRole($bothGroupsRole, 'product_license.create');
+
+            $apiRole = Role::factory()->create(['guard_name' => 'api']);
+            $grantRole($apiRole, 'product.*.force-delete');
+
+            $unrelatedRole = Role::factory()->create(['guard_name' => 'web']);
+            $grantRole($unrelatedRole, 'role.view-any');
+
+            $user = User::factory()->create();
+            $grantModel($user, 'product_license.*.view', 'web');
+
+            $systemUser = SystemUser::factory()->create();
+            $grantModel($systemUser, 'product.view-any', 'api');
+            $grantModel($systemUser, 'product_license.view-any', 'api');
+
+            expect(LicensesPermissionsConsolidationFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($roleGrants($productOnlyRole))->toBe(['licenses.*.update'])
+                ->and($roleGrants($productLicenseOnlyRole))->toBe(['licenses.view-any'])
+                ->and($roleGrants($bothGroupsRole))->toBe(['licenses.*.delete', 'licenses.create'])
+                ->and($roleGrants($apiRole))->toBe(['licenses.*.force-delete'])
+                ->and($roleGrants($unrelatedRole))->toBe(['role.view-any'])
+                ->and($modelGrants($user))->toBe(['licenses.*.view'])
+                ->and($modelGrants($systemUser))->toBe(['licenses.view-any']);
+
+            $licensesGroupId = DB::table('permission_groups')->where('name', 'Licenses')->value('id');
+
+            foreach (['web', 'api'] as $guard) {
+                foreach ($operations as $operation) {
+                    assertDatabaseHas('permissions', ['name' => "licenses.{$operation}", 'guard_name' => $guard, 'group_id' => $licensesGroupId]);
+                    assertDatabaseMissing('permissions', ['name' => "product.{$operation}", 'guard_name' => $guard]);
+                    assertDatabaseMissing('permissions', ['name' => "product_license.{$operation}", 'guard_name' => $guard]);
+                }
+
+                expect(DB::table('permissions')->where('group_id', $licensesGroupId)->where('guard_name', $guard)->count())->toBe(7);
+            }
+
+            assertDatabaseMissing('permission_groups', ['name' => 'Product']);
+            assertDatabaseMissing('permission_groups', ['name' => 'Product License']);
+            assertDatabaseHas('permissions', ['name' => 'role.view-any', 'guard_name' => 'web']);
+
+            expect(LicensesPermissionsConsolidationFeature::active())->toBeTrue();
+        });
+    });
+
+    it('clears the current tenant\'s cached permissions even though the permission registrar resolved its cache store before the tenant was switched', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            // Resolve the registrar first, then swap the cache store the way PrefixCacheTask does when `tenants:artisan` switches tenants.
+            app(PermissionRegistrar::class);
+
+            config()->set('cache.prefix', 'licenses_consolidation_tenant');
+            app('cache')->forgetDriver(config('cache.default'));
+            app()->forgetInstance('cache');
+            app()->forgetInstance('cache.store');
+            Cache::clearResolvedInstances();
+
+            Cache::forever(config('permission.cache.key'), 'stale');
+
+            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            expect(Cache::has(config('permission.cache.key')))->toBeFalse();
+        });
+    });
+
+    it('restores the grants on both original groups on rollback', function () use ($migrationName, $migrationPath, $operations, $permissionId, $roleGrants, $modelGrants): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $operations, $permissionId, $roleGrants, $modelGrants): void {
+            $role = Role::factory()->create(['guard_name' => 'web']);
+
+            DB::table('role_has_permissions')->insert([
+                'role_id' => $role->getKey(),
+                'permission_id' => $permissionId('product.*.update', 'web'),
+            ]);
+
+            $systemUser = SystemUser::factory()->create();
+
+            DB::table('model_has_permissions')->insert([
+                'permission_id' => $permissionId('product_license.view-any', 'api'),
+                'model_type' => $systemUser->getMorphClass(),
+                'model_id' => $systemUser->getKey(),
+            ]);
+
+            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect($roleGrants($role))->toBe(['product.*.update', 'product_license.*.update'])
+                ->and($modelGrants($systemUser))->toBe(['product.view-any', 'product_license.view-any']);
+
+            foreach (['web', 'api'] as $guard) {
+                foreach ($operations as $operation) {
+                    expect(DB::table('permissions')->where('name', "product.{$operation}")->where('guard_name', $guard)->count())->toBe(1)
+                        ->and(DB::table('permissions')->where('name', "product_license.{$operation}")->where('guard_name', $guard)->count())->toBe(1);
+
+                    assertDatabaseMissing('permissions', ['name' => "licenses.{$operation}", 'guard_name' => $guard]);
+                }
+            }
+
+            assertDatabaseHas('permission_groups', ['name' => 'Product']);
+            assertDatabaseHas('permission_groups', ['name' => 'Product License']);
+            assertDatabaseMissing('permission_groups', ['name' => 'Licenses']);
+
+            expect(LicensesPermissionsConsolidationFeature::active())->toBeFalse();
         });
     });
 });

@@ -34,11 +34,14 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\ManageProductLicenses;
 use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\LicenseManagement\Models\ProductLicense;
 use App\Features\ContactArchivingFeature;
+use App\Features\LicensesPermissionsConsolidationFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Forms\Components\Select;
@@ -57,9 +60,7 @@ it('is gated with proper access control', function (): void {
     $user = User::factory()->create();
     $product = Product::factory()->create();
 
-    $user->givePermissionTo('product.view-any');
-    $user->givePermissionTo('product.*.view');
-    $user->givePermissionTo('product_license.view-any');
+    $user->givePermissionTo(['licenses.view-any', 'licenses.*.view']);
 
     actingAs($user);
 
@@ -68,15 +69,11 @@ it('is gated with proper access control', function (): void {
     $settings->data->addons->licenseManagement = true;
     $settings->save();
 
-    $user->revokePermissionTo('product.view-any');
-    $user->revokePermissionTo('product.*.view');
-    $user->revokePermissionTo('product_license.view-any');
+    $user->revokePermissionTo(['licenses.view-any', 'licenses.*.view']);
 
     get(ManageProductLicenses::getUrl(['record' => $product]))->assertForbidden();
 
-    $user->givePermissionTo('product.view-any');
-    $user->givePermissionTo('product.*.view');
-    $user->givePermissionTo('product_license.view-any');
+    $user->givePermissionTo(['licenses.view-any', 'licenses.*.view']);
 
     get(ManageProductLicenses::getUrl(['record' => $product]))->assertSuccessful();
 });
@@ -143,4 +140,38 @@ test('ManageProductLicenses offers every contact as the license assignee when th
         ->assertFormFieldExists('assigned_to', 'mountedActionSchema0', function (Select $field) use ($archivedContact): bool {
             return array_key_exists($archivedContact->getKey(), $field->getOptions());
         });
+});
+
+// TODO: Cleanup Task (licenses-permissions-consolidation): delete this test
+it('grants access with the legacy product and product license permissions while the consolidation flag is inactive', function (): void {
+    LicensesPermissionsConsolidationFeature::deactivate();
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->licenseManagement = true;
+    $settings->save();
+
+    $legacyPermissions = [
+        'product.view-any' => 'Product',
+        'product.*.view' => 'Product',
+        'product_license.view-any' => 'Product License',
+    ];
+
+    foreach ($legacyPermissions as $name => $groupName) {
+        Permission::factory()->create([
+            'name' => $name,
+            'guard_name' => 'web',
+            'group_id' => PermissionGroup::firstOrCreate(['name' => $groupName])->getKey(),
+        ]);
+    }
+
+    $user = User::factory()->create();
+    $product = Product::factory()->create();
+
+    actingAs($user);
+
+    get(ManageProductLicenses::getUrl(['record' => $product]))->assertForbidden();
+
+    $user->givePermissionTo(array_keys($legacyPermissions));
+
+    get(ManageProductLicenses::getUrl(['record' => $product]))->assertSuccessful();
 });

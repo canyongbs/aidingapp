@@ -39,6 +39,7 @@ namespace AidingApp\LicenseManagement\Policies;
 use AidingApp\LicenseManagement\Models\Product;
 use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
+use App\Features\LicensesPermissionsConsolidationFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -58,7 +59,7 @@ class ProductPolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'product.view-any',
+            abilities: LicensesPermissionsConsolidationFeature::active() ? 'licenses.view-any' : 'product.view-any',
             denyResponse: 'You do not have permission to view products.'
         );
     }
@@ -66,7 +67,7 @@ class ProductPolicy
     public function view(Authenticatable $authenticatable, Product $product): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['product.*.view'],
+            abilities: LicensesPermissionsConsolidationFeature::active() ? ['licenses.*.view'] : ['product.*.view'],
             denyResponse: 'You do not have permission to view this product.'
         );
     }
@@ -74,7 +75,7 @@ class ProductPolicy
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'product.create',
+            abilities: LicensesPermissionsConsolidationFeature::active() ? 'licenses.create' : 'product.create',
             denyResponse: 'You do not have permission to create products.'
         );
     }
@@ -82,7 +83,7 @@ class ProductPolicy
     public function update(Authenticatable $authenticatable, Product $product): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['product.*.update'],
+            abilities: LicensesPermissionsConsolidationFeature::active() ? ['licenses.*.update'] : ['product.*.update'],
             denyResponse: 'You do not have permission to update this product.'
         );
     }
@@ -90,7 +91,7 @@ class ProductPolicy
     public function delete(Authenticatable $authenticatable, Product $product): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['product.*.delete'],
+            abilities: LicensesPermissionsConsolidationFeature::active() ? ['licenses.*.delete'] : ['product.*.delete'],
             denyResponse: 'You do not have permission to delete this product.'
         );
     }
@@ -98,7 +99,7 @@ class ProductPolicy
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['product.*.delete'],
+            abilities: LicensesPermissionsConsolidationFeature::active() ? ['licenses.*.delete'] : ['product.*.delete'],
             denyResponse: 'You do not have permission to delete any product.'
         );
     }
@@ -106,7 +107,7 @@ class ProductPolicy
     public function restore(Authenticatable $authenticatable, Product $product): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['product.*.restore'],
+            abilities: LicensesPermissionsConsolidationFeature::active() ? ['licenses.*.restore'] : ['product.*.restore'],
             denyResponse: 'You do not have permission to restore this product.'
         );
     }
@@ -114,7 +115,7 @@ class ProductPolicy
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['product.*.restore'],
+            abilities: LicensesPermissionsConsolidationFeature::active() ? ['licenses.*.restore'] : ['product.*.restore'],
             denyResponse: 'You do not have permission to restore any product.'
         );
     }
@@ -122,7 +123,7 @@ class ProductPolicy
     public function forceDelete(Authenticatable $authenticatable, Product $product): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['product.*.force-delete'],
+            abilities: LicensesPermissionsConsolidationFeature::active() ? ['licenses.*.force-delete'] : ['product.*.force-delete'],
             denyResponse: 'You do not have permission to force delete this product.'
         );
     }
@@ -130,7 +131,7 @@ class ProductPolicy
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['product.*.force-delete'],
+            abilities: LicensesPermissionsConsolidationFeature::active() ? ['licenses.*.force-delete'] : ['product.*.force-delete'],
             denyResponse: 'You do not have permission to force delete any product.'
         );
     }

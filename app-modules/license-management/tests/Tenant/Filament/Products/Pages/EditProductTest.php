@@ -34,10 +34,13 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\EditProduct;
 use AidingApp\LicenseManagement\Filament\Resources\Products\ProductResource;
 use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\LicenseManagement\Tests\Tenant\Filament\Products\RequestFactories\EditProductRequestFactory;
+use App\Features\LicensesPermissionsConsolidationFeature;
 use App\Features\ProductNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
@@ -72,7 +75,7 @@ it('displays the product data', function (): void {
 
 it('can update a product', function (): void {
     $user = User::factory()->create();
-    $user->givePermissionTo(['product.view-any', 'product.*.update']);
+    $user->givePermissionTo(['licenses.view-any', 'licenses.*.update']);
     actingAs($user);
 
     $product = Product::factory()->create();
@@ -151,9 +154,9 @@ describe('name uniqueness feature flag', function (): void {
 });
 
 describe('authorization', function (): void {
-    it('denies access to the edit page without the `product.*.update` permission', function (): void {
+    it('denies access to the edit page without the `licenses.*.update` permission', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('product.view-any');
+        $user->givePermissionTo('licenses.view-any');
         actingAs($user);
 
         $product = Product::factory()->create();
@@ -169,7 +172,7 @@ describe('authorization', function (): void {
         $settings->save();
 
         $user = User::factory()->create();
-        $user->givePermissionTo(['product.view-any', 'product.*.update']);
+        $user->givePermissionTo(['licenses.view-any', 'licenses.*.update']);
         actingAs($user);
 
         $product = Product::factory()->create();
@@ -177,9 +180,9 @@ describe('authorization', function (): void {
         get(ProductResource::getUrl('edit', ['record' => $product]))->assertForbidden();
     });
 
-    it('allows access to the edit page with the `product.*.update` permission', function (): void {
+    it('allows access to the edit page with the `licenses.*.update` permission', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo(['product.view-any', 'product.*.update']);
+        $user->givePermissionTo(['licenses.view-any', 'licenses.*.update']);
         actingAs($user);
 
         $product = Product::factory()->create();
@@ -188,4 +191,28 @@ describe('authorization', function (): void {
 
         Livewire::test(EditProduct::class, ['record' => $product->getRouteKey()])->assertSuccessful();
     });
+});
+
+// TODO: Cleanup Task (licenses-permissions-consolidation): delete this test
+it('allows access to the edit page with the legacy `product.*.update` permission while the consolidation flag is inactive', function (): void {
+    LicensesPermissionsConsolidationFeature::deactivate();
+
+    $legacyPermissions = ['product.view-any', 'product.*.update'];
+
+    $group = PermissionGroup::create(['name' => 'Product']);
+
+    foreach ($legacyPermissions as $name) {
+        Permission::factory()->create(['name' => $name, 'guard_name' => 'web', 'group_id' => $group->getKey()]);
+    }
+
+    $user = User::factory()->create();
+    actingAs($user);
+
+    $product = Product::factory()->create();
+
+    get(ProductResource::getUrl('edit', ['record' => $product]))->assertForbidden();
+
+    $user->givePermissionTo($legacyPermissions);
+
+    get(ProductResource::getUrl('edit', ['record' => $product]))->assertSuccessful();
 });
