@@ -1,0 +1,67 @@
+info:
+  name: Create Organization
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/organizations"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Bruno Example Organization {{exampleSuffix}}",
+        "email": "info@bruno-{{exampleSuffix}}.example.com",
+        "phone_number": "555-0100",
+        "website": "https://bruno-{{exampleSuffix}}.example.com",
+        "industry": "{{organizationIndustry}}",
+        "type": "{{organizationType}}",
+        "description": "Created from the Aiding App Bruno collection.",
+        "number_of_employees": 250,
+        "address": "123 Example Street",
+        "city": "Phoenix",
+        "state": "AZ",
+        "postalcode": "85001",
+        "country": "United States",
+        "linkedin_url": "https://www.linkedin.com/company/example",
+        "facebook_url": "https://www.facebook.com/example",
+        "twitter_url": "https://x.com/example",
+        "domains": [
+          "bruno-{{exampleSuffix}}.example.com"
+        ],
+        "is_contact_generation_enabled": false
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Organization names and domains must be unique, so each run uses a fresh suffix.
+        bru.setVar('exampleSuffix', Date.now().toString());
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 201) {
+          const organization = res.getBody().data;
+
+          bru.setVar('organizationId', organization.id);
+          bru.setVar('organizationName', organization.name);
+          bru.setVar('organizationDomain', organization.domains[0] ?? null);
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Creates an organization and stores its `id`, `name`, and first domain in the `organizationId`, `organizationName`, and `organizationDomain` runtime variables.
+
+  - Only `name` is required, and it must be unique among organizations (including archived ones).
+  - `industry` and `type` take the exact **name** of an existing organization industry / type (set via the `organizationIndustry` / `organizationType` environment variables).
+  - `domains` must be valid, unique domain names; they are used to match contacts to the organization by email domain.

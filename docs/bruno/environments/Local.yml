@@ -1,0 +1,13 @@
+name: Local
+variables:
+  - name: baseUrl
+    value: https://test.aidingapp.local
+  - name: organizationIndustry
+    value: Education
+  - name: organizationType
+    value: Education
+  - name: contactType
+    value: Employee
+  - secret: true
+    name: apiKey
+    description: ""
