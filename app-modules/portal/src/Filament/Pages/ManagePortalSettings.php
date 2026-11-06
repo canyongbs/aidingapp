@@ -45,9 +45,9 @@ use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use AidingApp\Portal\Enums\GdprDeclineOptions;
 use AidingApp\Portal\Settings\AiDisclaimerSettings;
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\AiDisclaimerFeature;
 use App\Enums\Feature;
 use App\Enums\NavigationGroup;
+use App\Features\AiDisclaimerFeature;
 use App\Models\User;
 use App\Rules\ValidUrl;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
@@ -283,43 +283,6 @@ class ManagePortalSettings extends SettingsPage
             ->disabled(! auth()->user()->can('settings.*.update'));
     }
 
-    /**
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
-     */
-    protected function mutateFormDataBeforeFill(array $data): array
-    {
-        if (! AiDisclaimerFeature::active()) {
-            return $data;
-        }
-
-        $aiDisclaimerSettings = app(AiDisclaimerSettings::class);
-
-        return [
-            ...$data,
-            'ai_disclaimer_enabled' => $aiDisclaimerSettings->is_enabled,
-            'ai_disclaimer_text' => $aiDisclaimerSettings->text,
-        ];
-    }
-
-    /**
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
-     */
-    protected function mutateFormDataBeforeSave(array $data): array
-    {
-        if (AiDisclaimerFeature::active()) {
-            $aiDisclaimerSettings = app(AiDisclaimerSettings::class);
-            $aiDisclaimerSettings->is_enabled = $data['ai_disclaimer_enabled'] ?? $aiDisclaimerSettings->is_enabled;
-            $aiDisclaimerSettings->text = $data['ai_disclaimer_text'] ?? $aiDisclaimerSettings->text;
-            $aiDisclaimerSettings->save();
-        }
-
-        unset($data['ai_disclaimer_enabled'], $data['ai_disclaimer_text']);
-
-        return $data;
-    }
-
     public function save(): void
     {
         if (! auth()->user()->can('settings.*.update')) {
@@ -343,6 +306,45 @@ class ManagePortalSettings extends SettingsPage
         }
 
         return parent::getFormActions();
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        if (! AiDisclaimerFeature::active()) {
+            return $data;
+        }
+
+        $aiDisclaimerSettings = app(AiDisclaimerSettings::class);
+
+        return [
+            ...$data,
+            'ai_disclaimer_enabled' => $aiDisclaimerSettings->is_enabled,
+            'ai_disclaimer_text' => $aiDisclaimerSettings->text,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (AiDisclaimerFeature::active()) {
+            $aiDisclaimerSettings = app(AiDisclaimerSettings::class);
+            $aiDisclaimerSettings->is_enabled = $data['ai_disclaimer_enabled'] ?? $aiDisclaimerSettings->is_enabled;
+            $aiDisclaimerSettings->text = $data['ai_disclaimer_text'] ?? $aiDisclaimerSettings->text;
+            $aiDisclaimerSettings->save();
+        }
+
+        unset($data['ai_disclaimer_enabled'], $data['ai_disclaimer_text']);
+
+        return $data;
     }
 
     protected function getHeaderActions(): array

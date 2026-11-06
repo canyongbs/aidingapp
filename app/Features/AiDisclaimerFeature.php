@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-
 namespace App\Features;
 
 use App\Support\AbstractFeatureFlag;

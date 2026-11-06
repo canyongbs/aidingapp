@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-
 use App\Features\AiDisclaimerFeature;
 use Illuminate\Database\Migrations\Migration;
 
