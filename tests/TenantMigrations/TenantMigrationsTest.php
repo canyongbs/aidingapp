@@ -57,6 +57,7 @@ use App\Features\ChangeRequestStatusNameUniquenessFeature;
 use App\Features\ChangeRequestTypeNameUniquenessFeature;
 use App\Features\ContactPermissionConsolidationFeature;
 use App\Features\ContactTypeNameUniquenessFeature;
+use App\Features\CheckboxesFormFieldFeature;
 use App\Features\ContractNameUniquenessFeature;
 use App\Features\ContractTypeNameUniquenessFeature;
 use App\Features\EmailTemplateNameUniquenessFeature;

@@ -52,9 +52,12 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateServiceRequestRequestFactory;
+use App\Features\CheckboxesFormFieldFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\ModalTableSelect;
 use Filament\Forms\Components\Select;
 use Illuminate\Contracts\Encryption\DecryptException;
@@ -945,4 +948,82 @@ describe('other option on choice fields', function (): void {
         'radio' => ['radio', '__other__'],
         'checkboxes' => ['checkboxes', ['__other__']],
     ]);
+});
+
+describe('checkbox fields and the checkboxes feature flag', function (): void {
+    $setUp = function (string $type, array $config = []): array {
+        asSuperAdmin();
+
+        $serviceRequestType = ServiceRequestType::factory()->create();
+        $priority = ServiceRequestPriority::factory()->for($serviceRequestType, 'type')->create();
+        $form = ServiceRequestForm::factory()->for($serviceRequestType, 'type')->create();
+        $field = new ServiceRequestFormField([
+            'label' => 'Agree',
+            'type' => $type,
+            'is_required' => false,
+            'config' => $config,
+        ]);
+        $field->submissible()->associate($form);
+        $field->save();
+
+        $form->setAttribute('content', [
+            'type' => 'doc',
+            'content' => [[
+                'type' => 'customBlock',
+                'attrs' => ['id' => $type, 'config' => ['fieldId' => $field->getKey(), 'label' => $field->label, 'isRequired' => false, ...$config]],
+            ]],
+        ]);
+        $form->save();
+
+        $request = CreateServiceRequestRequestFactory::new()->create(['priority_id' => $priority->getKey()]);
+
+        return [$serviceRequestType, $field, $request];
+    };
+
+    // TODO: Cleanup Task (convert-checkbox-form-fields): delete this test.
+    it('creates a service request with a legacy checkbox field and shows its answer while the flag is inactive', function () use ($setUp): void {
+        CheckboxesFormFieldFeature::deactivate();
+
+        [$serviceRequestType, $field, $request] = $setUp('checkbox');
+
+        expect(app(GenerateServiceRequestFilamentFormSchema::class)($serviceRequestType->form))
+            ->toHaveCount(1)
+            ->and(app(GenerateServiceRequestFilamentFormSchema::class)($serviceRequestType->form)[0])->toBeInstanceOf(Checkbox::class);
+
+        Livewire::test(CreateServiceRequest::class)
+            ->set('data.type_id', $serviceRequestType->getKey())
+            ->fillForm($request)
+            ->fillForm(['dynamic_fields' => [$field->getKey() => true]])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $submission = ServiceRequest::query()->sole()->serviceRequestFormSubmission;
+
+        expect($submission->fields()->whereKey($field)->firstOrFail()->pivot->getAttribute('response'))->toBeTruthy();
+
+        $html = view('service-management::submission', ['submission' => $submission->load('submissible', 'fields')])->render();
+
+        expect($html)->toContain('Agree')->and($html)->not->toContain('No response');
+    });
+
+    it('creates a service request with a checkboxes field and shows its answer while the flag is active', function () use ($setUp): void {
+        [$serviceRequestType, $field, $request] = $setUp('checkboxes', ['hasOtherOption' => false, 'options' => [['label' => 'Red', 'value' => 'red'], ['label' => 'Blue', 'value' => 'blue']]]);
+
+        expect(app(GenerateServiceRequestFilamentFormSchema::class)($serviceRequestType->form)[0])->toBeInstanceOf(CheckboxList::class);
+
+        Livewire::test(CreateServiceRequest::class)
+            ->set('data.type_id', $serviceRequestType->getKey())
+            ->fillForm($request)
+            ->fillForm(['dynamic_fields' => [$field->getKey() => ['red']]])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $submission = ServiceRequest::query()->sole()->serviceRequestFormSubmission;
+
+        expect($submission->fields()->whereKey($field)->firstOrFail()->pivot->getAttribute('response'))->toBe('["red"]');
+
+        $html = view('service-management::submission', ['submission' => $submission->load('submissible', 'fields')])->render();
+
+        expect($html)->toContain('Red')->and($html)->not->toContain('No response');
+    });
 });
