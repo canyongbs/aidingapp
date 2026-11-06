@@ -205,7 +205,6 @@ customElements.define(
                         name: 'advisories',
                         component: () => import('./Pages/Advisories.vue'),
                         meta: {
-                            requiresAuth: true,
                             loaders: [useAdvisoriesData],
                         },
                     },
@@ -214,7 +213,6 @@ customElements.define(
                         name: 'view-advisory',
                         component: () => import('./Pages/ViewAdvisory.vue'),
                         meta: {
-                            requiresAuth: true,
                             loaders: [useAdvisoryData],
                         },
                     },

@@ -66,6 +66,7 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequ
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalServiceManagementIsEnabled;
+use AidingApp\Portal\Http\Middleware\EnsurePortalContactWhenAuthenticationRequired;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestMediaDownloadController;
 use App\Http\Middleware\TrackContactPresence;
 use Illuminate\Support\Facades\Route;
@@ -178,10 +179,10 @@ Route::prefix('api')
                     ->name('product.licenses');
 
                 Route::get('/advisories', AdvisoryController::class)
-                    ->middleware(['auth:sanctum'])
+                    ->middleware([EnsurePortalContactWhenAuthenticationRequired::class])
                     ->name('advisories');
                 Route::get('/advisories/{advisory}', ShowAdvisoryController::class)
-                    ->middleware(['auth:sanctum'])
+                    ->middleware([EnsurePortalContactWhenAuthenticationRequired::class])
                     ->whereUuid('advisory')
                     ->name('advisories.show');
                 Route::get('/status', ServiceMonitorStatusController::class)
