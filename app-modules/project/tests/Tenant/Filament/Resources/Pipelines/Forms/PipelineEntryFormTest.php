@@ -79,8 +79,7 @@ it('lists related milestone options preloaded, searchable, alphabetically ordere
         'classification' => PipelineStageClassification::Complete,
     ]);
 
-    $washTheCar = ProjectMilestone::factory()->create([
-        'project_id' => $project->getKey(),
+    $washTheCar = ProjectMilestone::factory()->forProject($project)->create([
         'title' => 'Wash the Car',
     ]);
     PipelineEntry::factory()->create([
@@ -92,8 +91,7 @@ it('lists related milestone options preloaded, searchable, alphabetically ordere
         'project_milestone_id' => $washTheCar->getKey(),
     ]);
 
-    $buildTheSolution = ProjectMilestone::factory()->create([
-        'project_id' => $project->getKey(),
+    $buildTheSolution = ProjectMilestone::factory()->forProject($project)->create([
         'title' => 'Build the Solution',
     ]);
     PipelineEntry::factory()->create([
@@ -105,8 +103,7 @@ it('lists related milestone options preloaded, searchable, alphabetically ordere
         'project_milestone_id' => $buildTheSolution->getKey(),
     ]);
 
-    $buildTheHouse = ProjectMilestone::factory()->create([
-        'project_id' => $project->getKey(),
+    $buildTheHouse = ProjectMilestone::factory()->forProject($project)->create([
         'title' => 'Build the House',
     ]);
 
@@ -146,8 +143,8 @@ it('only lists milestones that belong to the entry\'s pipeline', function (): vo
         ->create();
     $otherPipeline = Pipeline::factory()->for($project)->create();
 
-    $pipelineMilestone = ProjectMilestone::factory()->for($project)->create(['pipeline_id' => $pipeline->getKey()]);
-    $otherPipelineMilestone = ProjectMilestone::factory()->for($project)->create(['pipeline_id' => $otherPipeline->getKey()]);
+    $pipelineMilestone = ProjectMilestone::factory()->create(['pipeline_id' => $pipeline->getKey()]);
+    $otherPipelineMilestone = ProjectMilestone::factory()->create(['pipeline_id' => $otherPipeline->getKey()]);
 
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->sole()->getKey(),
@@ -177,8 +174,7 @@ it('still resolves the label and keeps the option selectable for an archived mil
         'classification' => PipelineStageClassification::Planning,
     ]);
 
-    $archivedMilestone = ProjectMilestone::factory()->create([
-        'project_id' => $project->getKey(),
+    $archivedMilestone = ProjectMilestone::factory()->forProject($project)->create([
         'title' => 'Archived Milestone',
     ]);
 
@@ -216,8 +212,7 @@ it('excludes an archived milestone with no related entries from the options', fu
 
     $stage = PipelineStage::factory()->create(['pipeline_id' => $pipeline->getKey()]);
 
-    $unusedArchivedMilestone = ProjectMilestone::factory()->create([
-        'project_id' => $project->getKey(),
+    $unusedArchivedMilestone = ProjectMilestone::factory()->forProject($project)->create([
         'title' => 'Unused Archived Milestone',
     ]);
     $unusedArchivedMilestone->archive();

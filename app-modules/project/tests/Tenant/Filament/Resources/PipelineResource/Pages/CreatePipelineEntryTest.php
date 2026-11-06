@@ -222,7 +222,7 @@ it('persists related milestones, assets, and service requests via the kanban add
 
     $stage = $pipeline->stages->first();
 
-    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->id]);
+    $milestone = ProjectMilestone::factory()->forProject($project)->create();
     $asset = Asset::factory()->create();
     $serviceRequest = ServiceRequest::factory()->create();
 

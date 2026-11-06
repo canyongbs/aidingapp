@@ -526,7 +526,7 @@ it('persists related milestone, assets, and service requests when edited through
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
     ]);
 
-    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->getKey()]);
+    $milestone = ProjectMilestone::factory()->forProject($project)->create();
     $asset = Asset::factory()->create();
     $serviceRequest = ServiceRequest::factory()->create();
 
@@ -580,7 +580,7 @@ it('preserves related milestone, assets, and service requests when edited withou
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->getKey()]);
+    $milestone = ProjectMilestone::factory()->forProject($project)->create();
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
         'project_milestone_id' => $milestone->getKey(),
@@ -620,7 +620,7 @@ it('clears related milestone, assets, and service requests when the type is set 
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->getKey()]);
+    $milestone = ProjectMilestone::factory()->forProject($project)->create();
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
         'project_milestone_id' => $milestone->getKey(),
@@ -799,7 +799,7 @@ it('eager loads the milestone relation instead of lazy loading it per card', fun
 
     $stageId = $pipeline->stages->first()->getKey();
 
-    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->getKey()]);
+    $milestone = ProjectMilestone::factory()->forProject($project)->create();
 
     PipelineEntry::factory()->count(3)->create([
         'pipeline_stage_id' => $stageId,

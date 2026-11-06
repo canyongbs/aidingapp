@@ -48,6 +48,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -85,11 +86,11 @@ class ProjectMilestone extends Model implements Auditable
     }
 
     /**
-     * @return BelongsTo<Project, $this>
+     * @return HasOneThrough<Project, Pipeline, $this>
      */
-    public function project(): BelongsTo
+    public function project(): HasOneThrough
     {
-        return $this->belongsTo(Project::class);
+        return $this->hasOneThrough(Project::class, Pipeline::class, 'id', 'id', 'pipeline_id', 'project_id');
     }
 
     /**

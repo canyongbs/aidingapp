@@ -37,6 +37,7 @@
 namespace AidingApp\Project\Observers;
 
 use AidingApp\Project\Models\ProjectMilestone;
+use App\Features\MilestoneProjectFromPipelineFeature;
 
 class ProjectMilestoneObserver
 {
@@ -49,6 +50,12 @@ class ProjectMilestoneObserver
     {
         if (blank($projectMilestone->created_by_id)) {
             $projectMilestone->created_by_id = auth()->id();
+        }
+
+        // TODO: Cleanup Task (milestone-project-from-pipeline) - Remove this block once the
+        // project_id column is dropped and the flag is removed.
+        if (! MilestoneProjectFromPipelineFeature::active()) {
+            $projectMilestone->setAttribute('project_id', $projectMilestone->pipeline()->value('project_id'));
         }
     }
 }
