@@ -48,7 +48,7 @@ it('defaults created_by to the authenticated user when not provided', function (
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()->for($project)->create();
 
-    $milestone = $project->milestones()->create([
+    $milestone = $pipeline->milestones()->create([
         'title' => 'MVP Ready',
         'description' => 'First release',
         'pipeline_id' => $pipeline->getKey(),
@@ -68,7 +68,7 @@ it('keeps an explicitly provided created_by', function (): void {
 
     // created_by_id is not mass assignable, so set it directly before saving to exercise the
     // observer's "leave an explicitly provided created_by untouched" path.
-    $milestone = $project->milestones()->make([
+    $milestone = $pipeline->milestones()->make([
         'title' => 'MVP Ready',
         'description' => 'First release',
         'pipeline_id' => $pipeline->getKey(),
@@ -89,7 +89,7 @@ it('does not assign or override the pipeline, leaving it to the caller', functio
     Pipeline::factory()->for($project)->create(['created_at' => now()->subDays(2)]);
     $chosenPipeline = Pipeline::factory()->for($project)->create(['created_at' => now()->subDay()]);
 
-    $milestone = $project->milestones()->create([
+    $milestone = $chosenPipeline->milestones()->create([
         'title' => 'Beta',
         'description' => 'Beta milestone',
         'pipeline_id' => $chosenPipeline->getKey(),
