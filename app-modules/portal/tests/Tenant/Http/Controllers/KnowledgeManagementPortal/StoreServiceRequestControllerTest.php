@@ -43,6 +43,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\CheckboxesFormFieldFeature;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Crypt;
 
@@ -236,4 +237,89 @@ it('rejects a password secret owned by another contact', function (): void {
 
     expect(ServiceRequest::query()->exists())->toBeFalse()
         ->and($secret->refresh()->related_id)->toBeNull();
+});
+
+describe('checkbox form fields', function (): void {
+    $setUp = function (string $fieldType, array $config = []): array {
+        $type = ServiceRequestType::factory()->create();
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $field = new ServiceRequestFormField([
+            'label' => 'Agree',
+            'type' => $fieldType,
+            'is_required' => true,
+            'config' => $config,
+        ]);
+        $form = ServiceRequestForm::factory()->for($type, 'type')->create();
+        $field->submissible()->associate($form);
+        $field->save();
+
+        $form->update([
+            'content' => [
+                'type' => 'doc',
+                'content' => [[
+                    'type' => 'customBlock',
+                    'attrs' => ['id' => $fieldType, 'config' => ['fieldId' => $field->getKey(), 'label' => 'Agree', 'isRequired' => true, ...$config]],
+                ]],
+            ],
+        ]);
+
+        return [$type, $priority, $field];
+    };
+
+    // TODO: Cleanup Task (convert-checkbox-form-fields): delete this test.
+    it('submits a legacy checkbox field and shows its answer while the feature flag is inactive', function () use ($setUp): void {
+        CheckboxesFormFieldFeature::deactivate();
+
+        [$type, $priority, $field] = $setUp('checkbox');
+        $contact = Contact::factory()->create();
+
+        actingAs($contact, 'contact')->postJson(
+            route('api.portal.service-request.store', ['type' => $type]),
+            [
+                'Main' => ['title' => 'Legacy checkbox', 'description' => 'Legacy checkbox field.', 'priority' => $priority->getKey()],
+                'Details' => [$field->getKey() => true],
+            ],
+        )->assertSuccessful();
+
+        $submission = ServiceRequest::query()->sole()->serviceRequestFormSubmission;
+
+        expect($submission->fields()->whereKey($field)->firstOrFail()->pivot->getAttribute('response'))->toBeTruthy();
+
+        $html = view('service-management::submission', ['submission' => $submission->load('submissible', 'fields')])->render();
+
+        expect($html)->toContain('Agree')->and($html)->not->toContain('No response');
+    });
+
+    it('submits a checkboxes field and shows its answer while the feature flag is active', function () use ($setUp): void {
+        [$type, $priority, $field] = $setUp('checkboxes', ['hasOtherOption' => false, 'options' => [['label' => 'Red', 'value' => 'red'], ['label' => 'Blue', 'value' => 'blue']]]);
+        $contact = Contact::factory()->create();
+
+        actingAs($contact, 'contact')->postJson(
+            route('api.portal.service-request.store', ['type' => $type]),
+            [
+                'Main' => ['title' => 'Checkboxes', 'description' => 'Checkboxes field.', 'priority' => $priority->getKey()],
+                'Details' => [$field->getKey() => ['red']],
+            ],
+        )->assertSuccessful();
+
+        $submission = ServiceRequest::query()->sole()->serviceRequestFormSubmission;
+
+        expect($submission->fields()->whereKey($field)->firstOrFail()->pivot->getAttribute('response'))->toBe('["red"]');
+
+        $html = view('service-management::submission', ['submission' => $submission->load('submissible', 'fields')])->render();
+
+        expect($html)->toContain('Red')->and($html)->not->toContain('No response');
+    });
+
+    it('ignores a field with an unknown type instead of failing the submission', function () use ($setUp): void {
+        [$type, $priority, $field] = $setUp('removed_block_type');
+        $contact = Contact::factory()->create();
+
+        actingAs($contact, 'contact')->postJson(
+            route('api.portal.service-request.store', ['type' => $type]),
+            ['Main' => ['title' => 'Unknown type', 'description' => 'Unknown field type.', 'priority' => $priority->getKey()]],
+        )->assertSuccessful();
+
+        expect(ServiceRequest::query()->count())->toBe(1);
+    });
 });

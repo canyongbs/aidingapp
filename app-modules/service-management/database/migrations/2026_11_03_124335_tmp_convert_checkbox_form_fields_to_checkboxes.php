@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use App\Features\CheckboxesFormFieldFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
@@ -94,12 +95,18 @@ return new class () extends Migration {
                         ->update(['content' => json_encode($this->convertNode($content))]);
                 }
             }
+
+            CheckboxesFormFieldFeature::activate();
         });
     }
 
     public function down(): void
     {
-        // The converted fields are indistinguishable from `checkboxes` fields created later, so they are kept
+        DB::transaction(function (): void {
+            CheckboxesFormFieldFeature::deactivate();
+
+            // The converted fields are indistinguishable from `checkboxes` fields created later, so they are kept
+        });
     }
 
     /**

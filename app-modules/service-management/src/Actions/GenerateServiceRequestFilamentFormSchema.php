@@ -44,6 +44,7 @@ use AidingApp\Form\Models\SubmissibleStep;
 use AidingApp\ServiceManagement\Filament\Forms\Components\ServiceRequestPasswordInput;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Radio;
@@ -215,6 +216,11 @@ class GenerateServiceRequestFilamentFormSchema
                 ->required($field->is_required)
                 ->helperText($description),
             'radio' => $this->choiceComponent(Radio::make($field->getKey()), $field, isMultiple: false),
+            // TODO: Cleanup Task (convert-checkbox-form-fields): delete this legacy `checkbox` arm.
+            'checkbox' => Checkbox::make($field->getKey())
+                ->label($field->label)
+                ->required($field->is_required)
+                ->helperText($description),
             'checkboxes' => $this->choiceComponent(CheckboxList::make($field->getKey()), $field, isMultiple: true),
             'date' => DatePicker::make($field->getKey())
                 ->label($field->label)

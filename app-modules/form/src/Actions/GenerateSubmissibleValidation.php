@@ -81,7 +81,7 @@ class GenerateSubmissibleValidation
                     $rules->push('required');
                 }
 
-                if (blank($field->type)) {
+                if (blank($field->type) || ! isset($blocks[$field->type])) {
                     return [];
                 }
 
