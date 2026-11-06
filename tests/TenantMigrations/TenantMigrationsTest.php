@@ -47,6 +47,8 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\AdvisorySeverityNameUniquenessFeature;
+use App\Features\AdvisoryStatusNameUniquenessFeature;
 use App\Features\ChangeRequestStatusNameUniquenessFeature;
 use App\Features\ChangeRequestTypeNameUniquenessFeature;
 use App\Features\ContractNameUniquenessFeature;
@@ -1822,4 +1824,133 @@ describe('2026_11_04_120100_convert_contracts_name_to_citext_and_enforce_unique'
                 ->and(ContractNameUniquenessFeature::active())->toBeFalse();
         });
     });
+});
+
+// TODO: Cleanup Task (advisory-status-and-severity-name-uniqueness): delete the helper below, the two describes that follow, and the tests within
+$defineAdvisoryNameUniquenessTests = function (string $migrationName, string $table, array $extraColumns, string $featureClass, string $otherFeatureClass): void {
+    assert(is_subclass_of($featureClass, AbstractFeatureFlag::class));
+    assert(is_subclass_of($otherFeatureClass, AbstractFeatureFlag::class));
+    $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
+
+    $insertRecord = function (string $name, CarbonInterface $createdAt, ?CarbonInterface $deletedAt = null) use ($table, $extraColumns): string {
+        $id = (string) Str::uuid();
+
+        DB::table($table)->insert([
+            'id' => $id,
+            'name' => $name,
+            ...$extraColumns,
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+            'deleted_at' => $deletedAt,
+        ]);
+
+        return $id;
+    };
+
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates only its own feature flag', function () use ($migrationName, $migrationPath, $insertRecord, $table, $featureClass, $otherFeatureClass): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table, $featureClass, $otherFeatureClass): void {
+            $firstId = $insertRecord('Investigating', now()->subMinutes(3));
+            $secondId = $insertRecord('investigating', now()->subMinutes(2));
+            $thirdId = $insertRecord('INVESTIGATING', now()->subMinute());
+            $existingSuffixedId = $insertRecord('Investigating-2', now()->subMinutes(4));
+            $uniqueId = $insertRecord('Resolved', now()->subMinutes(5));
+
+            $featureClass::deactivate();
+            $otherFeatureClass::deactivate();
+
+            expect($featureClass::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table($table)->where('id', $id)->value('name');
+
+            expect($name($firstId))->toBe('Investigating')
+                ->and($name($secondId))->toBe('investigating-3')
+                ->and($name($thirdId))->toBe('INVESTIGATING-4')
+                ->and($name($existingSuffixedId))->toBe('Investigating-2')
+                ->and($name($uniqueId))->toBe('Resolved')
+                ->and($featureClass::active())->toBeTrue()
+                ->and($otherFeatureClass::active())->toBeFalse();
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched', function () use ($migrationName, $migrationPath, $insertRecord, $table): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table): void {
+            $keptId = $insertRecord('Investigating', now()->subMinutes(2));
+            $trashedId = $insertRecord('investigating', now()->subMinute(), now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table($table)->where('id', $keptId)->value('name'))->toBe('Investigating')
+                ->and(DB::table($table)->where('id', $trashedId)->value('name'))->toBe('investigating');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness among non-trashed records at the database level', function () use ($migrationName, $migrationPath, $insertRecord): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertRecord('Investigating', now());
+
+            expect(fn (): string => $insertRecord('INVESTIGATING', now()))
+                ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+
+    it('allows a name freed by a soft-deleted record to be reused at the database level', function () use ($migrationName, $migrationPath, $insertRecord, $table): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertRecord('Investigating', now()->subMinute(), now());
+            $insertRecord('INVESTIGATING', now());
+
+            expect(DB::table($table)->count())->toBe(2);
+        });
+    });
+
+    it('drops the unique index and deactivates its feature flag on rollback without altering stored names', function () use ($migrationName, $migrationPath, $insertRecord, $table, $featureClass): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table, $featureClass): void {
+            $insertRecord('Investigating', now()->subMinutes(2));
+            $secondId = $insertRecord('investigating', now()->subMinute());
+            $legitimateId = $insertRecord('Phase-2', now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect(DB::table($table)->where('id', $secondId)->value('name'))->toBe('investigating-2')
+                ->and(DB::table($table)->where('id', $legitimateId)->value('name'))->toBe('Phase-2')
+                ->and($featureClass::active())->toBeFalse();
+
+            $insertRecord('Investigating', now());
+
+            expect(DB::table($table)->where('name', 'Investigating')->count())->toBe(2);
+        });
+    });
+};
+
+describe('2026_11_04_164714_convert_advisory_statuses_name_to_citext_and_enforce_unique', function () use ($defineAdvisoryNameUniquenessTests): void {
+    $defineAdvisoryNameUniquenessTests(
+        '2026_11_04_164714_convert_advisory_statuses_name_to_citext_and_enforce_unique',
+        'advisory_statuses',
+        ['classification' => 'open'],
+        AdvisoryStatusNameUniquenessFeature::class,
+        AdvisorySeverityNameUniquenessFeature::class,
+    );
+});
+
+describe('2026_11_04_164715_convert_advisory_severities_name_to_citext_and_enforce_unique', function () use ($defineAdvisoryNameUniquenessTests): void {
+    $defineAdvisoryNameUniquenessTests(
+        '2026_11_04_164715_convert_advisory_severities_name_to_citext_and_enforce_unique',
+        'advisory_severities',
+        ['color' => 'red'],
+        AdvisorySeverityNameUniquenessFeature::class,
+        AdvisoryStatusNameUniquenessFeature::class,
+    );
 });
