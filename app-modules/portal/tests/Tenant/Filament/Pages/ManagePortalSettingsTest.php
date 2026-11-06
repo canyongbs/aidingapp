@@ -36,9 +36,12 @@
 
 use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Portal\Filament\Pages\ManagePortalSettings;
+use AidingApp\Portal\Settings\AiDisclaimerSettings;
 use AidingApp\Portal\Settings\PortalSettings;
+use App\Features\AiDisclaimerFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -118,10 +121,37 @@ it('saves a customized AI disclaimer text', function (): void {
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect(app(PortalSettings::class)->ai_disclaimer_text)->toBe('Custom disclaimer.');
+    expect(app(AiDisclaimerSettings::class)->text)->toBe('Custom disclaimer.');
 
     Livewire::test(ManagePortalSettings::class)
         ->fillForm(['ai_disclaimer_text' => ''])
         ->call('save')
         ->assertHasFormErrors(['ai_disclaimer_text' => 'required']);
+});
+
+it('saves portal settings before the AI disclaimer settings exist', function (): void {
+    AiDisclaimerFeature::deactivate();
+
+    DB::table('settings')->where('group', 'portal_ai_disclaimer')->delete();
+
+    $licenseSettings = app(LicenseSettings::class);
+    $licenseSettings->data->addons->knowledgeManagement = true;
+    $licenseSettings->save();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo(['settings.view-any', 'settings.*.update']);
+
+    actingAs($user);
+
+    $portalSettings = app(PortalSettings::class);
+    $portalSettings->knowledge_management_portal_enabled = true;
+    $portalSettings->save();
+
+    Livewire::test(ManagePortalSettings::class)
+        ->assertFormFieldHidden('ai_disclaimer_enabled')
+        ->fillForm(['page_title' => 'Updated Help Center'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(app(PortalSettings::class)->page_title)->toBe('Updated Help Center');
 });

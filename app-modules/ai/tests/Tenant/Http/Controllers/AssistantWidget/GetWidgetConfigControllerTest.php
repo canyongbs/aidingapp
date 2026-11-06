@@ -35,7 +35,9 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Portal\Settings\AiDisclaimerSettings;
 use AidingApp\Portal\Settings\PortalSettings;
+use App\Features\AiDisclaimerFeature;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\File;
 use Illuminate\Testing\TestResponse;
@@ -168,9 +170,9 @@ it('exposes the default AI disclaimer', function () use ($getWidgetConfig): void
 });
 
 it('exposes a customized AI disclaimer', function () use ($getWidgetConfig): void {
-    $portalSettings = app(PortalSettings::class);
-    $portalSettings->ai_disclaimer_text = 'Custom disclaimer.';
-    $portalSettings->save();
+    $disclaimerSettings = app(AiDisclaimerSettings::class);
+    $disclaimerSettings->text = 'Custom disclaimer.';
+    $disclaimerSettings->save();
 
     $getWidgetConfig()
         ->assertOk()
@@ -178,9 +180,17 @@ it('exposes a customized AI disclaimer', function () use ($getWidgetConfig): voi
 });
 
 it('does not expose the AI disclaimer when it is disabled', function () use ($getWidgetConfig): void {
-    $portalSettings = app(PortalSettings::class);
-    $portalSettings->ai_disclaimer_enabled = false;
-    $portalSettings->save();
+    $disclaimerSettings = app(AiDisclaimerSettings::class);
+    $disclaimerSettings->is_enabled = false;
+    $disclaimerSettings->save();
+
+    $getWidgetConfig()
+        ->assertOk()
+        ->assertJson(['ai_disclaimer' => null]);
+});
+
+it('does not expose the AI disclaimer before the feature is activated', function () use ($getWidgetConfig): void {
+    AiDisclaimerFeature::deactivate();
 
     $getWidgetConfig()
         ->assertOk()

@@ -42,13 +42,13 @@ return new class () extends SettingsMigration {
     public function up(): void
     {
         try {
-            $this->migrator->add('portal.ai_disclaimer_enabled', true);
+            $this->migrator->add('portal_ai_disclaimer.is_enabled', true);
         } catch (SettingAlreadyExists $exception) {
             // do nothing
         }
 
         try {
-            $this->migrator->add('portal.ai_disclaimer_text', 'Responses are AI generated. Check important info.');
+            $this->migrator->add('portal_ai_disclaimer.text', 'Responses are AI generated. Check important info.');
         } catch (SettingAlreadyExists $exception) {
             // do nothing
         }
@@ -57,7 +57,7 @@ return new class () extends SettingsMigration {
     // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function down(): void
     {
-        $this->migrator->deleteIfExists('portal.ai_disclaimer_enabled');
-        $this->migrator->deleteIfExists('portal.ai_disclaimer_text');
+        $this->migrator->deleteIfExists('portal_ai_disclaimer.is_enabled');
+        $this->migrator->deleteIfExists('portal_ai_disclaimer.text');
     }
 };

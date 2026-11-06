@@ -45,8 +45,6 @@ use CanyonGBS\Common\Enums\Color;
 
 class PortalSettings extends SettingsWithMedia
 {
-    public const DEFAULT_AI_DISCLAIMER_TEXT = 'Responses are AI generated. Check important info.';
-
     public null $logo = null;
 
     public null $favicon = null;
@@ -61,10 +59,6 @@ class PortalSettings extends SettingsWithMedia
     public bool $knowledge_management_portal_requires_authentication = false;
 
     public bool $ai_support_assistant = false;
-
-    public bool $ai_disclaimer_enabled = true;
-
-    public string $ai_disclaimer_text = self::DEFAULT_AI_DISCLAIMER_TEXT;
 
     public bool $ai_assistant_service_requests = false;
 
