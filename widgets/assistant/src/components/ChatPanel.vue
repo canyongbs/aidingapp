@@ -148,7 +148,11 @@
                     @retry="retryMessage"
                 />
 
-                <ChatInput :disabled="isSending || isAssistantResponding" :disclaimer="aiDisclaimer" @send="sendMessage" />
+                <ChatInput
+                    :disabled="isSending || isAssistantResponding"
+                    :disclaimer="aiDisclaimer"
+                    @send="sendMessage"
+                />
             </template>
         </div>
     </Transition>
