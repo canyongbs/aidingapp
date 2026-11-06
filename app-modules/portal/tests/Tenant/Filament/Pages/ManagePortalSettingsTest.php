@@ -34,7 +34,9 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Portal\Filament\Pages\ManagePortalSettings;
+use AidingApp\Portal\Settings\PortalSettings;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Livewire\Livewire;
@@ -61,4 +63,65 @@ it('is gated with proper access control', function (): void {
     $settings->save();
 
     Livewire::test(ManagePortalSettings::class)->assertOk();
+});
+
+it('shows the AI disclaimer fields only when the AI Support Assistant is enabled', function (): void {
+    $aiSettings = app(AiSupportAssistantSettings::class);
+    $aiSettings->is_enabled = true;
+    $aiSettings->save();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('settings.view-any');
+
+    actingAs($user);
+
+    $portalSettings = app(PortalSettings::class);
+    $portalSettings->knowledge_management_portal_enabled = true;
+    $portalSettings->ai_support_assistant = false;
+    $portalSettings->save();
+
+    Livewire::test(ManagePortalSettings::class)
+        ->assertFormFieldHidden('ai_disclaimer_enabled')
+        ->assertFormFieldHidden('ai_disclaimer_text');
+
+    $portalSettings->ai_support_assistant = true;
+    $portalSettings->save();
+
+    Livewire::test(ManagePortalSettings::class)
+        ->assertFormFieldVisible('ai_disclaimer_enabled')
+        ->assertFormFieldVisible('ai_disclaimer_text')
+        ->fillForm(['ai_disclaimer_enabled' => false])
+        ->assertFormFieldHidden('ai_disclaimer_text');
+});
+
+it('saves a customized AI disclaimer text', function (): void {
+    $aiSettings = app(AiSupportAssistantSettings::class);
+    $aiSettings->is_enabled = true;
+    $aiSettings->save();
+
+    $licenseSettings = app(LicenseSettings::class);
+    $licenseSettings->data->addons->knowledgeManagement = true;
+    $licenseSettings->save();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo(['settings.view-any', 'settings.*.update']);
+
+    actingAs($user);
+
+    $portalSettings = app(PortalSettings::class);
+    $portalSettings->knowledge_management_portal_enabled = true;
+    $portalSettings->ai_support_assistant = true;
+    $portalSettings->save();
+
+    Livewire::test(ManagePortalSettings::class)
+        ->fillForm(['ai_disclaimer_text' => 'Custom disclaimer.'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(app(PortalSettings::class)->ai_disclaimer_text)->toBe('Custom disclaimer.');
+
+    Livewire::test(ManagePortalSettings::class)
+        ->fillForm(['ai_disclaimer_text' => ''])
+        ->call('save')
+        ->assertHasFormErrors(['ai_disclaimer_text' => 'required']);
 });

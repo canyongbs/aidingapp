@@ -85,6 +85,7 @@ class GetWidgetConfigController extends Controller
                 ? route('widgets.assistant.api.service-request-types')
                 : null,
             'portal_service_management' => $serviceManagementEnabled,
+            'ai_disclaimer' => $settings->ai_disclaimer_enabled ? $settings->ai_disclaimer_text : null,
         ]);
     }
 }

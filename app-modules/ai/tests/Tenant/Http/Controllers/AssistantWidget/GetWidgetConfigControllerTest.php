@@ -160,3 +160,29 @@ it('exposes service management for an authenticated contact when the license add
 
     expect($response->json('service_request_types_url'))->not()->toBeNull();
 });
+
+it('exposes the default AI disclaimer', function () use ($getWidgetConfig): void {
+    $getWidgetConfig()
+        ->assertOk()
+        ->assertJson(['ai_disclaimer' => 'Responses are AI generated. Check important info.']);
+});
+
+it('exposes a customized AI disclaimer', function () use ($getWidgetConfig): void {
+    $portalSettings = app(PortalSettings::class);
+    $portalSettings->ai_disclaimer_text = 'Custom disclaimer.';
+    $portalSettings->save();
+
+    $getWidgetConfig()
+        ->assertOk()
+        ->assertJson(['ai_disclaimer' => 'Custom disclaimer.']);
+});
+
+it('does not expose the AI disclaimer when it is disabled', function () use ($getWidgetConfig): void {
+    $portalSettings = app(PortalSettings::class);
+    $portalSettings->ai_disclaimer_enabled = false;
+    $portalSettings->save();
+
+    $getWidgetConfig()
+        ->assertOk()
+        ->assertJson(['ai_disclaimer' => null]);
+});

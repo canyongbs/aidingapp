@@ -135,6 +135,17 @@ class ManagePortalSettings extends SettingsPage
                             ->label('AI Support Assistant')
                             ->visible(fn (Get $get): bool => $get('knowledge_management_portal_enabled') && app(AiSupportAssistantSettings::class)->is_enabled)
                             ->live(),
+                        Toggle::make('ai_disclaimer_enabled')
+                            ->label('AI Disclaimer')
+                            ->visible(fn (Get $get): bool => $get('knowledge_management_portal_enabled') && $get('ai_support_assistant') && app(AiSupportAssistantSettings::class)->is_enabled)
+                            ->live()
+                            ->columnSpanFull(),
+                        TextInput::make('ai_disclaimer_text')
+                            ->label('AI Disclaimer Text')
+                            ->required()
+                            ->maxLength(255)
+                            ->visible(fn (Get $get): bool => $get('knowledge_management_portal_enabled') && $get('ai_support_assistant') && $get('ai_disclaimer_enabled') && app(AiSupportAssistantSettings::class)->is_enabled)
+                            ->columnSpanFull(),
                         Toggle::make('embed_assistant')
                             ->label('Embed Support Assistant')
                             ->visible(fn (Get $get): bool => $get('knowledge_management_portal_enabled') && $get('ai_support_assistant'))
