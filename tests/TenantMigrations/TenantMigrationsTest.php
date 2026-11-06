@@ -50,6 +50,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use App\Features\ChangeRequestStatusNameUniquenessFeature;
 use App\Features\ChangeRequestTypeNameUniquenessFeature;
+use App\Features\CheckboxesFormFieldFeature;
 use App\Features\ContractNameUniquenessFeature;
 use App\Features\ContractTypeNameUniquenessFeature;
 use App\Features\EmailTemplateNameUniquenessFeature;
@@ -1887,6 +1888,8 @@ describe('2026_11_03_124335_tmp_convert_checkbox_form_fields_to_checkboxes', fun
             $uncheckedResponseId = $insertResponse($checkboxId, '0');
             $textResponseId = $insertResponse($textId, 'true');
 
+            expect(CheckboxesFormFieldFeature::active())->toBeFalse();
+
             $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_11_03_124335_tmp_convert_checkbox_form_fields_to_checkboxes.php']);
             expect($migrate)->toBe(Command::SUCCESS);
 
@@ -1909,7 +1912,8 @@ describe('2026_11_03_124335_tmp_convert_checkbox_form_fields_to_checkboxes', fun
 
             expect($response($checkedResponseId))->toBe('["1"]')
                 ->and($response($uncheckedResponseId))->toBe('[]')
-                ->and($response($textResponseId))->toBe('true');
+                ->and($response($textResponseId))->toBe('true')
+                ->and(CheckboxesFormFieldFeature::active())->toBeTrue();
         });
     });
 });
