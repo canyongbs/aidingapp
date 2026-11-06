@@ -3,6 +3,9 @@ info:
   type: folder
   seq: 2
 
+request:
+  auth: inherit
+
 docs:
   content: Contact endpoints. Run **Create Contact** first to populate `contactId` for the other requests. Running **Organizations > Create Organization** beforehand links the example contact to that organization.
   type: text/markdown

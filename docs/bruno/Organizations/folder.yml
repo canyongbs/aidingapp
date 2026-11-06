@@ -3,6 +3,9 @@ info:
   type: folder
   seq: 1
 
+request:
+  auth: inherit
+
 docs:
   content: Organization endpoints. Run **Create Organization** first to populate `organizationId` / `organizationName` for the other requests.
   type: text/markdown
