@@ -36,8 +36,10 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use AidingApp\Portal\Actions\ResolvePortalContact;
 use AidingApp\Portal\DataTransferObjects\AdvisoryDetailData;
 use AidingApp\ServiceManagement\Models\Advisory;
+use AidingApp\ServiceManagement\Models\Scopes\VisibleToPortalContact;
 use App\Settings\LicenseSettings;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
@@ -45,11 +47,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ShowAdvisoryController
 {
-    public function __invoke(string $advisory): JsonResponse
+    public function __invoke(ResolvePortalContact $resolvePortalContact, string $advisory): JsonResponse
     {
         abort_unless(resolve(LicenseSettings::class)->data?->addons->advisoryManagement, Response::HTTP_FORBIDDEN);
 
         $advisory = Advisory::query()
+            ->tap(new VisibleToPortalContact($resolvePortalContact()))
             ->with([
                 'severity',
                 'status',

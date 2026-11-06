@@ -37,13 +37,16 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Database\Factories\AdvisoryFactory;
+use AidingApp\ServiceManagement\Enums\AdvisoryVisibility;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -68,9 +71,28 @@ class Advisory extends Model implements Auditable
         'severity_id',
         'status_id',
         'assigned_department_id',
+        'visibility',
+        'is_visibility_restricted',
     ];
 
     protected $table = 'advisories';
+
+    // TODO: Cleanup Task (advisory-visibility): mirror the `visibility` ('public') and `is_visibility_restricted` (false) column defaults in an `$attributes` property.
+
+    /**
+     * @return BelongsToMany<ContactType, $this, covariant AdvisoryVisibilityContactType>
+     */
+    public function restrictedToContactTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            related: ContactType::class,
+            table: (new AdvisoryVisibilityContactType())->getTable(),
+            foreignPivotKey: 'advisory_id',
+            relatedPivotKey: 'contact_type_id',
+        )
+            ->using(AdvisoryVisibilityContactType::class)
+            ->withTimestamps();
+    }
 
     /**
      * @return BelongsTo<Department, $this>
@@ -116,5 +138,16 @@ class Advisory extends Model implements Auditable
         assert($lastUpdatedAt instanceof CarbonInterface);
 
         return $lastUpdatedAt;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'visibility' => AdvisoryVisibility::class,
+            'is_visibility_restricted' => 'boolean',
+        ];
     }
 }
