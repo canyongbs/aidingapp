@@ -47,8 +47,10 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use App\Features\ChangeRequestStatusNameUniquenessFeature;
 use App\Features\ChangeRequestTypeNameUniquenessFeature;
+use App\Features\CheckboxesFormFieldFeature;
 use App\Features\ContractNameUniquenessFeature;
 use App\Features\ContractTypeNameUniquenessFeature;
 use App\Features\EmailTemplateNameUniquenessFeature;
@@ -1820,6 +1822,98 @@ describe('2026_11_04_120100_convert_contracts_name_to_citext_and_enforce_unique'
             expect(DB::table('contracts')->where('id', $firstId)->value('name'))->toBe('Master Agreement')
                 ->and(DB::table('contracts')->where('id', $secondId)->value('name'))->toBe('master agreement-2')
                 ->and(ContractNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+});
+
+// TODO: Cleanup Task (convert-checkbox-form-fields): delete this describe and the test within
+describe('2026_11_03_124335_tmp_convert_checkbox_form_fields_to_checkboxes', function (): void {
+    it('converts checkbox fields, their content blocks and their responses to checkboxes', function (): void {
+        isolatedMigration('2026_11_03_124335_tmp_convert_checkbox_form_fields_to_checkboxes', function (): void {
+            $block = fn (string $type, string $fieldId): array => [
+                'type' => 'customBlock',
+                'attrs' => ['id' => $type, 'config' => ['fieldId' => $fieldId, 'label' => 'Agree', 'isRequired' => true]],
+            ];
+
+            $form = ServiceRequestForm::factory()->create();
+            $checkboxId = (string) Str::uuid();
+            $textId = (string) Str::uuid();
+
+            $insertField = fn (string $id, string $type, string $label): bool => DB::table('service_request_form_fields')->insert([
+                'id' => $id,
+                'label' => $label,
+                'type' => $type,
+                'is_required' => true,
+                'config' => json_encode(['description' => 'Please confirm']),
+                'service_request_form_id' => $form->getKey(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $insertField($checkboxId, 'checkbox', 'Agree');
+            $insertField($textId, 'text_input', 'Name');
+
+            DB::table('service_request_forms')->where('id', $form->getKey())->update([
+                'content' => json_encode(['type' => 'doc', 'content' => [
+                    $block('checkbox', $checkboxId),
+                    ['type' => 'grid', 'content' => [['type' => 'gridColumn', 'content' => [$block('text_input', $textId)]]]],
+                ]]),
+            ]);
+
+            $submissionId = (string) Str::uuid();
+
+            DB::table('service_request_form_submissions')->insert([
+                'id' => $submissionId,
+                'service_request_form_id' => $form->getKey(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $insertResponse = function (string $fieldId, string $response) use ($submissionId): string {
+                $id = (string) Str::uuid();
+
+                DB::table('service_request_form_field_submission')->insert([
+                    'id' => $id,
+                    'response' => $response,
+                    'service_request_form_field_id' => $fieldId,
+                    'service_request_form_submission_id' => $submissionId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                return $id;
+            };
+
+            $checkedResponseId = $insertResponse($checkboxId, 'true');
+            $uncheckedResponseId = $insertResponse($checkboxId, '0');
+            $textResponseId = $insertResponse($textId, 'true');
+
+            expect(CheckboxesFormFieldFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_11_03_124335_tmp_convert_checkbox_form_fields_to_checkboxes.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $field = DB::table('service_request_form_fields')->where('id', $checkboxId)->first();
+            $config = json_decode($field->config, associative: true);
+
+            expect($field->type)->toBe('checkboxes')
+                ->and($config['description'])->toBe('Please confirm')
+                ->and($config['hasOtherOption'])->toBeFalse()
+                ->and($config['options'])->toBe([['label' => 'Agree', 'value' => '1']])
+                ->and(DB::table('service_request_form_fields')->where('id', $textId)->value('type'))->toBe('text_input');
+
+            $content = json_decode(DB::table('service_request_forms')->where('id', $form->getKey())->value('content'), associative: true);
+
+            expect($content['content'][0]['attrs']['id'])->toBe('checkboxes')
+                ->and($content['content'][0]['attrs']['config']['options'])->toBe([['label' => 'Agree', 'value' => '1']])
+                ->and($content['content'][1]['content'][0]['content'][0]['attrs']['id'])->toBe('text_input');
+
+            $response = fn (string $id): string => DB::table('service_request_form_field_submission')->where('id', $id)->value('response');
+
+            expect($response($checkedResponseId))->toBe('["1"]')
+                ->and($response($uncheckedResponseId))->toBe('[]')
+                ->and($response($textResponseId))->toBe('true')
+                ->and(CheckboxesFormFieldFeature::active())->toBeTrue();
         });
     });
 });
