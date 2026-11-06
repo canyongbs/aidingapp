@@ -40,6 +40,7 @@
 
     const props = defineProps({
         disabled: { type: Boolean, default: false },
+        disclaimer: { type: String, default: null },
     });
 
     const textarea = ref(null);
@@ -128,5 +129,7 @@
                 @click="send"
             />
         </div>
+
+        <p v-if="disclaimer" class="mt-2 text-center text-xs text-gray-500">{{ disclaimer }}</p>
     </div>
 </template>
