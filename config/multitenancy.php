@@ -35,6 +35,7 @@
 */
 
 use App\Models\Tenant;
+use App\Multitenancy\Tasks\ForgetResolvedSettingsTask;
 use App\Multitenancy\Tasks\PrefixCacheTask;
 use App\Multitenancy\Tasks\SwitchAppUrl;
 use App\Multitenancy\Tasks\SwitchMailTask;
@@ -84,6 +85,7 @@ return [
         SwitchMailTask::class,
         SwitchS3FilesystemTask::class,
         SwitchS3PublicFilesystemTask::class,
+        ForgetResolvedSettingsTask::class,
         //\Spatie\Multitenancy\Tasks\SwitchRouteCacheTask::class,
     ],
 
