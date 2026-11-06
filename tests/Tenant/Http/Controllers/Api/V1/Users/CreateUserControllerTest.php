@@ -249,6 +249,25 @@ it('resolves department case-insensitively', function (): void {
     expect($response['data']['department']['id'])->toBe($department->id);
 });
 
+it('resolves department case-insensitively for multibyte characters', function (): void {
+    $department = Department::factory()->create(['name' => 'Équipe']);
+
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('user.create');
+    Sanctum::actingAs($user, ['api']);
+
+    $response = postJson(route('api.v1.users.store', absolute: false), [
+        'first_name' => 'Team',
+        'last_name' => 'User',
+        'email' => 'team@example.com',
+        'is_external' => false,
+        'department' => 'ÉQUIPE',
+    ]);
+
+    $response->assertCreated();
+    expect($response['data']['department']['id'])->toBe($department->id);
+});
+
 it('resolves role names case-insensitively', function (): void {
     $role = Role::factory()->create(['name' => 'Support Agent', 'guard_name' => 'web']);
 
