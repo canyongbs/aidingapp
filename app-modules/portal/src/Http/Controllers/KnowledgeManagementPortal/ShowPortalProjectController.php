@@ -136,7 +136,7 @@ class ShowPortalProjectController
 
         $milestones = ProjectMilestone::query()
             ->withoutArchived()
-            ->where('project_id', $portalProject->getKey())
+            ->whereRelation('pipeline', 'project_id', $portalProject->getKey())
             ->when(
                 $entries->currentPage() === 1,
                 fn (Builder $query): Builder => $query->where(

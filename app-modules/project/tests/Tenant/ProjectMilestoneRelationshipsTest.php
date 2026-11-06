@@ -49,7 +49,6 @@ it('belongs to a pipeline', function (): void {
     $pipeline = Pipeline::factory()->for($project)->create();
 
     $milestone = ProjectMilestone::factory()->create([
-        'project_id' => $project->id,
         'pipeline_id' => $pipeline->id,
     ]);
 
@@ -63,7 +62,6 @@ it('requires a pipeline', function (): void {
     $project = Project::factory()->create();
 
     expect(fn () => ProjectMilestone::query()->forceCreate([
-        'project_id' => $project->id,
         'pipeline_id' => null,
         'title' => 'Orphan',
         'description' => 'No pipeline',
@@ -78,7 +76,6 @@ it('can change its pipeline', function (): void {
     $pipelines = Pipeline::factory()->count(2)->for($project)->create();
 
     $milestone = ProjectMilestone::factory()->create([
-        'project_id' => $project->id,
         'pipeline_id' => $pipelines->first()->id,
     ]);
 
@@ -96,11 +93,35 @@ it('is deleted when its pipeline is deleted', function (): void {
     $pipeline = Pipeline::factory()->for($project)->create();
 
     $milestone = ProjectMilestone::factory()->create([
-        'project_id' => $project->id,
         'pipeline_id' => $pipeline->id,
     ]);
 
     $pipeline->delete();
 
     expect(ProjectMilestone::query()->whereKey($milestone->getKey())->exists())->toBeFalse();
+});
+
+it('derives its project from its pipeline', function (): void {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $otherProject = Project::factory()->create();
+
+    $milestone = ProjectMilestone::factory()->forProject($project)->create();
+    $otherMilestone = ProjectMilestone::factory()->forProject($otherProject)->create();
+
+    expect($milestone->project->is($project))->toBeTrue()
+        ->and($project->milestones()->pluck('project_milestones.id')->all())->toBe([$milestone->getKey()])
+        ->and($otherProject->milestones()->pluck('project_milestones.id')->all())->toBe([$otherMilestone->getKey()]);
+});
+
+it('moves to another project when its pipeline changes', function (): void {
+    asSuperAdmin();
+
+    $milestone = ProjectMilestone::factory()->create();
+    $otherPipeline = Pipeline::factory()->create();
+
+    $milestone->update(['pipeline_id' => $otherPipeline->getKey()]);
+
+    expect($milestone->fresh()->project->is($otherPipeline->project))->toBeTrue();
 });

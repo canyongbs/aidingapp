@@ -84,7 +84,7 @@ it('lists directly assigned projects with progress based on non-archived tasks',
     ]);
     $archivedEntry = PipelineEntry::factory()->for($completeStage, 'pipelineStage')->create();
     $archivedEntry->archive();
-    $archivedMilestone = ProjectMilestone::factory()->for($project)->create();
+    $archivedMilestone = ProjectMilestone::factory()->forProject($project)->create();
     PipelineEntry::factory()
         ->for($completeStage, 'pipelineStage')
         ->for($archivedMilestone, 'milestone')

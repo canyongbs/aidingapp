@@ -56,15 +56,24 @@ class ProjectMilestoneFactory extends Factory
     public function definition(): array
     {
         return [
-            'project_id' => Project::factory(),
-            'pipeline_id' => fn (array $attributes): string | PipelineFactory => Pipeline::query()
-                ->where('project_id', $attributes['project_id'])
-                ->withoutArchived()
-                ->tap(new ActivePipelineFirst())
-                ->value('id') ?? Pipeline::factory()->state(['project_id' => $attributes['project_id']]),
+            'pipeline_id' => Pipeline::factory(),
             'title' => str($this->faker->words(asText: true))->headline()->toString(),
             'description' => $this->faker->sentence(3),
             'created_by_id' => User::factory(),
         ];
+    }
+
+    /**
+     * Attach the milestone to the project's active pipeline, creating one if the project has none.
+     */
+    public function forProject(Project $project): static
+    {
+        return $this->state([
+            'pipeline_id' => fn (): string | PipelineFactory => Pipeline::query()
+                ->where('project_id', $project->getKey())
+                ->withoutArchived()
+                ->tap(new ActivePipelineFirst())
+                ->value('id') ?? Pipeline::factory()->for($project),
+        ]);
     }
 }

@@ -99,7 +99,7 @@ it('can belong to a milestone', function (): void {
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->id]);
+    $milestone = ProjectMilestone::factory()->forProject($project)->create();
 
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->id,
@@ -193,7 +193,7 @@ it('can change and clear its milestone', function (): void {
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    $milestones = ProjectMilestone::factory()->count(2)->create(['project_id' => $project->id]);
+    $milestones = ProjectMilestone::factory()->count(2)->forProject($project)->create();
 
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->id,
