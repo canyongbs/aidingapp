@@ -1,0 +1,74 @@
+info:
+  name: Create Contact
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/contacts"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "first_name": "Jane",
+        "last_name": "Doe",
+        "preferred_name": "JD",
+        "email": "jane.doe.{{contactSuffix}}@example.com",
+        "mobile": "555-0101",
+        "phone": "555-0102",
+        "type": "{{contactType}}",
+        "organization": "{{organizationName}}",
+        "job_title": "IT Coordinator",
+        "employee_id": "EMP-{{contactSuffix}}",
+        "work_number": "555-0103",
+        "work_extension": "42",
+        "student_id": null,
+        "school": "Example University",
+        "academic_department": "Information Technology",
+        "program": null,
+        "address": "456 Example Avenue",
+        "address_2": "Suite 100",
+        "city": "Phoenix",
+        "state": "AZ",
+        "postal_code": "85002",
+        "country": "United States"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Contact emails must be unique, so each run uses a fresh suffix.
+        bru.setVar('contactSuffix', Date.now().toString());
+
+        // Only link an organization when Create Organization has been run (and not archived since).
+        if (!bru.getVar('organizationName')) {
+          const body = req.getBody();
+
+          delete body.organization;
+          req.setBody(body);
+        }
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 201) {
+          bru.setVar('contactId', res.getBody().data.id);
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Creates a contact and stores its `id` in the `contactId` runtime variable.
+
+  - `first_name` and `last_name` are required; combined (with a space) they must not exceed 255 characters.
+  - `type` takes the exact, case-insensitive **name** of a contact type (the `contactType` environment variable). If omitted or `null`, the configured default contact type is used.
+  - `organization` takes the exact, case-insensitive **name** of an organization. The pre-request script uses the organization from **Create Organization** when available, and removes the field otherwise. Without an organization, the contact is matched to one by its email domain.
+  - `email` must be unique, and cannot belong to an archived contact.

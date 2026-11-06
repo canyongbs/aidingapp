@@ -1,0 +1,48 @@
+opencollection: 1.0.0
+
+info:
+  name: Aiding App API
+
+request:
+  headers:
+    - name: Accept
+      value: application/json
+  auth:
+    type: bearer
+    token: "{{apiKey}}"
+
+docs:
+  content: |-
+    # Aiding App API
+
+    Requests for the Aiding App REST API (`/api/v1`).
+
+    ## Setup
+
+    1. Select the **Local** environment in the top-right environment selector, and open its settings.
+    2. `baseUrl` defaults to `https://test.aidingapp.local`. Change it if your local tenant uses a different domain (no trailing slash). To target any other environment, create your own environment in Bruno and do not commit it.
+    3. Set the `apiKey` secret to an API key. Create one in the tenant under **Users > Programmatic Users**: create a programmatic user with the permissions the requests need, then copy its generated API key. Secrets are stored by Bruno on your machine and are never written to the collection files.
+    4. Optionally adjust the other environment variables (for example `organizationIndustry`, `organizationType`, and `contactType`) to names that exist in the tenant. The defaults are seeded into every new tenant.
+
+    All requests inherit **Bearer** auth (`{{apiKey}}`) and the `Accept: application/json` header from the collection settings.
+
+    ## Chaining
+
+    The **Create** requests store the records they create in runtime variables (for example `organizationId` and `contactId`) that the View, Update, and Archive / Delete requests in the same folder use. Running the whole collection with the **Runner** exercises every endpoint end to end, and removes the records it creates.
+
+    > **Caution:** the Create, Update, and Archive / Delete requests change data. Only run them against a tenant you are allowed to modify.
+
+    ## Contributing
+
+    Any change that adds or changes an API endpoint must add or update its requests in this collection. See `docs/how-tos/test-the-api-with-bruno.md`.
+
+    Full API reference: `{{baseUrl}}/docs/api/v1`.
+  type: text/markdown
+
+bundled: false
+
+extensions:
+  bruno:
+    ignore:
+      - node_modules
+      - .git
