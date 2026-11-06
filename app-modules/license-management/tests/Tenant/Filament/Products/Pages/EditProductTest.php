@@ -72,7 +72,7 @@ it('displays the product data', function (): void {
 
 it('can update a product', function (): void {
     $user = User::factory()->create();
-    $user->givePermissionTo(['product.view-any', 'product.*.update']);
+    $user->givePermissionTo(['licenses.view-any', 'licenses.*.update']);
     actingAs($user);
 
     $product = Product::factory()->create();
@@ -151,9 +151,9 @@ describe('name uniqueness feature flag', function (): void {
 });
 
 describe('authorization', function (): void {
-    it('denies access to the edit page without the `product.*.update` permission', function (): void {
+    it('denies access to the edit page without the `licenses.*.update` permission', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('product.view-any');
+        $user->givePermissionTo('licenses.view-any');
         actingAs($user);
 
         $product = Product::factory()->create();
@@ -169,7 +169,7 @@ describe('authorization', function (): void {
         $settings->save();
 
         $user = User::factory()->create();
-        $user->givePermissionTo(['product.view-any', 'product.*.update']);
+        $user->givePermissionTo(['licenses.view-any', 'licenses.*.update']);
         actingAs($user);
 
         $product = Product::factory()->create();
@@ -177,9 +177,9 @@ describe('authorization', function (): void {
         get(ProductResource::getUrl('edit', ['record' => $product]))->assertForbidden();
     });
 
-    it('allows access to the edit page with the `product.*.update` permission', function (): void {
+    it('allows access to the edit page with the `licenses.*.update` permission', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo(['product.view-any', 'product.*.update']);
+        $user->givePermissionTo(['licenses.view-any', 'licenses.*.update']);
         actingAs($user);
 
         $product = Product::factory()->create();
