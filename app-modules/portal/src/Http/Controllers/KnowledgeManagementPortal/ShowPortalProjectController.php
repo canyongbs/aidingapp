@@ -43,9 +43,13 @@ use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
+use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -98,6 +102,13 @@ class ShowPortalProjectController
             })
             ->with([
                 'pipelineStage:id,pipeline_id,name,classification',
+                'assignedTo' => function (Relation $relation): void {
+                    assert($relation instanceof MorphTo);
+                    $relation->constrain([
+                        User::class => fn (Builder $query): Builder => $query->select(['id', 'first_name', 'last_name']),
+                        Contact::class => fn (Builder $query): Builder => $query->select(['id', 'full_name']),
+                    ]);
+                },
             ])
             ->orderByRaw('pipeline_entries.project_milestone_id IS NULL')
             ->orderBy(
@@ -113,6 +124,8 @@ class ShowPortalProjectController
                 'pipeline_entries.project_milestone_id',
                 'pipeline_entries.start_date',
                 'pipeline_entries.due',
+                'pipeline_entries.assigned_to_type',
+                'pipeline_entries.assigned_to_id',
             ]);
 
         $milestoneIdsOnPage = $entries->getCollection()
@@ -272,7 +285,7 @@ class ShowPortalProjectController
     }
 
     /**
-     * @return array{id: string, name: string, stage: string, start_date: ?string, due: ?string}
+     * @return array{id: string, name: string, stage: string, assigned_to: ?array{name: string, type: string}, start_date: ?string, due: ?string}
      */
     private function mapEntry(PipelineEntry $entry): array
     {
@@ -280,8 +293,27 @@ class ShowPortalProjectController
             'id' => $entry->getKey(),
             'name' => $entry->name,
             'stage' => $entry->pipelineStage->name,
+            'assigned_to' => $this->mapAssignedTo($entry->assignedTo),
             'start_date' => $entry->start_date?->toDateString(),
             'due' => $entry->due?->toDateString(),
         ];
+    }
+
+    /**
+     * @return array{name: string, type: string}|null
+     */
+    private function mapAssignedTo(?Model $assignedTo): ?array
+    {
+        return match (true) {
+            $assignedTo instanceof User => [
+                'name' => $assignedTo->full_name,
+                'type' => 'Service Provider',
+            ],
+            $assignedTo instanceof Contact => [
+                'name' => $assignedTo->full_name,
+                'type' => 'Customer',
+            ],
+            default => null,
+        };
     }
 }
