@@ -1973,6 +1973,9 @@ describe('2026_11_06_233425_tmp_grant_change_request_permissions_to_users_and_ro
             $typeUser = User::factory()->create();
             $typeUser->givePermissionTo($permissionsFor('change_request_type'));
 
+            $systemUser = SystemUser::factory()->create();
+            $systemUser->givePermissionTo($permissionsFor('change_request_type'));
+
             $roleUser = User::factory()->create();
             $role = Role::factory()->create();
             $relatedRolePermissions = [
@@ -1988,11 +1991,12 @@ describe('2026_11_06_233425_tmp_grant_change_request_permissions_to_users_and_ro
             $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_11_06_233425_tmp_grant_change_request_permissions_to_users_and_roles_with_related_permissions.php']);
             expect($migrate)->toBe(Command::SUCCESS);
 
-            $directPermissionNames = fn (User $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->all();
+            $directPermissionNames = fn (User|SystemUser $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->all();
             $rolePermissionNames = fn (Role $role): array => $role->refresh()->permissions()->pluck('name')->all();
 
             expect($directPermissionNames($statusUser))->toContain(...$changeRequestPermissions)
                 ->and($directPermissionNames($typeUser))->toContain(...$changeRequestPermissions)
+                ->and($directPermissionNames($systemUser))->toContain(...$changeRequestPermissions)
                 ->and($rolePermissionNames($role))->toContain(...$changeRequestPermissions)
                 ->and($directPermissionNames($unrelatedUser))->not->toContain(...$changeRequestPermissions)
                 ->and($directPermissionNames($unrelatedUser))->toBe(['product.view-any']);

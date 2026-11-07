@@ -38,6 +38,7 @@ use Database\Migrations\Concerns\CanModifyPermissions;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\PermissionRegistrar;
 
 return new class () extends Migration {
     use CanModifyPermissions;
@@ -75,6 +76,10 @@ return new class () extends Migration {
         DB::transaction(function (): void {
             collect($this->guards)
                 ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
+
+            DB::afterCommit(function (): void {
+                app(PermissionRegistrar::class)->forgetCachedPermissions();
+            });
         });
     }
 
@@ -90,6 +95,10 @@ return new class () extends Migration {
 
                     $this->createPermissions($permissions, $guard);
                 });
+
+            DB::afterCommit(function (): void {
+                app(PermissionRegistrar::class)->forgetCachedPermissions();
+            });
         });
     }
 };
