@@ -74,7 +74,7 @@ return new class () extends Migration {
                     ->withTrashed()
                     ->whereHas('permissions', fn (Builder $query) => $query->where('name', $relatedPermission))
                     ->each(fn (User $user) => $user->givePermissionTo($permission));
-                
+
                 SystemUser::query()
                     ->withTrashed()
                     ->whereHas('permissions', fn (Builder $query) => $query->where('name', $relatedPermission))
