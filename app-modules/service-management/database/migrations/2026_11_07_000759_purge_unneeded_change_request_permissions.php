@@ -74,6 +74,14 @@ return new class () extends Migration {
     {
         DB::transaction(function (): void {
             collect($this->guards)
+                ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
+        });
+    }
+
+    public function down(): void
+    {
+        DB::transaction(function (): void {
+            collect($this->guards)
                 ->each(function (string $guard): void {
                     $permissions = Arr::except($this->permissions, keys: DB::table('permissions')
                         ->where('guard_name', $guard)
@@ -82,14 +90,6 @@ return new class () extends Migration {
 
                     $this->createPermissions($permissions, $guard);
                 });
-        });
-    }
-
-    public function down(): void
-    {
-        DB::transaction(function (): void {
-            collect($this->guards)
-                ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
         });
     }
 };

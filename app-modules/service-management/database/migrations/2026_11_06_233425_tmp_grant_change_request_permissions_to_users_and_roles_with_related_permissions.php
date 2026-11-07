@@ -36,6 +36,7 @@
 
 use AidingApp\Authorization\Models\Role;
 use App\Features\ChangeRequestPermissionCompressionFeature;
+use App\Models\SystemUser;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Migrations\Migration;
@@ -70,8 +71,14 @@ return new class () extends Migration {
                 $permission = 'change_request.' . Str::after($relatedPermission, '.');
 
                 User::query()
+                    ->withTrashed()
                     ->whereHas('permissions', fn (Builder $query) => $query->where('name', $relatedPermission))
                     ->each(fn (User $user) => $user->givePermissionTo($permission));
+                
+                SystemUser::query()
+                    ->withTrashed()
+                    ->whereHas('permissions', fn (Builder $query) => $query->where('name', $relatedPermission))
+                    ->each(fn (SystemUser $systemUser) => $systemUser->givePermissionTo($permission));
 
                 Role::query()
                     ->whereHas('permissions', fn (Builder $query) => $query->where('name', $relatedPermission))
