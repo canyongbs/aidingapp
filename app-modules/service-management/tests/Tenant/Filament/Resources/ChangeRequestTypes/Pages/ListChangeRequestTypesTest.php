@@ -47,7 +47,7 @@ use function Tests\Helpers\testResourceRequiresPermissionForAccess;
 
 testResourceRequiresPermissionForAccess(
     resource: ChangeRequestTypeResource::class,
-    permissions: 'change_request_type.view-any',
+    permissions: 'change_request.view-any',
     method: 'index',
     feature: 'changeManagement'
 );
@@ -63,7 +63,7 @@ it('is gated with proper access control', function (): void {
 
     Livewire::test(ListChangeRequestTypes::class)->assertForbidden();
 
-    $user->givePermissionTo('change_request_type.view-any');
+    $user->givePermissionTo('change_request.view-any');
     $user->refresh();
 
     Livewire::test(ListChangeRequestTypes::class)->assertForbidden();
@@ -74,19 +74,19 @@ it('is gated with proper access control', function (): void {
     Livewire::test(ListChangeRequestTypes::class)->assertOk();
 });
 
-it('only shows the bulk delete action to a user with the change_request_type.delete permission', function (): void {
+it('only shows the bulk delete action to a user with the change_request.delete permission', function (): void {
     ChangeRequestType::factory(15)->create();
 
     $user = User::factory()
         ->create()
-        ->givePermissionTo('change_request_type.view-any', 'change_request_type.*.view');
+        ->givePermissionTo('change_request.view-any', 'change_request.*.view');
 
     actingAs($user);
 
     Livewire::test(ListChangeRequestTypes::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
-    $user->givePermissionTo('change_request_type.*.delete');
+    $user->givePermissionTo('change_request.*.delete');
 
     Livewire::test(ListChangeRequestTypes::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());

@@ -36,6 +36,7 @@
 
 use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\Models\PermissionGroup;
+use AidingApp\Authorization\Models\Role;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ContractManagement\Models\ContractType;
 use AidingApp\Engagement\Models\EmailTemplate;
@@ -1953,4 +1954,48 @@ describe('2026_11_04_164715_convert_advisory_severities_name_to_citext_and_enfor
         AdvisorySeverityNameUniquenessFeature::class,
         AdvisoryStatusNameUniquenessFeature::class,
     );
+});
+
+// TODO: Cleanup Task - Compress Change Request Permissions: delete this describe and the test within
+describe('2026_11_06_233425_tmp_grant_change_request_permissions_to_users_and_roles_with_related_permissions', function (): void {
+    it('grants the equivalent change request permission to users with a related permission', function (): void {
+        isolatedMigration('2026_11_06_233425_tmp_grant_change_request_permissions_to_users_and_roles_with_related_permissions', function (): void {
+            $permissionsFor = fn (string $prefix): array => array_map(
+                fn (string $action): string => "{$prefix}.{$action}",
+                ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'],
+            );
+
+            $changeRequestPermissions = $permissionsFor('change_request');
+
+            $statusUser = User::factory()->create();
+            $statusUser->givePermissionTo($permissionsFor('change_request_status'));
+
+            $typeUser = User::factory()->create();
+            $typeUser->givePermissionTo($permissionsFor('change_request_type'));
+
+            $roleUser = User::factory()->create();
+            $role = Role::factory()->create();
+            $relatedRolePermissions = [
+                ...$permissionsFor('change_request_status'),
+                ...$permissionsFor('change_request_type'),
+            ];
+            $role->givePermissionTo($relatedRolePermissions);
+            $roleUser->assignRole($role);
+
+            $unrelatedUser = User::factory()->create();
+            $unrelatedUser->givePermissionTo('product.view-any');
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_11_06_233425_tmp_grant_change_request_permissions_to_users_and_roles_with_related_permissions.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $directPermissionNames = fn (User $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->all();
+            $rolePermissionNames = fn (Role $role): array => $role->refresh()->permissions()->pluck('name')->all();
+
+            expect($directPermissionNames($statusUser))->toContain(...$changeRequestPermissions)
+                ->and($directPermissionNames($typeUser))->toContain(...$changeRequestPermissions)
+                ->and($rolePermissionNames($role))->toContain(...$changeRequestPermissions)
+                ->and($directPermissionNames($unrelatedUser))->not->toContain(...$changeRequestPermissions)
+                ->and($directPermissionNames($unrelatedUser))->toBe(['product.view-any']);
+        });
+    });
 });
