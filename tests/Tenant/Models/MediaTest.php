@@ -37,6 +37,7 @@
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Models\Media;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 describe('attachmentContentDisposition', function (): void {
     it('builds an ISO-8859-1 safe disposition for a file name that is not Latin-1 representable', function (): void {
@@ -114,6 +115,12 @@ describe('getDownloadFilename', function (): void {
 
 describe('getTemporaryUrl', function (): void {
     $makeMedia = function (string $name): Media {
+        Storage::fake('s3');
+
+        Storage::disk('s3')->buildTemporaryUrlsUsing(
+            fn (string $path, DateTimeInterface $expiration, array $options): string => "https://media.test/{$path}?response-content-disposition=" . rawurlencode($options['ResponseContentDisposition'] ?? ''),
+        );
+
         $update = ServiceRequestUpdate::factory()->create();
 
         $update
