@@ -56,7 +56,7 @@ class AdvisorySeverityResource extends JsonResource
             'id' => $this->resource->id,
             'name' => $this->resource->name,
             'color' => $this->resource->color,
-            /** The severity's rank. Lower numbers are higher severities. */
+            /** The severity's position in the severity order. Lower numbers are higher severities. */
             'sort' => $this->resource->sort,
             'created_at' => $this->resource->created_at,
             'updated_at' => $this->resource->updated_at,

@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{baseUrl}}/api/v1/advisory-severities?page[number]=1&page[size]=30&sort=rank"
+  url: "{{baseUrl}}/api/v1/advisory-severities?page[number]=1&page[size]=30&sort=sort"
   params:
     - name: page[number]
       value: "1"
@@ -16,9 +16,9 @@ http:
       type: query
       description: Results per page. Defaults to 30.
     - name: sort
-      value: rank
+      value: sort
       type: query
-      description: One of `rank` (highest severity first), `name`, `created_at`, `updated_at`. Prefix with `-` for descending.
+      description: One of `sort` (highest severity first), `name`, `created_at`, `updated_at`. Prefix with `-` for descending.
     - name: filter[name]
       value: Critical
       type: query
@@ -50,6 +50,6 @@ settings:
   encodeUrl: true
 
 docs: |-
-  Lists advisory severities, ranked from the highest severity to the lowest by default, paginated with `page[number]` / `page[size]`. If the `advisorySeverityId` runtime variable is not set, it is set to the first severity returned.
+  Lists advisory severities, sorted from the highest severity to the lowest by default, paginated with `page[number]` / `page[size]`. If the `advisorySeverityId` runtime variable is not set, it is set to the first severity returned.
 
   Enable any of the disabled `filter[...]` query parameters in the **Params** tab to try them.

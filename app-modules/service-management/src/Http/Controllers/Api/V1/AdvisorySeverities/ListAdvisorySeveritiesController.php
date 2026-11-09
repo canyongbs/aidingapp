@@ -64,8 +64,8 @@ class ListAdvisorySeveritiesController
     ])]
     #[QueryParameter('page[number]', description: 'Control which page of advisory severities is returned in the response.', type: 'int', default: 1)]
     #[QueryParameter('page[size]', description: 'Control how many advisory severities are returned in the response.', type: 'int', default: 30)]
-    #[QueryParameter('sort', description: 'Control the order of advisory severities that are returned in the response. `rank` orders them from the highest severity to the lowest, as in the admin panel and portal. Ascending order is used by default, prepend the sort with `-` to sort descending.', type: 'string', default: 'rank', examples: [
-        'rank' => new Example('rank'),
+    #[QueryParameter('sort', description: 'Control the order of advisory severities that are returned in the response. `sort` orders them from the highest severity to the lowest, as in the admin panel and portal. Ascending order is used by default, prepend the sort with `-` to sort descending.', type: 'string', default: 'sort', examples: [
+        'sort' => new Example('sort'),
         'name' => new Example('name'),
         'created_at' => new Example('created_at'),
         'updated_at' => new Example('updated_at'),
@@ -74,7 +74,7 @@ class ListAdvisorySeveritiesController
     {
         Gate::authorize('viewAny', AdvisorySeverity::class);
 
-        $rank = AllowedSort::callback('rank', function (Builder $query, bool $descending): void {
+        $sort = AllowedSort::callback('sort', function (Builder $query, bool $descending): void {
             $direction = $descending ? 'desc' : 'asc';
 
             if (AdvisorySeveritySortFeature::active()) {
@@ -90,12 +90,12 @@ class ListAdvisorySeveritiesController
                 AllowedFilter::exact('color'),
             )
             ->allowedSorts(
-                $rank,
+                $sort,
                 AllowedSort::field('name'),
                 AllowedSort::field('created_at'),
                 AllowedSort::field('updated_at'),
             )
-            ->defaultSort($rank)
+            ->defaultSort($sort)
             ->jsonPaginate()
             ->toResourceCollection(AdvisorySeverityResource::class);
     }

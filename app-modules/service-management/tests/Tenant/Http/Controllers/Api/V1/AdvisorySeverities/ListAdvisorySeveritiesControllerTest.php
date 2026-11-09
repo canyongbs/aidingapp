@@ -126,10 +126,10 @@ it('can filter advisory severities by color', function () use ($actingAsAdvisory
         ->assertJsonPath('data.0.id', $red->getKey());
 });
 
-it('sorts advisory severities by rank by default and supports descending sorts', function () use ($actingAsAdvisorySeverityViewer): void {
+it('sorts advisory severities by `sort` by default and supports descending sorts', function () use ($actingAsAdvisorySeverityViewer): void {
     $actingAsAdvisorySeverityViewer();
 
-    // Ranked in an order that differs from the names' alphabetical order and its reverse.
+    // Sorted in an order that differs from the names' alphabetical order and its reverse.
     AdvisorySeverity::factory()->create(['name' => 'Maintenance', 'sort' => 3]);
     AdvisorySeverity::factory()->create(['name' => 'Outage', 'sort' => 1]);
     AdvisorySeverity::factory()->create(['name' => 'Degraded', 'sort' => 2]);
@@ -137,11 +137,11 @@ it('sorts advisory severities by rank by default and supports descending sorts',
     expect(getJson(route('api.v1.advisory-severities.index', [], false))->json('data.*.name'))
         ->toBe(['Outage', 'Degraded', 'Maintenance']);
 
-    expect(getJson(route('api.v1.advisory-severities.index', ['sort' => '-rank'], false))->json('data.*.name'))
+    expect(getJson(route('api.v1.advisory-severities.index', ['sort' => '-sort'], false))->json('data.*.name'))
         ->toBe(['Maintenance', 'Degraded', 'Outage']);
 });
 
-it('ranks advisory severities by name when `AdvisorySeveritySortFeature` is inactive', function () use ($actingAsAdvisorySeverityViewer): void {
+it('sorts advisory severities by name by default when `AdvisorySeveritySortFeature` is inactive', function () use ($actingAsAdvisorySeverityViewer): void {
     AdvisorySeveritySortFeature::deactivate();
 
     $actingAsAdvisorySeverityViewer();
