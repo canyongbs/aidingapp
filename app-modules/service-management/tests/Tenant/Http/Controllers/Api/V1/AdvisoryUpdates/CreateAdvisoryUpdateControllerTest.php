@@ -153,6 +153,21 @@ it('can add an internal update with a date', function () use ($actingAsAdvisoryU
         ->and($advisoryUpdate->date->toIso8601ZuluString())->toBe('2026-11-01T09:30:00Z');
 });
 
+it('converts a date with a timezone offset to the same moment', function () use ($actingAsAdvisoryUpdateCreator, $openAdvisory): void {
+    $actingAsAdvisoryUpdateCreator();
+
+    $response = postJson(route('api.v1.advisories.updates.store', ['advisory' => $openAdvisory()], false), [
+        'title' => 'Investigating',
+        'update' => 'We are looking into it.',
+        'date' => '2026-11-01T10:30:00+01:00',
+    ]);
+
+    $response->assertCreated()
+        ->assertJsonPath('data.date', '2026-11-01T09:30:00.000000Z');
+
+    expect(AdvisoryUpdate::query()->findOrFail($response->json('data.id'))->date->toIso8601ZuluString())->toBe('2026-11-01T09:30:00Z');
+});
+
 it('can move the advisory to another status, referenced by name regardless of case', function () use ($actingAsAdvisoryUpdateCreator, $openAdvisory): void {
     $actingAsAdvisoryUpdateCreator(['advisory.*.update']);
 
@@ -210,6 +225,7 @@ it('validates the request', function (array $data, array $errors) use ($actingAs
     'internal boolean' => [['internal' => 'yes'], ['internal']],
     'internal not null' => [['internal' => null], ['internal']],
     'date date' => [['date' => 'soon'], ['date']],
+    'date string' => [['date' => 20261101], ['date']],
     'date not null' => [['date' => null], ['date']],
     'status exists' => [['status' => 'Unknown'], ['status']],
     'status not soft deleted' => [['status' => 'Retired status'], ['status']],

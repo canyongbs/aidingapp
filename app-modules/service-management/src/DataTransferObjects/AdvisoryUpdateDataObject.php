@@ -69,7 +69,8 @@ class AdvisoryUpdateDataObject extends Data
             update: self::value($data, 'update'),
             // The `boolean` rule also accepts `0`, `1`, `'0'`, and `'1'`.
             internal: $internal instanceof Optional ? $internal : (bool) $internal,
-            date: is_string($date) ? CarbonImmutable::parse($date) : $date,
+            // The `date` column has no timezone, so an explicit offset is converted rather than stored as wall-clock time.
+            date: is_string($date) ? CarbonImmutable::parse($date)->setTimezone(config()->string('app.timezone')) : $date,
             status: self::value($data, 'status'),
         );
     }
