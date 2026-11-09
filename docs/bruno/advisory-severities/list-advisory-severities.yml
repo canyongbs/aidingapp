@@ -1,0 +1,55 @@
+info:
+  name: List Advisory Severities
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/advisory-severities?page[number]=1&page[size]=30&sort=rank"
+  params:
+    - name: page[number]
+      value: "1"
+      type: query
+      description: Page to return. Defaults to 1.
+    - name: page[size]
+      value: "30"
+      type: query
+      description: Results per page. Defaults to 30.
+    - name: sort
+      value: rank
+      type: query
+      description: One of `rank` (highest severity first), `name`, `created_at`, `updated_at`. Prefix with `-` for descending.
+    - name: filter[name]
+      value: Critical
+      type: query
+      description: Partial match on the name.
+      disabled: true
+    - name: filter[color]
+      value: red
+      type: query
+      description: Exact color, such as `red` or `amber`.
+      disabled: true
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // Gives View a record to show when Create has not set one.
+        const advisorySeverities = res.getBody()?.data ?? [];
+
+        if (res.getStatus() === 200 && !bru.getVar('advisorySeverityId') && advisorySeverities.length) {
+          bru.setVar('advisorySeverityId', advisorySeverities[0].id);
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Lists advisory severities, ranked from the highest severity to the lowest by default, paginated with `page[number]` / `page[size]`. If the `advisorySeverityId` runtime variable is not set, it is set to the first severity returned.
+
+  Enable any of the disabled `filter[...]` query parameters in the **Params** tab to try them.

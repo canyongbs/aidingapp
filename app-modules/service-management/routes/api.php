@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisorySeverities\ListAdvisorySeveritiesController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisorySeverities\ViewAdvisorySeverityController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryStatuses\CreateAdvisoryStatusController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryStatuses\DeleteAdvisoryStatusController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryStatuses\ListAdvisoryStatusesController;
@@ -46,6 +48,13 @@ use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ViewServ
 use Illuminate\Support\Facades\Route;
 
 Route::api(majorVersion: 1, routes: function (): void {
+    Route::name('advisory-severities.')
+        ->prefix('advisory-severities')
+        ->group(function (): void {
+            Route::get('/', ListAdvisorySeveritiesController::class)->name('index');
+            Route::get('/{advisorySeverity}', ViewAdvisorySeverityController::class)->name('show');
+        });
+
     Route::name('advisory-statuses.')
         ->prefix('advisory-statuses')
         ->group(function (): void {
