@@ -1,0 +1,11 @@
+info:
+  name: Advisories
+  type: folder
+  seq: 5
+
+request:
+  auth: inherit
+
+docs:
+  content: Advisory endpoints. These endpoints use the **Advisory** permissions, like the admin panel, and require the Advisory Management add-on.
+  type: text/markdown
