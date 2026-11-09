@@ -54,7 +54,7 @@ it('downloads a file by redirecting to its media url', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
-    $file = ProjectFile::factory()->state(['project_id' => $project->id])->create();
+    $file = ProjectFile::factory()->state(['project_id' => $project->getKey()])->create();
     $file->addMedia(UploadedFile::fake()->image('plan.png'))->usingName('Launch Plan')->toMediaCollection('file');
 
     Livewire::test(ProjectFilesWidget::class, ['record' => $project])
@@ -66,7 +66,7 @@ it('hides the download action for a file without media', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
-    $file = ProjectFile::factory()->state(['project_id' => $project->id])->create();
+    $file = ProjectFile::factory()->state(['project_id' => $project->getKey()])->create();
 
     Livewire::test(ProjectFilesWidget::class, ['record' => $project])
         ->assertActionHidden(TestAction::make('download')->table($file));
@@ -75,7 +75,7 @@ it('hides the download action for a file without media', function (): void {
 describe('authorization', function (): void {
     it('does not let a user without view access download a file', function (): void {
         $project = Project::factory()->create();
-        $file = ProjectFile::factory()->state(['project_id' => $project->id])->create();
+        $file = ProjectFile::factory()->state(['project_id' => $project->getKey()])->create();
         $file->addMedia(UploadedFile::fake()->image('plan.png'))->toMediaCollection('file');
 
         $user = User::factory()->create();

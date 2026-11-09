@@ -223,7 +223,7 @@ it('downloads a file by redirecting to its media url', function (): void {
     Storage::fake('s3');
 
     $project = Project::factory()->create();
-    $file = ProjectFile::factory()->state(['project_id' => $project->id])->create();
+    $file = ProjectFile::factory()->state(['project_id' => $project->getKey()])->create();
     $file->addMedia(UploadedFile::fake()->image('plan.png'))->usingName('Launch Plan')->toMediaCollection('file');
 
     Livewire::test(ManageFiles::class, ['record' => $project->getKey()])
