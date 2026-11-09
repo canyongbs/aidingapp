@@ -1,0 +1,36 @@
+info:
+  name: Update Advisory Status
+  type: http
+  seq: 4
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/v1/advisory-statuses/:advisoryStatus"
+  params:
+    - name: advisoryStatus
+      value: "{{advisoryStatusId}}"
+      type: path
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "classification": "resolved"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Partially updates an advisory status: only the attributes included in the body are changed. Accepts the same attributes as **Create Advisory Status**.
+
+  Uses the `advisoryStatusId` runtime variable, which **Create Advisory Status** sets automatically. You can also replace the `advisoryStatus` path parameter with any advisory status ID from **List Advisory Statuses**.
