@@ -81,7 +81,7 @@ class Media extends SpatieMedia
 
         $extension = (string) $this->extension;
 
-        if ($extension === '' || str_ends_with(mb_strtolower($name), '.' . mb_strtolower($extension))) {
+        if ($extension === '' || str_ends_with(mb_strtolower($name, 'UTF-8'), '.' . mb_strtolower($extension, 'UTF-8'))) {
             return $name;
         }
 
