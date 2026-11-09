@@ -45,14 +45,14 @@ use Illuminate\Http\JsonResponse;
 class CreateAdvisorySeverityController
 {
     /**
-     * Create an advisory severity. The name must be unique among advisory severities, ignoring case. New severities are ranked lowest, as in the admin panel.
+     * Create an advisory severity. The name must be unique among advisory severities, ignoring case. New severities are sorted last (lowest severity), as in the admin panel.
      */
     #[Group('Advisory Severities')]
     public function __invoke(CreateAdvisorySeverityRequest $request): JsonResponse
     {
         $advisorySeverity = AdvisorySeverity::query()->create($request->validated());
 
-        // Refreshed so the response has the rank the observer assigned in the database.
+        // Refreshed so the response has the `sort` the observer assigned in the database.
         return $advisorySeverity
             ->refresh()
             ->toResource(AdvisorySeverityResource::class)

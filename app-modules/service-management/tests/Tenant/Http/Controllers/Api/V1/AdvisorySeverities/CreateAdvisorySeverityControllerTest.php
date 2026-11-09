@@ -99,7 +99,7 @@ it('can create an advisory severity', function () use ($actingAsAdvisorySeverity
         ->and($advisorySeverity->color)->toBe(Color::Red);
 });
 
-it('ranks a new advisory severity lowest', function () use ($actingAsAdvisorySeverityCreator): void {
+it('sorts a new advisory severity last', function () use ($actingAsAdvisorySeverityCreator): void {
     $actingAsAdvisorySeverityCreator();
 
     AdvisorySeverity::factory()->create(['sort' => 1]);

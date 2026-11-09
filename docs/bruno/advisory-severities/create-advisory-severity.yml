@@ -45,7 +45,7 @@ settings:
   encodeUrl: true
 
 docs: |-
-  Creates an advisory severity and stores its `id` and `name` in the `advisorySeverityId` and `advisorySeverityName` runtime variables. New severities are ranked lowest.
+  Creates an advisory severity and stores its `id` and `name` in the `advisorySeverityId` and `advisorySeverityName` runtime variables. New severities are sorted last (lowest severity).
 
   - `name` is required and must be unique among advisory severities, ignoring case.
   - `color` is required, such as `red`, `amber`, or `green`. The shades `black`, `light-gray`, `dark-gray`, and `navy` are not allowed, like in the admin panel.
