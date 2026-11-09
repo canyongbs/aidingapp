@@ -129,15 +129,16 @@ it('can filter advisory severities by color', function () use ($actingAsAdvisory
 it('sorts advisory severities by rank by default and supports descending sorts', function () use ($actingAsAdvisorySeverityViewer): void {
     $actingAsAdvisorySeverityViewer();
 
-    AdvisorySeverity::factory()->create(['name' => 'Minor', 'sort' => 3]);
-    AdvisorySeverity::factory()->create(['name' => 'Critical', 'sort' => 1]);
-    AdvisorySeverity::factory()->create(['name' => 'Major', 'sort' => 2]);
+    // Ranked in an order that differs from the names' alphabetical order and its reverse.
+    AdvisorySeverity::factory()->create(['name' => 'Maintenance', 'sort' => 3]);
+    AdvisorySeverity::factory()->create(['name' => 'Outage', 'sort' => 1]);
+    AdvisorySeverity::factory()->create(['name' => 'Degraded', 'sort' => 2]);
 
     expect(getJson(route('api.v1.advisory-severities.index', [], false))->json('data.*.name'))
-        ->toBe(['Critical', 'Major', 'Minor']);
+        ->toBe(['Outage', 'Degraded', 'Maintenance']);
 
     expect(getJson(route('api.v1.advisory-severities.index', ['sort' => '-rank'], false))->json('data.*.name'))
-        ->toBe(['Minor', 'Major', 'Critical']);
+        ->toBe(['Maintenance', 'Degraded', 'Outage']);
 });
 
 it('ranks advisory severities by name when `AdvisorySeveritySortFeature` is inactive', function () use ($actingAsAdvisorySeverityViewer): void {
