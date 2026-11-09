@@ -39,19 +39,15 @@ use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Models\SystemUser;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\postJson;
-
-beforeEach(function (): void {
-    config()->set('audit.enabled', false);
-});
+use function Tests\actingAsApiUser;
 
 it('is gated with proper access control', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $user = SystemUser::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
         'update' => 'Test update',
@@ -63,7 +59,7 @@ it('requires service_request.view-any permission', function (): void {
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request_update.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
         'update' => 'Test update',
@@ -75,7 +71,7 @@ it('requires service_request_update.create permission', function (): void {
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
         'update' => 'Test update',
@@ -88,7 +84,7 @@ it('can create a service request update with valid data', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request_update.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $response = postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
         'update' => 'This is a test update',
@@ -113,7 +109,7 @@ it('can create a non-internal service request update', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request_update.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $response = postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
         'update' => 'This is a public update',
@@ -136,7 +132,7 @@ it('defaults internal to false when it is omitted', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request_update.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
         'update' => 'Update without internal flag',
@@ -152,7 +148,7 @@ it('can create a service request update with only required fields', function ():
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request_update.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $response = postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
         'update' => 'Test update',
@@ -170,7 +166,7 @@ it('validates that update field is required', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request_update.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [])
         ->assertUnprocessable()
@@ -183,7 +179,7 @@ it('validates that update field must be a string', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request_update.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
         'update' => 12345,
@@ -197,7 +193,7 @@ it('validates that internal field must be a boolean', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request_update.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
         'update' => 'Test update',
@@ -210,7 +206,7 @@ it('returns 404 for a non-existent service request', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request_update.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => 'non-existent-id'], false), [
         'update' => 'Test update',
@@ -223,7 +219,7 @@ it('stamps the update as created by the authenticated system user', function ():
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request_update.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
         'update' => 'Authored update',
@@ -243,7 +239,7 @@ it('can create a service request update with file attachments', function (): voi
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request_update.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $response = postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
         'update' => 'Update with file',
@@ -275,7 +271,7 @@ it('persists the update associated with the correct service request', function (
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request_update.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
         'update' => 'Correct service request update',

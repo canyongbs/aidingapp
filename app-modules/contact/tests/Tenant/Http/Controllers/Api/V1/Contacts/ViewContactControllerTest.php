@@ -37,14 +37,9 @@
 use AidingApp\Contact\Models\Contact;
 use App\Features\ContactArchivingFeature;
 use App\Models\SystemUser;
-use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\getJson;
-
-beforeEach(function (): void {
-    // Disable auditing, which causes testing issues when authenticating with a fake Sanctum token.
-    config()->set('audit.enabled', false);
-});
+use function Tests\actingAsApiUser;
 
 it('is gated with proper access control', function (): void {
     $contact = Contact::factory()->create();
@@ -53,25 +48,25 @@ it('is gated with proper access control', function (): void {
         ->assertUnauthorized();
 
     $user = SystemUser::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     getJson(route('api.v1.contacts.show', ['contact' => $contact], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('contact.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     getJson(route('api.v1.contacts.show', ['contact' => $contact], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('contact.*.view');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     getJson(route('api.v1.contacts.show', ['contact' => $contact], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['contact.view-any', 'contact.*.view']);
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     getJson(route('api.v1.contacts.show', ['contact' => $contact], false))
         ->assertOk();
 });
@@ -79,7 +74,7 @@ it('is gated with proper access control', function (): void {
 it('returns the contact', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['contact.view-any', 'contact.*.view']);
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $contact = Contact::factory()->create();
 
@@ -101,7 +96,7 @@ it('returns the contact', function (): void {
 it('returns not found for a deleted contact', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['contact.view-any', 'contact.*.view']);
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $contact = Contact::factory()->create();
     $contact->delete();
@@ -113,7 +108,7 @@ it('returns not found for a deleted contact', function (): void {
 it('returns not found for an archived contact', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['contact.view-any', 'contact.*.view']);
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $contact = Contact::factory()->archived()->create();
 
@@ -124,7 +119,7 @@ it('returns not found for an archived contact', function (): void {
 it('checks permissions before returning not found for an archived contact', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('contact.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $contact = Contact::factory()->archived()->create();
 
@@ -137,7 +132,7 @@ it('returns an archived contact while contact archiving is inactive', function (
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['contact.view-any', 'contact.*.view']);
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $contact = Contact::factory()->archived()->create();
 
@@ -149,7 +144,7 @@ it('returns an archived contact while contact archiving is inactive', function (
 it('returns not found for an identifier that is not a UUID', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['contact.view-any', 'contact.*.view']);
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     getJson(route('api.v1.contacts.show', ['contact' => 'not-a-uuid'], false))
         ->assertNotFound();

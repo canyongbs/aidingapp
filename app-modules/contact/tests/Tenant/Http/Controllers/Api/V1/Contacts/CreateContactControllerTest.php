@@ -40,24 +40,19 @@ use AidingApp\Contact\Models\Organization;
 use App\Features\ContactArchivingFeature;
 use App\Features\OrganizationArchivingFeature;
 use App\Models\SystemUser;
-use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\postJson;
+use function Tests\actingAsApiUser;
 
 $actingAsContactCreator = function (): SystemUser {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['contact.view-any', 'contact.create']);
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     return $user;
 };
-
-beforeEach(function (): void {
-    // Disable auditing, which causes testing issues when authenticating with a fake Sanctum token.
-    config()->set('audit.enabled', false);
-});
 
 it('is gated with proper access control', function () use ($actingAsContactCreator): void {
     $payload = ['first_name' => 'Jane', 'last_name' => 'Doe', 'type' => ContactType::factory()->create(['name' => 'Customer'])->name];
@@ -66,19 +61,19 @@ it('is gated with proper access control', function () use ($actingAsContactCreat
         ->assertUnauthorized();
 
     $user = SystemUser::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     postJson(route('api.v1.contacts.store', [], false), $payload)
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('contact.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     postJson(route('api.v1.contacts.store', [], false), $payload)
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('contact.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     postJson(route('api.v1.contacts.store', [], false), $payload)
         ->assertForbidden();
 
@@ -91,7 +86,7 @@ it('does not reveal validation details to unauthorized users', function (): void
     $existing = Contact::factory()->create();
 
     $user = SystemUser::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.contacts.store', [], false), ['email' => $existing->email])
         ->assertForbidden();

@@ -42,23 +42,18 @@ use App\Features\OrganizationArchivingFeature;
 use App\Models\SystemUser;
 use App\Models\User;
 use Illuminate\Support\Arr;
-use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\patchJson;
+use function Tests\actingAsApiUser;
 
 $actingAsContactUpdater = function (): SystemUser {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['contact.view-any', 'contact.*.update']);
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     return $user;
 };
-
-beforeEach(function (): void {
-    // Disable auditing, which causes testing issues when authenticating with a fake Sanctum token.
-    config()->set('audit.enabled', false);
-});
 
 it('is gated with proper access control', function () use ($actingAsContactUpdater): void {
     $contact = Contact::factory()->create();
@@ -68,19 +63,19 @@ it('is gated with proper access control', function () use ($actingAsContactUpdat
         ->assertUnauthorized();
 
     $user = SystemUser::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), $payload)
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('contact.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), $payload)
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('contact.*.update');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), $payload)
         ->assertForbidden();
 
@@ -353,7 +348,7 @@ it('returns not found for an archived contact before validating the request', fu
 it('checks permissions before returning not found for an archived contact', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('contact.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $contact = Contact::factory()->archived()->create();
 
