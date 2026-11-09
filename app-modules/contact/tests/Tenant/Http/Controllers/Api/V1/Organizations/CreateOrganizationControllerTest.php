@@ -38,39 +38,34 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use App\Models\SystemUser;
-use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\postJson;
+use function Tests\actingAsApiUser;
 
 $actingAsOrganizationCreator = function (): SystemUser {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     return $user;
 };
 
-beforeEach(function (): void {
-    // Disable auditing, which causes testing issues when authenticating with a fake Sanctum token.
-    config()->set('audit.enabled', false);
-});
-
 it('is gated with proper access control', function (): void {
     $user = SystemUser::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     postJson(route('api.v1.organizations.store', [], false), ['name' => 'Acme'])
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     postJson(route('api.v1.organizations.store', [], false), ['name' => 'Acme'])
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     postJson(route('api.v1.organizations.store', [], false), ['name' => 'Acme'])
         ->assertForbidden();
 
@@ -79,7 +74,7 @@ it('is gated with proper access control', function (): void {
 
 it('checks permissions before validating the request', function (): void {
     $user = SystemUser::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.organizations.store', [], false), [])
         ->assertForbidden();

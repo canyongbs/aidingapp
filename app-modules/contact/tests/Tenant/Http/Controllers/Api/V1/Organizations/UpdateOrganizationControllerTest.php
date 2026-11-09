@@ -39,41 +39,36 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use App\Models\SystemUser;
-use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\patchJson;
+use function Tests\actingAsApiUser;
 
 $actingAsOrganizationUpdater = function (): SystemUser {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.*.update');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     return $user;
 };
-
-beforeEach(function (): void {
-    // Disable auditing, which causes testing issues when authenticating with a fake Sanctum token.
-    config()->set('audit.enabled', false);
-});
 
 it('is gated with proper access control', function (): void {
     $organization = Organization::factory()->create(['name' => 'Original']);
 
     $user = SystemUser::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => 'Changed'])
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.*.update');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => 'Changed'])
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => 'Changed'])
         ->assertForbidden();
 
@@ -84,7 +79,7 @@ it('checks permissions before validating the request', function (): void {
     $organization = Organization::factory()->create();
 
     $user = SystemUser::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => ''])
         ->assertForbidden();
@@ -367,7 +362,7 @@ it('checks permissions before returning not found for an archived organization',
     $organization = Organization::factory()->archived()->create();
 
     $user = SystemUser::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => 'Changed'])
         ->assertForbidden();

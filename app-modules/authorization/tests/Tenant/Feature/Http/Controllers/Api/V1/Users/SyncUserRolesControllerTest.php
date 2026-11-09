@@ -39,20 +39,15 @@ use App\Models\Authenticatable;
 use App\Models\SystemUser;
 use App\Models\User;
 use Illuminate\Support\Str;
-use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\putJson;
-
-beforeEach(function (): void {
-    // Disable auditing, which causes testing issues when authenticating with a fake Sanctum token.
-    config()->set('audit.enabled', false);
-});
+use function Tests\actingAsApiUser;
 
 it('is gated with proper access control', function (): void {
     $targetUser = User::factory()->create();
 
     $actingUser = SystemUser::factory()->create();
-    Sanctum::actingAs($actingUser, ['api']);
+    actingAsApiUser($actingUser);
     putJson(route('api.v1.users.roles.sync', ['user' => $targetUser], false), [
         'role_ids' => [],
     ])
@@ -60,7 +55,7 @@ it('is gated with proper access control', function (): void {
 
     $actingUser = SystemUser::factory()->create();
     $actingUser->givePermissionTo('user.*.update');
-    Sanctum::actingAs($actingUser, ['api']);
+    actingAsApiUser($actingUser);
     putJson(route('api.v1.users.roles.sync', ['user' => $targetUser], false), [
         'role_ids' => [],
     ])
@@ -72,7 +67,7 @@ it('returns a user resource', function (): void {
     $actingUser->givePermissionTo('user.*.update');
 
     $targetUser = User::factory()->create();
-    Sanctum::actingAs($actingUser, ['api']);
+    actingAsApiUser($actingUser);
 
     $response = putJson(route('api.v1.users.roles.sync', ['user' => $targetUser], false), [
         'role_ids' => [],
@@ -88,7 +83,7 @@ it('returns correct user fields', function (string $responseKey, Closure $getExp
     $actingUser->givePermissionTo('user.*.update');
 
     $targetUser = User::factory()->create();
-    Sanctum::actingAs($actingUser, ['api']);
+    actingAsApiUser($actingUser);
 
     $response = putJson(route('api.v1.users.roles.sync', ['user' => $targetUser], false), [
         'role_ids' => [],
@@ -109,7 +104,7 @@ it('returns correct roles relationship structure', function (): void {
 
     $role = Role::factory()->create();
     $targetUser = User::factory()->create();
-    Sanctum::actingAs($actingUser, ['api']);
+    actingAsApiUser($actingUser);
 
     $response = putJson(route('api.v1.users.roles.sync', ['user' => $targetUser], false), [
         'role_ids' => [$role->id],
@@ -126,7 +121,7 @@ it('returns an empty roles list when no role_ids are provided', function (): voi
     $actingUser->givePermissionTo('user.*.update');
 
     $targetUser = User::factory()->create();
-    Sanctum::actingAs($actingUser, ['api']);
+    actingAsApiUser($actingUser);
 
     $response = putJson(route('api.v1.users.roles.sync', ['user' => $targetUser], false), [
         'role_ids' => [],
@@ -147,7 +142,7 @@ it('returns 404 if the target user is an admin', function (): void {
 
     $actingUser = SystemUser::factory()->create();
     $actingUser->givePermissionTo('user.*.update');
-    Sanctum::actingAs($actingUser, ['api']);
+    actingAsApiUser($actingUser);
 
     putJson(route('api.v1.users.roles.sync', ['user' => $targetUser], false), [
         'role_ids' => [],
@@ -165,7 +160,7 @@ it('returns 422 if any provided role_ids correspond to admin roles', function ()
 
     $actingUser = SystemUser::factory()->create();
     $actingUser->givePermissionTo('user.*.update');
-    Sanctum::actingAs($actingUser, ['api']);
+    actingAsApiUser($actingUser);
 
     putJson(route('api.v1.users.roles.sync', ['user' => $targetUser], false), [
         'role_ids' => [$adminRole->id],
@@ -179,7 +174,7 @@ it('returns 422 if any provided role_ids do not exist', function (): void {
 
     $actingUser = SystemUser::factory()->create();
     $actingUser->givePermissionTo('user.*.update');
-    Sanctum::actingAs($actingUser, ['api']);
+    actingAsApiUser($actingUser);
 
     putJson(route('api.v1.users.roles.sync', ['user' => $targetUser], false), [
         'role_ids' => [(string) Str::uuid()],
@@ -194,7 +189,7 @@ it('adds roles in the list that were not previously assigned', function (): void
 
     $role = Role::factory()->create();
     $targetUser = User::factory()->create();
-    Sanctum::actingAs($actingUser, ['api']);
+    actingAsApiUser($actingUser);
 
     putJson(route('api.v1.users.roles.sync', ['user' => $targetUser], false), [
         'role_ids' => [$role->id],
@@ -213,7 +208,7 @@ it('removes roles not in the list', function (): void {
     $roleToRemove = Role::factory()->create();
     $targetUser = User::factory()->create();
     $targetUser->roles()->sync([$roleToKeep->id, $roleToRemove->id]);
-    Sanctum::actingAs($actingUser, ['api']);
+    actingAsApiUser($actingUser);
 
     putJson(route('api.v1.users.roles.sync', ['user' => $targetUser], false), [
         'role_ids' => [$roleToKeep->id],
@@ -231,7 +226,7 @@ it('removes all roles when an empty role_ids list is provided', function (): voi
     $role = Role::factory()->create();
     $targetUser = User::factory()->create();
     $targetUser->roles()->sync([$role->id]);
-    Sanctum::actingAs($actingUser, ['api']);
+    actingAsApiUser($actingUser);
 
     putJson(route('api.v1.users.roles.sync', ['user' => $targetUser], false), [
         'role_ids' => [],
