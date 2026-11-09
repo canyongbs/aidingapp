@@ -151,6 +151,9 @@ class SaveAdvisory
      * Severities, statuses, and departments are referenced by name. Severity and status names may not be unique
      * while their uniqueness flags are inactive, so an ambiguous name is reported rather than guessed.
      *
+     * TODO: Cleanup Task (advisory-status-and-severity-name-uniqueness): once both flags are removed, every name is unique,
+     * so look the ID up with `value('id')` and drop the `limit(2)` and the ambiguous-name error.
+     *
      * @param class-string<AdvisorySeverity|AdvisoryStatus|Department> $model
      * @param array<string, string> $errors
      */
