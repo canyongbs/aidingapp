@@ -43,6 +43,7 @@ use App\Settings\LicenseSettings;
 use Illuminate\Database\Console\PruneCommand;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Filament\Actions\Testing\TestAction;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -215,6 +216,19 @@ it('can edit files', function (): void {
         ProjectFile::class,
         $request->toArray()
     );
+});
+
+it('downloads a file by redirecting to its media url', function (): void {
+    asSuperAdmin();
+    Storage::fake('s3');
+
+    $project = Project::factory()->create();
+    $file = ProjectFile::factory()->state(['project_id' => $project->id])->create();
+    $file->addMedia(UploadedFile::fake()->image('plan.png'))->usingName('Launch Plan')->toMediaCollection('file');
+
+    Livewire::test(ManageFiles::class, ['record' => $project->getKey()])
+        ->callAction(TestAction::make('download')->table($file))
+        ->assertRedirectContains($file->getFirstMedia('file')->file_name);
 });
 
 it('correctly prunes ProjectFiles based on retention_date', function (): void {

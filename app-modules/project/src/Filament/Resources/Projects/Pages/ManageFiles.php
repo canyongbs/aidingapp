@@ -56,7 +56,6 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Storage;
 
 class ManageFiles extends ManageRelatedRecords
 {
@@ -195,14 +194,12 @@ class ManageFiles extends ManageRelatedRecords
             ->recordActions([
                 Action::make('download')
                     ->icon('heroicon-o-arrow-down-on-square')
+                    ->authorize('view')
                     ->action(
-                        fn (ProjectFile $record) => Storage::disk('s3')
-                            ->download(
-                                $record
-                                    ->getMedia('file')
-                                    ->first()
-                                    ->getPathRelativeToRoot()
-                            )
+                        fn (ProjectFile $record) => redirect($record->getFirstMedia('file')->getTemporaryUrl(
+                            expiration: now()->addMinute(),
+                            options: ['ResponseContentDisposition' => 'attachment'],
+                        ))
                     ),
                 EditAction::make(),
                 DeleteAction::make(),

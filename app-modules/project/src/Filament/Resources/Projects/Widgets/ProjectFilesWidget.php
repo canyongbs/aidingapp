@@ -46,7 +46,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Locked;
 
 class ProjectFilesWidget extends TableWidget
@@ -131,13 +130,10 @@ class ProjectFilesWidget extends TableWidget
                     ->authorize(fn (ProjectFile $record): bool => auth()->user()->can('view', $record))
                     ->visible(fn (ProjectFile $record): bool => filled($record->getMedia('file')->first()?->getPathRelativeToRoot()))
                     ->action(
-                        fn (ProjectFile $record) => Storage::disk('s3')
-                            ->download(
-                                $record
-                                    ->getMedia('file')
-                                    ->first()
-                                    ?->getPathRelativeToRoot()
-                            )
+                        fn (ProjectFile $record) => redirect($record->getFirstMedia('file')->getTemporaryUrl(
+                            expiration: now()->addMinute(),
+                            options: ['ResponseContentDisposition' => 'attachment'],
+                        ))
                     ),
             ])
             ->headerActions([
