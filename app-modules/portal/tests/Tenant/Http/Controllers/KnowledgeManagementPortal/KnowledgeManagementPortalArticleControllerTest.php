@@ -38,7 +38,6 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use AidingApp\Portal\Settings\PortalSettings;
-
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 

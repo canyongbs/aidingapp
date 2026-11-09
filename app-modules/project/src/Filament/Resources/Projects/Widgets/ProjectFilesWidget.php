@@ -47,6 +47,7 @@ use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
+use Livewire\Component;
 
 class ProjectFilesWidget extends TableWidget
 {
@@ -129,12 +130,12 @@ class ProjectFilesWidget extends TableWidget
                     ->color('info')
                     ->authorize(fn (ProjectFile $record): bool => auth()->user()->can('view', $record))
                     ->visible(fn (ProjectFile $record): bool => filled($record->getMedia('file')->first()?->getPathRelativeToRoot()))
-                    ->action(
-                        fn (ProjectFile $record) => redirect($record->getFirstMedia('file')->getTemporaryUrl(
+                    ->action(function (ProjectFile $record, Component $livewire): void {
+                        $livewire->redirect($record->getFirstMedia('file')->getTemporaryUrl(
                             expiration: now()->addMinute(),
                             options: ['ResponseContentDisposition' => 'attachment'],
-                        ))
-                    ),
+                        ));
+                    }),
             ])
             ->headerActions([
                 Action::make('manageFiles')

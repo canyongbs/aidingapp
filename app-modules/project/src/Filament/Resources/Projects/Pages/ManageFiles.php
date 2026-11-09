@@ -56,6 +56,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Component;
 
 class ManageFiles extends ManageRelatedRecords
 {
@@ -195,12 +196,12 @@ class ManageFiles extends ManageRelatedRecords
                 Action::make('download')
                     ->icon('heroicon-o-arrow-down-on-square')
                     ->authorize('view')
-                    ->action(
-                        fn (ProjectFile $record) => redirect($record->getFirstMedia('file')->getTemporaryUrl(
+                    ->action(function (ProjectFile $record, Component $livewire): void {
+                        $livewire->redirect($record->getFirstMedia('file')->getTemporaryUrl(
                             expiration: now()->addMinute(),
                             options: ['ResponseContentDisposition' => 'attachment'],
-                        ))
-                    ),
+                        ));
+                    }),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
