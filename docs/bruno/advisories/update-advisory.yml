@@ -1,0 +1,42 @@
+info:
+  name: Update Advisory
+  type: http
+  seq: 4
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/v1/advisories/:advisory"
+  params:
+    - name: advisory
+      value: "{{advisoryId}}"
+      type: path
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Bruno Example Advisory (Updated)",
+        "visibility": "authenticated",
+        "is_visibility_restricted": true,
+        "restricted_to_contact_types": ["{{contactType}}"]
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Partially updates an advisory: only the attributes included in the body are changed. Accepts the same attributes as **Create Advisory**.
+
+  - `department: null` unassigns the advisory.
+  - `restricted_to_contact_types` replaces the current contact types. A restricted `authenticated` advisory must keep at least one.
+
+  Uses the `advisoryId` runtime variable, which **Create Advisory** sets automatically. You can also replace the `advisory` path parameter with any advisory ID from **List Advisories**.
