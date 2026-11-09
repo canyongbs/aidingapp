@@ -78,7 +78,7 @@ class UpdateAdvisoryUpdateRequest extends FormRequest
             /** Internal updates are only shown in the admin panel, not in the portal. */
             'internal' => ['sometimes', 'required', 'boolean'],
             /** When the update happened, shown to portal users. */
-            'date' => ['sometimes', 'required', 'date'],
+            'date' => ['sometimes', 'required', 'string', 'date'],
             /** The name of an advisory status to move the advisory to. Requires permission to update the advisory. */
             'status' => ['sometimes', 'required', 'string', 'max:255', Rule::exists(AdvisoryStatus::class, 'name')->withoutTrashed()],
         ];

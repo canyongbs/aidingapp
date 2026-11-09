@@ -129,12 +129,12 @@ it('only changes the attributes included in the request', function () use ($acti
         ->and($advisoryUpdate->advisory->refresh()->status_id)->toBe($statusId);
 });
 
-it('can change the date', function () use ($actingAsAdvisoryUpdateUpdater, $openAdvisoryUpdate, $updateUrl): void {
+it('can change the date, converting a timezone offset to the same moment', function () use ($actingAsAdvisoryUpdateUpdater, $openAdvisoryUpdate, $updateUrl): void {
     $actingAsAdvisoryUpdateUpdater();
 
     $advisoryUpdate = $openAdvisoryUpdate();
 
-    patchJson($updateUrl($advisoryUpdate), ['date' => '2026-11-01T09:30:00Z'])
+    patchJson($updateUrl($advisoryUpdate), ['date' => '2026-11-01T10:30:00+01:00'])
         ->assertOk();
 
     expect($advisoryUpdate->refresh()->date->toIso8601ZuluString())->toBe('2026-11-01T09:30:00Z');
@@ -182,6 +182,7 @@ it('validates the request', function (array $data, array $errors) use ($actingAs
     'update not null' => [['update' => null], ['update']],
     'internal boolean' => [['internal' => 'yes'], ['internal']],
     'date date' => [['date' => 'soon'], ['date']],
+    'date string' => [['date' => 20261101], ['date']],
     'status exists' => [['status' => 'Unknown'], ['status']],
     'status not soft deleted' => [['status' => 'Retired status'], ['status']],
 ]);
