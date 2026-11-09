@@ -38,6 +38,7 @@ use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectFilesWidget;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectFile;
 use App\Models\User;
+use DateTimeInterface;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -50,16 +51,22 @@ beforeEach(function (): void {
     Storage::fake('s3');
 });
 
-it('downloads a file by redirecting to its media url', function (): void {
+it('downloads a file as an attachment under its uploaded name', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
     $file = ProjectFile::factory()->state(['project_id' => $project->getKey()])->create();
     $file->addMedia(UploadedFile::fake()->image('plan.png'))->usingName('Launch Plan')->toMediaCollection('file');
 
+    $media = $file->getFirstMedia('file');
+
+    Storage::disk('s3')->buildTemporaryUrlsUsing(
+        fn (string $path, DateTimeInterface $expiration, array $options): string => "https://media.test/{$path}?disposition=" . rawurlencode($options['ResponseContentDisposition']),
+    );
+
     Livewire::test(ProjectFilesWidget::class, ['record' => $project])
         ->callAction(TestAction::make('download')->table($file))
-        ->assertRedirectContains($file->getFirstMedia('file')->file_name);
+        ->assertRedirect('https://media.test/' . $media->getPathRelativeToRoot() . '?disposition=' . rawurlencode('attachment; filename="Launch Plan.png"'));
 });
 
 it('hides the download action for a file without media', function (): void {
