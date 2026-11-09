@@ -116,7 +116,7 @@ it('only changes the attributes included in the request', function () use ($acti
         ->and($advisorySeverity->color)->toBe(Color::Red);
 });
 
-it('does not change the rank', function () use ($actingAsAdvisorySeverityUpdater): void {
+it('does not change the sort', function () use ($actingAsAdvisorySeverityUpdater): void {
     $actingAsAdvisorySeverityUpdater();
 
     $advisorySeverity = AdvisorySeverity::factory()->create(['sort' => 2]);

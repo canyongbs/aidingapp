@@ -45,7 +45,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class UpdateAdvisorySeverityController
 {
     /**
-     * Update an advisory severity. Only the attributes included in the request are changed. The rank can only be changed in the admin panel.
+     * Update an advisory severity. Only the attributes included in the request are changed. The `sort` can only be changed in the admin panel.
      *
      * @response AdvisorySeverityResource
      */
