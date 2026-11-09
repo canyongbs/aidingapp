@@ -55,9 +55,12 @@ class SaveAdvisory
     /**
      * Creates an advisory, or updates the given one. Only attributes present on the data object are written.
      *
+     * An existing advisory is re-read under a row lock, so concurrent partial updates cannot together leave a
+     * restricted advisory without contact types.
+     *
      * @throws ValidationException When a referenced record no longer resolves, or a restricted advisory would have no contact types.
      */
-    public function __invoke(AdvisoryDataObject $data, ?Advisory $advisory = null): Advisory
+    public function __invoke(AdvisoryDataObject $data, ?Advisory $existing = null): Advisory
     {
         $errors = [];
 
@@ -71,35 +74,28 @@ class SaveAdvisory
 
         $contactTypeIds = null;
 
-        if (AdvisoryVisibilityFeature::active()) {
-            $attributes = [
-                ...$attributes,
-                ...$this->visibilityAttributes($data, $advisory),
-            ];
-
-            if (! $data->restrictedToContactTypes instanceof Optional) {
-                $contactTypeIds = $this->resolveContactTypeIds($data->restrictedToContactTypes ?? [], $errors);
-            }
-
-            $hasContactTypes = $contactTypeIds !== null
-                ? $contactTypeIds !== []
-                : ($advisory?->restrictedToContactTypes()->exists() ?? false);
-
-            if (
-                $attributes['visibility'] === AdvisoryVisibility::Authenticated
-                && $attributes['is_visibility_restricted']
-                && ! $hasContactTypes
-            ) {
-                $errors['restricted_to_contact_types'] = 'At least one contact type is required when the advisory is restricted to specific contact types.';
-            }
+        if (AdvisoryVisibilityFeature::active() && ! $data->restrictedToContactTypes instanceof Optional) {
+            $contactTypeIds = $this->resolveContactTypeIds($data->restrictedToContactTypes ?? [], $errors);
         }
 
         if ($errors !== []) {
             throw ValidationException::withMessages($errors);
         }
 
-        return DB::transaction(function () use ($advisory, $attributes, $contactTypeIds): Advisory {
-            $advisory ??= new Advisory();
+        return DB::transaction(function () use ($data, $existing, $attributes, $contactTypeIds): Advisory {
+            $advisory = $existing === null
+                ? new Advisory()
+                : Advisory::query()->whereKey($existing->getKey())->lockForUpdate()->firstOrFail();
+
+            if (AdvisoryVisibilityFeature::active()) {
+                $attributes = [
+                    ...$attributes,
+                    ...$this->visibilityAttributes($data, $advisory),
+                ];
+
+                $this->ensureRestrictedAdvisoryHasContactTypes($advisory, $attributes, $contactTypeIds);
+            }
+
             $advisory->fill($attributes);
             $advisory->save();
 
@@ -116,16 +112,39 @@ class SaveAdvisory
      *
      * @return array{visibility: AdvisoryVisibility, is_visibility_restricted: bool}
      */
-    private function visibilityAttributes(AdvisoryDataObject $data, ?Advisory $advisory): array
+    private function visibilityAttributes(AdvisoryDataObject $data, Advisory $advisory): array
     {
         return [
             'visibility' => $data->visibility instanceof Optional
-                ? ($advisory->visibility ?? AdvisoryVisibility::Public)
+                ? ($advisory->exists ? $advisory->visibility : AdvisoryVisibility::Public)
                 : $data->visibility,
             'is_visibility_restricted' => $data->isVisibilityRestricted instanceof Optional
-                ? ($advisory->is_visibility_restricted ?? false)
+                ? ($advisory->exists && $advisory->is_visibility_restricted)
                 : $data->isVisibilityRestricted,
         ];
+    }
+
+    /**
+     * @param array{visibility: AdvisoryVisibility, is_visibility_restricted: bool} $attributes
+     * @param array<int, string>|null $contactTypeIds The replacement contact types, or `null` to keep the current ones.
+     *
+     * @throws ValidationException
+     */
+    private function ensureRestrictedAdvisoryHasContactTypes(Advisory $advisory, array $attributes, ?array $contactTypeIds): void
+    {
+        if ($attributes['visibility'] !== AdvisoryVisibility::Authenticated || ! $attributes['is_visibility_restricted']) {
+            return;
+        }
+
+        $hasContactTypes = $contactTypeIds !== null
+            ? $contactTypeIds !== []
+            : $advisory->exists && $advisory->restrictedToContactTypes()->exists();
+
+        if (! $hasContactTypes) {
+            throw ValidationException::withMessages([
+                'restricted_to_contact_types' => 'At least one contact type is required when the advisory is restricted to specific contact types.',
+            ]);
+        }
     }
 
     /**
