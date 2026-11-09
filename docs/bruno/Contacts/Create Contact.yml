@@ -42,6 +42,9 @@ runtime:
   scripts:
     - type: before-request
       code: |-
+        // Clear the previous run's record so a failed create doesn't leave later requests acting on it.
+        bru.setVar('contactId', null);
+
         // Contact emails must be unique, so each run uses a fresh suffix.
         bru.setVar('contactSuffix', Date.now().toString());
 

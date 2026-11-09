@@ -34,7 +34,7 @@ Any change that adds or changes an API endpoint must add or update its requests 
 2. Follow the existing requests:
     - Use `{{baseUrl}}` in the URL and `auth: inherit`.
     - Assert the expected status code.
-    - In **Create** requests, store the created record's ID in a runtime variable with an after-response script, and use that variable as the path parameter in the other requests.
+    - In **Create** requests, store the created record's ID in a runtime variable with an after-response script, and use that variable as the path parameter in the other requests. Clear those variables in a before-request script first, so a failed create doesn't leave the other requests acting on a record from an earlier run.
     - Make values that must be unique (such as names) unique per run, for example with a `Date.now()` suffix set in a before-request script.
     - Order the requests with `seq` so running the folder creates, views, updates, and then removes its records.
     - Describe the request and its fields in the **Docs** tab.
