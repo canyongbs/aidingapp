@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryStatuses\CreateAdvisoryStatusController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryStatuses\DeleteAdvisoryStatusController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryStatuses\ListAdvisoryStatusesController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryStatuses\ViewAdvisoryStatusController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\CreateServiceRequestUpdateController;
@@ -47,7 +49,9 @@ Route::api(majorVersion: 1, routes: function (): void {
         ->prefix('advisory-statuses')
         ->group(function (): void {
             Route::get('/', ListAdvisoryStatusesController::class)->name('index');
+            Route::post('/', CreateAdvisoryStatusController::class)->name('store');
             Route::get('/{advisoryStatus}', ViewAdvisoryStatusController::class)->name('show');
+            Route::delete('/{advisoryStatus}', DeleteAdvisoryStatusController::class)->name('delete');
         });
 
     Route::name('service-requests.')
