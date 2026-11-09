@@ -8,6 +8,10 @@ variables:
     value: Education
   - name: contactType
     value: Employee
+  - name: advisorySeverity
+    value: Minor
+  - name: advisoryStatus
+    value: Investigating
   - secret: true
     name: apiKey
     description: ""

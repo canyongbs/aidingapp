@@ -24,4 +24,4 @@ settings:
 docs: |-
   Shows a single advisory.
 
-  Uses the `advisoryId` runtime variable, which **List Advisories** sets automatically. You can also replace the `advisory` path parameter with any advisory ID from **List Advisories**.
+  Uses the `advisoryId` runtime variable, which **List Advisories** or **Create Advisory** sets automatically. You can also replace the `advisory` path parameter with any advisory ID from **List Advisories**.
