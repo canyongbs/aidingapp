@@ -1,0 +1,40 @@
+info:
+  name: Update Advisory Update
+  type: http
+  seq: 5
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/v1/advisories/:advisory/updates/:advisoryUpdate"
+  params:
+    - name: advisory
+      value: "{{advisoryId}}"
+      type: path
+    - name: advisoryUpdate
+      value: "{{advisoryUpdateId}}"
+      type: path
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Bruno Example Update (Updated)",
+        "internal": true
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Partially updates an advisory update: only the attributes included in the body are changed. Accepts the same attributes as **Create Advisory Update**, including `status` to move the advisory to another status. Updates on a resolved advisory cannot be edited (`403`).
+
+  Uses the `advisoryUpdateId` runtime variable, which **Create Advisory Update** sets automatically. You can also replace the `advisoryUpdate` path parameter with any update ID from **List Advisory Updates**.
