@@ -49,6 +49,7 @@
         portalServiceManagement: { type: Boolean, default: false },
         authenticateRequestUrl: { type: String, default: null },
         serviceRequestTypesUrl: { type: String, default: null },
+        aiDisclaimer: { type: String, default: null },
     });
 
     const emit = defineEmits(['close', 'authenticated']);
@@ -147,7 +148,11 @@
                     @retry="retryMessage"
                 />
 
-                <ChatInput :disabled="isSending || isAssistantResponding" @send="sendMessage" />
+                <ChatInput
+                    :disabled="isSending || isAssistantResponding"
+                    :disclaimer="aiDisclaimer"
+                    @send="sendMessage"
+                />
             </template>
         </div>
     </Transition>
