@@ -1,0 +1,51 @@
+info:
+  name: Create Advisory Severity
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/advisory-severities"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Bruno Example Severity {{advisorySeveritySuffix}}",
+        "color": "amber"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Clear the previous run's record so a failed create doesn't leave later requests acting on it.
+        bru.setVar('advisorySeverityId', null);
+        bru.setVar('advisorySeverityName', null);
+
+        // Advisory severity names must be unique, so each run uses a fresh suffix.
+        bru.setVar('advisorySeveritySuffix', Date.now().toString());
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 201) {
+          const advisorySeverity = res.getBody().data;
+
+          bru.setVar('advisorySeverityId', advisorySeverity.id);
+          bru.setVar('advisorySeverityName', advisorySeverity.name);
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Creates an advisory severity and stores its `id` and `name` in the `advisorySeverityId` and `advisorySeverityName` runtime variables. New severities are ranked lowest.
+
+  - `name` is required and must be unique among advisory severities, ignoring case.
+  - `color` is required, such as `red`, `amber`, or `green`. The shades `black`, `light-gray`, `dark-gray`, and `navy` are not allowed, like in the admin panel.
