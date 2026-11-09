@@ -56,7 +56,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Storage;
+use Livewire\Component;
 
 class ManageFiles extends ManageRelatedRecords
 {
@@ -195,15 +195,15 @@ class ManageFiles extends ManageRelatedRecords
             ->recordActions([
                 Action::make('download')
                     ->icon('heroicon-o-arrow-down-on-square')
-                    ->action(
-                        fn (ProjectFile $record) => Storage::disk('s3')
-                            ->download(
-                                $record
-                                    ->getMedia('file')
-                                    ->first()
-                                    ->getPathRelativeToRoot()
-                            )
-                    ),
+                    ->authorize('view')
+                    ->action(function (ProjectFile $record, Component $livewire): void {
+                        $media = $record->getFirstMedia('file');
+
+                        $livewire->redirect($media->getTemporaryUrl(
+                            expiration: now()->addMinute(),
+                            options: ['ResponseContentDisposition' => $media->attachmentContentDisposition()],
+                        ));
+                    }),
                 EditAction::make(),
                 DeleteAction::make(),
             ])

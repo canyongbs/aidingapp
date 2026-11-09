@@ -169,7 +169,7 @@ class ServiceRequestUpdate extends Model implements Auditable, ProvidesATimeline
             ->map(function (Media $media): array {
                 return [
                     'id' => $media->id,
-                    'name' => $media->name . '.' . pathinfo($media->file_name, PATHINFO_EXTENSION),
+                    'name' => $media->getDownloadFilename(),
                     'url' => route('api.portal.service-request.media.download', ['media' => $media->getKey()]),
                 ];
             })
