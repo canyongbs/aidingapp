@@ -1,0 +1,40 @@
+info:
+  name: Update Contact
+  type: http
+  seq: 4
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/v1/contacts/:contact"
+  params:
+    - name: contact
+      value: "{{contactId}}"
+      type: path
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "preferred_name": "Janie",
+        "job_title": "IT Director",
+        "phone": "555-0199"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Partially updates a contact: only the attributes included in the body are changed. Accepts the same attributes as **Create Contact**. `first_name`, `last_name`, and `type` cannot be `null`; sending `"organization": null` re-matches the contact to an organization by email domain.
+
+  Managed contacts (synchronized from a user) cannot be updated.
+
+  Uses the `contactId` runtime variable, which **Create Contact** sets automatically. You can also replace the `contact` path parameter with any contact ID from **List Contacts**.
