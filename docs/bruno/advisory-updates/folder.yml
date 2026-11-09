@@ -1,0 +1,11 @@
+info:
+  name: Advisory Updates
+  type: folder
+  seq: 6
+
+request:
+  auth: inherit
+
+docs:
+  content: Advisory update endpoints, nested under an advisory. **Create Advisory for Updates** creates the parent advisory and sets `advisoryId`, and **Delete Advisory for Updates** removes it, so the folder runs on its own (it uses the `advisoryStatus` and `advisorySeverity` environment variables, like **Create Advisory**). These endpoints use the **Advisory** and **Advisory Update** permissions, like the admin panel, and require the Advisory Management and Service Management add-ons.
+  type: text/markdown
