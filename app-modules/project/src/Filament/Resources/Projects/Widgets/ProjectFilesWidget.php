@@ -131,9 +131,11 @@ class ProjectFilesWidget extends TableWidget
                     ->authorize(fn (ProjectFile $record): bool => auth()->user()->can('view', $record))
                     ->visible(fn (ProjectFile $record): bool => filled($record->getMedia('file')->first()?->getPathRelativeToRoot()))
                     ->action(function (ProjectFile $record, Component $livewire): void {
-                        $livewire->redirect($record->getFirstMedia('file')->getTemporaryUrl(
+                        $media = $record->getFirstMedia('file');
+
+                        $livewire->redirect($media->getTemporaryUrl(
                             expiration: now()->addMinute(),
-                            options: ['ResponseContentDisposition' => 'attachment'],
+                            options: ['ResponseContentDisposition' => $media->attachmentContentDisposition()],
                         ));
                     }),
             ])

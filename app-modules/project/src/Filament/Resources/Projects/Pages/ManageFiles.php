@@ -197,9 +197,11 @@ class ManageFiles extends ManageRelatedRecords
                     ->icon('heroicon-o-arrow-down-on-square')
                     ->authorize('view')
                     ->action(function (ProjectFile $record, Component $livewire): void {
-                        $livewire->redirect($record->getFirstMedia('file')->getTemporaryUrl(
+                        $media = $record->getFirstMedia('file');
+
+                        $livewire->redirect($media->getTemporaryUrl(
                             expiration: now()->addMinute(),
-                            options: ['ResponseContentDisposition' => 'attachment'],
+                            options: ['ResponseContentDisposition' => $media->attachmentContentDisposition()],
                         ));
                     }),
                 EditAction::make(),
