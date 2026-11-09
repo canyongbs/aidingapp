@@ -31,11 +31,12 @@ All requests inherit Bearer authentication and the `Accept: application/json` he
 Any change that adds or changes an API endpoint must add or update its requests in the collection, in the same pull request.
 
 1. Add requests from Bruno, or by copying an existing `.yml` request file, inside the folder for the resource. For a new resource, create a folder with a `folder.yml` that sets `request.auth` to `inherit` (in Bruno: folder **Settings > Auth > Inherit**); otherwise the folder defaults to no auth and its requests are sent without the API key.
-2. Follow the existing requests:
+2. Name files and folders in kebab-case, without spaces (for example `advisory-statuses/create-advisory-status.yml`). Bruno displays the `name` stored inside each file, not the filename, but it names new files after the display name by default. When creating or renaming a request or folder in Bruno, open **Show Filesystem Name** and enter the kebab-case name.
+3. Follow the existing requests:
     - Use `{{baseUrl}}` in the URL and `auth: inherit`.
     - Assert the expected status code.
     - In **Create** requests, store the created record's ID in a runtime variable with an after-response script, and use that variable as the path parameter in the other requests. Clear those variables in a before-request script first, so a failed create doesn't leave the other requests acting on a record from an earlier run.
     - Make values that must be unique (such as names) unique per run, for example with a `Date.now()` suffix set in a before-request script.
     - Order the requests with `seq` so running the folder creates, views, updates, and then removes its records.
     - Describe the request and its fields in the **Docs** tab.
-3. Run the folder with the **Runner** against your local tenant before opening the pull request.
+4. Run the folder with the **Runner** against your local tenant before opening the pull request.
