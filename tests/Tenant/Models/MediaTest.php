@@ -166,7 +166,7 @@ describe('getTemporaryUrl', function (): void {
     it('keeps the header ISO-8859-1 safe for a name that is not Latin-1 representable', function () use ($makeMedia, $dispositionOf): void {
         $disposition = $dispositionOf($makeMedia("Screenshot 7.48\u{202F}PM")->getTemporaryUrl(now()->addMinute()));
 
-        expect(mb_check_encoding($disposition, 'ISO-8859-1'))->toBeTrue()
-            ->and(rawurldecode($disposition))->toContain("Screenshot 7.48\u{202F}PM.png");
+        expect(mb_check_encoding($disposition, 'ASCII'))->toBeTrue()
+            ->and($disposition)->toContain("filename*=utf-8''Screenshot%207.48%E2%80%AFPM.png");
     });
 });
