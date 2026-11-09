@@ -50,7 +50,7 @@
                         href="{{ route('service-request.media.download', ['media' => $media->getKey()]) }}"
                         class="text-sm text-primary-600 hover:underline"
                     >
-                        {{ $media->name }}.{{ pathinfo($media->file_name, PATHINFO_EXTENSION) }}
+                        {{ $media->getDownloadFilename() }}
                     </a>
                 </li>
             @endforeach

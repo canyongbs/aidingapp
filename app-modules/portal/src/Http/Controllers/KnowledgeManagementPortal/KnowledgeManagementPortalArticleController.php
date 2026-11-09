@@ -218,7 +218,7 @@ class KnowledgeManagementPortalArticleController extends Controller
                 )->toArray(),
                 'featured' => $article->is_featured,
                 'attachments' => $article->getMedia('article_attachments')->map(fn ($media): array => [
-                    'name' => $media->file_name,
+                    'name' => $media->getDownloadFilename(),
                     'url' => route('api.portal.knowledge-base-article.media.download', ['media' => $media->getKey()]),
                 ])->toArray(),
             ]),
