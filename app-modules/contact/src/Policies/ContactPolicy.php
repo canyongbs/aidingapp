@@ -105,6 +105,14 @@ class ContactPolicy
         );
     }
 
+    public function updateAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['contact.*.update'],
+            denyResponse: 'You do not have permission to update any contact.'
+        );
+    }
+
     public function delete(Authenticatable $authenticatable, Contact $contact): Response
     {
         if (ContactArchivingFeature::active() && $contact->isManaged()) {

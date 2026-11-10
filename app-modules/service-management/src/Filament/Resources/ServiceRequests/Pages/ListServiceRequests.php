@@ -69,6 +69,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class ListServiceRequests extends ListRecords
 {
@@ -139,7 +140,7 @@ class ListServiceRequests extends ListRecords
                     ->searchable(
                         query: fn (Builder $query, $search) => $query->whereHas(
                             'respondent',
-                            fn (Builder $query) => $query->whereRaw('lower(full_name) like ?', ['%' . strtolower($search) . '%'])
+                            fn (Builder $query) => $query->whereRaw('lower(full_name) like ?', ['%' . Str::lower($search) . '%'])
                         )
                     )
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction)))

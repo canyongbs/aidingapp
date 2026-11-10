@@ -109,18 +109,9 @@ class ServiceRequestMediaTable extends TableWidget
             ->columns([
                 TextColumn::make('display_name')
                     ->label('File Name')
-                    ->getStateUsing(function (Media $record): string {
-                        $extension = pathinfo($record->file_name, PATHINFO_EXTENSION);
-
-                        // Some ingestion paths store the extension in the name; don't append it twice.
-                        if ($extension === '' || str_ends_with(mb_strtolower($record->name), '.' . mb_strtolower($extension))) {
-                            return $record->name;
-                        }
-
-                        return $record->name . '.' . $extension;
-                    })
+                    ->getStateUsing(fn (Media $record): string => $record->getDownloadFilename())
                     ->searchable(
-                        query: fn (Builder $query, string $search) => $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($search) . '%'])
+                        query: fn (Builder $query, string $search) => $query->whereRaw('LOWER(name) LIKE ?', ['%' . Str::lower($search) . '%'])
                     )
                     ->wrap(),
 
@@ -133,7 +124,7 @@ class ServiceRequestMediaTable extends TableWidget
                             'createdBy',
                             [User::class, Contact::class],
                             function (Builder $subQuery, string $type) use ($search): void {
-                                $searchLower = strtolower($search);
+                                $searchLower = Str::lower($search);
 
                                 if ($type === User::class) {
                                     $subQuery->tap(new WhereFullNameLike($search));

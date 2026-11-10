@@ -69,6 +69,7 @@ if (!config || !config.send_message_url || !config.websockets_config) {
                         authenticateRequestUrl: config.authenticate_request_url || null,
                         serviceRequestTypesUrl: config.service_request_types_url || null,
                         portalServiceManagement: config.portal_service_management || false,
+                        aiDisclaimer: config.ai_disclaimer || null,
                     });
             },
             props: {

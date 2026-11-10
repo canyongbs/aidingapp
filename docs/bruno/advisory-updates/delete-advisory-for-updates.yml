@@ -1,0 +1,32 @@
+info:
+  name: Delete Advisory for Updates
+  type: http
+  seq: 7
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/v1/advisories/:advisory"
+  params:
+    - name: advisory
+      value: "{{advisoryId}}"
+      type: path
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 204) {
+          bru.setVar('advisoryId', null);
+          bru.setVar('advisoryUpdateId', null);
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "204"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Deletes the advisory that **Create Advisory for Updates** created. Returns `204 No Content`.

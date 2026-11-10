@@ -34,21 +34,36 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\Department\Models\Department;
+use AidingApp\ServiceManagement\Enums\AdvisoryVisibility;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ViewAdvisory;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\RelationManagers\AdvisoryUpdatesRelationManager;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
+use App\Features\AdvisoryVisibilityFeature;
 use App\Models\User;
 use CanyonGBS\Common\Enums\Color;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\Select;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
+
+$visibilityInfolistEntry = function (Testable $component, string $name): TextEntry {
+    $entry = $component->instance()
+        ->getSchema('infolist')
+        ->getComponent(fn ($entry): bool => $entry instanceof TextEntry && $entry->getName() === $name, withHidden: true);
+    assert($entry instanceof TextEntry);
+
+    return $entry;
+};
 
 test('The correct details are displayed on the ViewAdvisory page', function (): void {
     $user = User::factory()->create();
@@ -431,4 +446,165 @@ test('the advisory updates are only embedded for users who can view them', funct
     ])
         ->assertSuccessful()
         ->assertSeeLivewire(AdvisoryUpdatesRelationManager::class);
+});
+
+describe('advisory visibility', function () use ($visibilityInfolistEntry): void {
+    it('displays the visibility of the advisory', function () use ($visibilityInfolistEntry): void {
+        asSuperAdmin();
+
+        $contactTypes = ContactType::factory()->count(2)->sequence(['name' => 'Student'], ['name' => 'Alumni'])->create();
+
+        $advisory = Advisory::factory()->restrictedToContactTypes(...$contactTypes)->create();
+
+        $component = Livewire::test(ViewAdvisory::class, ['record' => $advisory->getRouteKey()]);
+
+        $component->assertSuccessful();
+
+        $state = \Tests\infolistState($component->instance(), ['visibility', 'is_visibility_restricted', 'restrictedToContactTypes.name']);
+
+        $names = $state['restrictedToContactTypes.name'];
+        sort($names);
+
+        expect($state['visibility'])->toBe(AdvisoryVisibility::Authenticated)
+            ->and($state['is_visibility_restricted'])->toBeTrue()
+            ->and($names)->toBe(['Alumni', 'Student']);
+
+        expect($visibilityInfolistEntry($component, 'is_visibility_restricted')->isVisible())->toBeTrue()
+            ->and($visibilityInfolistEntry($component, 'restrictedToContactTypes.name')->isVisible())->toBeTrue();
+    });
+
+    it('does not display the contact types for an advisory that is not restricted', function () use ($visibilityInfolistEntry): void {
+        asSuperAdmin();
+
+        $advisory = Advisory::factory()
+            ->restrictedToContactTypes(ContactType::factory()->create())
+            ->create(['is_visibility_restricted' => false]);
+
+        $component = Livewire::test(ViewAdvisory::class, ['record' => $advisory->getRouteKey()]);
+
+        $component->assertSuccessful();
+
+        expect($visibilityInfolistEntry($component, 'is_visibility_restricted')->isVisible())->toBeTrue()
+            ->and($visibilityInfolistEntry($component, 'restrictedToContactTypes.name')->isVisible())->toBeFalse();
+    });
+
+    it('does not display the restriction for a public advisory', function () use ($visibilityInfolistEntry): void {
+        asSuperAdmin();
+
+        $component = Livewire::test(ViewAdvisory::class, ['record' => Advisory::factory()->create()->getRouteKey()]);
+
+        $component->assertSuccessful();
+
+        expect($visibilityInfolistEntry($component, 'is_visibility_restricted')->isVisible())->toBeFalse()
+            ->and($visibilityInfolistEntry($component, 'restrictedToContactTypes.name')->isVisible())->toBeFalse();
+    });
+
+    it('does not display the visibility section until the advisory visibility migration has run', function (): void {
+        asSuperAdmin();
+
+        $record = Advisory::factory()->create()->getRouteKey();
+
+        $section = fn (Testable $component): Section => $component->instance()
+            ->getSchema('infolist')
+            ->getComponent('visibility', withHidden: true);
+
+        expect($section(Livewire::test(ViewAdvisory::class, ['record' => $record]))->isVisible())->toBeTrue();
+
+        AdvisoryVisibilityFeature::deactivate();
+
+        expect($section(Livewire::test(ViewAdvisory::class, ['record' => $record]))->isVisible())->toBeFalse();
+    });
+
+    it('gates the edit action with proper access control', function (): void {
+        $user = User::factory()->create();
+
+        $advisory = Advisory::factory()->create();
+
+        actingAs($user);
+
+        $user->givePermissionTo('advisory.view-any');
+        $user->givePermissionTo('advisory.*.view');
+
+        Livewire::test(ViewAdvisory::class, ['record' => $advisory->getRouteKey()])
+            ->assertActionDoesNotExist(TestAction::make('editVisibility')->schemaComponent('visibility'));
+
+        $user->givePermissionTo('advisory.*.update');
+
+        Livewire::test(ViewAdvisory::class, ['record' => $advisory->getRouteKey()])
+            ->assertActionVisible(TestAction::make('editVisibility')->schemaComponent('visibility'));
+    });
+
+    it('loads the current visibility into the edit action', function (): void {
+        asSuperAdmin();
+
+        $contactTypes = ContactType::factory()->count(2)->create();
+
+        $advisory = Advisory::factory()->restrictedToContactTypes(...$contactTypes)->create();
+
+        Livewire::test(ViewAdvisory::class, ['record' => $advisory->getRouteKey()])
+            ->mountAction(TestAction::make('editVisibility')->schemaComponent('visibility'))
+            ->assertSchemaStateSet(['is_visibility_restricted' => true])
+            ->assertSchemaComponentExists('restrictedToContactTypes', 'mountedActionSchema0', function (Select $select) use ($contactTypes): bool {
+                $state = $select->getState();
+                $expected = $contactTypes->pluck('id')->all();
+
+                assert(is_array($state));
+
+                sort($state);
+                sort($expected);
+
+                return $state === $expected;
+            });
+    });
+
+    it('can update the visibility to specific contact types', function (): void {
+        asSuperAdmin();
+
+        $advisory = Advisory::factory()->create();
+        $contactTypes = ContactType::factory()->count(2)->create();
+
+        Livewire::test(ViewAdvisory::class, ['record' => $advisory->getRouteKey()])
+            ->callAction(TestAction::make('editVisibility')->schemaComponent('visibility'), data: [
+                'visibility' => AdvisoryVisibility::Authenticated->value,
+                'is_visibility_restricted' => true,
+                'restrictedToContactTypes' => $contactTypes->pluck('id')->all(),
+            ])
+            ->assertHasNoFormErrors();
+
+        $advisory->refresh();
+
+        expect($advisory->visibility)->toBe(AdvisoryVisibility::Authenticated)
+            ->and($advisory->is_visibility_restricted)->toBeTrue()
+            ->and($advisory->restrictedToContactTypes->pluck('id')->sort()->values()->all())->toBe($contactTypes->pluck('id')->sort()->values()->all());
+    });
+
+    it('can update the visibility back to public', function (): void {
+        asSuperAdmin();
+
+        $advisory = Advisory::factory()->restrictedToContactTypes(ContactType::factory()->create())->create();
+
+        Livewire::test(ViewAdvisory::class, ['record' => $advisory->getRouteKey()])
+            ->callAction(TestAction::make('editVisibility')->schemaComponent('visibility'), data: [
+                'visibility' => AdvisoryVisibility::Public->value,
+            ])
+            ->assertHasNoFormErrors();
+
+        expect($advisory->refresh()->visibility)->toBe(AdvisoryVisibility::Public);
+    });
+
+    it('requires at least one contact type when restricted to specific contact types', function (): void {
+        asSuperAdmin();
+
+        $advisory = Advisory::factory()->create();
+
+        Livewire::test(ViewAdvisory::class, ['record' => $advisory->getRouteKey()])
+            ->callAction(TestAction::make('editVisibility')->schemaComponent('visibility'), data: [
+                'visibility' => AdvisoryVisibility::Authenticated->value,
+                'is_visibility_restricted' => true,
+                'restrictedToContactTypes' => [],
+            ])
+            ->assertHasFormErrors(['restrictedToContactTypes' => 'required']);
+
+        expect($advisory->refresh()->visibility)->toBe(AdvisoryVisibility::Public);
+    });
 });

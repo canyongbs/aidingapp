@@ -36,10 +36,12 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages;
 
+use AidingApp\ServiceManagement\Enums\AdvisoryVisibility;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\RelationManagers\AdvisoryUpdatesRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Schemas\AdvisoryForm;
 use AidingApp\ServiceManagement\Models\Advisory;
+use App\Features\AdvisoryVisibilityFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
@@ -81,6 +83,33 @@ class ViewAdvisory extends ViewRecord
                             ->columnSpanFull(),
                         TextEntry::make('description')
                             ->label('Description')
+                            ->columnSpanFull(),
+                    ]),
+                Section::make('Advisory Visibility')
+                    ->key('visibility')
+                    ->visible(fn (): bool => AdvisoryVisibilityFeature::active())
+                    ->headerActions([
+                        EditAction::make('editVisibility')
+                            ->label('Edit')
+                            ->modalHeading('Edit advisory visibility')
+                            ->slideOver()
+                            ->schema([AdvisoryForm::visibilitySection()])
+                            ->after(fn (Advisory $record) => $record->refresh()),
+                    ])
+                    ->schema([
+                        TextEntry::make('visibility')
+                            ->label('Visibility')
+                            ->badge()
+                            ->columnSpanFull(),
+                        TextEntry::make('is_visibility_restricted')
+                            ->label('Restrict to Specific Contact Types')
+                            ->formatStateUsing(fn (bool $state): string => $state ? 'Yes' : 'No')
+                            ->visible(fn (Advisory $record): bool => $record->visibility === AdvisoryVisibility::Authenticated)
+                            ->columnSpanFull(),
+                        TextEntry::make('restrictedToContactTypes.name')
+                            ->label('Contact Types')
+                            ->badge()
+                            ->visible(fn (Advisory $record): bool => $record->visibility === AdvisoryVisibility::Authenticated && $record->is_visibility_restricted)
                             ->columnSpanFull(),
                     ]),
                 Section::make('Tracking Details')

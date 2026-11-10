@@ -36,7 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\Department\Models\Department;
+use AidingApp\ServiceManagement\Enums\AdvisoryVisibility;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
@@ -60,6 +62,23 @@ class AdvisoryFactory extends Factory
             'severity_id' => AdvisorySeverity::factory(),
             'status_id' => AdvisoryStatus::factory(),
             'assigned_department_id' => Department::factory(),
+            'visibility' => AdvisoryVisibility::Public,
+            'is_visibility_restricted' => false,
         ];
+    }
+
+    public function authenticated(): static
+    {
+        return $this->state(['visibility' => AdvisoryVisibility::Authenticated]);
+    }
+
+    public function restrictedToContactTypes(ContactType ...$restrictedToContactTypes): static
+    {
+        return $this
+            ->authenticated()
+            ->state(['is_visibility_restricted' => true])
+            ->afterCreating(function (Advisory $advisory) use ($restrictedToContactTypes): void {
+                $advisory->restrictedToContactTypes()->attach($restrictedToContactTypes);
+            });
     }
 }

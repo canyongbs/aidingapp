@@ -1,0 +1,70 @@
+info:
+  name: List Advisories
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/advisories?page[number]=1&page[size]=30&sort=title"
+  params:
+    - name: page[number]
+      value: "1"
+      type: query
+      description: Page to return. Defaults to 1.
+    - name: page[size]
+      value: "30"
+      type: query
+      description: Results per page. Defaults to 30.
+    - name: sort
+      value: title
+      type: query
+      description: One of `title`, `severity` (highest severity first), `created_at`, `updated_at`. Prefix with `-` for descending.
+    - name: filter[title]
+      value: outage
+      type: query
+      description: Partial match on the title.
+      disabled: true
+    - name: filter[status]
+      value: Investigating
+      type: query
+      description: Exact status name, ignoring case. Separate multiple names with `|`.
+      disabled: true
+    - name: filter[classification]
+      value: open
+      type: query
+      description: Status classification, either `open` or `resolved`.
+      disabled: true
+    - name: filter[severity]
+      value: Critical
+      type: query
+      description: Exact severity name, ignoring case. Separate multiple names with `|`.
+      disabled: true
+    - name: filter[department]
+      value: IT
+      type: query
+      description: Exact department name, ignoring case. Separate multiple names with `|`.
+      disabled: true
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // Gives View a record to show when Create has not set one.
+        const advisories = res.getBody()?.data ?? [];
+
+        if (res.getStatus() === 200 && !bru.getVar('advisoryId') && advisories.length) {
+          bru.setVar('advisoryId', advisories[0].id);
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Lists advisories, paginated with `page[number]` / `page[size]`. If the `advisoryId` runtime variable is not set, it is set to the first advisory returned.
+
+  Enable any of the disabled `filter[...]` query parameters in the **Params** tab to try them.

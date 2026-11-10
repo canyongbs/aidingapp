@@ -40,23 +40,19 @@ use AidingApp\Contact\Services\ManagedContactService;
 use App\Features\ContactArchivingFeature;
 use App\Models\SystemUser;
 use App\Models\User;
-use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\assertModelExists;
 use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Laravel\deleteJson;
+use function Tests\actingAsApiUser;
 
 $actingAsContactDeleter = function (): SystemUser {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['contact.view-any', 'contact.*.delete']);
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     return $user;
 };
-
-beforeEach(function (): void {
-    config()->set('audit.enabled', false);
-});
 
 it('archives a contact without deleting it and revokes its tokens', function () use ($actingAsContactDeleter): void {
     $actingAsContactDeleter();
@@ -93,7 +89,7 @@ it('does not find an already archived contact', function () use ($actingAsContac
 it('checks permissions before returning not found for an archived contact', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('contact.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $contact = Contact::factory()->archived()->create();
 
@@ -160,7 +156,7 @@ describe('authorization', function () use ($actingAsContactDeleter): void {
     it('requires both view-any and delete permissions', function (array $permissions): void {
         $user = SystemUser::factory()->create();
         $user->givePermissionTo($permissions);
-        Sanctum::actingAs($user, ['api']);
+        actingAsApiUser($user);
 
         $contact = Contact::factory()->create();
 

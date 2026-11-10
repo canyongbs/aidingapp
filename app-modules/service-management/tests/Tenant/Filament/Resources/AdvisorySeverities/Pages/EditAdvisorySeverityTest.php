@@ -38,11 +38,14 @@ use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\AdvisorySe
 use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\Pages\EditAdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\AdvisorySeverityRequestFactory;
+use App\Features\AdvisorySeverityNameUniquenessFeature;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+use function Tests\asSuperAdmin;
 
 test('EditAdvisorySeverity is gated with proper access control', function (): void {
     $user = User::factory()->create();
@@ -91,6 +94,7 @@ test('EditAdvisorySeverity validates the inputs', function (AdvisorySeverityRequ
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.*.update');
 
+    AdvisorySeverity::factory()->create(['name' => 'Critical']);
     $advisorySeverity = AdvisorySeverity::factory()->create();
 
     $request = AdvisorySeverityRequestFactory::new($data)->create();
@@ -119,6 +123,14 @@ test('EditAdvisorySeverity validates the inputs', function (AdvisorySeverityRequ
             AdvisorySeverityRequestFactory::new()->state(['color' => null]),
             ['color' => 'required'],
         ],
+        'name unique' => [
+            AdvisorySeverityRequestFactory::new()->state(['name' => 'Critical']),
+            ['name' => 'unique'],
+        ],
+        'name unique case insensitive' => [
+            AdvisorySeverityRequestFactory::new()->state(['name' => 'CRITICAL']),
+            ['name' => 'unique'],
+        ],
     ]
 );
 
@@ -143,4 +155,54 @@ test('delete action visible with proper access control', function (): void {
         'record' => $advisorySeverity->getRouteKey(),
     ])
         ->assertActionVisible(DeleteAction::class);
+});
+
+test('EditAdvisorySeverity allows keeping its own name with a different case', function (): void {
+    asSuperAdmin();
+
+    $advisorySeverity = AdvisorySeverity::factory()->create(['name' => 'Critical']);
+
+    Livewire::test(EditAdvisorySeverity::class, [
+        'record' => $advisorySeverity->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'CRITICAL'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($advisorySeverity->refresh()->name)->toBe('CRITICAL');
+});
+
+test('EditAdvisorySeverity allows the name of a soft deleted advisory severity', function (): void {
+    asSuperAdmin();
+
+    AdvisorySeverity::factory()->create(['name' => 'Critical'])->delete();
+    $advisorySeverity = AdvisorySeverity::factory()->create(['name' => 'Minor']);
+
+    Livewire::test(EditAdvisorySeverity::class, [
+        'record' => $advisorySeverity->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'Critical'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($advisorySeverity->refresh()->name)->toBe('Critical');
+});
+
+// TODO: Cleanup Task (advisory-status-and-severity-name-uniqueness): delete this describe and the test within
+describe('name uniqueness feature flag', function (): void {
+    it('does not apply the unique form rule when the feature is disabled', function (): void {
+        AdvisorySeverityNameUniquenessFeature::deactivate();
+
+        asSuperAdmin();
+
+        AdvisorySeverity::factory()->create(['name' => 'Critical']);
+        $advisorySeverity = AdvisorySeverity::factory()->create(['name' => 'Minor']);
+
+        expect(fn () => Livewire::test(EditAdvisorySeverity::class, [
+            'record' => $advisorySeverity->getRouteKey(),
+        ])
+            ->fillForm(['name' => 'Critical'])
+            ->call('save'))
+            ->toThrow(UniqueConstraintViolationException::class);
+    });
 });

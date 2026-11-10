@@ -38,24 +38,19 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use App\Models\SystemUser;
-use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\getJson;
-
-beforeEach(function (): void {
-    // Disable auditing, which causes testing issues when authenticating with a fake Sanctum token.
-    config()->set('audit.enabled', false);
-});
+use function Tests\actingAsApiUser;
 
 it('is gated with proper access control', function (): void {
     $user = SystemUser::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     getJson(route('api.v1.organizations.index', [], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     getJson(route('api.v1.organizations.index', [], false))
         ->assertOk();
 });
@@ -63,7 +58,7 @@ it('is gated with proper access control', function (): void {
 it('returns a paginated list of organizations', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     Organization::factory()->count(3)->create();
 
@@ -106,7 +101,7 @@ it('returns a paginated list of organizations', function (): void {
 it('returns domains as a flat list of strings', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     Organization::factory()->create([
         'domains' => [['domain' => 'example.com'], ['domain' => 'example.org']],
@@ -120,7 +115,7 @@ it('returns domains as a flat list of strings', function (): void {
 it('does not return soft deleted organizations', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     Organization::factory()->create();
     Organization::factory()->create()->delete();
@@ -132,7 +127,7 @@ it('does not return soft deleted organizations', function (): void {
 it('can filter organizations by name', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     Organization::factory()->create(['name' => 'Acme Corporation']);
     Organization::factory()->count(2)->create();
@@ -147,7 +142,7 @@ it('can filter organizations by name', function (): void {
 it('can filter organizations by email', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     Organization::factory()->create(['email' => 'hello@acme.test']);
     Organization::factory()->count(2)->create(['email' => 'info@other.test']);
@@ -162,7 +157,7 @@ it('can filter organizations by email', function (): void {
 it('can filter organizations by industry name regardless of case', function (string $filter): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $industry = OrganizationIndustry::factory()->create(['name' => 'Higher Education']);
     Organization::factory()->create(['industry_id' => $industry->getKey()]);
@@ -182,7 +177,7 @@ it('can filter organizations by industry name regardless of case', function (str
 it('can filter organizations by type name regardless of case', function (string $filter): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $type = OrganizationType::factory()->create(['name' => 'Public Institution']);
     Organization::factory()->create(['type_id' => $type->getKey()]);
@@ -202,7 +197,7 @@ it('can filter organizations by type name regardless of case', function (string 
 it('does not match part of an industry or type name', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     Organization::factory()->create([
         'industry_id' => OrganizationIndustry::factory()->create(['name' => 'Higher Education'])->getKey(),
@@ -219,7 +214,7 @@ it('does not match part of an industry or type name', function (): void {
 it('can filter organizations by an industry or type name that contains a comma', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     Organization::factory()->create([
         'industry_id' => OrganizationIndustry::factory()->create(['name' => 'Arts, Entertainment, and Recreation'])->getKey(),
@@ -237,7 +232,7 @@ it('can filter organizations by an industry or type name that contains a comma',
 it('can filter organizations by multiple industry or type names separated by a pipe', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     Organization::factory()->create([
         'industry_id' => OrganizationIndustry::factory()->create(['name' => 'Higher Education'])->getKey(),
@@ -259,7 +254,7 @@ it('can filter organizations by multiple industry or type names separated by a p
 it('no longer filters industry and type by identifier', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $organization = Organization::factory()->create();
 
@@ -273,7 +268,7 @@ it('no longer filters industry and type by identifier', function (): void {
 it('can filter organizations by whether contact generation is enabled', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     Organization::factory()->create(['is_contact_generation_enabled' => true]);
     Organization::factory()->count(2)->create(['is_contact_generation_enabled' => false]);
@@ -288,7 +283,7 @@ it('can filter organizations by whether contact generation is enabled', function
 it('sorts organizations by name by default and supports descending sorts', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     Organization::factory()->create(['name' => 'Bravo']);
     Organization::factory()->create(['name' => 'Alpha']);
@@ -304,7 +299,7 @@ it('sorts organizations by name by default and supports descending sorts', funct
 it('rejects filters and sorts that are not allowed', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     getJson(route('api.v1.organizations.index', ['filter' => ['description' => 'x']], false))
         ->assertBadRequest();
@@ -316,7 +311,7 @@ it('rejects filters and sorts that are not allowed', function (): void {
 it('does not return archived organizations', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $organization = Organization::factory()->create();
     Organization::factory()->archived()->create();

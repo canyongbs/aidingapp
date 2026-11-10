@@ -1,0 +1,36 @@
+info:
+  name: Archive Organization
+  type: http
+  seq: 5
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/v1/organizations/:organization"
+  params:
+    - name: organization
+      value: "{{organizationId}}"
+      type: path
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 204) {
+          // The archived organization can no longer be assigned to contacts.
+          bru.setVar('organizationId', null);
+          bru.setVar('organizationName', null);
+          bru.setVar('organizationDomain', null);
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "204"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Archives the organization (it is not permanently deleted, but is no longer returned by the API). Returns `204 No Content`.
+
+  Uses the `organizationId` runtime variable, which **Create Organization** sets automatically. You can also replace the `organization` path parameter with any organization ID from **List Organizations**.

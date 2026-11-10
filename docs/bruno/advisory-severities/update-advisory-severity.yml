@@ -1,0 +1,36 @@
+info:
+  name: Update Advisory Severity
+  type: http
+  seq: 4
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/v1/advisory-severities/:advisorySeverity"
+  params:
+    - name: advisorySeverity
+      value: "{{advisorySeverityId}}"
+      type: path
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "color": "orange"
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Partially updates an advisory severity: only the attributes included in the body are changed. Accepts the same attributes as **Create Advisory Severity**. The `sort` can only be changed in the admin panel.
+
+  Uses the `advisorySeverityId` runtime variable, which **Create Advisory Severity** sets automatically. You can also replace the `advisorySeverity` path parameter with any advisory severity ID from **List Advisory Severities**.

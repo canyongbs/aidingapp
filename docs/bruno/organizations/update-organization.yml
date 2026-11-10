@@ -1,0 +1,39 @@
+info:
+  name: Update Organization
+  type: http
+  seq: 4
+
+http:
+  method: PATCH
+  url: "{{baseUrl}}/api/v1/organizations/:organization"
+  params:
+    - name: organization
+      value: "{{organizationId}}"
+      type: path
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "description": "Updated from the Aiding App Bruno collection.",
+        "number_of_employees": 500,
+        "phone_number": "555-0199",
+        "is_contact_generation_enabled": true
+      }
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Partially updates an organization: only the attributes included in the body are changed. Accepts the same attributes as **Create Organization**.
+
+  Uses the `organizationId` runtime variable, which **Create Organization** sets automatically. You can also replace the `organization` path parameter with any organization ID from **List Organizations**.

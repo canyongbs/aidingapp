@@ -1,0 +1,34 @@
+info:
+  name: Delete Advisory Status
+  type: http
+  seq: 5
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/v1/advisory-statuses/:advisoryStatus"
+  params:
+    - name: advisoryStatus
+      value: "{{advisoryStatusId}}"
+      type: path
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 204) {
+          bru.setVar('advisoryStatusId', null);
+          bru.setVar('advisoryStatusName', null);
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "204"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Deletes the advisory status. Returns `204 No Content`. An advisory status that is used by an advisory cannot be deleted (`403`).
+
+  Uses the `advisoryStatusId` runtime variable, which **Create Advisory Status** sets automatically. You can also replace the `advisoryStatus` path parameter with any advisory status ID from **List Advisory Statuses**.

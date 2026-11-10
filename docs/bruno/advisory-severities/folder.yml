@@ -1,0 +1,11 @@
+info:
+  name: Advisory Severities
+  type: folder
+  seq: 4
+
+request:
+  auth: inherit
+
+docs:
+  content: Advisory severity endpoints. **Create Advisory Severity** sets `advisorySeverityId` / `advisorySeverityName` for the other requests, and **Delete Advisory Severity** removes the severity it created. These endpoints use the **Settings** permissions, like the admin panel, and require the Advisory Management add-on.
+  type: text/markdown

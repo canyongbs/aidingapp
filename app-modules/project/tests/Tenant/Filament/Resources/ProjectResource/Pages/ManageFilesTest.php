@@ -40,6 +40,7 @@ use AidingApp\Project\Models\ProjectFile;
 use App\Jobs\PruneModels;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 use Illuminate\Database\Console\PruneCommand;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -215,6 +216,25 @@ it('can edit files', function (): void {
         ProjectFile::class,
         $request->toArray()
     );
+});
+
+it('downloads a file as an attachment under its uploaded name', function (): void {
+    asSuperAdmin();
+    Storage::fake('s3');
+
+    $project = Project::factory()->create();
+    $file = ProjectFile::factory()->state(['project_id' => $project->getKey()])->create();
+    $file->addMedia(UploadedFile::fake()->image('plan.png'))->usingName('Launch Plan')->toMediaCollection('file');
+
+    $media = $file->getFirstMedia('file');
+
+    Storage::disk('s3')->buildTemporaryUrlsUsing(
+        fn (string $path, DateTimeInterface $expiration, array $options): string => "https://media.test/{$path}?disposition=" . rawurlencode($options['ResponseContentDisposition']),
+    );
+
+    Livewire::test(ManageFiles::class, ['record' => $project->getKey()])
+        ->callAction(TestAction::make('download')->table($file))
+        ->assertRedirect('https://media.test/' . $media->getPathRelativeToRoot() . '?disposition=' . rawurlencode('attachment; filename="Launch Plan.png"'));
 });
 
 it('correctly prunes ProjectFiles based on retention_date', function (): void {

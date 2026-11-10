@@ -43,9 +43,11 @@ use AidingApp\Form\Enums\Rounding;
 use AidingApp\Form\Rules\IsDomain;
 use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use AidingApp\Portal\Enums\GdprDeclineOptions;
+use AidingApp\Portal\Settings\AiDisclaimerSettings;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
 use App\Enums\NavigationGroup;
+use App\Features\AiDisclaimerFeature;
 use App\Models\User;
 use App\Rules\ValidUrl;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
@@ -135,6 +137,17 @@ class ManagePortalSettings extends SettingsPage
                             ->label('AI Support Assistant')
                             ->visible(fn (Get $get): bool => $get('knowledge_management_portal_enabled') && app(AiSupportAssistantSettings::class)->is_enabled)
                             ->live(),
+                        Toggle::make('ai_disclaimer_enabled')
+                            ->label('AI Disclaimer')
+                            ->visible(fn (Get $get): bool => AiDisclaimerFeature::active() && $get('knowledge_management_portal_enabled') && $get('ai_support_assistant') && app(AiSupportAssistantSettings::class)->is_enabled)
+                            ->live()
+                            ->columnSpanFull(),
+                        TextInput::make('ai_disclaimer_text')
+                            ->label('AI Disclaimer Text')
+                            ->required()
+                            ->maxLength(255)
+                            ->visible(fn (Get $get): bool => AiDisclaimerFeature::active() && $get('knowledge_management_portal_enabled') && $get('ai_support_assistant') && $get('ai_disclaimer_enabled') && app(AiSupportAssistantSettings::class)->is_enabled)
+                            ->columnSpanFull(),
                         Toggle::make('embed_assistant')
                             ->label('Embed Support Assistant')
                             ->visible(fn (Get $get): bool => $get('knowledge_management_portal_enabled') && $get('ai_support_assistant'))
@@ -293,6 +306,45 @@ class ManagePortalSettings extends SettingsPage
         }
 
         return parent::getFormActions();
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        if (! AiDisclaimerFeature::active()) {
+            return $data;
+        }
+
+        $aiDisclaimerSettings = app(AiDisclaimerSettings::class);
+
+        return [
+            ...$data,
+            'ai_disclaimer_enabled' => $aiDisclaimerSettings->is_enabled,
+            'ai_disclaimer_text' => $aiDisclaimerSettings->text,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (AiDisclaimerFeature::active()) {
+            $aiDisclaimerSettings = app(AiDisclaimerSettings::class);
+            $aiDisclaimerSettings->is_enabled = $data['ai_disclaimer_enabled'] ?? $aiDisclaimerSettings->is_enabled;
+            $aiDisclaimerSettings->text = $data['ai_disclaimer_text'] ?? $aiDisclaimerSettings->text;
+            $aiDisclaimerSettings->save();
+        }
+
+        unset($data['ai_disclaimer_enabled'], $data['ai_disclaimer_text']);
+
+        return $data;
     }
 
     protected function getHeaderActions(): array
