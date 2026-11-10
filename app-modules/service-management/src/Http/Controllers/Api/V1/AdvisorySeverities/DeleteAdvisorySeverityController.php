@@ -44,7 +44,9 @@ use Illuminate\Support\Facades\Gate;
 class DeleteAdvisorySeverityController
 {
     /**
-     * Delete an advisory severity. An advisory severity that is used by an advisory cannot be deleted.
+     * Delete an advisory severity.
+     *
+     * An advisory severity that is used by an advisory cannot be deleted.
      */
     #[Group('Advisory Severities')]
     public function __invoke(AdvisorySeverity $advisorySeverity): Response

@@ -45,7 +45,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class UpdateAdvisoryStatusController
 {
     /**
-     * Update an advisory status. Only the attributes included in the request are changed.
+     * Update an advisory status.
+     *
+     * Only the attributes included in the request are changed.
      *
      * @response AdvisoryStatusResource
      */

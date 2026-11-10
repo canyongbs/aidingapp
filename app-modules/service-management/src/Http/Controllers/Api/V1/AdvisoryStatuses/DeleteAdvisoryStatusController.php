@@ -44,7 +44,9 @@ use Illuminate\Support\Facades\Gate;
 class DeleteAdvisoryStatusController
 {
     /**
-     * Delete an advisory status. An advisory status that is used by an advisory cannot be deleted.
+     * Delete an advisory status.
+     *
+     * An advisory status that is used by an advisory cannot be deleted.
      */
     #[Group('Advisory Statuses')]
     public function __invoke(AdvisoryStatus $advisoryStatus): Response
