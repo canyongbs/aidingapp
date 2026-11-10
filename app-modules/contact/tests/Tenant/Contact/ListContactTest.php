@@ -63,7 +63,7 @@ test('ListContacts is gated with proper access control', function (): void {
             ContactResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contacts.view-any');
 
     actingAs($user)
         ->get(
@@ -81,8 +81,7 @@ test('can list records of engagements timelineable', function (): void {
 
     expect(EngagementsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeFalse();
 
-    $user->givePermissionTo('engagement.view-any');
-    $user->givePermissionTo('engagement_response.view-any');
+    $user->givePermissionTo('contacts.view-any');
 
     actingAs($user);
 
@@ -134,8 +133,7 @@ test('can filter engagements timelineable', function (): void {
 
     expect(EngagementsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeFalse();
 
-    $user->givePermissionTo('engagement.view-any');
-    $user->givePermissionTo('engagement_response.view-any');
+    $user->givePermissionTo('contacts.view-any');
 
     actingAs($user);
 

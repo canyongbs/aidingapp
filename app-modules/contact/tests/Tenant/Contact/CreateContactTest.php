@@ -91,8 +91,8 @@ test('CreateContact is gated with proper access control', function (): void {
     Livewire::test(CreateContact::class)
         ->assertForbidden();
 
-    $user->givePermissionTo('contact.view-any');
-    $user->givePermissionTo('contact.create');
+    $user->givePermissionTo('contacts.view-any');
+    $user->givePermissionTo('contacts.create');
 
     actingAs($user)
         ->get(
@@ -115,8 +115,8 @@ test('CreateContact is gated with proper access control', function (): void {
 
 test('CreateContact rejects a duplicate email case-insensitively', function (): void {
     $user = User::factory()->create();
-    $user->givePermissionTo('contact.view-any');
-    $user->givePermissionTo('contact.create');
+    $user->givePermissionTo('contacts.view-any');
+    $user->givePermissionTo('contacts.create');
 
     Contact::factory()->create(['email' => 'taken@example.com']);
 
@@ -137,8 +137,8 @@ test('CreateContact rejects a duplicate email case-insensitively', function (): 
 
 test('CreateContact allows reusing a soft-deleted contact email', function (): void {
     $user = User::factory()->create();
-    $user->givePermissionTo('contact.view-any');
-    $user->givePermissionTo('contact.create');
+    $user->givePermissionTo('contacts.view-any');
+    $user->givePermissionTo('contacts.create');
 
     Contact::factory()->create(['email' => 'reuse@example.com'])->delete();
 
@@ -159,8 +159,8 @@ test('CreateContact allows reusing a soft-deleted contact email', function (): v
 
 it('does not create a contact with the email of an archived contact', function (): void {
     $user = User::factory()->create();
-    $user->givePermissionTo('contact.view-any');
-    $user->givePermissionTo('contact.create');
+    $user->givePermissionTo('contacts.view-any');
+    $user->givePermissionTo('contacts.create');
 
     Contact::factory()->archived()->create(['email' => 'archived@example.com']);
 
@@ -185,8 +185,8 @@ it('rejects the email of an archived contact with the unique message while conta
     ContactArchivingFeature::deactivate();
 
     $user = User::factory()->create();
-    $user->givePermissionTo('contact.view-any');
-    $user->givePermissionTo('contact.create');
+    $user->givePermissionTo('contacts.view-any');
+    $user->givePermissionTo('contacts.create');
 
     Contact::factory()->archived()->create(['email' => 'archived@example.com']);
 

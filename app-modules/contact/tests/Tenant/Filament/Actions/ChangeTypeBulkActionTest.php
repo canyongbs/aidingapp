@@ -48,7 +48,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 
 beforeEach(function (): void {
-    actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update'));
+    actingAs(User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view', 'contacts.*.update'));
 });
 
 it('changes the type of the selected contacts', function (): void {
@@ -92,15 +92,15 @@ it('skips managed contacts and reports why', function (): void {
         ->and($managed->refresh()->type_id)->toBe($managedType);
 });
 
-it('only offers the action to a user with the `contact.*.update` permission', function (): void {
+it('only offers the action to a user with the `contacts.*.update` permission', function (): void {
     Contact::factory()->create();
 
-    actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view'));
+    actingAs(User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view'));
 
     Livewire::test(ListContacts::class)
         ->assertActionHidden(TestAction::make('changeType')->table()->bulk());
 
-    actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update'));
+    actingAs(User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view', 'contacts.*.update'));
 
     Livewire::test(ListContacts::class)
         ->assertActionVisible(TestAction::make('changeType')->table()->bulk());

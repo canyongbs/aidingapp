@@ -36,6 +36,7 @@
 
 namespace AidingApp\Timeline\Filament\Pages;
 
+use App\Features\ContactPermissionConsolidationFeature;
 use BackedEnum;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
@@ -67,7 +68,7 @@ abstract class TimelinePage extends Page
 
     public static function canAccess(array $parameters = []): bool
     {
-        if (auth()->user()->cannot(['engagement.view-any', 'engagement.*.view'])) {
+        if (auth()->user()->cannot(ContactPermissionConsolidationFeature::active() ? ['contacts.view-any', 'contacts.*.view'] : ['engagement.view-any', 'engagement.*.view'])) {
             return false;
         }
 

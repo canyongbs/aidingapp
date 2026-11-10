@@ -52,6 +52,7 @@ use App\Features\AdvisorySeverityNameUniquenessFeature;
 use App\Features\AdvisoryStatusNameUniquenessFeature;
 use App\Features\ChangeRequestStatusNameUniquenessFeature;
 use App\Features\ChangeRequestTypeNameUniquenessFeature;
+use App\Features\ContactPermissionConsolidationFeature;
 use App\Features\ContractNameUniquenessFeature;
 use App\Features\ContractTypeNameUniquenessFeature;
 use App\Features\EmailTemplateNameUniquenessFeature;
@@ -2000,6 +2001,62 @@ describe('2026_11_06_233425_tmp_grant_change_request_permissions_to_users_and_ro
                 ->and($rolePermissionNames($role))->toContain(...$changeRequestPermissions)
                 ->and($directPermissionNames($unrelatedUser))->not->toContain(...$changeRequestPermissions)
                 ->and($directPermissionNames($unrelatedUser))->toBe(['product.view-any']);
+        });
+    });
+});
+
+// TODO: Cleanup Task (contacts-permission-consolidation): delete this describe and the test within
+describe('2026_11_10_191246_tmp_grant_contacts_permissions_to_users_and_roles_with_related_permissions', function (): void {
+    it('grants the equivalent contacts permissions to users and roles with a related permission', function (): void {
+        isolatedMigration('2026_11_10_191246_tmp_grant_contacts_permissions_to_users_and_roles_with_related_permissions', function (): void {
+            $actions = ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'];
+            $permissionsFor = fn (string $prefix): array => array_map(fn (string $action): string => "{$prefix}.{$action}", $actions);
+            $contactsPermissions = $permissionsFor('contacts');
+
+            $contactUser = User::factory()->create();
+            $contactUser->givePermissionTo([...$permissionsFor('contact'), 'contact.import']);
+
+            $fileUser = User::factory()->create();
+            $fileUser->givePermissionTo($permissionsFor('engagement_file'));
+
+            $responseUser = User::factory()->create();
+            $responseUser->givePermissionTo($permissionsFor('engagement_response'));
+
+            $timelineUser = User::factory()->create();
+            $timelineUser->givePermissionTo('engagement.view-any', 'engagement.*.view');
+
+            $sendUser = User::factory()->create();
+            $sendUser->givePermissionTo('engagement.create');
+
+            $systemUser = SystemUser::factory()->create();
+            $systemUser->givePermissionTo('contact.view-any');
+
+            $roleUser = User::factory()->create();
+            $role = Role::factory()->create();
+            $role->givePermissionTo('engagement.*.update');
+            $roleUser->assignRole($role);
+
+            $unrelatedUser = User::factory()->create();
+            $unrelatedUser->givePermissionTo('product.view-any');
+
+            expect(ContactPermissionConsolidationFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/contact/database/migrations/2026_11_10_191246_tmp_grant_contacts_permissions_to_users_and_roles_with_related_permissions.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $directPermissionNames = fn (User|SystemUser $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->filter(fn (string $name): bool => str_starts_with($name, 'contacts.'))->sort()->values()->all();
+            $sorted = fn (array $names): array => collect($names)->sort()->values()->all();
+
+            expect($directPermissionNames($contactUser))->toBe($sorted([...$contactsPermissions, 'contacts.import']))
+                ->and($directPermissionNames($fileUser))->toBe($sorted($contactsPermissions))
+                ->and($directPermissionNames($responseUser))->toBe($sorted($contactsPermissions))
+                ->and($directPermissionNames($timelineUser))->toBe($sorted(['contacts.view-any', 'contacts.*.view']))
+                ->and($directPermissionNames($sendUser))->toBe($sorted(['contacts.view-any', 'contacts.*.view', 'contacts.*.update']))
+                ->and($directPermissionNames($systemUser))->toBe($sorted(['contacts.view-any']))
+                ->and($role->refresh()->permissions()->pluck('name')->all())->toContain('contacts.*.update')
+                ->and($directPermissionNames($unrelatedUser))->toBe([])
+                ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['product.view-any'])
+                ->and(ContactPermissionConsolidationFeature::active())->toBeTrue();
         });
     });
 });

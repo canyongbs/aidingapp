@@ -44,7 +44,7 @@ it('populates the address fields when a suggestion is selected', function (): vo
     actingAs(
         User::factory()
             ->create()
-            ->givePermissionTo('contact.view-any', 'contact.create')
+            ->givePermissionTo('contacts.view-any', 'contacts.create')
     );
 
     $address = new AutocompletedAddress(

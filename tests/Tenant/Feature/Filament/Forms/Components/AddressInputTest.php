@@ -46,7 +46,7 @@ it('does not query the address suggestion service for searches shorter than thre
     actingAs(
         User::factory()
             ->create()
-            ->givePermissionTo('contact.view-any', 'contact.create')
+            ->givePermissionTo('contacts.view-any', 'contacts.create')
     );
 
     /** @phpstan-ignore method.notFound */
@@ -65,7 +65,7 @@ it('returns no suggestions and notifies the user when the address suggestion ser
     actingAs(
         User::factory()
             ->create()
-            ->givePermissionTo('contact.view-any', 'contact.create')
+            ->givePermissionTo('contacts.view-any', 'contacts.create')
     );
 
     /** @phpstan-ignore method.notFound */
@@ -88,7 +88,7 @@ it('limits the address to 255 characters', function (): void {
     actingAs(
         User::factory()
             ->create()
-            ->givePermissionTo('contact.view-any', 'contact.create')
+            ->givePermissionTo('contacts.view-any', 'contacts.create')
     );
 
     Livewire::test(CreateContact::class)
