@@ -74,11 +74,9 @@ it('can render create pipeline entry with proper permission', function (): void 
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('project.*.update');
-    $user->givePermissionTo('pipeline.view-any');
-    $user->givePermissionTo('pipeline.*.update');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
+    $user->givePermissionTo('projects.*.update');
     $user->refresh();
 
     Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])

@@ -61,9 +61,9 @@ it('can render with proper permission.', function (): void {
     Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
         ->assertForbidden();
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('project.*.update');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
+    $user->givePermissionTo('projects.*.update');
     $user->refresh();
 
     Livewire::test(CreatePipeline::class, ['parentRecord' => $project])

@@ -34,14 +34,73 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
+use App\Features\ProjectPermissionConsolidationFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 
 use function Pest\Laravel\actingAs;
+
+use Spatie\Permission\PermissionRegistrar;
+
 use function Tests\asSuperAdmin;
+
+$standalonePipelineAbilities = [
+    'viewAny' => ['viewAny', 'view-any', false],
+    'view' => ['view', '*.view', true],
+    'create' => ['create', 'create', false],
+    'update' => ['update', '*.update', true],
+    'delete' => ['delete', '*.delete', true],
+    'deleteAny' => ['deleteAny', '*.delete', false],
+    'restore' => ['restore', '*.restore', true],
+    'restoreAny' => ['restoreAny', '*.restore', false],
+    'forceDelete' => ['forceDelete', '*.force-delete', true],
+    'forceDeleteAny' => ['forceDeleteAny', '*.force-delete', false],
+];
+
+it('governs pipelines without a project with the projects permissions', function (string $ability, string $action, bool $forRecord): void {
+    $arguments = $forRecord ? Pipeline::factory()->make(['project_id' => null]) : Pipeline::class;
+
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    expect($user->can($ability, $arguments))->toBeFalse();
+
+    $user->givePermissionTo("projects.{$action}");
+
+    expect($user->can($ability, $arguments))->toBeTrue();
+})->with($standalonePipelineAbilities);
+
+// TODO: Cleanup Task (projects-permission-consolidation): delete this test, the feature will always be active
+it('governs pipelines without a project with the pipeline permissions while the projects permission consolidation is inactive', function (string $ability, string $action, bool $forRecord): void {
+    ProjectPermissionConsolidationFeature::deactivate();
+
+    $legacyPermission = Permission::factory()->create([
+        'name' => "pipeline.{$action}",
+        'guard_name' => 'web',
+        'group_id' => PermissionGroup::create(['name' => 'Pipeline'])->getKey(),
+    ]);
+    app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+    $arguments = $forRecord ? Pipeline::factory()->make(['project_id' => null]) : Pipeline::class;
+
+    $user = User::factory()->create()->givePermissionTo("projects.{$action}");
+
+    actingAs($user);
+
+    expect($user->can($ability, $arguments))->toBeFalse();
+
+    $legacyUser = User::factory()->create()->givePermissionTo($legacyPermission);
+
+    actingAs($legacyUser);
+
+    expect($legacyUser->can($ability, $arguments))->toBeTrue();
+})->with($standalonePipelineAbilities);
 
 it('delegates viewAny to the project when a project is passed', function (): void {
     $user = User::factory()->create();
@@ -52,21 +111,21 @@ it('delegates viewAny to the project when a project is passed', function (): voi
 
     expect($user->can('viewAny', [Pipeline::class, $project]))->toBeFalse();
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
     $user->refresh();
 
     expect($user->can('viewAny', [Pipeline::class, $project]))->toBeTrue();
 });
 
-it('falls back to the pipeline.view-any permission when no project is passed', function (): void {
+it('falls back to the `projects.view-any` permission when no project is passed', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
 
     expect($user->can('viewAny', Pipeline::class))->toBeFalse();
 
-    $user->givePermissionTo('pipeline.view-any');
+    $user->givePermissionTo('projects.view-any');
     $user->refresh();
 
     expect($user->can('viewAny', Pipeline::class))->toBeTrue();
@@ -81,22 +140,22 @@ it('delegates create to the project when a project is passed', function (): void
 
     expect($user->can('create', [Pipeline::class, $project]))->toBeFalse();
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('project.*.update');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
+    $user->givePermissionTo('projects.*.update');
     $user->refresh();
 
     expect($user->can('create', [Pipeline::class, $project]))->toBeTrue();
 });
 
-it('falls back to the pipeline.create permission when no project is passed', function (): void {
+it('falls back to the `projects.create` permission when no project is passed', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
 
     expect($user->can('create', Pipeline::class))->toBeFalse();
 
-    $user->givePermissionTo('pipeline.create');
+    $user->givePermissionTo('projects.create');
     $user->refresh();
 
     expect($user->can('create', Pipeline::class))->toBeTrue();
@@ -116,15 +175,15 @@ it('delegates update to the pipeline\'s project when it has one', function (): v
 
     expect($user->can('update', $pipeline))->toBeFalse();
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('project.*.update');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
+    $user->givePermissionTo('projects.*.update');
     $user->refresh();
 
     expect($user->can('update', $pipeline))->toBeTrue();
 });
 
-it('falls back to the pipeline.*.update permission when the pipeline has no project', function (): void {
+it('falls back to the `projects.*.update` permission when the pipeline has no project', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -135,7 +194,7 @@ it('falls back to the pipeline.*.update permission when the pipeline has no proj
 
     expect($user->can('update', $pipeline))->toBeFalse();
 
-    $user->givePermissionTo('pipeline.*.update');
+    $user->givePermissionTo('projects.*.update');
     $user->refresh();
 
     expect($user->can('update', $pipeline))->toBeTrue();
@@ -158,10 +217,8 @@ it('does not let a super admin view or update a pipeline whose project is archiv
         ->and($user->can('update', $pipeline))->toBeFalse();
 });
 
-it('denies access to a pipeline of an archived project without disclosing that it is archived', function (): void {
-    $user = User::factory()
-        ->create()
-        ->givePermissionTo('pipeline.view-any', 'pipeline.*.view');
+it('denies access to a pipeline of an archived project without disclosing that it is archived to a user who cannot view the project', function (): void {
+    $user = User::factory()->create();
 
     actingAs($user);
 
