@@ -45,7 +45,9 @@ use Illuminate\Http\JsonResponse;
 class CreateAdvisoryStatusController
 {
     /**
-     * Create an advisory status. The name must be unique among advisory statuses, ignoring case.
+     * Create an advisory status.
+     *
+     * The name must be unique among advisory statuses, ignoring case.
      */
     #[Group('Advisory Statuses')]
     public function __invoke(CreateAdvisoryStatusRequest $request): JsonResponse

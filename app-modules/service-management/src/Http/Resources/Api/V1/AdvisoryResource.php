@@ -76,7 +76,6 @@ class AdvisoryResource extends JsonResource
             'visibility' => $this->when(AdvisoryVisibilityFeature::active(), fn () => $this->resource->visibility),
             /** Whether only contacts of the `restricted_to_contact_types` can see an `authenticated` advisory. */
             'is_visibility_restricted' => $this->when(AdvisoryVisibilityFeature::active(), fn (): bool => $this->resource->is_visibility_restricted),
-            /** @var array<int, array{id: string, name: string}> */
             'restricted_to_contact_types' => $this->when(AdvisoryVisibilityFeature::active(), fn (): array => $this->resource->restrictedToContactTypes
                 ->sortBy('name')
                 ->map(fn (ContactType $contactType): array => [
