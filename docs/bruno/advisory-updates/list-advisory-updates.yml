@@ -1,0 +1,58 @@
+info:
+  name: List Advisory Updates
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/advisories/:advisory/updates?page[number]=1&page[size]=30&sort=-date"
+  params:
+    - name: advisory
+      value: "{{advisoryId}}"
+      type: path
+    - name: page[number]
+      value: "1"
+      type: query
+      description: Page to return. Defaults to 1.
+    - name: page[size]
+      value: "30"
+      type: query
+      description: Results per page. Defaults to 30.
+    - name: sort
+      value: -date
+      type: query
+      description: One of `date`, `title`, `created_at`, `updated_at`. Prefix with `-` for descending. Defaults to `-date` (newest first).
+    - name: filter[title]
+      value: Investigating
+      type: query
+      description: Partial match on the title.
+      disabled: true
+    - name: filter[internal]
+      value: "false"
+      type: query
+      description: Either `true` or `false`.
+      disabled: true
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        // Gives View a record to show when Create has not set one.
+        const advisoryUpdates = res.getBody()?.data ?? [];
+
+        if (res.getStatus() === 200 && !bru.getVar('advisoryUpdateId') && advisoryUpdates.length) {
+          bru.setVar('advisoryUpdateId', advisoryUpdates[0].id);
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Lists the updates of the advisory in the `advisoryId` runtime variable, paginated with `page[number]` / `page[size]`. If the `advisoryUpdateId` runtime variable is not set, it is set to the first update returned.
+
+  Enable any of the disabled `filter[...]` query parameters in the **Params** tab to try them.
