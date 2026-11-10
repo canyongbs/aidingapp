@@ -1,0 +1,34 @@
+info:
+  name: Delete Advisory Severity
+  type: http
+  seq: 5
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/api/v1/advisory-severities/:advisorySeverity"
+  params:
+    - name: advisorySeverity
+      value: "{{advisorySeverityId}}"
+      type: path
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 204) {
+          bru.setVar('advisorySeverityId', null);
+          bru.setVar('advisorySeverityName', null);
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "204"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Deletes the advisory severity. Returns `204 No Content`. An advisory severity that is used by an advisory cannot be deleted (`403`).
+
+  Uses the `advisorySeverityId` runtime variable, which **Create Advisory Severity** sets automatically. You can also replace the `advisorySeverity` path parameter with any advisory severity ID from **List Advisory Severities**.
