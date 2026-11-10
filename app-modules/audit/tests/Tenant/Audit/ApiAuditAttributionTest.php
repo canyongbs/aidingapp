@@ -93,8 +93,10 @@ it('resolves the SystemUser name via the audit user() relationship', function ()
         ->where('event', 'updated')
         ->first();
 
-    expect($audit->user)->toBeInstanceOf(SystemUser::class);
-    expect($audit->user->name)->toBe('Test System User');
+    $user = $audit->user;
+    assert($user instanceof SystemUser);
+
+    expect($user->name)->toBe('Test System User');
 });
 
 it('records null change_agent when no user is authenticated', function (): void {

@@ -101,7 +101,7 @@ class SqsDiskQueue extends BaseSqsDiskQueue
     {
         $response = $this->sqs->receiveMessage([
             'QueueUrl' => $queue = $this->getQueue($queue),
-            'AttributeNames' => ['ApproximateReceiveCount'],
+            'MessageSystemAttributeNames' => ['ApproximateReceiveCount'],
         ]);
 
         if (! is_null($response['Messages']) && count($response['Messages']) > 0) {

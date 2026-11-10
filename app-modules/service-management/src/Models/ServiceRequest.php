@@ -183,7 +183,7 @@ class ServiceRequest extends Model implements Auditable, HasMedia
 
                 continue;
             }
-        } while (! $save && $attempts < 3);
+        } while (! $save);
 
         return $save;
     }

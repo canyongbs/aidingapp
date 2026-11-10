@@ -131,7 +131,7 @@ class GenerateAiResolutionPrompt
     }
 
     /**
-     * @return Collection<int, string>
+     * @return Collection<string, string>
      */
     protected function buildFieldsMapFromType(ServiceRequestType $serviceRequestType): Collection
     {
@@ -152,7 +152,7 @@ class GenerateAiResolutionPrompt
 
     /**
      * @param array<string, mixed> $formData
-     * @param Collection<int, string> $fieldsMap
+     * @param Collection<string, string> $fieldsMap
      *
      * @return array<int, string>
      */
@@ -169,7 +169,7 @@ class GenerateAiResolutionPrompt
     /**
      * @param array<int, string> $ids
      *
-     * @return array<int, string>
+     * @return array<string, string>
      */
     protected function fetchMissingFieldLabels(array $ids): array
     {
@@ -181,7 +181,7 @@ class GenerateAiResolutionPrompt
 
     /**
      * @param array<string, mixed> $formData
-     * @param Collection<int, string> $fieldsMap
+     * @param Collection<string, string> $fieldsMap
      */
     protected function renderFormDataMarkdown(array $formData, Collection $fieldsMap): string
     {
