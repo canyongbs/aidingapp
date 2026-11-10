@@ -37,6 +37,7 @@
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisorySeverities\CreateAdvisorySeverityController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisorySeverities\DeleteAdvisorySeverityController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisorySeverities\ListAdvisorySeveritiesController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisorySeverities\UpdateAdvisorySeverityController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisorySeverities\ViewAdvisorySeverityController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryStatuses\CreateAdvisoryStatusController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryStatuses\DeleteAdvisoryStatusController;
@@ -56,6 +57,7 @@ Route::api(majorVersion: 1, routes: function (): void {
             Route::get('/', ListAdvisorySeveritiesController::class)->name('index');
             Route::post('/', CreateAdvisorySeverityController::class)->name('store');
             Route::get('/{advisorySeverity}', ViewAdvisorySeverityController::class)->name('show');
+            Route::patch('/{advisorySeverity}', UpdateAdvisorySeverityController::class)->name('update');
             Route::delete('/{advisorySeverity}', DeleteAdvisorySeverityController::class)->name('delete');
         });
 
