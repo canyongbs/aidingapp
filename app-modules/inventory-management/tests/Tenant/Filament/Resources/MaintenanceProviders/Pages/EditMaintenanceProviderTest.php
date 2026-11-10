@@ -68,7 +68,7 @@ it('displays the maintenance provider data', function (): void {
 
 it('can update a maintenance provider', function (): void {
     $user = User::factory()->create();
-    $user->givePermissionTo(['maintenance_provider.view-any', 'maintenance_provider.*.update']);
+    $user->givePermissionTo(['assets.view-any', 'assets.*.update']);
     actingAs($user);
 
     $maintenanceProvider = MaintenanceProvider::factory()->create();
@@ -146,9 +146,9 @@ describe('name uniqueness feature flag', function (): void {
 });
 
 describe('authorization', function (): void {
-    it('denies access to the edit page without the `maintenance_provider.*.update` permission', function (): void {
+    it('denies access to the edit page without the `assets.*.update` permission', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('maintenance_provider.view-any');
+        $user->givePermissionTo('assets.view-any');
         actingAs($user);
 
         $maintenanceProvider = MaintenanceProvider::factory()->create();
@@ -164,7 +164,7 @@ describe('authorization', function (): void {
         $settings->save();
 
         $user = User::factory()->create();
-        $user->givePermissionTo(['maintenance_provider.view-any', 'maintenance_provider.*.update']);
+        $user->givePermissionTo(['assets.view-any', 'assets.*.update']);
         actingAs($user);
 
         $maintenanceProvider = MaintenanceProvider::factory()->create();
@@ -172,9 +172,9 @@ describe('authorization', function (): void {
         get(MaintenanceProviderResource::getUrl('edit', ['record' => $maintenanceProvider]))->assertForbidden();
     });
 
-    it('allows access to the edit page with the `maintenance_provider.*.update` permission', function (): void {
+    it('allows access to the edit page with the `assets.*.update` permission', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo(['maintenance_provider.view-any', 'maintenance_provider.*.update']);
+        $user->givePermissionTo(['assets.view-any', 'assets.*.update']);
         actingAs($user);
 
         $maintenanceProvider = MaintenanceProvider::factory()->create();

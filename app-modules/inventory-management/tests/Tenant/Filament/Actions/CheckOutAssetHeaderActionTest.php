@@ -42,6 +42,7 @@ use AidingApp\InventoryManagement\Models\AssetStatus;
 use App\Models\User;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
 it('excludes archived contacts', function (): void {
@@ -64,4 +65,28 @@ it('excludes archived contacts', function (): void {
 
     expect($asset->refresh()->isCheckedOut())->toBeTrue()
         ->and($asset->latestCheckOut?->checked_out_to_id)->toBe($contact->getKey());
+});
+
+describe('authorization', function (): void {
+    it('shows the `check-out` action to a user who can update the asset', function (): void {
+        actingAs(User::factory()->create(['timezone' => config('app.timezone')])->givePermissionTo('assets.view-any', 'assets.*.view', 'assets.*.update'));
+
+        AssetStatus::factory()->available()->create();
+
+        $asset = Asset::factory()->available()->create();
+
+        Livewire::test(ViewAsset::class, ['record' => $asset->getKey()])
+            ->assertActionVisible('check-out');
+    });
+
+    it('hides the `check-out` action from a user who cannot update the asset', function (): void {
+        actingAs(User::factory()->create(['timezone' => config('app.timezone')])->givePermissionTo('assets.view-any', 'assets.*.view', 'assets.create'));
+
+        AssetStatus::factory()->available()->create();
+
+        $asset = Asset::factory()->available()->create();
+
+        Livewire::test(ViewAsset::class, ['record' => $asset->getKey()])
+            ->assertActionHidden('check-out');
+    });
 });

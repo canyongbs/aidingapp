@@ -38,12 +38,7 @@ namespace AidingApp\Authorization\Enums;
 
 enum PermissionDescription: string
 {
-    case Asset = 'This permission group enables the display and management of the Asset feature in the primary navigation group Service Management. Permission options include create, view, update, and delete assets.';
-    case AssetCheckIn = 'This permission group enables the display and management of the Asset Check in feature, a primary navigation group. Permission options include view asset check ins. Note: Users cannot access this feature.';
-    case AssetCheckOut = 'This permission group enables the display and management of the Asset Check out feature, a primary navigation group. Permission options include view asset check outs. Note: Users cannot access this feature.';
-    case AssetLocation = 'This permission group enables the display and management of the Asset Location feature in the secondary navigation group Asset Management. Permission options include create, view, update, and delete asset locations.';
-    case AssetStatus = 'This permission group enables the display and management of the Asset Status feature in the secondary navigation group Asset Management. Permission options include create, view, update, and delete asset statuses.';
-    case AssetType = 'This permission group enables the display and management of the Asset Type feature in the secondary navigation group Asset Management. Permission options include create, view, update, and delete asset types.';
+    case Assets = 'Enables display and management of assets and related asset management features. Permissions cover creating, viewing, updating, and deleting assets, asset locations, asset statuses, asset types, and maintenance providers; creating, viewing, and updating maintenance activities; and viewing asset check-ins and check-outs. Existing restrictions on user access to check-in and check-out features continue to apply.';
     case Audit = 'This permission group enables the display and management of the Audit feature in the secondary navigation group Usage Auditing. Permission options include  view audits.';
     case ChangeRequest = 'Enables display and management of change requests and their configuration. Permissions cover creating, viewing, updating, and deleting change requests, change request statuses, and change request types.';
     case Contacts = 'Enables display and management of contacts and associated engagement features. Permissions cover creating, viewing, updating, and deleting contacts and engagement files, viewing timelines, and viewing engagement responses. Existing restrictions on user access to engagement files and engagement responses continue to apply.';
@@ -54,8 +49,6 @@ enum PermissionDescription: string
     case KnowledgeBaseItem = 'This permission group enables the display and management of the Knowledge Base Item feature in the primary navigation group Service Management. Permission options include create, view, update, and delete knowledge base items.';
     case License = 'This permission group enables the management of the License feature. Permission options include bulk assigning licesnes.';
     case Licenses = 'Enables display and management of License Management features, including products and their licenses. Permissions cover creating, viewing, updating, and deleting products and product licenses.';
-    case MaintenanceActivity = 'This permission group enables the display and management of the Maintenance Activity feature in the tertiary navigation group View Asset. Permission options include create, view, and update maintenance activity.';
-    case MaintenanceProvider = 'This permission group enables the display and management of the Maintenance Provider feature in the secondary navigation group Asset Management. Permission options include create, view, update and delete maintenance providers.';
     case Organization = 'This permission group enables the display and management of the Organization feature in the primary navigation group Clients. Permission options include create, view, update, and delete organizations.';
     case Permission = 'This permission group enables the display and management of the Permission feature in the primary navigation group User Management. Permission options include view permissions.';
     case Projects = 'Enables display and management of projects and their pipelines. Permissions cover creating, viewing, updating, and deleting projects and pipelines where those features are available.';
