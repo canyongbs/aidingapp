@@ -49,6 +49,8 @@ use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryStatuses\DeleteA
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryStatuses\ListAdvisoryStatusesController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryStatuses\UpdateAdvisoryStatusController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryStatuses\ViewAdvisoryStatusController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryUpdates\CreateAdvisoryUpdateController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryUpdates\DeleteAdvisoryUpdateController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryUpdates\ListAdvisoryUpdatesController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryUpdates\ViewAdvisoryUpdateController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\CreateServiceRequestUpdateController;
@@ -71,7 +73,9 @@ Route::api(majorVersion: 1, routes: function (): void {
                 ->prefix('/{advisory}/updates')
                 ->group(function (): void {
                     Route::get('/', ListAdvisoryUpdatesController::class)->name('index');
+                    Route::post('/', CreateAdvisoryUpdateController::class)->name('store');
                     Route::get('/{advisoryUpdate}', ViewAdvisoryUpdateController::class)->name('show');
+                    Route::delete('/{advisoryUpdate}', DeleteAdvisoryUpdateController::class)->name('delete');
                 });
         });
 

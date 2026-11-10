@@ -27,4 +27,4 @@ settings:
 docs: |-
   Shows a single update of the advisory in the `advisoryId` runtime variable. An update requested through a different advisory returns `404`.
 
-  Uses the `advisoryUpdateId` runtime variable, which **List Advisory Updates** sets automatically. You can also replace the `advisoryUpdate` path parameter with any update ID from **List Advisory Updates**.
+  Uses the `advisoryUpdateId` runtime variable, which **List Advisory Updates** or **Create Advisory Update** sets automatically. You can also replace the `advisoryUpdate` path parameter with any update ID from **List Advisory Updates**.
