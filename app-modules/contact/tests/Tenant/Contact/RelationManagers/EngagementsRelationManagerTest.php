@@ -137,10 +137,10 @@ it('hides the `engage` header action when read only while still listing emails',
         ->assertCanSeeTableRecords($emails['outbound']->pluck('timelineRecord'));
 });
 
-describe('email direction filtering by permission', function () use ($seedContactEmails): void {
-    it('shows only outbound emails to a user with only the `engagement.view-any` permission', function () use ($seedContactEmails): void {
+describe('email direction visibility by permission', function () use ($seedContactEmails): void {
+    it('shows outbound emails to a user with the `contacts.view-any` permission', function () use ($seedContactEmails): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('engagement.view-any');
+        $user->givePermissionTo('contacts.view-any');
 
         actingAs($user);
 
@@ -153,13 +153,12 @@ describe('email direction filtering by permission', function () use ($seedContac
             'pageClass' => ViewContact::class,
         ])
             ->assertSuccessful()
-            ->assertCanSeeTableRecords($emails['outbound']->pluck('timelineRecord'))
-            ->assertCanNotSeeTableRecords($emails['inbound']->pluck('timelineRecord'));
+            ->assertCanSeeTableRecords($emails['outbound']->pluck('timelineRecord'));
     });
 
-    it('shows only inbound emails to a user with only the `engagement_response.view-any` permission', function () use ($seedContactEmails): void {
+    it('shows inbound emails to a user with the `contacts.view-any` permission', function () use ($seedContactEmails): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('engagement_response.view-any');
+        $user->givePermissionTo('contacts.view-any');
 
         actingAs($user);
 
@@ -172,14 +171,12 @@ describe('email direction filtering by permission', function () use ($seedContac
             'pageClass' => ViewContact::class,
         ])
             ->assertSuccessful()
-            ->assertCanSeeTableRecords($emails['inbound']->pluck('timelineRecord'))
-            ->assertCanNotSeeTableRecords($emails['outbound']->pluck('timelineRecord'));
+            ->assertCanSeeTableRecords($emails['inbound']->pluck('timelineRecord'));
     });
 
-    it('shows both directions to a user with both engagement permissions', function () use ($seedContactEmails): void {
+    it('shows both directions to a user with the `contacts.view-any` permission', function () use ($seedContactEmails): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('engagement.view-any');
-        $user->givePermissionTo('engagement_response.view-any');
+        $user->givePermissionTo('contacts.view-any');
 
         actingAs($user);
 
@@ -199,7 +196,7 @@ describe('email direction filtering by permission', function () use ($seedContac
 });
 
 describe('authorization', function (): void {
-    it('does not show the Emails tab to a user with neither engagement permission', function (): void {
+    it('does not show the Emails tab to a user without the `contacts.view-any` permission', function (): void {
         $user = User::factory()->create();
 
         actingAs($user);
@@ -209,20 +206,9 @@ describe('authorization', function (): void {
         expect(EngagementsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeFalse();
     });
 
-    it('shows the Emails tab to a user with only the `engagement.view-any` permission', function (): void {
+    it('shows the Emails tab to a user with only the `contacts.view-any` permission', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('engagement.view-any');
-
-        actingAs($user);
-
-        $contact = Contact::factory()->create();
-
-        expect(EngagementsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeTrue();
-    });
-
-    it('shows the Emails tab to a user with only the `engagement_response.view-any` permission', function (): void {
-        $user = User::factory()->create();
-        $user->givePermissionTo('engagement_response.view-any');
+        $user->givePermissionTo('contacts.view-any');
 
         actingAs($user);
 

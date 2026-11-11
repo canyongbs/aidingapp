@@ -36,39 +36,34 @@
 
 use AidingApp\Contact\Models\Organization;
 use App\Models\SystemUser;
-use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\getJson;
-
-beforeEach(function (): void {
-    // Disable auditing, which causes testing issues when authenticating with a fake Sanctum token.
-    config()->set('audit.enabled', false);
-});
+use function Tests\actingAsApiUser;
 
 it('is gated with proper access control', function (): void {
     $organization = Organization::factory()->create();
 
     $user = SystemUser::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     getJson(route('api.v1.organizations.show', ['organization' => $organization], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     getJson(route('api.v1.organizations.show', ['organization' => $organization], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.*.view');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     getJson(route('api.v1.organizations.show', ['organization' => $organization], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.*.view');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     getJson(route('api.v1.organizations.show', ['organization' => $organization], false))
         ->assertOk();
 });
@@ -77,7 +72,7 @@ it('returns the organization', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.*.view');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $organization = Organization::factory()->create([
         'domains' => [['domain' => 'example.com']],
@@ -103,7 +98,7 @@ it('skips stored domain entries that have no domain', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.*.view');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $organization = Organization::factory()->create([
         'domains' => [['domain' => 'example.com'], ['domain' => null], ['domain' => ''], []],
@@ -118,7 +113,7 @@ it('returns null relations and an empty domain list when they are not set', func
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.*.view');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $organization = Organization::factory()->create([
         'industry_id' => null,
@@ -137,7 +132,7 @@ it('returns not found for a soft deleted organization', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.*.view');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $organization = Organization::factory()->create();
     $organization->delete();
@@ -150,7 +145,7 @@ it('returns not found for an archived organization', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.*.view');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $organization = Organization::factory()->archived()->create();
 

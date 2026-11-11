@@ -40,7 +40,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 
 it('denies deleting a managed contact', function (): void {
-    $user = User::factory()->create()->givePermissionTo('contact.*.delete');
+    $user = User::factory()->create()->givePermissionTo('contacts.*.delete');
     $managed = Contact::factory()->for(User::factory(), 'managedByUser')->create();
 
     $response = Gate::forUser($user)->inspect('delete', $managed);
@@ -52,8 +52,13 @@ it('denies deleting a managed contact', function (): void {
 it('allows deleting a managed contact when the contact archiving feature is inactive', function (): void {
     ContactArchivingFeature::deactivate();
 
-    $user = User::factory()->create()->givePermissionTo('contact.*.delete');
+    $user = User::factory()->create()->givePermissionTo('contacts.*.delete');
     $managed = Contact::factory()->for(User::factory(), 'managedByUser')->create();
 
     expect(Gate::forUser($user)->inspect('delete', $managed)->allowed())->toBeTrue();
+});
+
+it('only allows updating any contact with the `contacts.*.update` permission', function (): void {
+    expect(Gate::forUser(User::factory()->create())->inspect('updateAny', Contact::class)->denied())->toBeTrue()
+        ->and(Gate::forUser(User::factory()->create()->givePermissionTo('contacts.*.update'))->inspect('updateAny', Contact::class)->allowed())->toBeTrue();
 });

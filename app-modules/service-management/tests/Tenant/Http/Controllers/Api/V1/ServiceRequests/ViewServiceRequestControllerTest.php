@@ -38,38 +38,33 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Models\SystemUser;
 use App\Models\User;
-use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\getJson;
-
-beforeEach(function (): void {
-    // Disable auditing, which causes testing issues when authenticating with a fake Sanctum token.
-    config()->set('audit.enabled', false);
-});
+use function Tests\actingAsApiUser;
 
 it('is gated with proper access control', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $user = SystemUser::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     getJson(route('api.v1.service-requests.show', ['serviceRequest' => $serviceRequest], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     getJson(route('api.v1.service-requests.show', ['serviceRequest' => $serviceRequest], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.*.view');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     getJson(route('api.v1.service-requests.show', ['serviceRequest' => $serviceRequest], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     getJson(route('api.v1.service-requests.show', ['serviceRequest' => $serviceRequest], false))
         ->assertOk();
 });
@@ -79,7 +74,7 @@ it('returns a service request resource', function (): void {
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
 
     $serviceRequest = ServiceRequest::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $response = getJson(route('api.v1.service-requests.show', ['serviceRequest' => $serviceRequest], false));
     $response->assertOk();
@@ -93,7 +88,7 @@ it('returns correct service request fields', function (string $responseKey, Clos
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
 
     $serviceRequest = ServiceRequest::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $response = getJson(route('api.v1.service-requests.show', ['serviceRequest' => $serviceRequest], false));
     $response->assertOk();
@@ -113,7 +108,7 @@ it('returns correct status relationship structure', function (): void {
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
 
     $serviceRequest = ServiceRequest::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $response = getJson(route('api.v1.service-requests.show', ['serviceRequest' => $serviceRequest], false));
     $response->assertOk();
@@ -129,7 +124,7 @@ it('returns correct priority relationship structure', function (): void {
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
 
     $serviceRequest = ServiceRequest::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $response = getJson(route('api.v1.service-requests.show', ['serviceRequest' => $serviceRequest], false));
     $response->assertOk();
@@ -145,7 +140,7 @@ it('returns correct respondent relationship structure', function (): void {
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
 
     $serviceRequest = ServiceRequest::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $response = getJson(route('api.v1.service-requests.show', ['serviceRequest' => $serviceRequest], false));
     $response->assertOk();
@@ -169,7 +164,7 @@ it('returns correct assignee relationship structure', function (): void {
         'user_id' => $assigneeUser->id,
     ]);
 
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $response = getJson(route('api.v1.service-requests.show', ['serviceRequest' => $serviceRequest], false));
     $response->assertOk();
@@ -185,7 +180,7 @@ it('returns null assignee when no assignment exists', function (): void {
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
 
     $serviceRequest = ServiceRequest::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $response = getJson(route('api.v1.service-requests.show', ['serviceRequest' => $serviceRequest], false));
     $response->assertOk();

@@ -1,0 +1,51 @@
+info:
+  name: Create Advisory Status
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/advisory-statuses"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Bruno Example Status {{advisoryStatusSuffix}}",
+        "classification": "open"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Clear the previous run's record so a failed create doesn't leave later requests acting on it.
+        bru.setVar('advisoryStatusId', null);
+        bru.setVar('advisoryStatusName', null);
+
+        // Advisory status names must be unique, so each run uses a fresh suffix.
+        bru.setVar('advisoryStatusSuffix', Date.now().toString());
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 201) {
+          const advisoryStatus = res.getBody().data;
+
+          bru.setVar('advisoryStatusId', advisoryStatus.id);
+          bru.setVar('advisoryStatusName', advisoryStatus.name);
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Creates an advisory status and stores its `id` and `name` in the `advisoryStatusId` and `advisoryStatusName` runtime variables.
+
+  - `name` is required and must be unique among advisory statuses, ignoring case.
+  - `classification` is required: `open` or `resolved`.

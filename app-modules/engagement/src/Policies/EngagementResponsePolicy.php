@@ -37,6 +37,7 @@
 namespace AidingApp\Engagement\Policies;
 
 use AidingApp\Engagement\Models\EngagementResponse;
+use App\Features\ContactPermissionConsolidationFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -45,7 +46,7 @@ class EngagementResponsePolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'engagement_response.view-any',
+            abilities: ContactPermissionConsolidationFeature::active() ? 'contacts.view-any' : 'engagement_response.view-any',
             denyResponse: 'You do not have permission to view engagement responses.'
         );
     }
@@ -53,7 +54,7 @@ class EngagementResponsePolicy
     public function view(Authenticatable $authenticatable, EngagementResponse $engagementResponse): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['engagement_response.*.view'],
+            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.view'] : ['engagement_response.*.view'],
             denyResponse: 'You do not have permission to view this engagement response.'
         );
     }
@@ -61,7 +62,7 @@ class EngagementResponsePolicy
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'engagement_response.create',
+            abilities: ContactPermissionConsolidationFeature::active() ? 'contacts.create' : 'engagement_response.create',
             denyResponse: 'You do not have permission to create engagement responses.'
         );
     }
@@ -69,7 +70,7 @@ class EngagementResponsePolicy
     public function update(Authenticatable $authenticatable, EngagementResponse $engagementResponse): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['engagement_response.*.update'],
+            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.update'] : ['engagement_response.*.update'],
             denyResponse: 'You do not have permission to update this engagement response.'
         );
     }
@@ -77,7 +78,7 @@ class EngagementResponsePolicy
     public function delete(Authenticatable $authenticatable, EngagementResponse $engagementResponse): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['engagement_response.*.delete'],
+            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.delete'] : ['engagement_response.*.delete'],
             denyResponse: 'You do not have permission to delete this engagement response.'
         );
     }
@@ -85,7 +86,7 @@ class EngagementResponsePolicy
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['engagement_response.*.delete'],
+            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.delete'] : ['engagement_response.*.delete'],
             denyResponse: 'You do not have permission to delete any engagement response.'
         );
     }
@@ -93,7 +94,7 @@ class EngagementResponsePolicy
     public function restore(Authenticatable $authenticatable, EngagementResponse $engagementResponse): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['engagement_response.*.restore'],
+            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.restore'] : ['engagement_response.*.restore'],
             denyResponse: 'You do not have permission to restore this engagement response.'
         );
     }
@@ -101,7 +102,7 @@ class EngagementResponsePolicy
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['engagement_response.*.restore'],
+            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.restore'] : ['engagement_response.*.restore'],
             denyResponse: 'You do not have permission to restore any engagement response.'
         );
     }
@@ -109,7 +110,7 @@ class EngagementResponsePolicy
     public function forceDelete(Authenticatable $authenticatable, EngagementResponse $engagementResponse): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['engagement_response.*.force-delete'],
+            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.force-delete'] : ['engagement_response.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this engagement response.'
         );
     }
@@ -117,7 +118,7 @@ class EngagementResponsePolicy
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['engagement_response.*.force-delete'],
+            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.force-delete'] : ['engagement_response.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete any engagement response.'
         );
     }

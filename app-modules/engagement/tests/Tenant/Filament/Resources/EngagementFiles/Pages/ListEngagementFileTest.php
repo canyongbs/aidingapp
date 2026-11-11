@@ -58,7 +58,7 @@ test('ListEngagementFiles is gated with proper access control', function (): voi
             EngagementFileResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('engagement_file.view-any');
+    $user->givePermissionTo('contacts.view-any');
 
     actingAs($user)
         ->get(
@@ -66,19 +66,19 @@ test('ListEngagementFiles is gated with proper access control', function (): voi
         )->assertSuccessful();
 });
 
-test('only shows the bulk delete action to a user with the engagement_file delete permission', function (): void {
+test('only shows the bulk delete action to a user with the contacts delete permission', function (): void {
     EngagementFile::factory(5)->create();
 
     $user = User::factory()
         ->create()
-        ->givePermissionTo('engagement_file.view-any', 'engagement_file.*.view');
+        ->givePermissionTo('contacts.view-any', 'contacts.*.view');
 
     actingAs($user);
 
     Livewire::test(ListEngagementFiles::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
-    $user->givePermissionTo('engagement_file.*.delete');
+    $user->givePermissionTo('contacts.*.delete');
 
     Livewire::test(ListEngagementFiles::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());

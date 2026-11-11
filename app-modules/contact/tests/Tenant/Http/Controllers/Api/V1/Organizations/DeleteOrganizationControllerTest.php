@@ -37,41 +37,36 @@
 use AidingApp\Contact\Models\Organization;
 use App\Features\OrganizationArchivingFeature;
 use App\Models\SystemUser;
-use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\assertModelExists;
 use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Laravel\deleteJson;
-
-beforeEach(function (): void {
-    // Disable auditing, which causes testing issues when authenticating with a fake Sanctum token.
-    config()->set('audit.enabled', false);
-});
+use function Tests\actingAsApiUser;
 
 it('is gated with proper access control', function (): void {
     $organization = Organization::factory()->create();
 
     $user = SystemUser::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     deleteJson(route('api.v1.organizations.delete', ['organization' => $organization], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     deleteJson(route('api.v1.organizations.delete', ['organization' => $organization], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.*.delete');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     deleteJson(route('api.v1.organizations.delete', ['organization' => $organization], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.*.delete');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     deleteJson(route('api.v1.organizations.delete', ['organization' => $organization], false))
         ->assertNoContent();
 });
@@ -80,7 +75,7 @@ it('archives the organization', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.*.delete');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $organization = Organization::factory()->create();
 
@@ -99,7 +94,7 @@ it('returns not found for an archived organization', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.*.delete');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $organization = Organization::factory()->archived()->create();
 
@@ -112,7 +107,7 @@ it('returns not found for an archived organization', function (): void {
 it('checks permissions before returning not found for an archived organization', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $organization = Organization::factory()->archived()->create();
 
@@ -124,7 +119,7 @@ it('returns not found for a soft deleted organization', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.*.delete');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $organization = Organization::factory()->create();
     $organization->delete();
@@ -139,7 +134,7 @@ it('soft deletes the organization when organization archiving is inactive', func
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.*.delete');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $organization = Organization::factory()->create();
 

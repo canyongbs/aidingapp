@@ -38,6 +38,8 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use AidingApp\Portal\Settings\PortalSettings;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 use function Pest\Laravel\getJson;
 
@@ -94,6 +96,22 @@ it('returns the helpful vote percentage', function (): void {
     ]))
         ->assertOk()
         ->assertJsonPath('helpful_vote_percentage', 67);
+});
+
+it('lists attachments under their uploaded name', function (): void {
+    Storage::fake('s3');
+
+    $article = KnowledgeBaseItem::factory()->create(['public' => true]);
+    $article
+        ->addMedia(UploadedFile::fake()->create('stored-random.pdf', 100))
+        ->usingName('Syllabus')
+        ->toMediaCollection('article_attachments');
+
+    getJson(route('api.portal.article.show-canonical', [
+        'article' => "article-{$article->public_id}",
+    ]))
+        ->assertOk()
+        ->assertJsonPath('article.attachments.0.name', 'Syllabus.pdf');
 });
 
 it('rejects the legacy article API when the category does not exist', function (): void {

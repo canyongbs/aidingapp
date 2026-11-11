@@ -38,35 +38,30 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use App\Models\SystemUser;
-use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\getJson;
-
-beforeEach(function (): void {
-    // Disable auditing, which causes testing issues when authenticating with a fake Sanctum token.
-    config()->set('audit.enabled', false);
-});
+use function Tests\actingAsApiUser;
 
 it('is gated with proper access control', function (): void {
     getJson(route('api.v1.contacts.index', [], false))
         ->assertUnauthorized();
 
     $user = SystemUser::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     getJson(route('api.v1.contacts.index', [], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
-    Sanctum::actingAs($user, ['api']);
+    $user->givePermissionTo('contacts.view-any');
+    actingAsApiUser($user);
     getJson(route('api.v1.contacts.index', [], false))
         ->assertOk();
 });
 
 it('returns a paginated list of contacts', function (): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
-    Sanctum::actingAs($user, ['api']);
+    $user->givePermissionTo('contacts.view-any');
+    actingAsApiUser($user);
 
     Contact::factory()->count(3)->create();
 
@@ -79,8 +74,8 @@ it('returns a paginated list of contacts', function (): void {
 
 it('does not include deleted contacts', function (): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
-    Sanctum::actingAs($user, ['api']);
+    $user->givePermissionTo('contacts.view-any');
+    actingAsApiUser($user);
 
     $contact = Contact::factory()->create();
     Contact::factory()->create()->delete();
@@ -94,8 +89,8 @@ it('does not include deleted contacts', function (): void {
 
 it('does not include archived contacts', function (): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
-    Sanctum::actingAs($user, ['api']);
+    $user->givePermissionTo('contacts.view-any');
+    actingAsApiUser($user);
 
     $contact = Contact::factory()->create();
     Contact::factory()->archived()->create();
@@ -109,8 +104,8 @@ it('does not include archived contacts', function (): void {
 
 it('filters contacts by exact type and organization names ignoring case', function (string $filter): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
-    Sanctum::actingAs($user, ['api']);
+    $user->givePermissionTo('contacts.view-any');
+    actingAsApiUser($user);
 
     $included = Contact::factory()
         ->for(ContactType::factory()->create(['name' => 'Quill Partner']), 'type')
@@ -132,8 +127,8 @@ it('filters contacts by exact type and organization names ignoring case', functi
 
 it('filters contacts by multiple names separated with a pipe', function (string $filter): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
-    Sanctum::actingAs($user, ['api']);
+    $user->givePermissionTo('contacts.view-any');
+    actingAsApiUser($user);
 
     $first = Contact::factory()
         ->for(ContactType::factory()->create(['name' => 'Partner, Premier']), 'type')
@@ -158,8 +153,8 @@ it('filters contacts by multiple names separated with a pipe', function (string 
 
 it('returns no contacts for a type or organization name that does not exist', function (string $filter): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
-    Sanctum::actingAs($user, ['api']);
+    $user->givePermissionTo('contacts.view-any');
+    actingAsApiUser($user);
 
     Contact::factory()->count(2)->create();
 
@@ -171,8 +166,8 @@ it('returns no contacts for a type or organization name that does not exist', fu
 
 it('can filter contacts by name, email, type, and organization', function (string $filter): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
-    Sanctum::actingAs($user, ['api']);
+    $user->givePermissionTo('contacts.view-any');
+    actingAsApiUser($user);
 
     $type = ContactType::factory()->create(['name' => 'Zebediah Type']);
     $organization = Organization::factory()->create(['name' => 'Zebediah Organization']);
@@ -202,8 +197,8 @@ it('can filter contacts by name, email, type, and organization', function (strin
 
 it('sorts contacts by name by default and supports descending sorts', function (): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
-    Sanctum::actingAs($user, ['api']);
+    $user->givePermissionTo('contacts.view-any');
+    actingAsApiUser($user);
 
     Contact::factory()->create(['full_name' => 'Bravo Contact']);
     Contact::factory()->create(['full_name' => 'Alpha Contact']);

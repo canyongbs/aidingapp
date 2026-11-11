@@ -57,8 +57,8 @@ class BulkEngagementAction
 {
     public static function make(string $context): BulkAction
     {
-        return BulkAction::make('engage')
-            ->icon('heroicon-o-chat-bubble-bottom-center-text')
+        return BulkAction::make('email')
+            ->icon('heroicon-o-envelope')
             ->modalHeading('Send Bulk Engagement')
             ->slideOver()
             ->modalDescription(fn (Collection $records): string => "You have selected {$records->count()} {$context} to engage.")

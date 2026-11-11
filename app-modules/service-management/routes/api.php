@@ -34,6 +34,26 @@
 </COPYRIGHT>
 */
 
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\Advisories\CreateAdvisoryController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\Advisories\DeleteAdvisoryController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\Advisories\ListAdvisoriesController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\Advisories\UpdateAdvisoryController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\Advisories\ViewAdvisoryController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisorySeverities\CreateAdvisorySeverityController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisorySeverities\DeleteAdvisorySeverityController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisorySeverities\ListAdvisorySeveritiesController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisorySeverities\UpdateAdvisorySeverityController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisorySeverities\ViewAdvisorySeverityController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryStatuses\CreateAdvisoryStatusController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryStatuses\DeleteAdvisoryStatusController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryStatuses\ListAdvisoryStatusesController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryStatuses\UpdateAdvisoryStatusController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryStatuses\ViewAdvisoryStatusController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryUpdates\CreateAdvisoryUpdateController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryUpdates\DeleteAdvisoryUpdateController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryUpdates\ListAdvisoryUpdatesController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryUpdates\UpdateAdvisoryUpdateController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisoryUpdates\ViewAdvisoryUpdateController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\CreateServiceRequestUpdateController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ListServiceRequestsController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\UpdateServiceRequestController;
@@ -41,6 +61,46 @@ use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ViewServ
 use Illuminate\Support\Facades\Route;
 
 Route::api(majorVersion: 1, routes: function (): void {
+    Route::name('advisories.')
+        ->prefix('advisories')
+        ->group(function (): void {
+            Route::get('/', ListAdvisoriesController::class)->name('index');
+            Route::post('/', CreateAdvisoryController::class)->name('store');
+            Route::get('/{advisory}', ViewAdvisoryController::class)->name('show');
+            Route::patch('/{advisory}', UpdateAdvisoryController::class)->name('update');
+            Route::delete('/{advisory}', DeleteAdvisoryController::class)->name('delete');
+
+            Route::name('updates.')
+                ->prefix('/{advisory}/updates')
+                ->group(function (): void {
+                    Route::get('/', ListAdvisoryUpdatesController::class)->name('index');
+                    Route::post('/', CreateAdvisoryUpdateController::class)->name('store');
+                    Route::get('/{advisoryUpdate}', ViewAdvisoryUpdateController::class)->name('show');
+                    Route::patch('/{advisoryUpdate}', UpdateAdvisoryUpdateController::class)->name('update');
+                    Route::delete('/{advisoryUpdate}', DeleteAdvisoryUpdateController::class)->name('delete');
+                });
+        });
+
+    Route::name('advisory-severities.')
+        ->prefix('advisory-severities')
+        ->group(function (): void {
+            Route::get('/', ListAdvisorySeveritiesController::class)->name('index');
+            Route::post('/', CreateAdvisorySeverityController::class)->name('store');
+            Route::get('/{advisorySeverity}', ViewAdvisorySeverityController::class)->name('show');
+            Route::patch('/{advisorySeverity}', UpdateAdvisorySeverityController::class)->name('update');
+            Route::delete('/{advisorySeverity}', DeleteAdvisorySeverityController::class)->name('delete');
+        });
+
+    Route::name('advisory-statuses.')
+        ->prefix('advisory-statuses')
+        ->group(function (): void {
+            Route::get('/', ListAdvisoryStatusesController::class)->name('index');
+            Route::post('/', CreateAdvisoryStatusController::class)->name('store');
+            Route::get('/{advisoryStatus}', ViewAdvisoryStatusController::class)->name('show');
+            Route::patch('/{advisoryStatus}', UpdateAdvisoryStatusController::class)->name('update');
+            Route::delete('/{advisoryStatus}', DeleteAdvisoryStatusController::class)->name('delete');
+        });
+
     Route::name('service-requests.')
         ->prefix('service-requests')
         ->group(function (): void {

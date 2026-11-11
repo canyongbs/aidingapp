@@ -43,13 +43,12 @@ use App\Notifications\SetPasswordNotification;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
-use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\postJson;
+use function Tests\actingAsApiUser;
 
 beforeEach(function (): void {
     Queue::fake();
-    config()->set('audit.enabled', false);
 });
 
 it('is gated with proper access control', function (): void {
@@ -64,13 +63,13 @@ it('is gated with proper access control', function (): void {
         ->assertUnauthorized();
 
     $user = SystemUser::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     postJson(route('api.v1.users.store', absolute: false), $payload)
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     postJson(route('api.v1.users.store', absolute: false), $payload)
         ->assertCreated();
 });
@@ -78,7 +77,7 @@ it('is gated with proper access control', function (): void {
 it('creates a user and returns a 201 response with required fields', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $payload = [
         'first_name' => 'Jane',
@@ -105,7 +104,7 @@ it('creates a user with all optional fields', function (): void {
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $response = postJson(route('api.v1.users.store', absolute: false), [
         'first_name' => 'Full',
@@ -137,7 +136,7 @@ it('creates a user with all optional fields', function (): void {
 it('creates a user with all newly added demographic and address fields', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $payload = [
         'first_name' => 'Demographic',
@@ -209,7 +208,7 @@ it('sends SetPasswordNotification only to non-external users', function (bool $i
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.users.store', absolute: false), [
         'first_name' => 'Test',
@@ -235,7 +234,7 @@ it('resolves department case-insensitively', function (): void {
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $response = postJson(route('api.v1.users.store', absolute: false), [
         'first_name' => 'HR',
@@ -249,12 +248,31 @@ it('resolves department case-insensitively', function (): void {
     expect($response['data']['department']['id'])->toBe($department->id);
 });
 
+it('resolves department case-insensitively for multibyte characters', function (): void {
+    $department = Department::factory()->create(['name' => 'Équipe']);
+
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('user.create');
+    actingAsApiUser($user);
+
+    $response = postJson(route('api.v1.users.store', absolute: false), [
+        'first_name' => 'Team',
+        'last_name' => 'User',
+        'email' => 'team@example.com',
+        'is_external' => false,
+        'department' => 'ÉQUIPE',
+    ]);
+
+    $response->assertCreated();
+    expect($response['data']['department']['id'])->toBe($department->id);
+});
+
 it('resolves role names case-insensitively', function (): void {
     $role = Role::factory()->create(['name' => 'Support Agent', 'guard_name' => 'web']);
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $response = postJson(route('api.v1.users.store', absolute: false), [
         'first_name' => 'Agent',
@@ -275,7 +293,7 @@ it('rejects a duplicate email address', function (): void {
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.users.store', absolute: false), [
         'first_name' => 'Dup',
@@ -292,7 +310,7 @@ it('rejects the email of a soft-deleted user', function (): void {
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.users.store', absolute: false), [
         'first_name' => 'Archived',
@@ -306,7 +324,7 @@ it('rejects the email of a soft-deleted user', function (): void {
 it('returns 422 when department name does not exist', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.users.store', absolute: false), [
         'first_name' => 'No',
@@ -321,7 +339,7 @@ it('returns 422 when department name does not exist', function (): void {
 it('returns 422 when a role name does not exist', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.users.store', absolute: false), [
         'first_name' => 'Bad',
@@ -338,7 +356,7 @@ it('rejects admin roles', function (string $roleToCreate, string $roleNameToSend
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.users.store', absolute: false), [
         'first_name' => 'Admin',
@@ -358,7 +376,7 @@ it('rejects admin roles', function (string $roleToCreate, string $roleNameToSend
 it('requires first_name, last_name, email, and is_external fields', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.users.store', absolute: false), [])
         ->assertUnprocessable()
@@ -368,7 +386,7 @@ it('requires first_name, last_name, email, and is_external fields', function ():
 it('rejects an invalid email format', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.users.store', absolute: false), [
         'first_name' => 'Bad',
@@ -382,7 +400,7 @@ it('rejects an invalid email format', function (): void {
 it('does not set a password on the created user', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     postJson(route('api.v1.users.store', absolute: false), [
         'first_name' => 'No Password',

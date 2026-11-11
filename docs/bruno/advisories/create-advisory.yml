@@ -1,0 +1,53 @@
+info:
+  name: Create Advisory
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/advisories"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Bruno Example Advisory",
+        "description": "Created by the Bruno collection.",
+        "severity": "{{advisorySeverity}}",
+        "status": "{{advisoryStatus}}",
+        "department": null,
+        "visibility": "public"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Clear the previous run's record so a failed create doesn't leave later requests acting on it.
+        bru.setVar('advisoryId', null);
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 201) {
+          bru.setVar('advisoryId', res.getBody().data.id);
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Creates an advisory and stores its `id` in the `advisoryId` runtime variable.
+
+  The severity, status, department, and contact types are referenced by name, ignoring case. The `advisorySeverity` and `advisoryStatus` environment variables must name a severity and status that exist in the tenant.
+
+  - `title` and `description` are required.
+  - `severity` and `status` are required.
+  - `department` is optional (`null` leaves the advisory unassigned).
+  - `visibility` is `public` (default) or `authenticated`.
+  - `is_visibility_restricted` (default `false`) limits an `authenticated` advisory to the contact types named in `restricted_to_contact_types`, which is then required. For example: `"visibility": "authenticated", "is_visibility_restricted": true, "restricted_to_contact_types": ["{{contactType}}"]`.

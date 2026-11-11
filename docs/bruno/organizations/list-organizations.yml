@@ -1,0 +1,61 @@
+info:
+  name: List Organizations
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/organizations?page[number]=1&page[size]=30&sort=name"
+  params:
+    - name: page[number]
+      value: "1"
+      type: query
+      description: Page to return. Defaults to 1.
+    - name: page[size]
+      value: "30"
+      type: query
+      description: Results per page. Defaults to 30.
+    - name: sort
+      value: name
+      type: query
+      description: One of `name`, `created_at`, `updated_at`. Prefix with `-` for descending.
+    - name: filter[name]
+      value: Acme
+      type: query
+      description: Partial match on the name.
+      disabled: true
+    - name: filter[email]
+      value: example.com
+      type: query
+      description: Partial match on the email.
+      disabled: true
+    - name: filter[industry]
+      value: "{{organizationIndustry}}"
+      type: query
+      description: Exact, case-insensitive industry name. Separate multiple with `|`.
+      disabled: true
+    - name: filter[type]
+      value: "{{organizationType}}"
+      type: query
+      description: Exact, case-insensitive type name. Separate multiple with `|`.
+      disabled: true
+    - name: filter[is_contact_generation_enabled]
+      value: "true"
+      type: query
+      description: Filter by whether contact generation is enabled.
+      disabled: true
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Lists organizations (archived organizations are excluded), paginated with `page[number]` / `page[size]`.
+
+  Enable any of the disabled `filter[...]` query parameters in the **Params** tab to try them.

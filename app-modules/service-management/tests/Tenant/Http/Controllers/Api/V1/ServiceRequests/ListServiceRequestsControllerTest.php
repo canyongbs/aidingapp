@@ -40,24 +40,19 @@ use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Models\SystemUser;
 use App\Models\User;
-use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\getJson;
-
-beforeEach(function (): void {
-    // Disable auditing, which causes testing issues when authenticating with a fake Sanctum token.
-    config()->set('audit.enabled', false);
-});
+use function Tests\actingAsApiUser;
 
 it('is gated with proper access control', function (): void {
     $user = SystemUser::factory()->create();
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     getJson(route('api.v1.service-requests.index', [], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
     getJson(route('api.v1.service-requests.index', [], false))
         ->assertOk();
 });
@@ -65,7 +60,7 @@ it('is gated with proper access control', function (): void {
 it('returns a paginated list of service requests', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     ServiceRequest::factory()->count(3)->create();
 
@@ -84,7 +79,7 @@ it('returns a paginated list of service requests', function (): void {
 it('can filter service requests by all attributes', function (string $requestKey, mixed $requestValue, array $includedAttributes, array $excludedAttributes, string $responseKey, mixed $responseValue): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     ServiceRequest::factory()->create($includedAttributes);
     ServiceRequest::factory()->create($excludedAttributes);
@@ -105,7 +100,7 @@ it('can filter service requests by all attributes', function (string $requestKey
 it('can filter service requests by status', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $status = ServiceRequestStatus::factory()->create();
     $status2 = ServiceRequestStatus::factory()->create();
@@ -124,7 +119,7 @@ it('can filter service requests by status', function (): void {
 it('can filter service requests by requestor', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $contact = Contact::factory()->create();
     ServiceRequest::factory()->create(['respondent_id' => $contact->id]);
@@ -140,7 +135,7 @@ it('can filter service requests by requestor', function (): void {
 it('can filter service requests by assignee', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     $assigneeUser = User::factory()->create();
     $serviceRequest = ServiceRequest::factory()->create();
@@ -169,7 +164,7 @@ dataset('sorts', [
 it('can sort service requests by all attributes ascending', function (string $requestKey, array $firstAttributes, array $secondAttributes, string $responseKey, mixed $responseFirstValue, mixed $responseSecondValue): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     ServiceRequest::factory()->create($firstAttributes);
     ServiceRequest::factory()->create($secondAttributes);
@@ -186,7 +181,7 @@ it('can sort service requests by all attributes ascending', function (string $re
 it('can sort service requests by all attributes descending', function (string $requestKey, array $firstAttributes, array $secondAttributes, string $responseKey, mixed $responseFirstValue, mixed $responseSecondValue): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    Sanctum::actingAs($user, ['api']);
+    actingAsApiUser($user);
 
     ServiceRequest::factory()->create($firstAttributes);
     ServiceRequest::factory()->create($secondAttributes);
