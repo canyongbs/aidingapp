@@ -234,10 +234,8 @@ it('hides the add entry action without pipeline update permission', function ():
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('pipeline.view-any');
-    $user->givePermissionTo('pipeline.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
     $user->refresh();
 
     expect($user->can('update', $pipeline))->toBeFalse();
@@ -299,10 +297,8 @@ it('denies moving a pipeline entry without pipeline update permission', function
 
     $entry = PipelineEntry::factory()->create(['pipeline_stage_id' => $fromStage->getKey()]);
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('pipeline.view-any');
-    $user->givePermissionTo('pipeline.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
     $user->refresh();
 
     Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
@@ -322,10 +318,8 @@ it('disables kanban drag and drop for users without pipeline update permission',
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('pipeline.view-any');
-    $user->givePermissionTo('pipeline.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
     $user->refresh();
 
     Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
@@ -712,10 +706,8 @@ it('hides the remove action without pipeline update permission', function (): vo
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
     ]);
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('pipeline.view-any');
-    $user->givePermissionTo('pipeline.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
     $user->refresh();
 
     expect($user->can('update', $pipeline))->toBeFalse();
@@ -741,10 +733,9 @@ it('mounts the edit pipeline entry action from the card title with pipeline upda
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
     ]);
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('project.*.update');
-    $user->givePermissionTo('pipeline.view-any');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
+    $user->givePermissionTo('projects.*.update');
     $user->refresh();
 
     expect($user->can('update', $pipeline))->toBeTrue();
@@ -771,10 +762,8 @@ it('mounts the view pipeline entry action from the card title without pipeline u
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
     ]);
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('pipeline.view-any');
-    $user->givePermissionTo('pipeline.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
     $user->refresh();
 
     expect($user->can('update', $pipeline))->toBeFalse();

@@ -146,9 +146,9 @@ describe('authorization', function (): void {
     it('allows the project creator with the update permission to attach a manager department', function (): void {
         $user = User::factory()->create();
 
-        $user->givePermissionTo('project.view-any');
-        $user->givePermissionTo('project.*.view');
-        $user->givePermissionTo('project.*.update');
+        $user->givePermissionTo('projects.view-any');
+        $user->givePermissionTo('projects.*.view');
+        $user->givePermissionTo('projects.*.update');
 
         actingAs($user);
 
@@ -172,9 +172,9 @@ describe('authorization', function (): void {
     it('allows a manager whose department manages the project with the update permission to attach a manager department', function (): void {
         $user = User::factory()->create();
 
-        $user->givePermissionTo('project.view-any');
-        $user->givePermissionTo('project.*.view');
-        $user->givePermissionTo('project.*.update');
+        $user->givePermissionTo('projects.view-any');
+        $user->givePermissionTo('projects.*.view');
+        $user->givePermissionTo('projects.*.update');
 
         $department = Department::factory()->create();
 
@@ -204,8 +204,8 @@ describe('authorization', function (): void {
     it('hides the attach action when the user has no update permission', function (): void {
         $user = User::factory()->create();
 
-        $user->givePermissionTo('project.view-any');
-        $user->givePermissionTo('project.*.view');
+        $user->givePermissionTo('projects.view-any');
+        $user->givePermissionTo('projects.*.view');
 
         actingAs($user);
 
@@ -221,9 +221,9 @@ describe('authorization', function (): void {
     it('hides the attach action when the user has the update permission but is unrelated to the project', function (): void {
         $user = User::factory()->create();
 
-        $user->givePermissionTo('project.view-any');
-        $user->givePermissionTo('project.*.view');
-        $user->givePermissionTo('project.*.update');
+        $user->givePermissionTo('projects.view-any');
+        $user->givePermissionTo('projects.*.view');
+        $user->givePermissionTo('projects.*.update');
 
         $project = Project::factory()->for(User::factory(), 'createdBy')->create();
 

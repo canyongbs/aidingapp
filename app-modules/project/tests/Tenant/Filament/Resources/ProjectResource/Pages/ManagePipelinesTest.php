@@ -53,8 +53,8 @@ it('can render with proper permission.', function (): void {
     ]))
         ->assertForbidden();
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
     $user->refresh();
 
     get(ManagePipelines::getUrl([

@@ -68,8 +68,8 @@ use function Tests\asSuperAdmin;
 
 $loginAsUserWithProjectViewPermissions = function (): User {
     $user = User::factory()->create();
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
     actingAs($user);
 
     return $user;
@@ -115,8 +115,8 @@ it('can render if logged in user is a superadmin, the creator, a manager, or an 
     $user = User::factory()->create();
     $secondUser = User::factory()->create();
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
 
     $user->refresh();
 
@@ -131,8 +131,8 @@ it('can render if logged in user is a superadmin, the creator, a manager, or an 
 
     actingAs($secondUser);
 
-    $secondUser->givePermissionTo('project.view-any');
-    $secondUser->givePermissionTo('project.*.view');
+    $secondUser->givePermissionTo('projects.view-any');
+    $secondUser->givePermissionTo('projects.*.view');
 
     get(ViewProject::getUrl([
         'record' => $project->getRouteKey(),
@@ -242,9 +242,9 @@ describe('tabs', function () use ($loginAsUserWithProjectViewPermissions): void 
             ->assertSuccessful();
     });
 
-    it('denies access without the `project.view-any` permission even when the user can view the project', function (): void {
+    it('denies access without the `projects.view-any` permission even when the user can view the project', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('project.*.view');
+        $user->givePermissionTo('projects.*.view');
 
         $project = Project::factory()->create();
         $project->managerUsers()->attach($user->getKey());
@@ -425,9 +425,9 @@ it('hides the create milestone action when the project has no pipeline', functio
 
 it('shows the create milestone action to users who can update the project', function (): void {
     $manager = User::factory()->create();
-    $manager->givePermissionTo('project.view-any');
-    $manager->givePermissionTo('project.*.view');
-    $manager->givePermissionTo('project.*.update');
+    $manager->givePermissionTo('projects.view-any');
+    $manager->givePermissionTo('projects.*.view');
+    $manager->givePermissionTo('projects.*.update');
 
     $project = Project::factory()->create();
     $project->managerUsers()->attach($manager);
@@ -447,8 +447,8 @@ it('shows the create milestone action to users who can update the project', func
 
 it('hides the create milestone action from users who cannot update the project', function (): void {
     $user = User::factory()->create();
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
 
     actingAs($user);
 
@@ -772,8 +772,8 @@ it('shows a manage milestone action when the user can manage the project', funct
 
 it('does not show a manage milestone action when the user cannot manage the project', function (): void {
     $user = User::factory()->create();
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
 
     actingAs($user);
 
@@ -797,8 +797,8 @@ it('does not show a manage milestone action when the user cannot manage the proj
 
 it('renders the milestone title as plain text and denies the manage milestone action for view-only users', function (): void {
     $user = User::factory()->create();
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
 
     actingAs($user);
 
@@ -842,9 +842,9 @@ it('renders a clean aria-label for the collapsible milestone group toggle instea
 
 it('does not re-authorize milestone updates per milestone group row', function (): void {
     $manager = User::factory()->create();
-    $manager->givePermissionTo('project.view-any');
-    $manager->givePermissionTo('project.*.view');
-    $manager->givePermissionTo('project.*.update');
+    $manager->givePermissionTo('projects.view-any');
+    $manager->givePermissionTo('projects.*.view');
+    $manager->givePermissionTo('projects.*.update');
 
     $project = Project::factory()->create();
     $project->managerUsers()->attach($manager);
@@ -926,8 +926,8 @@ it('shows the delete milestone action to users who can manage the project', func
 
 it('hides the delete milestone action from users who cannot manage the project', function (): void {
     $user = User::factory()->create();
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
 
     actingAs($user);
 
@@ -1273,9 +1273,9 @@ it('can list files in the project files widget', function (): void {
 
 it('shows the manage files action to users who can update the project', function (): void {
     $manager = User::factory()->create();
-    $manager->givePermissionTo('project.view-any');
-    $manager->givePermissionTo('project.*.view');
-    $manager->givePermissionTo('project.*.update');
+    $manager->givePermissionTo('projects.view-any');
+    $manager->givePermissionTo('projects.*.view');
+    $manager->givePermissionTo('projects.*.update');
 
     $project = Project::factory()->create();
     $project->managerUsers()->attach($manager);
@@ -1290,8 +1290,8 @@ it('shows the manage files action to users who can update the project', function
 
 it('hides the manage files action from users who cannot update the project', function (): void {
     $user = User::factory()->create();
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
 
     actingAs($user);
 
@@ -1375,8 +1375,8 @@ it('gates the project access widget behind project view permissions', function (
 
     expect(ProjectAccessWidget::canView())->toBeFalse();
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
     $user->refresh();
 
     expect(ProjectAccessWidget::canView())->toBeTrue();
@@ -1389,8 +1389,8 @@ it('gates the project files widget behind project view permissions', function ()
 
     expect(ProjectFilesWidget::canView())->toBeFalse();
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
     $user->refresh();
 
     expect(ProjectFilesWidget::canView())->toBeTrue();
@@ -1403,8 +1403,8 @@ it('gates the project stats widget behind project view permissions', function ()
 
     expect(ProjectStatsWidget::canView())->toBeFalse();
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
     $user->refresh();
 
     expect(ProjectStatsWidget::canView())->toBeTrue();
@@ -1424,7 +1424,7 @@ it('can archive a project from the header action', function (): void {
     expect($project->refresh()->isArchived())->toBeTrue();
 });
 
-it('hides the archive header action from a user without the `project.*.delete` permission', function () use ($loginAsUserWithProjectViewPermissions): void {
+it('hides the archive header action from a user without the `projects.*.delete` permission', function () use ($loginAsUserWithProjectViewPermissions): void {
     $loginAsUserWithProjectViewPermissions();
 
     $project = Project::factory()->create();
@@ -1433,9 +1433,9 @@ it('hides the archive header action from a user without the `project.*.delete` p
         ->assertActionHidden(TestAction::make('archive'));
 });
 
-it('shows the archive header action to the creator or a manager with the `project.*.delete` permission', function (): void {
-    $creator = User::factory()->create()->givePermissionTo('project.view-any', 'project.*.view', 'project.*.delete');
-    $manager = User::factory()->create()->givePermissionTo('project.view-any', 'project.*.view', 'project.*.delete');
+it('shows the archive header action to the creator or a manager with the `projects.*.delete` permission', function (): void {
+    $creator = User::factory()->create()->givePermissionTo('projects.view-any', 'projects.*.view', 'projects.*.delete');
+    $manager = User::factory()->create()->givePermissionTo('projects.view-any', 'projects.*.view', 'projects.*.delete');
 
     $project = Project::factory()
         ->for($creator, 'createdBy')
@@ -1453,8 +1453,8 @@ it('shows the archive header action to the creator or a manager with the `projec
         ->assertActionVisible(TestAction::make('archive'));
 });
 
-it('hides the archive header action from an auditor even with the `project.*.delete` permission', function (): void {
-    $auditor = User::factory()->create()->givePermissionTo('project.view-any', 'project.*.view', 'project.*.delete');
+it('hides the archive header action from an auditor even with the `projects.*.delete` permission', function (): void {
+    $auditor = User::factory()->create()->givePermissionTo('projects.view-any', 'projects.*.view', 'projects.*.delete');
 
     $project = Project::factory()->hasAttached($auditor, relationship: 'auditorUsers')->create();
 
