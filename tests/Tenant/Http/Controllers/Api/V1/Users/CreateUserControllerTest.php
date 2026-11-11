@@ -43,6 +43,7 @@ use App\Notifications\SetPasswordNotification;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
+use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\postJson;
 use function Tests\actingAsApiUser;
