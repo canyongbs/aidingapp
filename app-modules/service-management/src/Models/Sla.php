@@ -37,20 +37,22 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperSla
  */
-class Sla extends BaseModel implements Auditable
+class Sla extends Model implements Auditable
 {
     use SoftDeletes;
     use AuditableTrait;
     use HasUuids;
+    use UsesTenantConnection;
 
     protected $fillable = [
         'name',

@@ -36,12 +36,16 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
 
+use AidingApp\Contact\Filament\Support\OrganizationArchivedName;
+use AidingApp\Contact\Models\Builders\OrganizationBuilder;
+use AidingApp\Contact\Models\Organization;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Contracts\View\View;
 
 class GuestOrganizationsRelationManager extends RelationManager
 {
@@ -57,10 +61,12 @@ class GuestOrganizationsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('name')
             ->columns([
-                TextColumn::make('name'),
+                TextColumn::make('name')
+                    ->formatStateUsing(fn (Organization $record, string $state): string | View => OrganizationArchivedName::format($record, $state)),
             ])
             ->headerActions([
                 AttachAction::make()
+                    ->recordSelectOptionsQuery(fn (OrganizationBuilder $query): OrganizationBuilder => $query->withoutArchived())
                     ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->recordActions([

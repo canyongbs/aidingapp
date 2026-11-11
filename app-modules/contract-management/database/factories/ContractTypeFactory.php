@@ -40,7 +40,7 @@ use AidingApp\ContractManagement\Models\ContractType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends ContractType>
+ * @extends Factory<ContractType>
  */
 class ContractTypeFactory extends Factory
 {
@@ -54,7 +54,7 @@ class ContractTypeFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->word(),
+            'name' => $this->faker->unique()->words(asText: true),
             'is_default' => false,
             'order' => $this->getNewOrder(),
         ];

@@ -36,9 +36,12 @@
 
 use AidingApp\Authorization\Filament\Pages\Reporting;
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
 use AidingApp\Report\Enums\ReportAccessKey;
 use AidingApp\Report\Models\ReportDepartmentAccess;
+use AidingApp\Report\Models\ReportGroupAccess;
 use AidingApp\Report\Models\ReportUserAccess;
+use App\Features\ReportGroupAccessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
@@ -260,6 +263,106 @@ it('assigns departments to a report through the manage action', function (): voi
             ->where('department_id', $department->getKey())
             ->exists()
     )->toBeTrue();
+});
+
+it('assigns groups to a report through the manage action', function (): void {
+    $user = User::factory()->create();
+    $user->givePermissionTo('reporting.view-any');
+    $user->givePermissionTo('reporting.*.update');
+
+    $group = Group::factory()->create();
+
+    actingAs($user);
+
+    expect(ReportGroupAccess::query()->where('report_key', ReportAccessKey::AiSupportAssistant->value)->exists())->toBeFalse();
+
+    Livewire::test(Reporting::class)
+        ->callAction(TestAction::make('manage')->table(ReportAccessKey::AiSupportAssistant->value), [
+            'users' => [],
+            'departments' => [],
+            'groups' => [$group->getKey()],
+        ])
+        ->assertNotified();
+
+    expect(
+        ReportGroupAccess::query()
+            ->where('report_key', ReportAccessKey::AiSupportAssistant->value)
+            ->where('group_id', $group->getKey())
+            ->exists()
+    )->toBeTrue();
+});
+
+it('does not assign groups to a report through the manage action when the group access feature is inactive', function (): void {
+    ReportGroupAccessFeature::deactivate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('reporting.view-any');
+    $user->givePermissionTo('reporting.*.update');
+
+    $group = Group::factory()->create();
+
+    actingAs($user);
+
+    Livewire::test(Reporting::class)
+        ->callAction(TestAction::make('manage')->table(ReportAccessKey::AiSupportAssistant->value), [
+            'users' => [],
+            'departments' => [],
+            'groups' => [$group->getKey()],
+        ])
+        ->assertNotified();
+
+    expect(ReportGroupAccess::query()->where('report_key', ReportAccessKey::AiSupportAssistant->value)->exists())->toBeFalse();
+});
+
+it('counts members of an assigned group in the access count without duplicates', function (): void {
+    $group = Group::factory()->create();
+
+    $member = User::factory()->create();
+    $group->users()->attach($member);
+
+    ReportUserAccess::factory()->create([
+        'report_key' => ReportAccessKey::AiSupportAssistant->value,
+        'user_id' => $member->getKey(),
+    ]);
+
+    ReportGroupAccess::factory()->create([
+        'report_key' => ReportAccessKey::AiSupportAssistant->value,
+        'group_id' => $group->getKey(),
+    ]);
+
+    expect(ReportAccessKey::AiSupportAssistant->accessCount())->toEqual(1);
+});
+
+it('bulk manage assignments action assigns and replaces groups', function (): void {
+    $user = User::factory()->create();
+    $user->givePermissionTo('reporting.view-any');
+    $user->givePermissionTo('reporting.*.update');
+
+    $existingGroup = Group::factory()->create();
+    $newGroup = Group::factory()->create();
+
+    ReportGroupAccess::factory()->create([
+        'report_key' => ReportAccessKey::AiSupportAssistant->value,
+        'group_id' => $existingGroup->getKey(),
+    ]);
+
+    actingAs($user);
+
+    Livewire::test(Reporting::class)
+        ->callTableBulkAction('manageReportAssignments', [ReportAccessKey::AiSupportAssistant->value], [
+            'users' => [],
+            'departments' => [],
+            'groups' => [$newGroup->getKey()],
+            'sync' => true,
+        ])
+        ->assertNotified();
+
+    expect(
+        ReportGroupAccess::query()
+            ->where('report_key', ReportAccessKey::AiSupportAssistant->value)
+            ->pluck('group_id')
+            ->all()
+    )->toBe([$newGroup->getKey()]);
 });
 
 it('removes access that is no longer selected when managing a report', function (): void {

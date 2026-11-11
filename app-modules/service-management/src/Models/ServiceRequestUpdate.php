@@ -42,9 +42,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Observers\ServiceRequestUpdateObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Timelines\ServiceRequestUpdateTimeline;
-use App\Models\BaseModel;
 use App\Models\Media;
-use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -56,16 +54,18 @@ use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperServiceRequestUpdate
  */
 #[ObservedBy([ServiceRequestUpdateObserver::class])]
-class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATimeline, HasMedia
+class ServiceRequestUpdate extends Model implements Auditable, ProvidesATimeline, HasMedia
 {
     use SoftDeletes;
     use HasUuids;
     use AuditableTrait;
+    use UsesTenantConnection;
 
     /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
@@ -169,15 +169,10 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
             ->map(function (Media $media): array {
                 return [
                     'id' => $media->id,
-                    'name' => $media->name . '.' . pathinfo($media->file_name, PATHINFO_EXTENSION),
+                    'name' => $media->getDownloadFilename(),
                     'url' => route('api.portal.service-request.media.download', ['media' => $media->getKey()]),
                 ];
             })
             ->toArray();
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 }

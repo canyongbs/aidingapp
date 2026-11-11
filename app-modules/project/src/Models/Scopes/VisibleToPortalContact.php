@@ -58,7 +58,7 @@ class VisibleToPortalContact
             if ($this->contact->organization_id) {
                 $query->orWhereHas(
                     'guestOrganizations',
-                    fn (Builder $query): Builder => $query->whereKey($this->contact->organization_id),
+                    fn (Builder $query): Builder => $query->withoutArchived()->whereKey($this->contact->organization_id),
                 );
             }
         });

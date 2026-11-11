@@ -1,0 +1,91 @@
+<?php
+
+/*
+<COPYRIGHT>
+
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
+
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
+
+    Notice:
+
+    - You may not provide the software to third parties as a hosted or managed
+      service, where the service provides users with access to any substantial set of
+      the features or functionality of the software.
+    - You may not move, change, disable, or circumvent the license key functionality
+      in the software, and you may not remove or obscure any functionality in the
+      software that is protected by the license key.
+    - You may not alter, remove, or obscure any licensing, copyright, or other notices
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      to applicable law.
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
+      vigorously.
+    - The software solution, including services, infrastructure, and code, is offered as a
+      Software as a Service (SaaS) by Canyon GBS Inc.
+    - Use of this software implies agreement to the license terms and conditions as stated
+      in the Elastic License 2.0.
+
+    For more information or inquiries please visit our website at
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
+
+</COPYRIGHT>
+*/
+
+namespace AidingApp\Contact\Http\Resources\Api\V1;
+
+use AidingApp\Contact\Models\Contact;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+/**
+ * @property Contact $resource
+ */
+class ContactResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->resource->id,
+            'name' => $this->resource->full_name,
+            'first_name' => $this->resource->first_name,
+            'last_name' => $this->resource->last_name,
+            'preferred_name' => $this->resource->preferred,
+            'email' => $this->resource->email,
+            'mobile' => $this->resource->mobile,
+            'phone' => $this->resource->phone,
+            'type' => [
+                'id' => $this->resource->type_id,
+                'name' => $this->resource->type?->name,
+            ],
+            'organization' => $this->resource->organization ? [
+                'id' => $this->resource->organization->id,
+                'name' => $this->resource->organization->name,
+            ] : null,
+            'job_title' => $this->resource->job_title,
+            'employee_id' => $this->resource->employee_id,
+            'work_number' => $this->resource->work_number,
+            'work_extension' => $this->resource->work_extension,
+            'student_id' => $this->resource->student_id,
+            'school' => $this->resource->school,
+            'academic_department' => $this->resource->academic_department,
+            'program' => $this->resource->program,
+            'address' => $this->resource->address,
+            'address_2' => $this->resource->address_2,
+            'city' => $this->resource->city,
+            'state' => $this->resource->state,
+            'postal_code' => $this->resource->postal,
+            'country' => $this->resource->country,
+            'is_managed' => $this->resource->isManaged(),
+            'created_at' => $this->resource->created_at,
+            'updated_at' => $this->resource->updated_at,
+        ];
+    }
+}

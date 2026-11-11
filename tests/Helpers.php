@@ -43,6 +43,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use App\Actions\Paths\ModulePath;
+use App\Models\SystemUser;
 use App\Models\User;
 use Dom\HTMLDocument;
 use Dom\Node;
@@ -52,6 +53,20 @@ use Filament\Schemas\Contracts\HasSchemas;
 use Illuminate\Foundation\Testing\TestCase;
 
 use function Pest\Laravel\actingAs;
+
+/**
+ * Authenticates a programmatic user for API requests with a real API token, the same way
+ * the app issues them. Unlike `Sanctum::actingAs()`'s mocked token, a real token can be
+ * serialized, so queued audits work.
+ */
+function actingAsApiUser(SystemUser $systemUser): SystemUser
+{
+    $systemUser->withAccessToken($systemUser->createToken('api', ['api'])->accessToken);
+
+    actingAs($systemUser, 'sanctum');
+
+    return $systemUser;
+}
 
 function asSuperAdmin(?User $user = null): TestCase
 {

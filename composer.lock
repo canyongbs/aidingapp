@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5f428f33f8f4637fcab08dd9db71349f",
+    "content-hash": "191318cc5b3798aee70ff1b9e289a7a4",
     "packages": [
         {
             "name": "ably/ably-php",
@@ -1599,16 +1599,16 @@
         },
         {
             "name": "canyongbs/common",
-            "version": "2.46.1",
+            "version": "2.47.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/canyongbs/common.git",
-                "reference": "9e05a7a4b9e0476c65da256ae0511280eee350bc"
+                "reference": "9affe279a9f427c2a8ddb12410a403b08d33abe4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/canyongbs/common/zipball/9e05a7a4b9e0476c65da256ae0511280eee350bc",
-                "reference": "9e05a7a4b9e0476c65da256ae0511280eee350bc",
+                "url": "https://api.github.com/repos/canyongbs/common/zipball/9affe279a9f427c2a8ddb12410a403b08d33abe4",
+                "reference": "9affe279a9f427c2a8ddb12410a403b08d33abe4",
                 "shasum": ""
             },
             "require": {
@@ -1666,9 +1666,10 @@
             ],
             "support": {
                 "issues": "https://github.com/canyongbs/common/issues",
-                "source": "https://github.com/canyongbs/common/tree/2.46.1"
+                "source": "https://github.com/canyongbs/common/tree/2.47.0"
             },
-            "time": "2026-10-26T15:37:46+00:00"
+            "time": "2026-11-04T10:55:25+00:00",
+            "published-time": "2026-11-04T21:08:49+00:00"
         },
         {
             "name": "canyongbs/model-state-machine",
@@ -9674,16 +9675,16 @@
         },
         {
             "name": "phpoffice/phpspreadsheet",
-            "version": "1.30.6",
+            "version": "1.30.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPOffice/PhpSpreadsheet.git",
-                "reference": "a416375ffc8bf5b661c1bb4e6c60d8f3fddbe5ce"
+                "reference": "f5dd9c1f084d336ea63cf53099533e061a9c157a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/a416375ffc8bf5b661c1bb4e6c60d8f3fddbe5ce",
-                "reference": "a416375ffc8bf5b661c1bb4e6c60d8f3fddbe5ce",
+                "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/f5dd9c1f084d336ea63cf53099533e061a9c157a",
+                "reference": "f5dd9c1f084d336ea63cf53099533e061a9c157a",
                 "shasum": ""
             },
             "require": {
@@ -9776,9 +9777,9 @@
             ],
             "support": {
                 "issues": "https://github.com/PHPOffice/PhpSpreadsheet/issues",
-                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.30.6"
+                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/1.30.7"
             },
-            "time": "2026-07-12T19:59:31+00:00"
+            "time": "2026-09-17T03:56:23+00:00"
         },
         {
             "name": "phpoption/phpoption",
@@ -10084,8 +10085,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-08-31T19:09:43+00:00",
-            "published-time": "2026-08-31T19:09:59+00:00"
+            "time": "2026-08-31T19:09:43+00:00"
         },
         {
             "name": "pragmarx/google2fa",

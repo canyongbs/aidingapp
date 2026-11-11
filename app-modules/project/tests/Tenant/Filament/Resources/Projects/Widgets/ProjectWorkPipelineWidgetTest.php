@@ -237,12 +237,12 @@ describe('status filter', function (): void {
 });
 
 describe('columns', function (): void {
-    it('renders the assigned to column before the stage column', function (): void {
+    it('renders the assigned to column before the status column', function (): void {
         $project = Project::factory()->create();
 
         $widget = Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
             ->assertTableColumnExists('assignedTo', fn (Column $column): bool => $column->getLabel() === 'Assigned To')
-            ->assertTableColumnExists('pipelineStage.name', fn (Column $column): bool => $column->getLabel() === 'Stage');
+            ->assertTableColumnExists('pipelineStage.name', fn (Column $column): bool => $column->getLabel() === 'Status');
 
         $columns = array_keys($widget->instance()->getTable()->getColumns());
         expect(array_search('assignedTo', $columns, true))
@@ -371,5 +371,69 @@ describe('task access authorization', function (): void {
             ->assertHasNoActionErrors();
 
         expect($entry->refresh()->description)->toBe('Updated description.');
+    });
+});
+
+describe('create pipeline action name uniqueness', function (): void {
+    it('rejects a pipeline name that differs only by case', function (): void {
+        $project = Project::factory()->create();
+        Pipeline::factory()->for($project)->create(['name' => 'Admissions']);
+
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->callAction('createPipeline', [
+                'name' => 'ADMISSIONS',
+                'description' => 'Duplicate',
+                'stages' => [['name' => 'Planning', 'classification' => PipelineStageClassification::Planning->value]],
+            ])
+            ->assertHasActionErrors(['name' => 'unique']);
+
+        expect(Pipeline::query()->count())->toBe(1);
+    });
+
+    it('allows a pipeline name that is already used in another project', function (): void {
+        Pipeline::factory()->create(['name' => 'Admissions']);
+        $project = Project::factory()->create();
+
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->callAction('createPipeline', [
+                'name' => 'admissions',
+                'description' => 'Other project',
+                'stages' => [['name' => 'Planning', 'classification' => PipelineStageClassification::Planning->value]],
+            ])
+            ->assertHasNoActionErrors();
+
+        expect(Pipeline::query()->where('project_id', $project->getKey())->exists())->toBeTrue();
+    });
+
+    it('rejects stage names that differ only by case', function (): void {
+        $project = Project::factory()->create();
+
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->callAction('createPipeline', [
+                'name' => 'Admissions',
+                'description' => 'Stages',
+                'stages' => [
+                    ['name' => 'Review', 'classification' => PipelineStageClassification::Planning->value],
+                    ['name' => 'review', 'classification' => PipelineStageClassification::Planning->value],
+                ],
+            ])
+            ->assertHasActionErrors();
+
+        expect(Pipeline::query()->count())->toBe(0);
+    });
+
+    it('creates a pipeline with a unique name', function (): void {
+        $project = Project::factory()->create();
+        Pipeline::factory()->for($project)->create(['name' => 'Admissions']);
+
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->callAction('createPipeline', [
+                'name' => 'Retention',
+                'description' => 'Unique',
+                'stages' => [['name' => 'Planning', 'classification' => PipelineStageClassification::Planning->value]],
+            ])
+            ->assertHasNoActionErrors();
+
+        expect(Pipeline::query()->where('name', 'Retention')->exists())->toBeTrue();
     });
 });

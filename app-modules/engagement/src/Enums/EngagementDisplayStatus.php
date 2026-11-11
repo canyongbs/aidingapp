@@ -110,7 +110,7 @@ enum EngagementDisplayStatus implements HasLabel, HasColor
             $status = self::Scheduled;
         }
 
-        $events = $engagement->latestEmailMessage?->events()->orderBy('occurred_at', 'asc')->get();
+        $events = $engagement->latestEmailMessage?->events->sortByOccurrence();
 
         $events?->each(function (EmailMessageEvent $event) use (&$status): void {
             match ($event->type) {
@@ -121,6 +121,7 @@ enum EngagementDisplayStatus implements HasLabel, HasColor
                 EmailMessageEventType::FailedDispatch => $status = self::SystemDelayed,
                 EmailMessageEventType::RateLimited => $status = self::Failed,
                 EmailMessageEventType::SuppressedByBounced => $status = self::Failed,
+                EmailMessageEventType::SuppressedByArchived => $status = self::Failed,
 
                 // We will consider the message "delivered" if blocked by demo mode
                 // for visual demo purposes

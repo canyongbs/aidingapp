@@ -73,4 +73,11 @@ class OrganizationFactory extends Factory
             'twitter_url' => $this->faker->url(),
         ];
     }
+
+    public function archived(): static
+    {
+        return $this->state([
+            'archived_at' => now(),
+        ]);
+    }
 }

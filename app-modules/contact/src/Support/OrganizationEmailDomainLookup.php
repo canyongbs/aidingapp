@@ -43,12 +43,12 @@ use Illuminate\Support\Str;
 
 class OrganizationEmailDomainLookup
 {
-    private const string NORMALIZED_DOMAIN_SQL = <<<'SQL'
+    private const string NORMALIZED_DOMAIN_SQL_TEMPLATE = <<<'SQL'
         LOWER(
             regexp_replace(
                 regexp_replace(
                     regexp_replace(
-                        regexp_replace(trim(elem->>'domain'), '^https?://', '', 'i'),
+                        regexp_replace(trim({value}), '^https?://', '', 'i'),
                         '/.*$',
                         ''
                     ),
@@ -73,9 +73,10 @@ class OrganizationEmailDomainLookup
             return null;
         }
 
-        $normalizedDomain = self::NORMALIZED_DOMAIN_SQL;
+        $normalizedDomain = $this->normalizedDomainSql("elem->>'domain'");
 
         return Organization::query()
+            ->withoutArchived()
             ->when($organization, fn (Builder $query) => $query->whereKey($organization->getKey()))
             ->when($requireContactGenerationEnabled, fn (Builder $query) => $query->where('is_contact_generation_enabled', true))
             ->whereRaw(
@@ -95,9 +96,10 @@ class OrganizationEmailDomainLookup
     public function domainSet(?Organization $organization = null): array
     {
         $domains = Organization::query()
+            ->withoutArchived()
             ->when($organization, fn (Builder $query) => $query->whereKey($organization->getKey()))
             ->crossJoin(DB::raw('jsonb_array_elements(domains) AS elem'))
-            ->selectRaw(self::NORMALIZED_DOMAIN_SQL . ' AS normalized_domain')
+            ->selectRaw($this->normalizedDomainSql("elem->>'domain'") . ' AS normalized_domain')
             ->distinct()
             ->pluck('normalized_domain');
 
@@ -125,5 +127,13 @@ class OrganizationEmailDomainLookup
         }
 
         return Str::lower($emailDomain);
+    }
+
+    /**
+     * Wraps the SQL expression in the normalization used to compare organization domains.
+     */
+    public function normalizedDomainSql(string $expression): string
+    {
+        return str_replace('{value}', $expression, self::NORMALIZED_DOMAIN_SQL_TEMPLATE);
     }
 }

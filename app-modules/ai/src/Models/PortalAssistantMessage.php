@@ -37,17 +37,21 @@
 namespace AidingApp\Ai\Models;
 
 use AidingApp\Ai\Database\Factories\PortalAssistantMessageFactory;
-use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperPortalAssistantMessage
  */
-class PortalAssistantMessage extends BaseModel
+class PortalAssistantMessage extends Model
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
+
     /** @use HasFactory<PortalAssistantMessageFactory> */
     use HasFactory;
 

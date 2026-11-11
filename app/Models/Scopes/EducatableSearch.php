@@ -39,6 +39,7 @@ namespace App\Models\Scopes;
 use AidingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class EducatableSearch
 {
@@ -52,7 +53,7 @@ class EducatableSearch
      */
     public function __invoke(Builder $query): void
     {
-        $search = strtolower($this->search);
+        $search = Str::lower($this->search);
 
         $relatedModel = $query->getModel()->{$this->relationship}()->getRelated();
         $column = $relatedModel::displayNameKey();

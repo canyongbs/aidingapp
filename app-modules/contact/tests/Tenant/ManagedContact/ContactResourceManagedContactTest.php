@@ -63,7 +63,7 @@ dataset('contactSectionEditActions', [
 
 it('does not render standalone view or edit actions in the list', function () use ($makeManagedContact): void {
     $user = User::factory()->create()
-        ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
+        ->givePermissionTo('contacts.view-any', 'contacts.*.view', 'contacts.*.update');
 
     actingAs($user);
 
@@ -79,7 +79,7 @@ it('does not render standalone view or edit actions in the list', function () us
 
 it('shows a lock action instead of the section edit actions on the view page of a managed contact', function (string $action, string $component) use ($makeManagedContact): void {
     $user = User::factory()->create()
-        ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
+        ->givePermissionTo('contacts.view-any', 'contacts.*.view', 'contacts.*.update');
 
     actingAs($user);
 
@@ -92,7 +92,7 @@ it('shows a lock action instead of the section edit actions on the view page of 
 
 it('shows the section edit actions on the view page of an unmanaged contact', function (string $action, string $component): void {
     $user = User::factory()->create()
-        ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
+        ->givePermissionTo('contacts.view-any', 'contacts.*.view', 'contacts.*.update');
 
     actingAs($user);
 
@@ -105,7 +105,7 @@ it('shows the section edit actions on the view page of an unmanaged contact', fu
 
 it('denies the update ability for a managed contact via the policy', function () use ($makeManagedContact): void {
     $user = User::factory()->create()
-        ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
+        ->givePermissionTo('contacts.view-any', 'contacts.*.view', 'contacts.*.update');
 
     $managed = $makeManagedContact();
     $unmanaged = Contact::factory()->create();

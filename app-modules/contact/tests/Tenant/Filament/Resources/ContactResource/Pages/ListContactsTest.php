@@ -40,9 +40,17 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use App\Settings\PresenceSettings;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
+use Filament\Notifications\Livewire\Notifications;
+use Filament\Notifications\Notification;
+use Filament\Notifications\NotificationMailbox;
 
 use function Filament\Support\generate_icon_html;
 
@@ -59,7 +67,7 @@ use function Pest\Laravel\freezeTime;
 
 it('displays the open and total service request counts', function (): void {
     actingAs(
-        User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view')
+        User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view')
     );
 
     $contact = Contact::factory()->create();
@@ -92,7 +100,7 @@ it('displays the open and total service request counts', function (): void {
 
 it('displays 0 open and 0 total when the contact has no service requests', function (): void {
     actingAs(
-        User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view')
+        User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view')
     );
 
     $contact = Contact::factory()->create();
@@ -112,7 +120,7 @@ it('displays 0 open and 0 total when the contact has no service requests', funct
 
 it('only displays populated identifiers', function (): void {
     actingAs(
-        User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view')
+        User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view')
     );
 
     Contact::factory()->create([
@@ -128,7 +136,7 @@ it('only displays populated identifiers', function (): void {
 
 it('only displays the organization when one is associated', function (): void {
     actingAs(
-        User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view')
+        User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view')
     );
 
     $organization = Organization::factory()->create(['name' => 'Acme University']);
@@ -148,7 +156,7 @@ it('only displays the organization when one is associated', function (): void {
 });
 
 it('does not show an organization description when none is associated', function (): void {
-    actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view'));
+    actingAs(User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view'));
 
     $contact = Contact::factory()->create(['organization_id' => null]);
 
@@ -158,7 +166,7 @@ it('does not show an organization description when none is associated', function
 
 it('links the contact name to the view page', function (): void {
     actingAs(
-        User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view')
+        User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view')
     );
 
     $contact = Contact::factory()->create();
@@ -177,7 +185,7 @@ it('links the contact name to the view page', function (): void {
 
 it('does not render standalone view or edit actions', function (): void {
     actingAs(
-        User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update')
+        User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view', 'contacts.*.update')
     );
 
     $contact = Contact::factory()->create();
@@ -192,7 +200,7 @@ describe('presence', function (): void {
         freezeTime();
 
         actingAs(
-            User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view')
+            User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view')
         );
 
         $settings = app(PresenceSettings::class);
@@ -232,7 +240,7 @@ describe('presence', function (): void {
         freezeTime();
 
         actingAs(
-            User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view')
+            User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view')
         );
 
         $contact = Contact::factory()->for(User::factory(), 'managedByUser')->create([
@@ -253,7 +261,7 @@ describe('presence', function (): void {
 
     it('displays presence without linking a contact the user cannot view', function (): void {
         actingAs(
-            User::factory()->create()->givePermissionTo('contact.view-any')
+            User::factory()->create()->givePermissionTo('contacts.view-any')
         );
 
         $contact = Contact::factory()->create(['last_activity_at' => null]);
@@ -272,7 +280,7 @@ describe('presence', function (): void {
 
 describe('copy controls', function (): void {
     it('uses the same email description, tooltip and confirmation as Users', function (): void {
-        actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view'));
+        actingAs(User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view'));
 
         $contact = Contact::factory()->create();
 
@@ -296,7 +304,7 @@ describe('copy controls', function (): void {
     });
 
     it('omits the email copy control when there is no email', function (): void {
-        actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view'));
+        actingAs(User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view'));
 
         $contact = Contact::factory()->create(['email' => null]);
 
@@ -306,7 +314,7 @@ describe('copy controls', function (): void {
     });
 
     it('shows only populated identifiers and copies their raw values', function (?string $employeeId, ?string $studentId, array $fields): void {
-        actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view'));
+        actingAs(User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view'));
 
         $contact = Contact::factory()->create([
             'employee_id' => $employeeId,
@@ -361,7 +369,7 @@ describe('copy controls', function (): void {
 
 describe('search and filters', function (): void {
     it('searches by contact name and email', function (string $search): void {
-        actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view'));
+        actingAs(User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view'));
 
         $matchingContact = Contact::factory()->create([
             'first_name' => 'Searchable',
@@ -377,20 +385,159 @@ describe('search and filters', function (): void {
     })->with(['Searchable Contact', 'searchable-contact@example.com']);
 });
 
-it('only shows the bulk delete action to a user with the contact.delete permission', function (): void {
+describe('archived contacts', function (): void {
+    it('does not list archived contacts', function (): void {
+        actingAs(User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view'));
+
+        $contact = Contact::factory()->create();
+        $archivedContact = Contact::factory()->archived()->create();
+
+        Livewire::test(ListContacts::class)
+            ->assertCanSeeTableRecords([$contact])
+            ->assertCanNotSeeTableRecords([$archivedContact]);
+    });
+
+    it('does not find archived contacts in global search', function (): void {
+        actingAs(User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view'));
+
+        $contact = Contact::factory()->create(['full_name' => 'Searchable Contact']);
+        $archivedContact = Contact::factory()->archived()->create(['full_name' => 'Searchable Contact']);
+
+        $resultUrls = ContactResource::getGlobalSearchResults($archivedContact->full_name)->pluck('url');
+
+        expect($resultUrls)->toContain(ContactResource::getUrl('view', ['record' => $contact]));
+        expect($resultUrls)->not->toContain(ContactResource::getUrl('view', ['record' => $archivedContact]));
+    });
+});
+
+it('lists archived contacts while contact archiving is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    actingAs(User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view'));
+
+    $archivedContact = Contact::factory()->archived()->create();
+
+    Livewire::test(ListContacts::class)
+        ->assertCanSeeTableRecords([$archivedContact]);
+});
+
+it('only shows the bulk archive action to a user with the contacts.delete permission', function (): void {
     Contact::factory(15)->create();
 
     $user = User::factory()
         ->create()
-        ->givePermissionTo('contact.view-any', 'contact.*.view');
+        ->givePermissionTo('contacts.view-any', 'contacts.*.view');
 
     actingAs($user);
 
     Livewire::test(ListContacts::class)
-        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+        ->assertActionHidden(TestAction::make('archive')->table()->bulk());
 
-    $user->givePermissionTo('contact.*.delete');
+    $user->givePermissionTo('contacts.*.delete');
 
     Livewire::test(ListContacts::class)
-        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+        ->assertActionVisible(TestAction::make('archive')->table()->bulk());
+});
+
+it('can sort contacts by name', function (): void {
+    actingAs(
+        User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view')
+    );
+
+    $contacts = collect(['Charlie Brown', 'Alice Smith', 'Bob Jones'])
+        ->map(fn (string $name): Contact => Contact::factory()->create(['full_name' => $name]));
+
+    Livewire::test(ListContacts::class)
+        ->sortTable('full_name')
+        ->assertCanSeeTableRecords($contacts->sortBy('full_name')->values(), inOrder: true)
+        ->sortTable('full_name', 'desc')
+        ->assertCanSeeTableRecords($contacts->sortByDesc('full_name')->values(), inOrder: true);
+});
+
+it('hides the created at and updated at columns by default and allows sorting them', function (string $column): void {
+    actingAs(
+        User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view')
+    );
+
+    $contacts = Contact::factory()->count(3)->create();
+
+    Livewire::test(ListContacts::class)
+        ->assertTableColumnExists($column, fn (TextColumn $column): bool => $column->isToggleable() && $column->isToggledHiddenByDefault() && $column->isSortable())
+        ->assertCanNotRenderTableColumn($column)
+        ->toggleAllTableColumns()
+        ->assertCanRenderTableColumn($column)
+        ->sortTable($column)
+        ->assertCanSeeTableRecords($contacts);
+})->with(['created_at', 'updated_at']);
+
+describe('archiving', function (): void {
+    it('bulk archives contacts and skips managed ones', function (): void {
+        actingAs(User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view', 'contacts.*.delete'));
+
+        $contact = Contact::factory()->create();
+        $managed = Contact::factory()->for(User::factory(), 'managedByUser')->create();
+
+        Livewire::test(ListContacts::class)
+            ->selectTableRecords([$contact->getKey(), $managed->getKey()])
+            ->callAction(TestAction::make('archive')->table()->bulk());
+
+        app(NotificationMailbox::class)->flush();
+
+        $notifications = new Notifications();
+        $notifications->mount();
+        $notifications->pullNotificationsFromSession();
+
+        expect($notifications->notifications->map(fn (Notification $notification): string => (string) $notification->getBody())->all())
+            ->toContain('<p>One of the selected contacts is managed and cannot be archived.</p>');
+
+        expect($contact->refresh()->isArchived())->toBeTrue()
+            ->and($managed->refresh()->isArchived())->toBeFalse();
+    });
+});
+
+it('shows the bulk delete action when the contact archiving feature is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    actingAs(User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view', 'contacts.*.delete'));
+
+    Livewire::test(ListContacts::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk())
+        ->assertActionDoesNotExist(TestAction::make('archive')->table()->bulk());
+});
+
+it('bulk deletes managed contacts when the contact archiving feature is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    actingAs(User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view', 'contacts.*.delete'));
+
+    $managed = Contact::factory()->for(User::factory(), 'managedByUser')->create();
+
+    Livewire::test(ListContacts::class)
+        ->selectTableRecords([$managed->getKey()])
+        ->callAction(TestAction::make(DeleteBulkAction::class)->table()->bulk());
+
+    expect(Contact::find($managed->getKey()))->toBeNull();
+});
+
+it('orders the bulk actions with email first and archive separated by a divider', function (): void {
+    actingAs(User::factory()->create()->givePermissionTo('contacts.view-any', 'contacts.*.view', 'contacts.*.update', 'contacts.*.delete'));
+
+    $toolbarGroup = array_values(Livewire::test(ListContacts::class)->instance()->getTable()->getToolbarActions())[0];
+
+    assert($toolbarGroup instanceof BulkActionGroup);
+
+    $groups = array_values($toolbarGroup->getActions());
+
+    expect($groups)->toHaveCount(2)
+        ->and($groups[0])->toBeInstanceOf(ActionGroup::class)
+        ->and($groups[1])->toBeInstanceOf(ActionGroup::class);
+
+    assert($groups[0] instanceof ActionGroup && $groups[1] instanceof ActionGroup);
+
+    $names = fn (ActionGroup $group): array => array_values(array_map(fn (Action | ActionGroup $action): ?string => $action->getName(), $group->getActions()));
+
+    expect($groups[0]->hasDropdown())->toBeFalse()
+        ->and($groups[1]->hasDropdown())->toBeFalse()
+        ->and($names($groups[0]))->toBe(['email', 'changeType'])
+        ->and($names($groups[1]))->toBe(['archive']);
 });

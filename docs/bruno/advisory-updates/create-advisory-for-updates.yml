@@ -1,0 +1,46 @@
+info:
+  name: Create Advisory for Updates
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/advisories"
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Bruno Example Advisory for Updates",
+        "description": "Created by the Bruno collection to hold advisory updates.",
+        "severity": "{{advisorySeverity}}",
+        "status": "{{advisoryStatus}}"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Clear the previous run's records so a failed create doesn't leave later requests acting on them.
+        bru.setVar('advisoryId', null);
+        bru.setVar('advisoryUpdateId', null);
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 201) {
+          bru.setVar('advisoryId', res.getBody().data.id);
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Creates the advisory that the other requests in this folder add updates to, and stores its `id` in the `advisoryId` runtime variable. **Delete Advisory for Updates** removes it.
+
+  To work with the updates of an existing advisory instead, skip this request and set `advisoryId` to that advisory's ID.

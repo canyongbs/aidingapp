@@ -89,15 +89,23 @@ class GenerateServiceRequestForm
             ]),
         ]);
 
+        $combinedStep = null;
+
         if ($shouldCombineFirstStepIfEnabled && $form->is_first_step_combined && $form->steps->isNotEmpty()) {
-            $firstStep = $form->steps->shift();
+            $combinedStep = $form->steps->shift();
 
             /** @var array<int, array<string, mixed>> $firstStepContentData */
-            $firstStepContentData = data_get($firstStep, 'content.content', []);
+            $firstStepContentData = data_get($combinedStep, 'content.content', []);
             $content = $content->concat($firstStepContentData);
         }
 
-        $form->steps->prepend($this->formatStep('Main', -1, $content));
+        $mainStep = $this->formatStep('Main', -1, $content, $combinedStep?->description);
+
+        // `Main` stays the submission key, so the displayed title is set separately: a merged
+        // step lends its own title, otherwise the step is shown as "Request Details".
+        $mainStep->setAttribute('display_label', $combinedStep->label ?? 'Request Details');
+
+        $form->steps->prepend($mainStep);
 
         if (app(AiClarificationSettings::class)->is_enabled
             && $type->is_ai_clarification_enabled) {
@@ -112,10 +120,11 @@ class GenerateServiceRequestForm
     /**
      * @param Collection<int, array<string, mixed>> $content
      */
-    protected function formatStep(string $label, int $order, Collection $content): ServiceRequestFormStep
+    protected function formatStep(string $label, int $order, Collection $content, ?string $description = null): ServiceRequestFormStep
     {
         $step = new ServiceRequestFormStep([
             'label' => $label,
+            'description' => $description,
             'order' => $order,
             'content' => [
                 'content' => $content,

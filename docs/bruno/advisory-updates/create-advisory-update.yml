@@ -1,0 +1,51 @@
+info:
+  name: Create Advisory Update
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/advisories/:advisory/updates"
+  params:
+    - name: advisory
+      value: "{{advisoryId}}"
+      type: path
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Bruno Example Update",
+        "update": "Created by the Bruno collection.",
+        "internal": false
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        // Clear the previous run's record so a failed create doesn't leave later requests acting on it.
+        bru.setVar('advisoryUpdateId', null);
+    - type: after-response
+      code: |-
+        if (res.getStatus() === 201) {
+          bru.setVar('advisoryUpdateId', res.getBody().data.id);
+        }
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "201"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Adds an update to the advisory in the `advisoryId` runtime variable and stores its `id` in the `advisoryUpdateId` runtime variable. Updates cannot be added to a resolved advisory (`422`).
+
+  - `title` and `update` are required.
+  - `internal` (default `false`) hides the update from the portal.
+  - `date` defaults to now, for example `"2026-11-01T09:30:00Z"`.
+  - `status` optionally moves the advisory to the named advisory status, as in the admin panel. It requires permission to update the advisory.

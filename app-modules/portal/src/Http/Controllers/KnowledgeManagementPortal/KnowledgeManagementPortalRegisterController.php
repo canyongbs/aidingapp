@@ -45,6 +45,7 @@ use AidingApp\Portal\Actions\ResolvePortalDisplayTimezone;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalRegisterRequest;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Settings\PortalSettings;
+use App\Features\ContactArchivingFeature;
 use App\Http\Controllers\Controller;
 use App\Settings\LicenseSettings;
 use Illuminate\Http\JsonResponse;
@@ -65,30 +66,45 @@ class KnowledgeManagementPortalRegisterController extends Controller
 
         $data = $request->validated();
 
-        /** @var Contact $contact */
-        $contact = Contact::query()
-            ->make([
-                'email' => $data['email'],
-                'first_name' => $data['first_name'],
-                'last_name' => $data['last_name'],
-                'full_name' => "{$data['first_name']} {$data['last_name']}",
-                'preferred' => $data['preferred'] ?? null,
-                'mobile' => $data['mobile'],
-                'phone' => $data['phone'] ?? null,
-            ]);
+        $attributes = [
+            'email' => $data['email'],
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'full_name' => "{$data['first_name']} {$data['last_name']}",
+            'preferred' => $data['preferred'] ?? null,
+            'mobile' => $data['mobile'],
+            'phone' => $data['phone'] ?? null,
+        ];
+
+        $archivedContact = null;
+
+        if (ContactArchivingFeature::active()) {
+            $archivedContact = Contact::query()
+                ->onlyArchived()
+                ->where('email', $data['email'])
+                ->first();
+        }
+
+        // Optional fields left blank keep the restored contact's existing values.
+        $contact = $archivedContact?->fill(array_filter($attributes, filled(...))) ?? Contact::query()->make($attributes);
+
         $type = ContactType::resolveDefault();
 
         $organization = app(FindPortalRegistrationOrganization::class)($data['email']);
 
-        if ($organization) {
+        if ($organization && blank($contact->organization_id)) {
             $contact->organization()->associate($organization);
         }
 
-        if ($type) {
+        if ($type instanceof ContactType && ! $archivedContact) {
             $contact->type()->associate($type);
         }
 
         $contact->save();
+
+        if ($archivedContact) {
+            $contact->unarchive();
+        }
 
         $authenticatePortalContact($contact);
 

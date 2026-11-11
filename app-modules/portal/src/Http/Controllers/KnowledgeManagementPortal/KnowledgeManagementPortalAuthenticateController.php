@@ -44,6 +44,7 @@ use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticateRequest;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Settings\PortalSettings;
+use App\Features\ContactArchivingFeature;
 use App\Http\Controllers\Controller;
 use App\Settings\LicenseSettings;
 use Illuminate\Http\JsonResponse;
@@ -56,7 +57,14 @@ class KnowledgeManagementPortalAuthenticateController extends Controller
         PortalAuthentication $authentication,
         AuthenticatePortalContact $authenticatePortalContact,
     ): JsonResponse {
-        if ($authentication->isExpired()) {
+        if (
+            $authentication->isExpired()
+            || (
+                ContactArchivingFeature::active()
+                && $authentication->educatable instanceof Contact
+                && $authentication->educatable->isArchived()
+            )
+        ) {
             if (! session()->has('guest_id')) {
                 $portalGuest = PortalGuest::create();
                 session()->put('guest_id', $portalGuest->getKey());

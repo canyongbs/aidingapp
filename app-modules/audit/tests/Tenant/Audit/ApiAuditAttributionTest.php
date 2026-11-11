@@ -40,18 +40,14 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Models\SystemUser;
-use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\patchJson;
-
-beforeEach(function (): void {
-    config()->set('audit.queue.enable', false);
-});
+use function Tests\actingAsApiUser;
 
 it('attributes audit change_agent to the authenticated SystemUser for API-initiated changes', function (): void {
     $systemUser = SystemUser::factory()->create(['name' => 'Test System User']);
     $systemUser->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
-    Sanctum::actingAs($systemUser, ['api']);
+    actingAsApiUser($systemUser);
 
     $serviceRequest = ServiceRequest::factory()->create([
         'status_id' => ServiceRequestStatus::factory()->state(['classification' => SystemServiceRequestClassification::Open]),
@@ -78,7 +74,7 @@ it('attributes audit change_agent to the authenticated SystemUser for API-initia
 it('resolves the SystemUser name via the audit user() relationship', function (): void {
     $systemUser = SystemUser::factory()->create(['name' => 'Test System User']);
     $systemUser->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
-    Sanctum::actingAs($systemUser, ['api']);
+    actingAsApiUser($systemUser);
 
     $serviceRequest = ServiceRequest::factory()->create([
         'status_id' => ServiceRequestStatus::factory()->state(['classification' => SystemServiceRequestClassification::Open]),

@@ -38,6 +38,7 @@ namespace App\Models;
 
 use AidingApp\Contact\Models\Contact;
 use App\Observers\MediaObserver;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -60,25 +61,51 @@ class Media extends SpatieMedia
     }
 
     /**
-     * Build an RFC 6266 `attachment` Content-Disposition value safe to pass to S3.
-     *
-     * S3 rejects `response-content-disposition` values that are not representable in
-     * ISO-8859-1 (e.g. a file name containing a narrow no-break space), so the real
-     * UTF-8 name is carried in the RFC 5987 `filename*` parameter alongside an ASCII fallback.
+     * Build an RFC 6266 `attachment` Content-Disposition value naming the file after {@see getDownloadFilename()}.
      */
     public function attachmentContentDisposition(): string
     {
-        $fallback = Str::of($this->file_name)
-            ->ascii()
-            ->replace(['%', '/', '\\', '"'], '')
-            ->trim()
-            ->toString();
+        return $this->makeContentDisposition(HeaderUtils::DISPOSITION_ATTACHMENT, $this->getDownloadFilename());
+    }
 
-        return HeaderUtils::makeDisposition(
-            HeaderUtils::DISPOSITION_ATTACHMENT,
-            $this->file_name,
-            $fallback !== '' ? $fallback : 'download',
-        );
+    /**
+     * Stored file names are random, so downloads use the uploaded name with the stored extension instead.
+     */
+    public function getDownloadFilename(): string
+    {
+        $name = trim((string) $this->name);
+
+        if ($name === '') {
+            return $this->file_name;
+        }
+
+        $extension = (string) $this->extension;
+
+        if ($extension === '' || str_ends_with(mb_strtolower($name, 'UTF-8'), '.' . mb_strtolower($extension, 'UTF-8'))) {
+            return $name;
+        }
+
+        return "{$name}.{$extension}";
+    }
+
+    /**
+     * Name the downloaded file after {@see getDownloadFilename()} unless the caller already chose a full disposition.
+     *
+     * @param array<string, mixed> $options
+     */
+    public function getTemporaryUrl(?DateTimeInterface $expiration = null, string $conversionName = '', array $options = []): string
+    {
+        if ($conversionName === '') {
+            $disposition = $options['ResponseContentDisposition'] ?? HeaderUtils::DISPOSITION_INLINE;
+
+            $type = is_string($disposition) ? Str::lower(trim($disposition)) : null;
+
+            if (in_array($type, [HeaderUtils::DISPOSITION_ATTACHMENT, HeaderUtils::DISPOSITION_INLINE], strict: true)) {
+                $options['ResponseContentDisposition'] = $this->makeContentDisposition($type, $this->getDownloadFilename());
+            }
+        }
+
+        return parent::getTemporaryUrl($expiration, $conversionName, $options);
     }
 
     public function getCreatedByNameAttribute(): string
@@ -105,6 +132,28 @@ class Media extends SpatieMedia
             $creator instanceof Contact => $this->getContactSubLabel($creator),
             default => null,
         };
+    }
+
+    /**
+     * S3 rejects `response-content-disposition` values that are not representable in
+     * ISO-8859-1 (e.g. a file name containing a narrow no-break space), so the real
+     * UTF-8 name is carried in the RFC 5987 `filename*` parameter alongside an ASCII fallback.
+     */
+    private function makeContentDisposition(string $type, string $filename): string
+    {
+        $filename = str_replace(['/', '\\'], '', $filename);
+
+        $fallback = Str::of($filename)
+            ->ascii()
+            ->replace(['%', '"'], '')
+            ->trim()
+            ->toString();
+
+        return HeaderUtils::makeDisposition(
+            $type,
+            $filename !== '' ? $filename : 'download',
+            $fallback !== '' ? $fallback : 'download',
+        );
     }
 
     private function getUserSubLabel(User $creator): ?string

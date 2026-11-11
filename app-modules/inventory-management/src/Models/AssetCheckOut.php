@@ -44,10 +44,9 @@ use AidingApp\InventoryManagement\Observers\AssetCheckOutObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Timeline\Timelines\AssetCheckOutTimeline;
-use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -57,13 +56,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperAssetCheckOut
  */
 #[ObservedBy([AssetCheckOutObserver::class])]
-class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
+class AssetCheckOut extends Model implements Auditable, ProvidesATimeline
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
     use AuditableTrait;
     use SoftDeletes;
 
@@ -98,6 +100,9 @@ class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
         return $this->belongsTo(Asset::class, 'asset_id');
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function checkedOutBy(): MorphTo
     {
         return $this->morphTo(
@@ -138,27 +143,29 @@ class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
 
     public static function getTimelineData(Model $forModel): Collection
     {
+        assert($forModel instanceof Asset);
+
         return $forModel->checkOuts()->get();
     }
 
-    public function scopeWithoutReturned(Builder $query): Builder
-    {
-        return $query->whereNull('asset_check_in_id');
-    }
-
+    /**
+     * @return Attribute<AssetCheckOutStatus, never>
+     */
     protected function status(): Attribute
     {
-        return Attribute::get(function (): AssetCheckOutStatus {
-            if ($this->checkIn()->exists()) {
-                return AssetCheckOutStatus::Returned;
-            }
+        return new Attribute(
+            get: function (): AssetCheckOutStatus {
+                if ($this->checkIn()->exists()) {
+                    return AssetCheckOutStatus::Returned;
+                }
 
-            if ($this->expected_check_in_at?->isPast()) {
-                return AssetCheckOutStatus::PastDue;
-            }
+                if ($this->expected_check_in_at?->isPast()) {
+                    return AssetCheckOutStatus::PastDue;
+                }
 
-            return AssetCheckOutStatus::Active;
-        });
+                return AssetCheckOutStatus::Active;
+            },
+        );
     }
 
     /**

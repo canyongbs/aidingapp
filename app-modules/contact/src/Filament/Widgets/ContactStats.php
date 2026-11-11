@@ -54,7 +54,7 @@ class ContactStats extends StatsOverviewWidget
             Stat::make('Contacts', Number::abbreviate(
                 Cache::tags(['{contacts}'])
                     ->remember('contacts-count', now()->addHour(), function (): int {
-                        return Contact::count();
+                        return Contact::query()->withoutArchived()->count();
                     }),
                 maxPrecision: 2,
             )),

@@ -54,7 +54,7 @@ class ContractFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->sentence(),
+            'name' => $this->faker->unique()->words(asText: true),
             'description' => $this->faker->paragraph(),
             'contract_type_id' => ContractType::factory(),
             'vendor_name' => $this->faker->name(),

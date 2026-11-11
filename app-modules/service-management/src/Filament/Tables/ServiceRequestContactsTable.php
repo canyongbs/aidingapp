@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Tables;
 
+use AidingApp\Contact\Models\Builders\OrganizationBuilder;
 use AidingApp\Contact\Models\Contact;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -48,7 +49,7 @@ class ServiceRequestContactsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->query(fn (): Builder => Contact::query())
+            ->query(fn (): Builder => Contact::query()->withoutArchived())
             ->columns([
                 IdColumn::make(),
                 TextColumn::make(Contact::displayNameKey())
@@ -71,7 +72,7 @@ class ServiceRequestContactsTable
             ->filters([
                 SelectFilter::make('organization_id')
                     ->label('Organization')
-                    ->relationship('organization', 'name')
+                    ->relationship('organization', 'name', fn (OrganizationBuilder $query): OrganizationBuilder => $query->withoutArchived())
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('type_id')

@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\Department\Models\Department;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Models\Advisory;
@@ -42,11 +43,13 @@ use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
 use App\Features\AdvisorySeveritySortFeature;
+use App\Features\AdvisoryVisibilityFeature;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Carbon;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
+use function Pest\Laravel\withToken;
 
 beforeEach(function (): void {
     $settings = app(PortalSettings::class);
@@ -317,13 +320,89 @@ describe('sorting', function (): void {
     });
 });
 
-describe('authorization', function (): void {
-    it('denies access to guests', function (): void {
+describe('visibility', function (): void {
+    it('only lists public advisories to guests', function (): void {
         auth()->logout();
 
-        getJson(route('api.portal.advisories'))->assertUnauthorized();
+        $publicAdvisory = Advisory::factory()->for(AdvisoryStatus::factory()->open(), 'status')->create();
+        Advisory::factory()->authenticated()->for(AdvisoryStatus::factory()->open(), 'status')->create();
+
+        getJson(route('api.portal.advisories'))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $publicAdvisory->getKey())
+            ->assertJsonPath('counts.open', 1);
     });
 
+    it('lists public and authenticated advisories to a signed-in contact', function (): void {
+        actingAs(Contact::factory()->create(), 'contact');
+
+        $advisories = collect([
+            Advisory::factory()->for(AdvisoryStatus::factory()->open(), 'status')->create(),
+            Advisory::factory()->authenticated()->for(AdvisoryStatus::factory()->open(), 'status')->create(),
+        ]);
+
+        $response = getJson(route('api.portal.advisories'))->assertOk()->assertJsonPath('counts.open', 2);
+
+        expect($response->collect('data')->pluck('id')->sort()->values()->all())
+            ->toBe($advisories->pluck('id')->sort()->values()->all());
+    });
+
+    it('only lists advisories restricted to specific contact types to contacts of those types', function (): void {
+        $allowedType = ContactType::factory()->create();
+        $otherType = ContactType::factory()->create();
+
+        $restrictedAdvisory = Advisory::factory()
+            ->restrictedToContactTypes($allowedType)
+            ->for(AdvisoryStatus::factory()->open(), 'status')
+            ->create();
+
+        actingAs(Contact::factory()->for($otherType, 'type')->create(), 'contact');
+
+        getJson(route('api.portal.advisories'))->assertOk()->assertJsonCount(0, 'data')->assertJsonPath('counts.open', 0);
+
+        actingAs(Contact::factory()->for($allowedType, 'type')->create(), 'contact');
+
+        getJson(route('api.portal.advisories'))
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $restrictedAdvisory->getKey())
+            ->assertJsonPath('counts.open', 1);
+    });
+
+    it('lists authenticated and contact type restricted advisories for a request with only an access token', function (): void {
+        auth()->logout();
+
+        $contactType = ContactType::factory()->create();
+        $contact = Contact::factory()->for($contactType, 'type')->create();
+
+        $advisories = collect([
+            Advisory::factory()->authenticated()->for(AdvisoryStatus::factory()->open(), 'status')->create(),
+            Advisory::factory()->restrictedToContactTypes($contactType)->for(AdvisoryStatus::factory()->open(), 'status')->create(),
+        ]);
+
+        Advisory::factory()->restrictedToContactTypes(ContactType::factory()->create())->for(AdvisoryStatus::factory()->open(), 'status')->create();
+
+        $response = withToken($contact->createToken('knowledge-management-portal-access-token')->plainTextToken)
+            ->getJson(route('api.portal.advisories'))
+            ->assertOk()
+            ->assertJsonPath('counts.open', 2);
+
+        expect($response->collect('data')->pluck('id')->sort()->values()->all())
+            ->toBe($advisories->pluck('id')->sort()->values()->all());
+    });
+
+    it('lists nothing to guests until the advisory visibility migration has run', function (): void {
+        AdvisoryVisibilityFeature::deactivate();
+        auth()->logout();
+
+        Advisory::factory()->for(AdvisoryStatus::factory()->open(), 'status')->create();
+
+        getJson(route('api.portal.advisories'))->assertOk()->assertJsonCount(0, 'data');
+    });
+});
+
+describe('authorization', function (): void {
     it('denies access without the advisory management add-on', function (): void {
         $licenseSettings = app(LicenseSettings::class);
         $licenseSettings->data->addons->advisoryManagement = false;

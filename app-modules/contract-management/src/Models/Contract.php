@@ -40,21 +40,26 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ContractManagement\Database\Factories\ContractFactory;
 use AidingApp\ContractManagement\Enums\ContractStatus;
 use App\Casts\CurrencyCast;
-use App\Models\BaseModel;
 use App\Models\Media;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperContract
  */
-class Contract extends BaseModel implements HasMedia, Auditable
+class Contract extends Model implements HasMedia, Auditable
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
+
     /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
 

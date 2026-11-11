@@ -102,7 +102,7 @@ class ProjectAccessWidget extends Widget implements HasActions, HasSchemas
     {
         /** @var Collection<int, Contact | Organization> $guests */
         $guests = $this->record->guestContacts
-            ->concat($this->record->guestOrganizations);
+            ->concat($this->record->guestOrganizations()->withoutArchived()->get());
 
         return $guests;
     }

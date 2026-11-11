@@ -36,19 +36,41 @@
 
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ManageContacts;
 use AidingApp\Contact\Filament\Resources\OrganizationResource\RelationManagers\ContactsRelationManager;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use App\Models\User;
+use Filament\Actions\AssociateAction;
 use Filament\Actions\Testing\TestAction;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+
+it('does not list archived contacts', function (): void {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('organization.view-any', 'organization.*.view', 'contacts.view-any', 'contacts.*.view');
+
+    actingAs($user);
+
+    $organization = Organization::factory()->create();
+
+    $contact = Contact::factory()->for($organization)->create();
+    $archivedContact = Contact::factory()->archived()->for($organization)->create();
+
+    Livewire::test(ContactsRelationManager::class, [
+        'ownerRecord' => $organization,
+        'pageClass' => ManageContacts::class,
+    ])
+        ->assertCanSeeTableRecords([$contact])
+        ->assertCanNotSeeTableRecords([$archivedContact]);
+});
 
 it('only shows the associate contact action to a user with the organization.update permission', function (): void {
     $organization = Organization::factory()->create();
 
     $user = User::factory()
         ->create()
-        ->givePermissionTo('organization.view-any', 'organization.*.view', 'contact.view-any', 'contact.*.view');
+        ->givePermissionTo('organization.view-any', 'organization.*.view', 'contacts.view-any', 'contacts.*.view');
 
     actingAs($user);
 
@@ -65,4 +87,41 @@ it('only shows the associate contact action to a user with the organization.upda
         'pageClass' => ManageContacts::class,
     ])
         ->assertActionVisible(TestAction::make('associate')->table());
+});
+
+it('does not offer archived contacts to associate', function (): void {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo(
+            'organization.view-any',
+            'organization.*.view',
+            'organization.*.update',
+            'contacts.view-any',
+            'contacts.*.view',
+        );
+
+    actingAs($user);
+
+    $organization = Organization::factory()->create();
+
+    $contact = Contact::factory()->create(['organization_id' => null]);
+    $archivedContact = Contact::factory()->archived()->create(['organization_id' => null]);
+
+    Livewire::test(ContactsRelationManager::class, [
+        'ownerRecord' => $organization,
+        'pageClass' => ManageContacts::class,
+    ])
+        ->callAction(TestAction::make(AssociateAction::class)->table(), ['recordId' => $archivedContact->getKey()])
+        ->assertHasFormErrors(['recordId']);
+
+    expect($archivedContact->refresh()->organization_id)->toBeNull();
+
+    Livewire::test(ContactsRelationManager::class, [
+        'ownerRecord' => $organization,
+        'pageClass' => ManageContacts::class,
+    ])
+        ->callAction(TestAction::make(AssociateAction::class)->table(), ['recordId' => $contact->getKey()])
+        ->assertHasNoFormErrors();
+
+    expect($contact->refresh()->organization_id)->toBe($organization->getKey());
 });

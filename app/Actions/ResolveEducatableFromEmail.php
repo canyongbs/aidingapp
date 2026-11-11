@@ -48,6 +48,7 @@ class ResolveEducatableFromEmail
 
         /** @var Contact|null $contact */
         $contact = Contact::query()
+            ->withoutArchived()
             ->where('email', $email)
             ->first();
 

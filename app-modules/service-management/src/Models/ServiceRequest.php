@@ -49,16 +49,16 @@ use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsEx
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
-use App\Models\BaseModel;
 use App\Models\Media;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Closure;
-use DateTimeInterface;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -70,6 +70,7 @@ use Illuminate\Support\HtmlString;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
 /**
@@ -79,11 +80,13 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
  * @mixin IdeHelperServiceRequest
  */
 #[ObservedBy([ServiceRequestObserver::class])]
-class ServiceRequest extends BaseModel implements Auditable, HasMedia
+class ServiceRequest extends Model implements Auditable, HasMedia
 {
     use SoftDeletes;
     use AuditableTrait;
     use HasRelationships;
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
 
     /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
@@ -611,11 +614,6 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         static::addGlobalScope('excludeDrafts', function (Builder $builder): void {
             $builder->where('is_draft', false);
         });
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 
     private function responseSecondsBetween(CarbonInterface $start, CarbonInterface $end): int

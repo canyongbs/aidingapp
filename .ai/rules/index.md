@@ -4,4 +4,6 @@ This file maps file globs to rule files. Before creating or editing any file, re
 
 | Rule file                    | Applies to (globs)                                                                                   |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------- |
+| [api.md](api.md)             | `app-modules/*/src/Http/Controllers/Api/**`                                                          |
+| [api-tests.md](api-tests.md) | `**/tests/**/Http/Controllers/Api/**`                                                                |
 | [scheduler.md](scheduler.md) | `app/Console/Kernel.php`, `app/Jobs/DispatchForEachTenant.php`, `**/Jobs/Dispatch*ForEachTenant.php` |

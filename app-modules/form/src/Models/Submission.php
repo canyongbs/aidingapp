@@ -37,22 +37,25 @@
 namespace AidingApp\Form\Models;
 
 use AidingApp\Contact\Models\Contact;
-use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @property-read Submissible $submissible
  * @property-read Collection<int, SubmissibleField> $fields
  * @property-read Contact|null $author
  */
-abstract class Submission extends BaseModel
+abstract class Submission extends Model
 {
     use SoftDeletes;
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
 
     /**
      * @return BelongsTo<Submissible, $this>

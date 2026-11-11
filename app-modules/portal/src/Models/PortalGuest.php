@@ -37,16 +37,20 @@
 namespace AidingApp\Portal\Models;
 
 use AidingApp\Portal\Database\Factories\PortalGuestFactory;
-use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperPortalGuest
  */
-class PortalGuest extends BaseModel
+class PortalGuest extends Model
 {
+    use HasVersion4Uuids;
+    use UsesTenantConnection;
     use SoftDeletes;
 
     /** @use HasFactory<PortalGuestFactory> */

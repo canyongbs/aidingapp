@@ -65,8 +65,8 @@ test('EditEngagementFile is gated with proper access control', function (): void
     ])
         ->assertForbidden();
 
-    $user->givePermissionTo('engagement_file.view-any');
-    $user->givePermissionTo('engagement_file.*.update');
+    $user->givePermissionTo('contacts.view-any');
+    $user->givePermissionTo('contacts.*.update');
 
     actingAs($user)
         ->get(

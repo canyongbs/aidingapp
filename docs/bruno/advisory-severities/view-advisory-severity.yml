@@ -1,0 +1,27 @@
+info:
+  name: View Advisory Severity
+  type: http
+  seq: 3
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/advisory-severities/:advisorySeverity"
+  params:
+    - name: advisorySeverity
+      value: "{{advisorySeverityId}}"
+      type: path
+  auth: inherit
+
+runtime:
+  assertions:
+    - expression: res.status
+      operator: eq
+      value: "200"
+
+settings:
+  encodeUrl: true
+
+docs: |-
+  Shows a single advisory severity.
+
+  Uses the `advisorySeverityId` runtime variable, which **List Advisory Severities** or **Create Advisory Severity** sets automatically. You can also replace the `advisorySeverity` path parameter with any advisory severity ID from **List Advisory Severities**.

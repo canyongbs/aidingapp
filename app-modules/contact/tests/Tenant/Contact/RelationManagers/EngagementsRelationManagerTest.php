@@ -39,6 +39,9 @@ use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\Engage
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementResponse;
+use AidingApp\Notification\Enums\EmailMessageEventType;
+use AidingApp\Notification\Models\EmailMessage;
+use AidingApp\Notification\Models\EmailMessageEvent;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Listeners\AddRecordToTimeline;
 use App\Models\User;
@@ -134,10 +137,10 @@ it('hides the `engage` header action when read only while still listing emails',
         ->assertCanSeeTableRecords($emails['outbound']->pluck('timelineRecord'));
 });
 
-describe('email direction filtering by permission', function () use ($seedContactEmails): void {
-    it('shows only outbound emails to a user with only the `engagement.view-any` permission', function () use ($seedContactEmails): void {
+describe('email direction visibility by permission', function () use ($seedContactEmails): void {
+    it('shows outbound emails to a user with the `contacts.view-any` permission', function () use ($seedContactEmails): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('engagement.view-any');
+        $user->givePermissionTo('contacts.view-any');
 
         actingAs($user);
 
@@ -150,13 +153,12 @@ describe('email direction filtering by permission', function () use ($seedContac
             'pageClass' => ViewContact::class,
         ])
             ->assertSuccessful()
-            ->assertCanSeeTableRecords($emails['outbound']->pluck('timelineRecord'))
-            ->assertCanNotSeeTableRecords($emails['inbound']->pluck('timelineRecord'));
+            ->assertCanSeeTableRecords($emails['outbound']->pluck('timelineRecord'));
     });
 
-    it('shows only inbound emails to a user with only the `engagement_response.view-any` permission', function () use ($seedContactEmails): void {
+    it('shows inbound emails to a user with the `contacts.view-any` permission', function () use ($seedContactEmails): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('engagement_response.view-any');
+        $user->givePermissionTo('contacts.view-any');
 
         actingAs($user);
 
@@ -169,14 +171,12 @@ describe('email direction filtering by permission', function () use ($seedContac
             'pageClass' => ViewContact::class,
         ])
             ->assertSuccessful()
-            ->assertCanSeeTableRecords($emails['inbound']->pluck('timelineRecord'))
-            ->assertCanNotSeeTableRecords($emails['outbound']->pluck('timelineRecord'));
+            ->assertCanSeeTableRecords($emails['inbound']->pluck('timelineRecord'));
     });
 
-    it('shows both directions to a user with both engagement permissions', function () use ($seedContactEmails): void {
+    it('shows both directions to a user with the `contacts.view-any` permission', function () use ($seedContactEmails): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('engagement.view-any');
-        $user->givePermissionTo('engagement_response.view-any');
+        $user->givePermissionTo('contacts.view-any');
 
         actingAs($user);
 
@@ -196,7 +196,7 @@ describe('email direction filtering by permission', function () use ($seedContac
 });
 
 describe('authorization', function (): void {
-    it('does not show the Emails tab to a user with neither engagement permission', function (): void {
+    it('does not show the Emails tab to a user without the `contacts.view-any` permission', function (): void {
         $user = User::factory()->create();
 
         actingAs($user);
@@ -206,9 +206,9 @@ describe('authorization', function (): void {
         expect(EngagementsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeFalse();
     });
 
-    it('shows the Emails tab to a user with only the `engagement.view-any` permission', function (): void {
+    it('shows the Emails tab to a user with only the `contacts.view-any` permission', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('engagement.view-any');
+        $user->givePermissionTo('contacts.view-any');
 
         actingAs($user);
 
@@ -216,15 +216,40 @@ describe('authorization', function (): void {
 
         expect(EngagementsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeTrue();
     });
+});
 
-    it('shows the Emails tab to a user with only the `engagement_response.view-any` permission', function (): void {
-        $user = User::factory()->create();
-        $user->givePermissionTo('engagement_response.view-any');
+it('lists message events newest first, breaking ties by id', function (): void {
+    asSuperAdmin();
 
-        actingAs($user);
+    $contact = Contact::factory()->create();
 
-        $contact = Contact::factory()->create();
+    $engagement = Engagement::factory()->email()->state([
+        'recipient_id' => $contact->getKey(),
+        'recipient_type' => $contact->getMorphClass(),
+    ])->createQuietly();
 
-        expect(EngagementsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeTrue();
-    });
+    app(AddRecordToTimeline::class)->handle(
+        new TimelineableRecordCreated($contact, $engagement),
+    );
+
+    $message = EmailMessage::factory()->for($engagement, 'related')->create();
+
+    // Inserted in the opposite order to the expected one, so insertion order would list Send first.
+    $message->events()->save(EmailMessageEvent::factory()->make([
+        'id' => '00000000-0000-4000-8000-000000000000',
+        'type' => EmailMessageEventType::Send,
+        'occurred_at' => '2025-03-14 10:15:00',
+    ]));
+    $message->events()->save(EmailMessageEvent::factory()->make([
+        'id' => 'ffffffff-ffff-4fff-bfff-ffffffffffff',
+        'type' => EmailMessageEventType::Delivery,
+        'occurred_at' => '2025-03-14 10:15:00',
+    ]));
+
+    Livewire::test(EngagementsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ViewContact::class,
+    ])
+        ->mountAction(TestAction::make('view')->table($engagement->refresh()->timelineRecord))
+        ->assertSchemaComponentStateSet('message_events.0.type', EmailMessageEventType::Delivery->getLabel(), 'mountedActionSchema0');
 });

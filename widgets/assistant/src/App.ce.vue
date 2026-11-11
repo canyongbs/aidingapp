@@ -47,6 +47,7 @@
         portalServiceManagement: { type: Boolean, default: false },
         authenticateRequestUrl: { type: String, default: null },
         serviceRequestTypesUrl: { type: String, default: null },
+        aiDisclaimer: { type: String, default: null },
     });
 
     const isOpen = ref(false);
@@ -160,6 +161,7 @@
             :portal-service-management="portalServiceManagement"
             :authenticate-request-url="authenticateRequestUrl"
             :service-request-types-url="serviceRequestTypesUrl"
+            :ai-disclaimer="aiDisclaimer"
             @close="toggleChat"
             @authenticated="onAuthenticated"
         />

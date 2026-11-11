@@ -158,7 +158,7 @@
                 label: 'Advisories',
                 routeName: 'advisories',
                 icon: ShieldExclamationIcon,
-                visible: isAdvisoryEnabled.value && user.value !== null,
+                visible: isAdvisoryEnabled.value,
                 activeRoutes: ['advisories', 'view-advisory'],
             },
             {

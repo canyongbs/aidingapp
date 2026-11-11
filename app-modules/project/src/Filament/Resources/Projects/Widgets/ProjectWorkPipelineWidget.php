@@ -42,6 +42,8 @@ use AidingApp\Project\Filament\Actions\CreateProjectMilestoneAction;
 use AidingApp\Project\Filament\Concerns\HasPipelineSwitcherAction;
 use AidingApp\Project\Filament\Resources\Pipelines\Actions\EditPipelineEntryAction;
 use AidingApp\Project\Filament\Resources\Pipelines\Actions\ViewPipelineEntryAction;
+use AidingApp\Project\Filament\Resources\Pipelines\Forms\Components\PipelineNameInput;
+use AidingApp\Project\Filament\Resources\Pipelines\Forms\Components\PipelineStageNameInput;
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\Pipeline;
@@ -56,7 +58,6 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Component;
 use Filament\Tables\Columns\IconColumn;
@@ -152,7 +153,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                         };
                     }),
                 TextColumn::make('pipelineStage.name')
-                    ->label('Stage')
+                    ->label('Status')
                     ->badge(),
                 ViewColumn::make('assets')
                     ->label('Assets')
@@ -612,9 +613,7 @@ class ProjectWorkPipelineWidget extends TableWidget
     protected function pipelineFormSchema(): array
     {
         return [
-            TextInput::make('name')
-                ->required()
-                ->maxLength(255),
+            PipelineNameInput::make(fn (): string => $this->record->getKey()),
             Textarea::make('description')
                 ->required()
                 ->maxLength(65535),
@@ -624,10 +623,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                     TableColumn::make('Classification'),
                 ])
                 ->schema([
-                    TextInput::make('name')
-                        ->label('Stage')
-                        ->distinct()
-                        ->required(),
+                    PipelineStageNameInput::make(),
                     Select::make('classification')
                         ->label('Classification')
                         ->options(PipelineStageClassification::class)

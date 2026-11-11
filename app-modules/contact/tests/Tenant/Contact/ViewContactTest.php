@@ -40,16 +40,21 @@ use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\AssetC
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\AssetCheckOutRelationManager;
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\EngagementsRelationManager;
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\ServiceRequestsRelationManager;
+use AidingApp\Contact\Filament\Tables\OrganizationsTable;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\EditContactRequestFactory;
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers\EngagementFilesRelationManager;
+use App\Features\ContactArchivingFeature;
+use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 use Dom\HTMLDocument;
 use Dom\Node;
 use Dom\XPath;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\TableSelect;
+use Filament\Forms\Components\TableSelect\Livewire\TableSelectLivewireComponent;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Callout;
 use Livewire\Livewire;
@@ -123,6 +128,83 @@ test('ViewContact renders successfully when optional fields have no value', func
         ->assertSuccessful();
 });
 
+describe('archived organization indicator', function (): void {
+    it('marks an archived organization while still showing its name', function (): void {
+        asSuperAdmin();
+
+        $contact = Contact::factory()
+            ->for(Organization::factory()->archived()->state(['name' => 'Acme Inc']), 'organization')
+            ->create();
+
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+            ->assertSee('Acme Inc')
+            ->assertSee('This organization is archived.');
+    });
+
+    it('does not mark an active organization', function (): void {
+        asSuperAdmin();
+
+        $contact = Contact::factory()
+            ->for(Organization::factory()->state(['name' => 'Acme Inc']), 'organization')
+            ->create();
+
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+            ->assertSee('Acme Inc')
+            ->assertDontSee('This organization is archived.');
+    });
+
+    it('does not mark an archived organization when the feature is inactive', function (): void {
+        OrganizationArchivingFeature::deactivate();
+
+        asSuperAdmin();
+
+        $contact = Contact::factory()
+            ->for(Organization::factory()->archived()->state(['name' => 'Acme Inc']), 'organization')
+            ->create();
+
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+            ->assertSee('Acme Inc')
+            ->assertDontSee('This organization is archived.');
+    });
+});
+
+it('returns not found for an archived contact', function (): void {
+    asSuperAdmin();
+
+    $contact = Contact::factory()->archived()->create();
+
+    \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
+        ->assertNotFound();
+});
+
+describe('archiving', function (): void {
+    it('archives the contact', function (): void {
+        asSuperAdmin();
+
+        $contact = Contact::factory()->create();
+
+        expect($contact->isArchived())->toBeFalse();
+
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+            ->callAction('archive')
+            ->assertRedirect(ContactResource::getUrl('index'));
+
+        expect($contact->refresh()->isArchived())->toBeTrue();
+    });
+});
+
+it('shows the delete action when the contact archiving feature is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    asSuperAdmin();
+
+    $contact = Contact::factory()->create();
+
+    Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+        ->assertActionVisible('delete')
+        ->assertActionDoesNotExist('archive');
+});
+
 // Permission Tests
 
 test('ViewContact is gated with proper access control', function (): void {
@@ -137,8 +219,8 @@ test('ViewContact is gated with proper access control', function (): void {
             ])
         )->assertForbidden();
 
-    $user->givePermissionTo('contact.view-any');
-    $user->givePermissionTo('contact.*.view');
+    $user->givePermissionTo('contacts.view-any');
+    $user->givePermissionTo('contacts.*.view');
 
     actingAs($user)
         ->get(
@@ -156,15 +238,15 @@ describe('section edit actions', function (): void {
 
         actingAs($user);
 
-        $user->givePermissionTo('contact.view-any');
-        $user->givePermissionTo('contact.*.view');
+        $user->givePermissionTo('contacts.view-any');
+        $user->givePermissionTo('contacts.*.view');
 
         Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->assertActionDoesNotExist(TestAction::make('editDemographicInformation')->schemaComponent('demographicInformation'));
 
-        $user->givePermissionTo('contact.*.update');
+        $user->givePermissionTo('contacts.*.update');
 
         Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
@@ -174,9 +256,9 @@ describe('section edit actions', function (): void {
 
     test('the contact sections can be updated', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any');
-        $user->givePermissionTo('contact.*.view');
-        $user->givePermissionTo('contact.*.update');
+        $user->givePermissionTo('contacts.view-any');
+        $user->givePermissionTo('contacts.*.view');
+        $user->givePermissionTo('contacts.*.update');
 
         actingAs($user);
 
@@ -206,9 +288,9 @@ describe('section edit actions', function (): void {
 
     test('the employment information section can be updated', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any');
-        $user->givePermissionTo('contact.*.view');
-        $user->givePermissionTo('contact.*.update');
+        $user->givePermissionTo('contacts.view-any');
+        $user->givePermissionTo('contacts.*.view');
+        $user->givePermissionTo('contacts.*.update');
 
         actingAs($user);
 
@@ -237,9 +319,9 @@ describe('section edit actions', function (): void {
 
     test('the academic information section can be updated', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any');
-        $user->givePermissionTo('contact.*.view');
-        $user->givePermissionTo('contact.*.update');
+        $user->givePermissionTo('contacts.view-any');
+        $user->givePermissionTo('contacts.*.view');
+        $user->givePermissionTo('contacts.*.update');
 
         actingAs($user);
 
@@ -268,9 +350,9 @@ describe('section edit actions', function (): void {
 
     test('the address information section can be updated', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any');
-        $user->givePermissionTo('contact.*.view');
-        $user->givePermissionTo('contact.*.update');
+        $user->givePermissionTo('contacts.view-any');
+        $user->givePermissionTo('contacts.*.view');
+        $user->givePermissionTo('contacts.*.update');
 
         actingAs($user);
 
@@ -303,9 +385,9 @@ describe('section edit actions', function (): void {
 
     test('the customer information section can be updated', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any');
-        $user->givePermissionTo('contact.*.view');
-        $user->givePermissionTo('contact.*.update');
+        $user->givePermissionTo('contacts.view-any');
+        $user->givePermissionTo('contacts.*.view');
+        $user->givePermissionTo('contacts.*.update');
 
         actingAs($user);
 
@@ -324,11 +406,143 @@ describe('section edit actions', function (): void {
         expect($contact->fresh()->organization_id)->toEqual($organization->getKey());
     });
 
+    describe('organization picker', function (): void {
+        beforeEach(function (): void {
+            $user = User::factory()->create();
+            $user->givePermissionTo('contacts.view-any');
+            $user->givePermissionTo('contacts.*.view');
+            $user->givePermissionTo('contacts.*.update');
+
+            actingAs($user);
+        });
+
+        it('keeps the linked archived organization listed and hides other archived ones', function (): void {
+            $linkedOrganization = Organization::factory()->archived()->create();
+            $otherArchivedOrganization = Organization::factory()->archived()->create();
+            $contact = Contact::factory()->create(['organization_id' => $linkedOrganization->getKey()]);
+
+            $component = Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+                ->mountAction(TestAction::make('editCustomerInformation')->schemaComponent('customerInformation'));
+
+            $field = (fn () => $this->getMountedActionSchema())->call($component->instance())->getFlatComponents()['organization_id'] ?? null;
+
+            assert($field instanceof TableSelect);
+
+            Livewire::test(TableSelectLivewireComponent::class, [
+                'tableConfiguration' => base64_encode(OrganizationsTable::class),
+                'tableArguments' => $field->getTableArguments(),
+                'model' => Contact::class,
+                'relationshipName' => 'organization',
+            ])
+                ->assertCanSeeTableRecords([$linkedOrganization])
+                ->assertCanNotSeeTableRecords([$otherArchivedOrganization]);
+        });
+
+        it('marks only the archived selection with the archived indicator in the picker', function (): void {
+            $linkedOrganization = Organization::factory()->archived()->create();
+            $activeOrganization = Organization::factory()->create();
+            $contact = Contact::factory()->create(['organization_id' => $linkedOrganization->getKey()]);
+
+            $component = Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+                ->mountAction(TestAction::make('editCustomerInformation')->schemaComponent('customerInformation'));
+
+            $field = (fn () => $this->getMountedActionSchema())->call($component->instance())->getFlatComponents()['organization_id'] ?? null;
+
+            assert($field instanceof TableSelect);
+
+            $html = Livewire::test(TableSelectLivewireComponent::class, [
+                'tableConfiguration' => base64_encode(OrganizationsTable::class),
+                'tableArguments' => $field->getTableArguments(),
+                'model' => Contact::class,
+                'relationshipName' => 'organization',
+            ])
+                ->assertCanSeeTableRecords([$linkedOrganization, $activeOrganization])
+                ->html();
+
+            expect(substr_count($html, 'This organization is archived.'))->toBe(substr_count(view('filament.tables.columns.organization.archived-name', ['name' => 'x'])->render(), 'This organization is archived.'))
+                ->toBeGreaterThan(0);
+        });
+
+        it('keeps the archived organization when the section is saved unchanged', function (): void {
+            $linkedOrganization = Organization::factory()->archived()->create();
+            $contact = Contact::factory()->create(['organization_id' => $linkedOrganization->getKey()]);
+
+            Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+                ->callAction(TestAction::make('editCustomerInformation')->schemaComponent('customerInformation'), data: [
+                    'organization_id' => $linkedOrganization->getKey(),
+                ])
+                ->assertHasNoFormErrors();
+
+            expect($contact->fresh()->organization_id)->toEqual($linkedOrganization->getKey());
+        });
+
+        it('stops listing the archived organization once the contact is moved to an active one', function (): void {
+            $archivedOrganization = Organization::factory()->archived()->create();
+            $activeOrganization = Organization::factory()->create();
+            $contact = Contact::factory()->create(['organization_id' => $archivedOrganization->getKey()]);
+
+            Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+                ->callAction(TestAction::make('editCustomerInformation')->schemaComponent('customerInformation'), data: [
+                    'organization_id' => $activeOrganization->getKey(),
+                ])
+                ->assertHasNoFormErrors();
+
+            expect($contact->fresh()->organization_id)->toEqual($activeOrganization->getKey());
+
+            $component = Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+                ->mountAction(TestAction::make('editCustomerInformation')->schemaComponent('customerInformation'));
+
+            $field = (fn () => $this->getMountedActionSchema())->call($component->instance())->getFlatComponents()['organization_id'] ?? null;
+
+            assert($field instanceof TableSelect);
+
+            Livewire::test(TableSelectLivewireComponent::class, [
+                'tableConfiguration' => base64_encode(OrganizationsTable::class),
+                'tableArguments' => $field->getTableArguments(),
+                'model' => Contact::class,
+                'relationshipName' => 'organization',
+            ])
+                ->assertCanSeeTableRecords([$activeOrganization])
+                ->assertCanNotSeeTableRecords([$archivedOrganization]);
+        });
+
+        it('lists archived organizations while organization archiving is inactive', function (): void {
+            OrganizationArchivingFeature::deactivate();
+
+            $archivedOrganization = Organization::factory()->archived()->create();
+            $contact = Contact::factory()->create(['organization_id' => null]);
+
+            Livewire::test(TableSelectLivewireComponent::class, [
+                'tableConfiguration' => base64_encode(OrganizationsTable::class),
+                'tableArguments' => ['selectedOrganizationId' => $contact->organization_id],
+                'model' => Contact::class,
+                'relationshipName' => 'organization',
+            ])
+                ->assertCanSeeTableRecords([$archivedOrganization]);
+        });
+
+        it('lists archived organizations alongside the linked organization while organization archiving is inactive', function (): void {
+            OrganizationArchivingFeature::deactivate();
+
+            $linkedOrganization = Organization::factory()->create();
+            $archivedOrganization = Organization::factory()->archived()->create();
+            $contact = Contact::factory()->create(['organization_id' => $linkedOrganization->getKey()]);
+
+            Livewire::test(TableSelectLivewireComponent::class, [
+                'tableConfiguration' => base64_encode(OrganizationsTable::class),
+                'tableArguments' => ['selectedOrganizationId' => $contact->organization_id],
+                'model' => Contact::class,
+                'relationshipName' => 'organization',
+            ])
+                ->assertCanSeeTableRecords([$linkedOrganization, $archivedOrganization]);
+        });
+    });
+
     test('the contact information section keeps its own email but rejects another contact\'s email case-insensitively', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any');
-        $user->givePermissionTo('contact.*.view');
-        $user->givePermissionTo('contact.*.update');
+        $user->givePermissionTo('contacts.view-any');
+        $user->givePermissionTo('contacts.*.view');
+        $user->givePermissionTo('contacts.*.update');
 
         Contact::factory()->create(['email' => 'other@example.com']);
         $contact = Contact::factory()->create(['email' => 'mine@example.com']);
@@ -350,6 +564,29 @@ describe('section edit actions', function (): void {
                 'email' => 'Other@Example.com',
             ])
             ->assertHasFormErrors(['email']);
+    });
+
+    it('does not save the email of an archived contact', function (): void {
+        $user = User::factory()->create();
+        $user->givePermissionTo('contacts.view-any');
+        $user->givePermissionTo('contacts.*.view');
+        $user->givePermissionTo('contacts.*.update');
+
+        Contact::factory()->archived()->create(['email' => 'archived@example.com']);
+        $contact = Contact::factory()->create(['email' => 'mine@example.com']);
+
+        actingAs($user);
+
+        $component = Livewire::test(ViewContact::class, [
+            'record' => $contact->getRouteKey(),
+        ])
+            ->callAction(TestAction::make('editContactInformation')->schemaComponent('contactInformation'), data: [
+                'email' => 'Archived@Example.com',
+            ])
+            ->assertHasFormErrors(['email' => 'An archived contact with this email already exists.']);
+
+        expect($component->errors()->get('mountedActions.0.data.email'))->toBe(['An archived contact with this email already exists.'])
+            ->and($contact->fresh()->email)->toBe('mine@example.com');
     });
 });
 
@@ -415,9 +652,9 @@ describe('email health', function (): void {
 });
 
 describe('tabs', function (): void {
-    test('renders successfully with no tabs visible when the user has no relation manager abilities', function (): void {
+    test('renders successfully with no service request or asset tabs visible when the user has no relation manager abilities', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any', 'contact.*.view');
+        $user->givePermissionTo('contacts.view-any', 'contacts.*.view');
         actingAs($user);
 
         $contact = Contact::factory()->create();
@@ -426,14 +663,12 @@ describe('tabs', function (): void {
             ->assertSuccessful()
             ->assertDontSeeLivewire(ServiceRequestsRelationManager::class)
             ->assertDontSeeLivewire(AssetCheckOutRelationManager::class)
-            ->assertDontSeeLivewire(AssetCheckInRelationManager::class)
-            ->assertDontSeeLivewire(EngagementFilesRelationManager::class)
-            ->assertDontSeeLivewire(EngagementsRelationManager::class);
+            ->assertDontSeeLivewire(AssetCheckInRelationManager::class);
     });
 
     test('shows the Service Requests tab only with the service_request.view-any ability', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any', 'contact.*.view');
+        $user->givePermissionTo('contacts.view-any', 'contacts.*.view');
         actingAs($user);
 
         $contact = Contact::factory()->create();
@@ -450,7 +685,7 @@ describe('tabs', function (): void {
 
     test('shows the Assets tab only with an asset_check_out/asset_check_in.view-any ability', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any', 'contact.*.view');
+        $user->givePermissionTo('contacts.view-any', 'contacts.*.view');
         actingAs($user);
 
         $contact = Contact::factory()->create();
@@ -474,9 +709,9 @@ describe('tabs', function (): void {
             ->assertSeeLivewire(AssetCheckInRelationManager::class);
     });
 
-    test('shows the Files tab only with the engagement_file.view-any ability', function (): void {
+    test('shows the Files tab only with the contacts.view-any ability', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any', 'contact.*.view');
+        $user->givePermissionTo('contacts.*.view');
         actingAs($user);
 
         $contact = Contact::factory()->create();
@@ -484,16 +719,16 @@ describe('tabs', function (): void {
         \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertDontSeeLivewire(EngagementFilesRelationManager::class);
 
-        $user->givePermissionTo('engagement_file.view-any');
+        $user->givePermissionTo('contacts.view-any');
 
         \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertSuccessful()
             ->assertSeeLivewire(EngagementFilesRelationManager::class);
     });
 
-    test('shows the Emails tab only with an engagement/engagement_response.view-any ability', function (): void {
+    test('shows the Emails tab only with the contacts.view-any ability', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any', 'contact.*.view');
+        $user->givePermissionTo('contacts.*.view');
         actingAs($user);
 
         $contact = Contact::factory()->create();
@@ -501,7 +736,7 @@ describe('tabs', function (): void {
         \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertDontSeeLivewire(EngagementsRelationManager::class);
 
-        $user->givePermissionTo('engagement.view-any');
+        $user->givePermissionTo('contacts.view-any');
 
         \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertSuccessful()

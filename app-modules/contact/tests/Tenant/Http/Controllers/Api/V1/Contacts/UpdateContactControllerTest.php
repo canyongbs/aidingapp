@@ -1,0 +1,470 @@
+<?php
+
+/*
+<COPYRIGHT>
+
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
+
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
+
+    Notice:
+
+    - You may not provide the software to third parties as a hosted or managed
+      service, where the service provides users with access to any substantial set of
+      the features or functionality of the software.
+    - You may not move, change, disable, or circumvent the license key functionality
+      in the software, and you may not remove or obscure any functionality in the
+      software that is protected by the license key.
+    - You may not alter, remove, or obscure any licensing, copyright, or other notices
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      to applicable law.
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
+      vigorously.
+    - The software solution, including services, infrastructure, and code, is offered as a
+      Software as a Service (SaaS) by Canyon GBS Inc.
+    - Use of this software implies agreement to the license terms and conditions as stated
+      in the Elastic License 2.0.
+
+    For more information or inquiries please visit our website at
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
+
+</COPYRIGHT>
+*/
+
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactType;
+use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Services\ManagedContactService;
+use App\Features\OrganizationArchivingFeature;
+use App\Models\SystemUser;
+use App\Models\User;
+use Illuminate\Support\Arr;
+
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\patchJson;
+use function Tests\actingAsApiUser;
+
+$actingAsContactUpdater = function (): SystemUser {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['contacts.view-any', 'contacts.*.update']);
+    actingAsApiUser($user);
+
+    return $user;
+};
+
+it('is gated with proper access control', function () use ($actingAsContactUpdater): void {
+    $contact = Contact::factory()->create();
+    $payload = ['job_title' => 'Updated'];
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), $payload)
+        ->assertUnauthorized();
+
+    $user = SystemUser::factory()->create();
+    actingAsApiUser($user);
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), $payload)
+        ->assertForbidden();
+
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('contacts.view-any');
+
+    actingAsApiUser($user);
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), $payload)
+        ->assertForbidden();
+
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('contacts.*.update');
+    actingAsApiUser($user);
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), $payload)
+        ->assertForbidden();
+
+    $actingAsContactUpdater();
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), $payload)
+        ->assertOk();
+});
+
+it('updates only the attributes included in the request', function () use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $contact = Contact::factory()->create(['job_title' => 'Original', 'city' => 'Springfield']);
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), [
+        'job_title' => 'Updated',
+        'postal_code' => '54321',
+        'preferred_name' => null,
+    ])
+        ->assertOk()
+        ->assertJsonPath('data.id', $contact->getKey())
+        ->assertJsonPath('data.job_title', 'Updated')
+        ->assertJsonPath('data.postal_code', '54321')
+        ->assertJsonPath('data.preferred_name', null)
+        ->assertJsonPath('data.city', 'Springfield');
+
+    $fresh = $contact->fresh();
+
+    expect($fresh->job_title)->toBe('Updated')
+        ->and($fresh->postal)->toBe('54321')
+        ->and($fresh->preferred)->toBeNull()
+        ->and($fresh->city)->toBe('Springfield')
+        ->and($fresh->full_name)->toBe($contact->full_name);
+});
+
+it('updates a single attribute without requiring the others and leaves every other column untouched', function (array $payload, array $changedColumns) use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $organization = Organization::factory()->create(['name' => 'Original Organization', 'domains' => []]);
+    Organization::factory()->create(['name' => 'Other Organization', 'domains' => []]);
+    ContactType::factory()->create(['name' => 'Other Type']);
+
+    $contact = Contact::factory()->for($organization, 'organization')->create([
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+        'full_name' => 'Jane Doe',
+        'preferred' => 'JD',
+        'email' => 'jane@example.com',
+        'mobile' => '555-0101',
+        'phone' => '555-0102',
+        'job_title' => 'Engineer',
+        'employee_id' => 'E-1',
+        'city' => 'Springfield',
+        'state' => 'IL',
+        'postal' => '62701',
+    ]);
+
+    $unchangedColumns = fn (): array => Arr::except($contact->fresh()->getAttributes(), [...$changedColumns, 'updated_at']);
+    $before = $unchangedColumns();
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), $payload)
+        ->assertOk();
+
+    expect($unchangedColumns())->toBe($before);
+})->with([
+    'job title' => [['job_title' => 'Updated'], ['job_title']],
+    'email' => [['email' => 'new@example.com'], ['email']],
+    'phone cleared' => [['phone' => null], ['phone']],
+    'first name' => [['first_name' => 'Janet'], ['first_name', 'full_name']],
+    'last name' => [['last_name' => 'Smith'], ['last_name', 'full_name']],
+    'type' => [['type' => 'Other Type'], ['type_id']],
+    'organization' => [['organization' => 'Other Organization'], ['organization_id']],
+]);
+
+it('keeps the full name in sync with the first and last name', function () use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $contact = Contact::factory()->create(['first_name' => 'Jane', 'last_name' => 'Doe', 'full_name' => 'Jane Doe']);
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['last_name' => 'Smith'])
+        ->assertOk()
+        ->assertJsonPath('data.name', 'Jane Smith');
+
+    assertDatabaseHas(Contact::class, ['id' => $contact->getKey(), 'full_name' => 'Jane Smith']);
+});
+
+it('can change the contact type', function () use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $contact = Contact::factory()->create();
+    $type = ContactType::factory()->create(['name' => 'Customer']);
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['type' => $type->name])
+        ->assertOk()
+        ->assertJsonPath('data.type.id', $type->getKey());
+});
+
+it('can change the organization', function () use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $contact = Contact::factory()->create();
+    $organization = Organization::factory()->create();
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['organization' => $organization->name])
+        ->assertOk()
+        ->assertJsonPath('data.organization.id', $organization->getKey());
+});
+
+it('resolves relationship names case-insensitively without wildcard matching', function () use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $contact = Contact::factory()->create();
+    ContactType::factory()->create(['name' => 'VIPXContact']);
+    $type = ContactType::factory()->create(['name' => 'VIP_Contact']);
+    Organization::factory()->create(['name' => '100 Percent Extra']);
+    $organization = Organization::factory()->create(['name' => '100% Company']);
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), [
+        'type' => 'vip_contact',
+        'organization' => '100% company',
+    ])->assertOk()
+        ->assertJsonPath('data.type.id', $type->getKey())
+        ->assertJsonPath('data.organization.id', $organization->getKey());
+
+    expect($contact->refresh()->type_id)->toBe($type->getKey())
+        ->and($contact->organization_id)->toBe($organization->getKey());
+});
+
+it('rejects ambiguous contact type names without modifying the contact', function () use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $contact = Contact::factory()->create();
+    $originalTypeId = $contact->type_id;
+    ContactType::factory()->create(['name' => 'Customer']);
+    ContactType::factory()->create(['name' => 'CUSTOMER']);
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['type' => 'customer'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['type'])
+        ->assertJsonPath('errors.type.0', 'The specified contact type name is ambiguous.');
+
+    expect($contact->refresh()->type_id)->toBe($originalTypeId);
+});
+
+it('does not resolve deleted relationships by name', function (string $field) use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $contact = Contact::factory()->create();
+    $originalTypeId = $contact->type_id;
+    $originalOrganizationId = $contact->organization_id;
+    $type = ContactType::factory()->create(['name' => 'Customer']);
+    $organization = Organization::factory()->create(['name' => 'Acme']);
+
+    if ($field === 'type') {
+        $type->delete();
+    } else {
+        $organization->delete();
+    }
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), [
+        'type' => $type->name,
+        'organization' => $organization->name,
+    ])->assertUnprocessable()
+        ->assertJsonValidationErrors([$field]);
+
+    expect($contact->refresh()->type_id)->toBe($originalTypeId)
+        ->and($contact->organization_id)->toBe($originalOrganizationId);
+})->with(['type', 'organization']);
+
+it('does not resolve an archived organization by name', function () use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $contact = Contact::factory()->create();
+    $originalOrganizationId = $contact->organization_id;
+    $organization = Organization::factory()->archived()->create(['name' => 'Acme']);
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['organization' => $organization->name])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['organization']);
+
+    expect($contact->refresh()->organization_id)->toBe($originalOrganizationId);
+});
+
+it('resolves an archived organization by name while organization archiving is inactive', function () use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    OrganizationArchivingFeature::deactivate();
+
+    $contact = Contact::factory()->create();
+    $organization = Organization::factory()->archived()->create(['name' => 'Acme']);
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['organization' => $organization->name])
+        ->assertOk()
+        ->assertJsonPath('data.organization.id', $organization->getKey());
+});
+
+it('validates the request', function (array $payload, array $errors) use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    Contact::factory()->create(['email' => 'taken@example.com']);
+    $contact = Contact::factory()->create();
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), $payload)
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors($errors);
+})->with([
+    'first name cannot be blank' => [['first_name' => ''], ['first_name']],
+    'last name cannot be null' => [['last_name' => null], ['last_name']],
+    'email must be valid' => [['email' => 'not-an-email'], ['email']],
+    'email must be unique' => [['email' => 'taken@example.com'], ['email']],
+    'type cannot be null' => [['type' => null], ['type']],
+    'type must exist' => [['type' => 'Unknown type'], ['type']],
+    'organization must exist' => [['organization' => 'Unknown organization'], ['organization']],
+    'type must be a string' => [['type' => ['Invalid']], ['type']],
+    'organization must be a string' => [['organization' => ['Invalid']], ['organization']],
+]);
+
+it('explains that an archived contact reserves the email', function () use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    Contact::factory()->archived()->create(['email' => 'archived@example.com']);
+    $contact = Contact::factory()->create(['email' => 'jane@example.com']);
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['email' => 'ARCHIVED@example.com'])
+        ->assertUnprocessable()
+        ->assertJsonPath('errors.email', ['An archived contact with this email already exists.']);
+
+    expect($contact->refresh()->email)->toBe('jane@example.com');
+});
+
+it('allows a contact to keep its own email address', function () use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $contact = Contact::factory()->create(['email' => 'same@example.com']);
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['email' => 'same@example.com', 'job_title' => 'Updated'])
+        ->assertOk();
+});
+
+it('cannot update a managed contact', function () use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $contact = app(ManagedContactService::class)->enable(User::factory()->create(), ContactType::factory()->create()->getKey());
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['job_title' => 'Updated'])
+        ->assertForbidden();
+
+    expect($contact->fresh()->job_title)->not->toBe('Updated');
+});
+
+it('cannot update an archived contact', function () use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $contact = Contact::factory()->archived()->create(['job_title' => 'Original']);
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['job_title' => 'Updated'])
+        ->assertNotFound();
+
+    expect($contact->refresh()->job_title)->toBe('Original');
+});
+
+it('returns not found for an archived contact before validating the request', function () use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $contact = Contact::factory()->archived()->create();
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['email' => 'not-an-email'])
+        ->assertNotFound();
+});
+
+it('checks permissions before returning not found for an archived contact', function (): void {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('contacts.view-any');
+    actingAsApiUser($user);
+
+    $contact = Contact::factory()->archived()->create();
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['job_title' => 'Updated'])
+        ->assertForbidden();
+});
+
+it('clears the organization when no other organization matches the email domain', function () use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $organization = Organization::factory()->create(['domains' => []]);
+    $contact = Contact::factory()->for($organization, 'organization')->create(['email' => 'jane@example.com']);
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['organization' => null])
+        ->assertOk()
+        ->assertJsonPath('data.organization', null);
+
+    expect($contact->refresh()->organization_id)->toBeNull();
+});
+
+it('matches the organization by email domain again after it is cleared', function () use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $organization = Organization::factory()->create(['domains' => [['domain' => 'example.com']]]);
+    $contact = Contact::factory()->for($organization, 'organization')->create(['email' => 'jane@example.com']);
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['organization' => null])
+        ->assertOk()
+        ->assertJsonPath('data.organization.id', $organization->getKey());
+
+    expect($contact->refresh()->organization_id)->toBe($organization->getKey());
+});
+
+it('matches an organization by email domain when the email changes', function (bool $omitOrganization) use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $organization = Organization::factory()->create(['domains' => [['domain' => 'example.com']]]);
+    $contact = Contact::factory()->create(['email' => 'jane@other.test', 'organization_id' => null]);
+
+    expect($contact->refresh()->organization_id)->toBeNull();
+
+    $payload = ['email' => 'jane@example.com'];
+
+    if (! $omitOrganization) {
+        $payload['organization'] = null;
+    }
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), $payload)
+        ->assertOk()
+        ->assertJsonPath('data.organization.id', $organization->getKey());
+
+    expect($contact->refresh()->organization_id)->toBe($organization->getKey());
+})->with([
+    'omitted organization' => [true],
+    'explicitly null organization' => [false],
+]);
+
+it('updates a contact at the combined name length boundary', function (array $payload, string $expectedName) use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $firstName = str_repeat('a', 127);
+    $lastName = str_repeat('b', 127);
+    $contact = Contact::factory()->create([
+        'first_name' => $firstName,
+        'last_name' => $lastName,
+        'full_name' => "{$firstName} {$lastName}",
+    ]);
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), $payload)
+        ->assertOk()
+        ->assertJsonPath('data.name', $expectedName);
+
+    expect($contact->refresh()->full_name)->toBe($expectedName);
+})->with([
+    '254 characters with omitted last name' => [
+        ['first_name' => str_repeat('c', 126)],
+        str_repeat('c', 126) . ' ' . str_repeat('b', 127),
+    ],
+    '255 characters with omitted first name' => [
+        ['last_name' => str_repeat("\u{00E9}", 127)],
+        str_repeat('a', 127) . ' ' . str_repeat("\u{00E9}", 127),
+    ],
+    '255 characters with both names' => [
+        ['first_name' => str_repeat('c', 126), 'last_name' => str_repeat('d', 128)],
+        str_repeat('c', 126) . ' ' . str_repeat('d', 128),
+    ],
+]);
+
+it('rejects an oversized combined name without changing the contact', function (array $payload, array $errors) use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $firstName = str_repeat('a', 127);
+    $lastName = str_repeat('b', 127);
+    $contact = Contact::factory()->create([
+        'first_name' => $firstName,
+        'last_name' => $lastName,
+        'full_name' => "{$firstName} {$lastName}",
+    ]);
+
+    $response = patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), $payload)
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors($errors);
+
+    foreach ($errors as $field) {
+        $response->assertJsonPath("errors.{$field}.0", 'The full name may not be greater than 255 characters.');
+    }
+
+    expect($contact->refresh()->first_name)->toBe($firstName)
+        ->and($contact->last_name)->toBe($lastName)
+        ->and($contact->full_name)->toBe("{$firstName} {$lastName}");
+})->with([
+    '256 characters with omitted last name' => [['first_name' => str_repeat('c', 128)], ['first_name']],
+    '256 characters with omitted first name' => [['last_name' => str_repeat('d', 128)], ['last_name']],
+    '257 characters with both names' => [
+        ['first_name' => str_repeat('c', 128), 'last_name' => str_repeat('d', 128)],
+        ['first_name', 'last_name'],
+    ],
+]);

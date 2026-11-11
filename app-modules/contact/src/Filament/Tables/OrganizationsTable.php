@@ -36,11 +36,15 @@
 
 namespace AidingApp\Contact\Filament\Tables;
 
+use AidingApp\Contact\Filament\Support\OrganizationArchivedName;
+use AidingApp\Contact\Models\Builders\OrganizationBuilder;
 use AidingApp\Contact\Models\Organization;
+use App\Features\OrganizationArchivingFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 
 class OrganizationsTable
@@ -49,10 +53,26 @@ class OrganizationsTable
     {
         return $table
             ->query(fn (): Builder => Organization::query())
+            ->modifyQueryUsing(function (OrganizationBuilder $query) use ($table): OrganizationBuilder {
+                if (! OrganizationArchivingFeature::active()) {
+                    return $query;
+                }
+
+                $selectedOrganizationId = $table->getArguments()['selectedOrganizationId'] ?? null;
+
+                return $query->where(function (OrganizationBuilder $query) use ($selectedOrganizationId): void {
+                    $query->withoutArchived();
+
+                    if (filled($selectedOrganizationId)) {
+                        $query->orWhereKey($selectedOrganizationId);
+                    }
+                });
+            })
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('name')
                     ->label('Organization Name')
+                    ->formatStateUsing(fn (Organization $record, string $state): string | View => OrganizationArchivedName::format($record, $state))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('website')

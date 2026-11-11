@@ -75,7 +75,7 @@ $actingAsServiceRequestViewer = function (string ...$extraPermissions): ServiceR
             'type_id' => $serviceRequestType->getKey(),
         ])->getKey(),
     ])->create();
-    $user->givePermissionTo('service_request.view-any', 'service_request.*.view', 'contact.*.view', ...$extraPermissions);
+    $user->givePermissionTo('service_request.view-any', 'service_request.*.view', 'contacts.*.view', ...$extraPermissions);
     actingAs($user->refresh());
 
     return $serviceRequest;
@@ -209,7 +209,7 @@ test('viewContact hides the Returned Assets section for a user without permissio
 // Files tab
 
 test('viewContact shows scoped engagement files when the user has permission', function () use ($actingAsServiceRequestViewer, $mountViewContact): void {
-    $serviceRequest = $actingAsServiceRequestViewer('engagement_file.view-any');
+    $serviceRequest = $actingAsServiceRequestViewer('contacts.view-any');
 
     $contact = $serviceRequest->respondent;
 
@@ -237,7 +237,7 @@ test('viewContact hides the Files tab for a user without permission', function (
 // Emails tab
 
 test('viewContact shows scoped engagement timeline entries when the user has permission', function () use ($actingAsServiceRequestViewer, $mountViewContact): void {
-    $serviceRequest = $actingAsServiceRequestViewer('engagement.view-any');
+    $serviceRequest = $actingAsServiceRequestViewer('contacts.view-any');
 
     $contact = $serviceRequest->respondent;
 

@@ -36,9 +36,11 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
+use AidingApp\Contact\Models\Builders\ContactBuilder;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
+use App\Features\ContactArchivingFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Scopes\OrderByFullName;
 use App\Models\Scopes\WithoutAnyAdmin;
@@ -97,7 +99,11 @@ class ReportFrequencySection
                             ->multiple()
                             ->preload()
                             ->searchable()
-                            ->options(fn (): array => once(fn (): array => Contact::query()->orderBy('full_name')->pluck('full_name', 'id')->all())),
+                            ->options(fn (?array $state): array => Contact::query()
+                                ->when(ContactArchivingFeature::active(), fn (ContactBuilder $query): ContactBuilder => $query->where(fn (ContactBuilder $query): ContactBuilder => $query->withoutArchived()->orWhereKey($state ?? [])))
+                                ->orderBy('full_name')
+                                ->pluck('full_name', 'id')
+                                ->all()),
                         CheckboxList::make("{$prefix}.report_channels")
                             ->label('Channels')
                             ->options([

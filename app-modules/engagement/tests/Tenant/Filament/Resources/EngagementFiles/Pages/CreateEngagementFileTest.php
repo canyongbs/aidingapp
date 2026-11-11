@@ -58,8 +58,8 @@ test('CreateEngagementFile is gated with proper access control', function (): vo
     Livewire::test(CreateEngagementFile::class)
         ->assertForbidden();
 
-    $user->givePermissionTo('engagement_file.view-any');
-    $user->givePermissionTo('engagement_file.create');
+    $user->givePermissionTo('contacts.view-any');
+    $user->givePermissionTo('contacts.create');
 
     actingAs($user)
         ->get(
