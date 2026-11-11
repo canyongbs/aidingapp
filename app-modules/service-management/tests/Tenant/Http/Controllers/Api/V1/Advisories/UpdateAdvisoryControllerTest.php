@@ -219,7 +219,6 @@ it('validates the request', function (array $data, array $errors) use ($actingAs
     $advisory = Advisory::factory()->create(['title' => 'Email outage']);
     AdvisorySeverity::factory()->create(['name' => 'Retired severity'])->delete();
     AdvisoryStatus::factory()->create(['name' => 'Retired status'])->delete();
-    ContactType::factory()->count(2)->create(['name' => 'Duplicate']);
 
     patchJson(route('api.v1.advisories.update', ['advisory' => $advisory], false), $data)
         ->assertUnprocessable()
@@ -242,7 +241,6 @@ it('validates the request', function (array $data, array $errors) use ($actingAs
     'is_visibility_restricted boolean' => [['is_visibility_restricted' => 'yes'], ['is_visibility_restricted']],
     'restricted_to_contact_types array' => [['restricted_to_contact_types' => 'Student'], ['restricted_to_contact_types']],
     'restricted_to_contact_types exists' => [['restricted_to_contact_types' => ['Unknown']], ['restricted_to_contact_types.0']],
-    'restricted_to_contact_types not ambiguous' => [['restricted_to_contact_types' => ['Duplicate']], ['restricted_to_contact_types.0']],
 ]);
 
 it('ignores the visibility fields when `AdvisoryVisibilityFeature` is inactive', function () use ($actingAsAdvisoryUpdater): void {

@@ -40,6 +40,7 @@ use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
 use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
+use App\Features\ProjectPermissionConsolidationFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -104,7 +105,7 @@ class ProjectMilestonePolicy
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'project.*.delete',
+            abilities: ProjectPermissionConsolidationFeature::active() ? 'projects.*.delete' : 'project.*.delete',
             denyResponse: 'You do not have permission to delete any project milestone.'
         );
     }

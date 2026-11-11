@@ -72,8 +72,8 @@ it('cannot render without proper permission.', function (): void {
 it('can render with proper permission.', function (): void {
     $user = User::factory()->create();
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
 
     $user->refresh();
 
@@ -91,7 +91,7 @@ it('is gated with proper access control', function (): void {
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('projects.view-any');
 
     actingAs($user);
 
@@ -100,11 +100,11 @@ it('is gated with proper access control', function (): void {
     $settings->data->addons->projectManagement = true;
     $settings->save();
 
-    $user->revokePermissionTo('project.view-any');
+    $user->revokePermissionTo('projects.view-any');
 
     get(ListProjects::getUrl())->assertForbidden();
 
-    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('projects.view-any');
 
     get(ListProjects::getUrl())->assertSuccessful();
 });
@@ -112,8 +112,8 @@ it('is gated with proper access control', function (): void {
 it('can list records', function (): void {
     $user = User::factory()->create();
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
 
     actingAs($user);
 
@@ -125,10 +125,10 @@ it('can list records', function (): void {
         ->assertSuccessful();
 });
 
-it('only shows the create action to users with the `project.create` permission', function (): void {
+it('only shows the create action to users with the `projects.create` permission', function (): void {
     $user = User::factory()
         ->create()
-        ->givePermissionTo('project.view-any', 'project.*.view');
+        ->givePermissionTo('projects.view-any', 'projects.*.view');
 
     actingAs($user);
 
@@ -137,7 +137,7 @@ it('only shows the create action to users with the `project.create` permission',
         ->mountAction('create')
         ->assertActionNotMounted();
 
-    $user->givePermissionTo('project.create');
+    $user->givePermissionTo('projects.create');
 
     Livewire::test(ListProjects::class)
         ->assertActionVisible(TestAction::make('create'));
@@ -157,7 +157,7 @@ it('opens the create form in a slide-over instead of redirecting to a page', fun
 it('creates a project from the slide-over', function (): void {
     $user = User::factory()
         ->create()
-        ->givePermissionTo('project.view-any', 'project.*.view', 'project.create');
+        ->givePermissionTo('projects.view-any', 'projects.*.view', 'projects.create');
 
     actingAs($user);
 
@@ -204,10 +204,10 @@ it('redirects to the new project after creating it when the user can view it', f
         ->assertRedirect(ProjectResource::getUrl('view', ['record' => Project::query()->where('name', $request['name'])->firstOrFail()]));
 });
 
-it('does not redirect after creating a project without the `project.*.view` permission', function (): void {
+it('does not redirect after creating a project without the `projects.*.view` permission', function (): void {
     $user = User::factory()
         ->create()
-        ->givePermissionTo('project.view-any', 'project.create');
+        ->givePermissionTo('projects.view-any', 'projects.create');
 
     actingAs($user);
 
@@ -328,7 +328,7 @@ describe('name uniqueness', function (): void {
 it('hides the create action when the license addon is disabled after the page loads', function (): void {
     $user = User::factory()
         ->create()
-        ->givePermissionTo('project.view-any', 'project.*.view', 'project.create');
+        ->givePermissionTo('projects.view-any', 'projects.*.view', 'projects.create');
 
     actingAs($user);
 
@@ -359,8 +359,8 @@ it('can see project in list if logged in user is a superadmin, the creator, a ma
     $user = User::factory()->create();
     $secondUser = User::factory()->create();
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
 
     $user->refresh();
 
@@ -374,8 +374,8 @@ it('can see project in list if logged in user is a superadmin, the creator, a ma
 
     actingAs($secondUser);
 
-    $secondUser->givePermissionTo('project.view-any');
-    $secondUser->givePermissionTo('project.*.view');
+    $secondUser->givePermissionTo('projects.view-any');
+    $secondUser->givePermissionTo('projects.*.view');
 
     Livewire::test(ListProjects::class)
         ->assertCanNotSeeTableRecords([$project])
@@ -434,10 +434,10 @@ it('can see project in list if logged in user is a superadmin, the creator, a ma
         ->assertSuccessful();
 });
 
-it('only shows the archive bulk action to a user with the project.delete permission', function (): void {
+it('only shows the archive bulk action to a user with the `projects.*.delete` permission', function (): void {
     $user = User::factory()
         ->create()
-        ->givePermissionTo('project.view-any', 'project.*.view');
+        ->givePermissionTo('projects.view-any', 'projects.*.view');
 
     actingAs($user);
 
@@ -446,7 +446,7 @@ it('only shows the archive bulk action to a user with the project.delete permiss
     Livewire::test(ListProjects::class)
         ->assertActionHidden(TestAction::make('archive')->table()->bulk());
 
-    $user->givePermissionTo('project.*.delete');
+    $user->givePermissionTo('projects.*.delete');
 
     Livewire::test(ListProjects::class)
         ->assertActionVisible(TestAction::make('archive')->table()->bulk());

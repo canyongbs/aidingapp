@@ -34,11 +34,66 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Project\Models\Project;
+use App\Features\ProjectPermissionConsolidationFeature;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
+
+use Spatie\Permission\PermissionRegistrar;
+
 use function Tests\asSuperAdmin;
+
+$recordIndependentAbilities = [
+    'viewAny' => ['viewAny', 'view-any', false],
+    'view' => ['view', '*.view', true],
+    'create' => ['create', 'create', false],
+    'deleteAny' => ['deleteAny', '*.delete', false],
+    'restoreAny' => ['restoreAny', '*.restore', false],
+    'forceDeleteAny' => ['forceDeleteAny', '*.force-delete', false],
+];
+
+it('is governed by the projects permissions', function (string $ability, string $action, bool $forRecord): void {
+    $arguments = $forRecord ? Project::factory()->make() : Project::class;
+
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    expect($user->can($ability, $arguments))->toBeFalse();
+
+    $user->givePermissionTo("projects.{$action}");
+
+    expect($user->can($ability, $arguments))->toBeTrue();
+})->with($recordIndependentAbilities);
+
+// TODO: Cleanup Task (projects-permission-consolidation): delete this test, the feature will always be active
+it('is governed by the project permissions while the projects permission consolidation is inactive', function (string $ability, string $action, bool $forRecord): void {
+    ProjectPermissionConsolidationFeature::deactivate();
+
+    $legacyPermission = Permission::factory()->create([
+        'name' => "project.{$action}",
+        'guard_name' => 'web',
+        'group_id' => PermissionGroup::create(['name' => 'Project'])->getKey(),
+    ]);
+    app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+    $arguments = $forRecord ? Project::factory()->make() : Project::class;
+
+    $user = User::factory()->create()->givePermissionTo("projects.{$action}");
+
+    actingAs($user);
+
+    expect($user->can($ability, $arguments))->toBeFalse();
+
+    $legacyUser = User::factory()->create()->givePermissionTo($legacyPermission);
+
+    actingAs($legacyUser);
+
+    expect($legacyUser->can($ability, $arguments))->toBeTrue();
+})->with($recordIndependentAbilities);
 
 it('only allows creating a project with the create permission', function (): void {
     $user = User::factory()->create();
@@ -47,7 +102,7 @@ it('only allows creating a project with the create permission', function (): voi
 
     expect($user->can('create', Project::class))->toBeFalse();
 
-    $user->givePermissionTo('project.create');
+    $user->givePermissionTo('projects.create');
 
     expect($user->can('create', Project::class))->toBeTrue();
 });
@@ -67,7 +122,7 @@ it('only allows the creator, a manager, or a super admin to update a project, an
     expect($user->can('update', $createdProject))->toBeFalse()
         ->and($user->can('update', $managedProject))->toBeFalse();
 
-    $user->givePermissionTo('project.*.update');
+    $user->givePermissionTo('projects.*.update');
 
     expect($user->can('update', $createdProject))->toBeTrue()
         ->and($user->can('update', $managedProject))->toBeTrue()
@@ -83,7 +138,7 @@ it('does not throw when checking a permission whose project creator has been del
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo("project.*.{$ability}");
+    $user->givePermissionTo("projects.*.{$ability}");
 
     actingAs($user);
 
@@ -104,7 +159,7 @@ it('does not throw when checking the force-delete permission and the project cre
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('project.*.force-delete');
+    $user->givePermissionTo('projects.*.force-delete');
 
     actingAs($user);
 
@@ -125,7 +180,7 @@ it('allows a super admin to archive any project', function (): void {
 it('allows a project manager with the delete permission to archive the project', function (): void {
     $user = User::factory()->create();
 
-    $user->givePermissionTo('project.*.delete');
+    $user->givePermissionTo('projects.*.delete');
 
     actingAs($user);
 
@@ -140,7 +195,7 @@ it('allows a project manager with the delete permission to archive the project',
 it('allows the project creator with the delete permission to archive the project', function (): void {
     $user = User::factory()->create();
 
-    $user->givePermissionTo('project.*.delete');
+    $user->givePermissionTo('projects.*.delete');
 
     actingAs($user);
 
@@ -165,7 +220,7 @@ it('does not let a manager archive the project without the delete permission', f
 it('does not fail when the project has no creator', function (): void {
     $user = User::factory()->create();
 
-    $user->givePermissionTo('project.*.delete');
+    $user->givePermissionTo('projects.*.delete');
 
     $project = Project::factory()->create();
 
@@ -184,7 +239,7 @@ it('does not let a user with the delete permission archive a project they do not
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('project.*.delete');
+    $user->givePermissionTo('projects.*.delete');
 
     actingAs($user);
 

@@ -68,8 +68,8 @@ it('can render with proper permission.', function (): void {
     ]))
         ->assertForbidden();
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
     $user->refresh();
 
     get(ManageFiles::getUrl([
@@ -86,8 +86,8 @@ it('is gated with proper access control', function (): void {
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
 
     actingAs($user);
 
@@ -98,13 +98,13 @@ it('is gated with proper access control', function (): void {
     $settings->data->addons->projectManagement = true;
     $settings->save();
 
-    $user->revokePermissionTo('project.view-any');
-    $user->revokePermissionTo('project.*.view');
+    $user->revokePermissionTo('projects.view-any');
+    $user->revokePermissionTo('projects.*.view');
 
     get(ManageFiles::getUrl(['record' => $project]))->assertForbidden();
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
 
     get(ManageFiles::getUrl(['record' => $project]))->assertSuccessful();
 });
