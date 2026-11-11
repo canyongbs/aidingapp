@@ -44,6 +44,7 @@ use App\Features\ContactArchivingFeature;
 use App\Features\LicensesPermissionsConsolidationFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\Select;
 use Livewire\Livewire;
 
@@ -174,4 +175,77 @@ it('grants access with the legacy product and product license permissions while 
     $user->givePermissionTo(array_keys($legacyPermissions));
 
     get(ManageProductLicenses::getUrl(['record' => $product]))->assertSuccessful();
+});
+
+describe('action authorization', function (): void {
+    beforeEach(function (): void {
+        $settings = app(LicenseSettings::class);
+        $settings->data->addons->licenseManagement = true;
+        $settings->save();
+    });
+
+    $testAction = fn (string $action, ProductLicense $productLicense): TestAction => $action === 'create'
+        ? TestAction::make($action)->table()
+        : TestAction::make($action)->table($productLicense);
+
+    it('only shows each license action to a user with the consolidated permission', function (string $action, string $permission) use ($testAction): void {
+        $user = User::factory()->create();
+        $user->givePermissionTo(['licenses.view-any', 'licenses.*.view']);
+
+        // Non-admin users only see the licenses they created
+        $productLicense = ProductLicense::factory()->create(['created_by_id' => $user->getKey()]);
+
+        actingAs($user);
+
+        Livewire::test(ManageProductLicenses::class, ['record' => $productLicense->product->getRouteKey()])
+            ->assertActionHidden($testAction($action, $productLicense));
+
+        $user->givePermissionTo($permission);
+
+        Livewire::test(ManageProductLicenses::class, ['record' => $productLicense->product->getRouteKey()])
+            ->assertActionVisible($testAction($action, $productLicense));
+    })->with([
+        'create' => ['create', 'licenses.create'],
+        'edit' => ['edit', 'licenses.*.update'],
+        'delete' => ['delete', 'licenses.*.delete'],
+    ]);
+
+    // TODO: Cleanup Task (licenses-permissions-consolidation): delete this test
+    it('only shows each license action to a user with the legacy permission while the consolidation flag is inactive', function (string $action, string $permission) use ($testAction): void {
+        LicensesPermissionsConsolidationFeature::deactivate();
+
+        $legacyPermissions = [
+            'product.view-any' => 'Product',
+            'product.*.view' => 'Product',
+            'product_license.view-any' => 'Product License',
+            $permission => 'Product License',
+        ];
+
+        foreach ($legacyPermissions as $name => $groupName) {
+            Permission::factory()->create([
+                'name' => $name,
+                'guard_name' => 'web',
+                'group_id' => PermissionGroup::firstOrCreate(['name' => $groupName])->getKey(),
+            ]);
+        }
+
+        $user = User::factory()->create();
+        $user->givePermissionTo(['product.view-any', 'product.*.view', 'product_license.view-any']);
+
+        $productLicense = ProductLicense::factory()->create(['created_by_id' => $user->getKey()]);
+
+        actingAs($user);
+
+        Livewire::test(ManageProductLicenses::class, ['record' => $productLicense->product->getRouteKey()])
+            ->assertActionHidden($testAction($action, $productLicense));
+
+        $user->givePermissionTo($permission);
+
+        Livewire::test(ManageProductLicenses::class, ['record' => $productLicense->product->getRouteKey()])
+            ->assertActionVisible($testAction($action, $productLicense));
+    })->with([
+        'create' => ['create', 'product_license.create'],
+        'edit' => ['edit', 'product_license.*.update'],
+        'delete' => ['delete', 'product_license.*.delete'],
+    ]);
 });
