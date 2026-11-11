@@ -68,8 +68,18 @@ class ServiceRequestUpdatePolicy
 
     public function view(Authenticatable $authenticatable, ServiceRequestUpdate $serviceRequestUpdate): Response
     {
+        if (ServiceRequestPermissionCompressionFeature::active()) {
+            $serviceRequest = $serviceRequestUpdate->serviceRequest;
+
+            if (! $serviceRequest) {
+                return Response::deny('You do not have permissions to view this service request update.');
+            }
+
+            return Gate::forUser($authenticatable)->inspect('view', $serviceRequest);
+        }
+
         return $authenticatable->canOrElse(
-            abilities: ServiceRequestPermissionCompressionFeature::active() ? ['service_request.*.view'] : ['service_request_update.*.view'],
+            abilities: ['service_request_update.*.view'],
             denyResponse: 'You do not have permissions to view this service request update.'
         );
     }
