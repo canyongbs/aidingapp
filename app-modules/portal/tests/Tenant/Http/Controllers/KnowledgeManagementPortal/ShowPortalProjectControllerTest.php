@@ -45,6 +45,7 @@ use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Illuminate\Support\Carbon;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
@@ -152,16 +153,19 @@ it('shows who each pipeline task is assigned to', function (): void {
         'project_milestone_id' => null,
         'assigned_to_type' => $user->getMorphClass(),
         'assigned_to_id' => $user->getKey(),
+        'created_at' => Carbon::parse('2026-01-15 09:00:00'),
     ]);
     $contactEntry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
         'project_milestone_id' => null,
         'assigned_to_type' => $assignedContact->getMorphClass(),
         'assigned_to_id' => $assignedContact->getKey(),
+        'created_at' => Carbon::parse('2026-01-15 10:00:00'),
     ]);
     $unassignedEntry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
         'project_milestone_id' => null,
         'assigned_to_type' => null,
         'assigned_to_id' => null,
+        'created_at' => Carbon::parse('2026-01-15 11:00:00'),
     ]);
 
     actingAs($contact, 'contact');
