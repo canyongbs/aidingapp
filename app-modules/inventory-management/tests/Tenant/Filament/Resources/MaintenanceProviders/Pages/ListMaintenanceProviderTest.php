@@ -54,7 +54,7 @@ it('is gated with proper access control', function (): void {
 
     Livewire::test(ListMaintenanceProviders::class)->assertForbidden();
 
-    $user->givePermissionTo('maintenance_provider.view-any');
+    $user->givePermissionTo('assets.view-any');
     $user->refresh();
 
     Livewire::test(ListMaintenanceProviders::class)->assertForbidden();
@@ -70,14 +70,14 @@ it('only shows the bulk delete action to a user with the maintenance_provider.de
 
     $user = User::factory()
         ->create()
-        ->givePermissionTo('maintenance_provider.view-any', 'maintenance_provider.*.view');
+        ->givePermissionTo('assets.view-any', 'assets.*.view');
 
     actingAs($user);
 
     Livewire::test(ListMaintenanceProviders::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
-    $user->givePermissionTo('maintenance_provider.*.delete');
+    $user->givePermissionTo('assets.*.delete');
 
     Livewire::test(ListMaintenanceProviders::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());

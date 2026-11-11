@@ -51,6 +51,7 @@ use AidingApp\Project\Models\Project;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\AdvisorySeverityNameUniquenessFeature;
 use App\Features\AdvisoryStatusNameUniquenessFeature;
+use App\Features\AssetPermissionConsolidationFeature;
 use App\Features\ChangeRequestStatusNameUniquenessFeature;
 use App\Features\ChangeRequestTypeNameUniquenessFeature;
 use App\Features\ContactPermissionConsolidationFeature;
@@ -2395,6 +2396,66 @@ describe('2026_11_11_042242_tmp_grant_service_request_permissions_to_users_and_r
                 ->and($directPermissionNames($partialUser))->toEqualCanonicalizing(['service_request_priority.view-any', 'service_request.view-any'])
                 ->and($directPermissionNames($updateCreatorUser))->toEqualCanonicalizing(['service_request_update.create', 'service_request.*.update'])
                 ->and($directPermissionNames($unrelatedUser))->toBe(['product.view-any']);
+        });
+    });
+});
+
+// TODO: Cleanup Task (assets-permission-consolidation): delete this describe and the test within
+describe('2026_11_10_205002_tmp_grant_assets_permissions_to_users_and_roles_with_related_permissions', function (): void {
+    it('grants the equivalent assets permissions to users and roles with a related permission without adding unsupported actions', function (): void {
+        isolatedMigration('2026_11_10_205002_tmp_grant_assets_permissions_to_users_and_roles_with_related_permissions', function (): void {
+            $allActions = ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'];
+            $permissionsFor = fn (string $prefix, ?array $actions = null): array => array_map(fn (string $action): string => "{$prefix}.{$action}", $actions ?? $allActions);
+            $assetsPermissions = $permissionsFor('assets');
+
+            $fullUsers = collect(['asset', 'asset_location', 'asset_status', 'asset_type', 'maintenance_provider'])
+                ->mapWithKeys(function (string $prefix) use ($permissionsFor): array {
+                    $user = User::factory()->create();
+                    $user->givePermissionTo($permissionsFor($prefix));
+
+                    return [$prefix => $user];
+                });
+
+            $maintenanceActivityUser = User::factory()->create();
+            $maintenanceActivityUser->givePermissionTo($permissionsFor('maintenance_activity'));
+
+            $checkInUser = User::factory()->create();
+            $checkInUser->givePermissionTo($permissionsFor('asset_check_in'));
+
+            $checkOutUser = User::factory()->create();
+            $checkOutUser->givePermissionTo($permissionsFor('asset_check_out'));
+
+            $systemUser = SystemUser::factory()->create();
+            $systemUser->givePermissionTo('asset.view-any');
+
+            $roleUser = User::factory()->create();
+            $role = Role::factory()->create();
+            $role->givePermissionTo('asset_type.*.update');
+            $roleUser->assignRole($role);
+
+            $unrelatedUser = User::factory()->create();
+            $unrelatedUser->givePermissionTo('product.view-any');
+
+            expect(AssetPermissionConsolidationFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/inventory-management/database/migrations/2026_11_10_205002_tmp_grant_assets_permissions_to_users_and_roles_with_related_permissions.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $directPermissionNames = fn (User|SystemUser $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->filter(fn (string $name): bool => str_starts_with($name, 'assets.'))->sort()->values()->all();
+            $sorted = fn (array $names): array => collect($names)->sort()->values()->all();
+
+            foreach ($fullUsers as $user) {
+                expect($directPermissionNames($user))->toBe($sorted($assetsPermissions));
+            }
+
+            expect($directPermissionNames($maintenanceActivityUser))->toBe($sorted(['assets.view-any', 'assets.create', 'assets.*.view', 'assets.*.update']))
+                ->and($directPermissionNames($checkInUser))->toBe($sorted(['assets.view-any', 'assets.*.view']))
+                ->and($directPermissionNames($checkOutUser))->toBe($sorted(['assets.view-any', 'assets.*.view']))
+                ->and($directPermissionNames($systemUser))->toBe($sorted(['assets.view-any']))
+                ->and($role->refresh()->permissions()->pluck('name')->all())->toContain('assets.*.update')
+                ->and($directPermissionNames($unrelatedUser))->toBe([])
+                ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['product.view-any'])
+                ->and(AssetPermissionConsolidationFeature::active())->toBeTrue();
         });
     });
 });

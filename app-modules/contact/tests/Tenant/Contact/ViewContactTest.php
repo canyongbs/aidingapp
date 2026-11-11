@@ -683,7 +683,7 @@ describe('tabs', function (): void {
             ->assertSeeLivewire(ServiceRequestsRelationManager::class);
     });
 
-    test('shows the Assets tab only with an asset_check_out/asset_check_in.view-any ability', function (): void {
+    test('shows the Assets tab only with the assets.view-any ability', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('contacts.view-any', 'contacts.*.view');
         actingAs($user);
@@ -694,14 +694,7 @@ describe('tabs', function (): void {
             ->assertDontSeeLivewire(AssetCheckOutRelationManager::class)
             ->assertDontSeeLivewire(AssetCheckInRelationManager::class);
 
-        $user->givePermissionTo('asset_check_out.view-any');
-
-        \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
-            ->assertSuccessful()
-            ->assertSeeLivewire(AssetCheckOutRelationManager::class)
-            ->assertDontSeeLivewire(AssetCheckInRelationManager::class);
-
-        $user->givePermissionTo('asset_check_in.view-any');
+        $user->givePermissionTo('assets.view-any');
 
         \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertSuccessful()

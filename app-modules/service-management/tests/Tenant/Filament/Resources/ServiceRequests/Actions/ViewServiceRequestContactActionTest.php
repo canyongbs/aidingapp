@@ -147,7 +147,7 @@ test('viewContact shows scoped service request records on the Service Requests t
 // Assets tab - Checked Out Assets
 
 test('viewContact shows scoped checked out assets when the user has permission', function () use ($actingAsServiceRequestViewer, $mountViewContact): void {
-    $serviceRequest = $actingAsServiceRequestViewer('asset_check_out.view-any');
+    $serviceRequest = $actingAsServiceRequestViewer('assets.view-any');
 
     $asset = Asset::factory()->create(['name' => 'Checked Out Test Laptop']);
     AssetCheckOut::factory()->create([
@@ -177,7 +177,7 @@ test('viewContact hides the Checked Out Assets section for a user without permis
 // Assets tab - Returned Assets
 
 test('viewContact shows scoped returned assets when the user has permission', function () use ($actingAsServiceRequestViewer, $mountViewContact): void {
-    $serviceRequest = $actingAsServiceRequestViewer('asset_check_in.view-any');
+    $serviceRequest = $actingAsServiceRequestViewer('assets.view-any');
 
     $asset = Asset::factory()->create(['name' => 'Returned Test Monitor']);
     AssetCheckOut::factory()->create(['asset_id' => $asset->getKey()]);
