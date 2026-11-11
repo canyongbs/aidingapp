@@ -167,11 +167,13 @@ class ProjectWorkPipelineWidget extends TableWidget
                                         select trim(concat(users.first_name, ' ', users.last_name))
                                         from users
                                         where users.id = {$assignedToId}
+                                        and users.deleted_at is null
                                     )
                                     when {$assignedToType} = ? then (
                                         select contacts.full_name
                                         from contacts
                                         where contacts.id = {$assignedToId}
+                                        and contacts.deleted_at is null
                                     )
                                     else null
                                 end
