@@ -45,7 +45,7 @@ use function Tests\actingAsApiUser;
 
 $actingAsAdvisoryDeleter = function (): SystemUser {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo(['advisory.view-any', 'advisory.*.delete']);
+    $user->givePermissionTo(['advisories.view-any', 'advisories.*.delete']);
 
     return actingAsApiUser($user);
 };
@@ -58,13 +58,13 @@ it('is gated with proper access control', function (): void {
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisories.view-any');
     actingAsApiUser($user);
     deleteJson(route('api.v1.advisories.delete', ['advisory' => $advisory], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('advisory.*.delete');
+    $user->givePermissionTo('advisories.*.delete');
     actingAsApiUser($user);
     deleteJson(route('api.v1.advisories.delete', ['advisory' => $advisory], false))
         ->assertForbidden();

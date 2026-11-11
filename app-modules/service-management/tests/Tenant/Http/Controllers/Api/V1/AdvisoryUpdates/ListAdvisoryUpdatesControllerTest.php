@@ -44,7 +44,7 @@ use function Tests\actingAsApiUser;
 
 $actingAsAdvisoryUpdateViewer = function (): SystemUser {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo(['advisory.view-any', 'advisory.*.view', 'advisory_update.view-any']);
+    $user->givePermissionTo(['advisories.view-any', 'advisories.*.view']);
 
     return actingAsApiUser($user);
 };
@@ -60,12 +60,11 @@ it('is gated with proper access control', function (array $permissions): void {
         ->assertForbidden();
 })->with([
     'no permissions' => [[]],
-    'missing advisory view any' => [['advisory.*.view', 'advisory_update.view-any']],
-    'missing advisory view' => [['advisory.view-any', 'advisory_update.view-any']],
-    'missing advisory update view any' => [['advisory.view-any', 'advisory.*.view']],
+    'missing view any' => [['advisories.*.view']],
+    'missing view' => [['advisories.view-any']],
 ]);
 
-it('allows access with the advisory and advisory update permissions', function () use ($actingAsAdvisoryUpdateViewer): void {
+it('allows access with the advisories permissions', function () use ($actingAsAdvisoryUpdateViewer): void {
     $actingAsAdvisoryUpdateViewer();
 
     getJson(route('api.v1.advisories.updates.index', ['advisory' => Advisory::factory()->create()], false))

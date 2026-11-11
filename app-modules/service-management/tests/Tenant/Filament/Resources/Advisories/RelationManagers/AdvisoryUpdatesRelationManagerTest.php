@@ -76,10 +76,10 @@ test('the records are displayed on the AdvisoryUpdatesRelationManager', function
         ->assertCountTableRecords(10);
 });
 
-test('only shows the updates bulk delete action to a user with the advisory_update delete permission', function (): void {
+test('only shows the updates bulk delete action to a user with the advisories delete permission', function (): void {
     $user = User::factory()
         ->create()
-        ->givePermissionTo('advisory.view-any', 'advisory.*.view', 'advisory_update.view-any');
+        ->givePermissionTo('advisories.view-any', 'advisories.*.view');
 
     actingAs($user);
 
@@ -93,7 +93,7 @@ test('only shows the updates bulk delete action to a user with the advisory_upda
     ])
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
-    $user->givePermissionTo('advisory_update.*.delete');
+    $user->givePermissionTo('advisories.*.delete');
 
     Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
@@ -257,7 +257,7 @@ test('the view or edit action hides the status change guidance when the user can
 
     $user = User::factory()
         ->create()
-        ->givePermissionTo('advisory.view-any', 'advisory.*.view', 'advisory_update.view-any', 'advisory_update.*.view', 'advisory_update.*.update');
+        ->givePermissionTo('advisories.view-any', 'advisories.*.view', 'advisories.*.update');
 
     actingAs($user);
 
@@ -345,7 +345,7 @@ test('clicking the title opens a read-only modal when the user cannot update the
 
     $user = User::factory()
         ->create()
-        ->givePermissionTo('advisory.view-any', 'advisory.*.view', 'advisory_update.view-any', 'advisory_update.*.view', 'advisory_update.*.update');
+        ->givePermissionTo('advisories.view-any', 'advisories.*.view', 'advisories.*.update');
 
     actingAs($user);
 
@@ -369,7 +369,7 @@ test('a user cannot mount the view or edit advisory update action without the vi
 
     $user = User::factory()
         ->create()
-        ->givePermissionTo('advisory.view-any', 'advisory.*.view', 'advisory_update.view-any');
+        ->givePermissionTo('advisories.view-any');
 
     actingAs($user);
 
@@ -454,7 +454,7 @@ test('AdvisoryUpdatesRelationManager create action is gated with proper access c
         ])->getKey(),
     ]);
 
-    $user->givePermissionTo('advisory.view-any', 'advisory.*.view', 'advisory_update.view-any');
+    $user->givePermissionTo('advisories.view-any', 'advisories.*.view');
 
     actingAs($user);
 
@@ -464,7 +464,7 @@ test('AdvisoryUpdatesRelationManager create action is gated with proper access c
     ])
         ->assertTableActionHidden('create');
 
-    $user->givePermissionTo('advisory_update.create');
+    $user->givePermissionTo('advisories.create');
 
     Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,

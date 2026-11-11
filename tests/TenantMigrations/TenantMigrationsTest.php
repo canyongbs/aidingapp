@@ -48,6 +48,7 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\AdvisoryPermissionConsolidationFeature;
 use App\Features\AdvisorySeverityNameUniquenessFeature;
 use App\Features\AdvisoryStatusNameUniquenessFeature;
 use App\Features\ChangeRequestStatusNameUniquenessFeature;
@@ -2057,6 +2058,54 @@ describe('2026_11_10_191246_tmp_grant_contacts_permissions_to_users_and_roles_wi
                 ->and($directPermissionNames($unrelatedUser))->toBe([])
                 ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['product.view-any'])
                 ->and(ContactPermissionConsolidationFeature::active())->toBeTrue();
+        });
+    });
+});
+
+// TODO: Cleanup Task (advisories-permission-consolidation): delete this describe and the test within
+describe('2026_11_11_120001_tmp_grant_advisories_permissions_to_users_and_roles_with_related_permissions', function (): void {
+    it('grants the equivalent advisories permissions to users and roles with a related permission', function (): void {
+        isolatedMigration('2026_11_11_120001_tmp_grant_advisories_permissions_to_users_and_roles_with_related_permissions', function (): void {
+            $actions = ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'];
+            $permissionsFor = fn (string $prefix, array $actions): array => array_map(fn (string $action): string => "{$prefix}.{$action}", $actions);
+            $advisoriesPermissions = $permissionsFor('advisories', $actions);
+
+            $advisoryUser = User::factory()->create();
+            $advisoryUser->givePermissionTo($permissionsFor('advisory', $actions));
+
+            $advisoryUpdateUser = User::factory()->create();
+            $advisoryUpdateUser->givePermissionTo($permissionsFor('advisory_update', $actions));
+
+            $advisoryUpdateRestoreUser = User::factory()->create();
+            $advisoryUpdateRestoreUser->givePermissionTo('advisory_update.*.restore', 'advisory_update.*.force-delete');
+
+            $systemUser = SystemUser::factory()->create();
+            $systemUser->givePermissionTo('advisory_update.create');
+
+            $roleUser = User::factory()->create();
+            $role = Role::factory()->create();
+            $role->givePermissionTo('advisory.*.update');
+            $roleUser->assignRole($role);
+
+            $unrelatedUser = User::factory()->create();
+            $unrelatedUser->givePermissionTo('product.view-any');
+
+            expect(AdvisoryPermissionConsolidationFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_11_11_120001_tmp_grant_advisories_permissions_to_users_and_roles_with_related_permissions.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $directPermissionNames = fn (User|SystemUser $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->filter(fn (string $name): bool => str_starts_with($name, 'advisories.'))->sort()->values()->all();
+            $sorted = fn (array $names): array => collect($names)->sort()->values()->all();
+
+            expect($directPermissionNames($advisoryUser))->toBe($sorted($advisoriesPermissions))
+                ->and($directPermissionNames($advisoryUpdateUser))->toBe($sorted($permissionsFor('advisories', ['view-any', 'create', '*.view', '*.update', '*.delete'])))
+                ->and($directPermissionNames($advisoryUpdateRestoreUser))->toBe([])
+                ->and($directPermissionNames($systemUser))->toBe(['advisories.create'])
+                ->and($role->refresh()->permissions()->pluck('name')->all())->toContain('advisories.*.update')
+                ->and($directPermissionNames($unrelatedUser))->toBe([])
+                ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['product.view-any'])
+                ->and(AdvisoryPermissionConsolidationFeature::active())->toBeTrue();
         });
     });
 });

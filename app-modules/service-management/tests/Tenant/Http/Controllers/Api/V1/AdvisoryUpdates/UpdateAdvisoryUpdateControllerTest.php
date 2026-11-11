@@ -43,11 +43,11 @@ use App\Settings\LicenseSettings;
 use function Pest\Laravel\patchJson;
 use function Tests\actingAsApiUser;
 
-$updaterPermissions = ['advisory.view-any', 'advisory.*.view', 'advisory_update.view-any', 'advisory_update.*.update'];
+$updaterPermissions = ['advisories.view-any', 'advisories.*.view', 'advisories.*.update'];
 
-$actingAsAdvisoryUpdateUpdater = function (array $extraPermissions = []) use ($updaterPermissions): SystemUser {
+$actingAsAdvisoryUpdateUpdater = function () use ($updaterPermissions): SystemUser {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo([...$updaterPermissions, ...$extraPermissions]);
+    $user->givePermissionTo($updaterPermissions);
 
     return actingAsApiUser($user);
 };
@@ -71,24 +71,10 @@ it('is gated with proper access control', function (array $permissions) use ($op
     expect($advisoryUpdate->refresh()->title)->toBe('Investigating');
 })->with([
     'no permissions' => [[]],
-    'missing advisory view any' => [['advisory.*.view', 'advisory_update.view-any', 'advisory_update.*.update']],
-    'missing advisory view' => [['advisory.view-any', 'advisory_update.view-any', 'advisory_update.*.update']],
-    'missing advisory update view any' => [['advisory.view-any', 'advisory.*.view', 'advisory_update.*.update']],
-    'missing advisory update update' => [['advisory.view-any', 'advisory.*.view', 'advisory_update.view-any']],
+    'missing view any' => [['advisories.*.view', 'advisories.*.update']],
+    'missing view' => [['advisories.view-any', 'advisories.*.update']],
+    'missing update' => [['advisories.view-any', 'advisories.*.view']],
 ]);
-
-it('requires permission to update the advisory to change its status', function () use ($actingAsAdvisoryUpdateUpdater, $openAdvisoryUpdate, $updateUrl): void {
-    $actingAsAdvisoryUpdateUpdater();
-
-    $advisoryUpdate = $openAdvisoryUpdate();
-    $statusId = $advisoryUpdate->advisory->status_id;
-    AdvisoryStatus::factory()->resolved()->create(['name' => 'Resolved']);
-
-    patchJson($updateUrl($advisoryUpdate), ['status' => 'Resolved'])
-        ->assertForbidden();
-
-    expect($advisoryUpdate->advisory->refresh()->status_id)->toBe($statusId);
-});
 
 it('checks permissions before validating the request', function () use ($openAdvisoryUpdate, $updateUrl): void {
     actingAsApiUser(SystemUser::factory()->create());
@@ -141,7 +127,7 @@ it('can change the date, converting a timezone offset to the same moment', funct
 });
 
 it('can move the advisory to another status, referenced by name regardless of case', function () use ($actingAsAdvisoryUpdateUpdater, $openAdvisoryUpdate, $updateUrl): void {
-    $actingAsAdvisoryUpdateUpdater(['advisory.*.update']);
+    $actingAsAdvisoryUpdateUpdater();
 
     $advisoryUpdate = $openAdvisoryUpdate();
     $resolved = AdvisoryStatus::factory()->resolved()->create(['name' => 'Resolved']);
@@ -153,7 +139,7 @@ it('can move the advisory to another status, referenced by name regardless of ca
 });
 
 it('cannot edit an update on a resolved advisory', function () use ($actingAsAdvisoryUpdateUpdater, $updateUrl): void {
-    $actingAsAdvisoryUpdateUpdater(['advisory.*.update']);
+    $actingAsAdvisoryUpdateUpdater();
 
     $advisoryUpdate = AdvisoryUpdate::factory()
         ->for(Advisory::factory()->for(AdvisoryStatus::factory()->resolved(), 'status'))
@@ -166,7 +152,7 @@ it('cannot edit an update on a resolved advisory', function () use ($actingAsAdv
 });
 
 it('validates the request', function (array $data, array $errors) use ($actingAsAdvisoryUpdateUpdater, $openAdvisoryUpdate, $updateUrl): void {
-    $actingAsAdvisoryUpdateUpdater(['advisory.*.update']);
+    $actingAsAdvisoryUpdateUpdater();
 
     $advisoryUpdate = $openAdvisoryUpdate(['title' => 'Investigating']);
     AdvisoryStatus::factory()->create(['name' => 'Retired status'])->delete();

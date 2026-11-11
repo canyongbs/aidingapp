@@ -44,7 +44,7 @@ use function Tests\actingAsApiUser;
 
 $actingAsAdvisoryUpdateViewer = function (): SystemUser {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo(['advisory.view-any', 'advisory.*.view', 'advisory_update.view-any', 'advisory_update.*.view']);
+    $user->givePermissionTo(['advisories.view-any', 'advisories.*.view']);
 
     return actingAsApiUser($user);
 };
@@ -60,10 +60,8 @@ it('is gated with proper access control', function (array $permissions): void {
         ->assertForbidden();
 })->with([
     'no permissions' => [[]],
-    'missing advisory view any' => [['advisory.*.view', 'advisory_update.view-any', 'advisory_update.*.view']],
-    'missing advisory view' => [['advisory.view-any', 'advisory_update.view-any', 'advisory_update.*.view']],
-    'missing advisory update view any' => [['advisory.view-any', 'advisory.*.view', 'advisory_update.*.view']],
-    'missing advisory update view' => [['advisory.view-any', 'advisory.*.view', 'advisory_update.view-any']],
+    'missing view any' => [['advisories.*.view']],
+    'missing view' => [['advisories.view-any']],
 ]);
 
 it('requires the advisory management and service management addons', function (string $addon) use ($actingAsAdvisoryUpdateViewer): void {

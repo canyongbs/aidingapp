@@ -46,7 +46,7 @@ use function Tests\actingAsApiUser;
 
 $actingAsAdvisoryUpdateDeleter = function (): SystemUser {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo(['advisory.view-any', 'advisory.*.view', 'advisory_update.view-any', 'advisory_update.*.delete']);
+    $user->givePermissionTo(['advisories.view-any', 'advisories.*.view', 'advisories.*.delete']);
 
     return actingAsApiUser($user);
 };
@@ -64,10 +64,9 @@ it('is gated with proper access control', function (array $permissions): void {
     assertModelExists($advisoryUpdate);
 })->with([
     'no permissions' => [[]],
-    'missing advisory view any' => [['advisory.*.view', 'advisory_update.view-any', 'advisory_update.*.delete']],
-    'missing advisory view' => [['advisory.view-any', 'advisory_update.view-any', 'advisory_update.*.delete']],
-    'missing advisory update view any' => [['advisory.view-any', 'advisory.*.view', 'advisory_update.*.delete']],
-    'missing advisory update delete' => [['advisory.view-any', 'advisory.*.view', 'advisory_update.view-any']],
+    'missing view any' => [['advisories.*.view', 'advisories.*.delete']],
+    'missing view' => [['advisories.view-any', 'advisories.*.delete']],
+    'missing delete' => [['advisories.view-any', 'advisories.*.view']],
 ]);
 
 it('requires the advisory management and service management addons', function (string $addon) use ($actingAsAdvisoryUpdateDeleter): void {
