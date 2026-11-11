@@ -37,6 +37,7 @@
 namespace AidingApp\Form\Filament\Blocks;
 
 use AidingApp\Form\Models\SubmissibleField;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Hidden;
@@ -123,7 +124,7 @@ abstract class FormFieldBlock extends RichContentCustomBlock
     abstract public static function getFormKitSchema(SubmissibleField $field): array;
 
     /**
-     * @return array<int, string>
+     * @return array<int, string|Closure>
      */
     public static function getValidationRules(SubmissibleField $field): array
     {

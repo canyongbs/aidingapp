@@ -38,6 +38,7 @@ namespace AidingApp\Form\Filament\Blocks;
 
 use AidingApp\Form\Filament\Forms\Components\OptionsKeyValue;
 use AidingApp\Form\Models\SubmissibleField;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Schemas\Components\Component;
@@ -96,12 +97,19 @@ class CheckboxesFormFieldBlock extends FormFieldBlock
     }
 
     /**
-     * @return array<string>
+     * @return array<int, string|Closure>
      */
     public static function getValidationRules(SubmissibleField $field): array
     {
         if ($field->config['hasOtherOption'] ?? false) {
-            return ['array'];
+            return [
+                'array',
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if (is_array($value) && collect($value)->contains(fn (mixed $selection): bool => ! is_string($selection))) {
+                        $fail('The :attribute field must only contain text values.');
+                    }
+                },
+            ];
         }
 
         /** @var array<array-key, mixed> $options */

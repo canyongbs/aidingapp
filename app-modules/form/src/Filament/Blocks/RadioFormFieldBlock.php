@@ -101,7 +101,7 @@ class RadioFormFieldBlock extends FormFieldBlock
     public static function getValidationRules(SubmissibleField $field): array
     {
         if ($field->config['hasOtherOption'] ?? false) {
-            return ['string'];
+            return ['nullable', 'string'];
         }
 
         /** @var array<array-key, mixed> $options */

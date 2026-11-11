@@ -89,6 +89,22 @@ it('only accepts configured values unless the other option is included', functio
         ->and($validate(true))->toBeTrue();
 });
 
+it('rejects non-string selections even when the other option is included', function (mixed $response, bool $passes) use ($options): void {
+    $field = new ServiceRequestFormField([
+        'label' => 'Colors',
+        'config' => ['hasOtherOption' => true, 'options' => $options],
+    ]);
+
+    expect(Validator::make(
+        ['response' => $response],
+        ['response' => CheckboxesFormFieldBlock::getValidationRules($field)],
+    )->passes())->toBe($passes);
+})->with([
+    'nested array' => [[['Teal']], false],
+    'integer' => [[1], false],
+    'free text' => [['red', 'Teal'], true],
+]);
+
 it('shows which options were selected in the submission view', function () use ($options): void {
     $html = view('form::blocks.submissions.checkboxes', [
         'label' => 'Colors',
