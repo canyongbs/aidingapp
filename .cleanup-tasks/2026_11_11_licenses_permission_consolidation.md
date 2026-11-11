@@ -22,4 +22,3 @@ paths or line numbers. For non-obvious changes, put a `TODO: Cleanup Task (<tag>
 comment at the change site and reference the tag here — e.g.
 "Search for `TODO: Cleanup Task (some-feature)`".
 -->
-
