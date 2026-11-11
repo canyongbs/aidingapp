@@ -38,6 +38,7 @@ use AidingApp\Department\Models\Department;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectDashboardHeaderWidget;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Tests\Tenant\Filament\Resources\ProjectResource\RequestFactory\EditProjectRequestFactory;
+use App\Features\ProjectNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Action;
@@ -191,6 +192,65 @@ it('validates the inputs', function (EditProjectRequestFactory $data, array $err
         ['color' => 'in'],
     ],
 ]);
+
+describe('name uniqueness', function (): void {
+    it('rejects a project name that differs only by case from another project', function (string $name): void {
+        Project::factory()->create(['name' => 'Campus Renovation']);
+        $project = Project::factory()->create(['name' => 'Library Expansion']);
+
+        Livewire::test(ProjectDashboardHeaderWidget::class, ['record' => $project])
+            ->mountAction('editProject')
+            ->setActionData(['name' => $name])
+            ->callMountedAction()
+            ->assertHasActionErrors(['name' => 'unique']);
+
+        expect($project->refresh()->name)->toBe('Library Expansion');
+    })->with([
+        'exact' => 'Campus Renovation',
+        'lower case' => 'campus renovation',
+        'upper case' => 'CAMPUS RENOVATION',
+    ]);
+
+    it('allows a project to change the case of its own name', function (): void {
+        $project = Project::factory()->create(['name' => 'Library Expansion']);
+
+        Livewire::test(ProjectDashboardHeaderWidget::class, ['record' => $project])
+            ->mountAction('editProject')
+            ->setActionData(['name' => 'LIBRARY EXPANSION'])
+            ->callMountedAction()
+            ->assertNotified();
+
+        expect($project->refresh()->name)->toBe('LIBRARY EXPANSION');
+    });
+
+    it('allows a project name that was used by a deleted project', function (): void {
+        Project::factory()->create(['name' => 'Campus Renovation'])->delete();
+        $project = Project::factory()->create(['name' => 'Library Expansion']);
+
+        Livewire::test(ProjectDashboardHeaderWidget::class, ['record' => $project])
+            ->mountAction('editProject')
+            ->setActionData(['name' => 'campus renovation'])
+            ->callMountedAction()
+            ->assertNotified();
+
+        expect($project->refresh()->name)->toBe('campus renovation');
+    });
+
+    it('rejects a project name that was used by a deleted project when the feature is inactive', function (): void {
+        ProjectNameUniquenessFeature::deactivate();
+
+        Project::factory()->create(['name' => 'Campus Renovation'])->delete();
+        $project = Project::factory()->create(['name' => 'Library Expansion']);
+
+        Livewire::test(ProjectDashboardHeaderWidget::class, ['record' => $project])
+            ->mountAction('editProject')
+            ->setActionData(['name' => 'Campus Renovation'])
+            ->callMountedAction()
+            ->assertHasActionErrors(['name' => 'unique']);
+
+        expect($project->refresh()->name)->toBe('Library Expansion');
+    });
+});
 
 describe('authorization', function (): void {
     it('hides the edit action from a user without the `project.*.update` permission', function (): void {

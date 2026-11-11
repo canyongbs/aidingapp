@@ -39,12 +39,14 @@ namespace AidingApp\Project\Filament\Actions;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
+use App\Features\ProjectMilestoneTitleUniquenessFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Component;
+use Illuminate\Validation\Rules\Unique;
 use Livewire\Component as LivewireComponent;
 
 class CreateProjectMilestoneAction
@@ -58,7 +60,7 @@ class CreateProjectMilestoneAction
             ->authorize(fn (): bool => auth()->user()->can('create', [ProjectMilestone::class, $project]))
             ->slideOver()
             ->modalHeading('Create Project Milestone')
-            ->schema(static::formSchema())
+            ->schema(static::formSchema(pipelineId: $pipeline?->getKey()))
             ->action(function (array $data, LivewireComponent $livewire) use ($project, $pipeline): void {
                 // A milestone must belong to the pipeline it was created under. The action is only
                 // available when a pipeline is selected, so associate the new milestone with it.
@@ -78,14 +80,28 @@ class CreateProjectMilestoneAction
     }
 
     /**
+     * @param  ?string  $pipelineId  The pipeline whose milestones the title must be unique within.
+     * @param  ?string  $ignoreMilestoneId  The milestone being edited, which is excluded from the uniqueness check.
+     *
      * @return array<int, Component>
      */
-    public static function formSchema(): array
+    public static function formSchema(?string $pipelineId = null, ?string $ignoreMilestoneId = null): array
     {
         return [
             TextInput::make('title')
                 ->required()
-                ->maxLength(255),
+                ->maxLength(255)
+                // TODO: Cleanup Task (project-and-milestone-name-uniqueness): replace this `when()` with `->unique(table: ProjectMilestone::class, modifyRuleUsing: fn (Unique $rule): Unique => $rule->where('pipeline_id', $pipelineId)->ignore($ignoreMilestoneId)->withoutTrashed())` once the flag is removed.
+                ->when(
+                    ProjectMilestoneTitleUniquenessFeature::active(),
+                    fn (TextInput $input): TextInput => $input->unique(
+                        table: ProjectMilestone::class,
+                        modifyRuleUsing: fn (Unique $rule): Unique => $rule
+                            ->where('pipeline_id', $pipelineId)
+                            ->ignore($ignoreMilestoneId)
+                            ->withoutTrashed(),
+                    ),
+                ),
             Textarea::make('description')
                 ->required()
                 ->maxLength(65535),

@@ -42,8 +42,11 @@ use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
+use App\Features\ProjectMilestoneTitleUniquenessFeature;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Filament\Tables\Columns\Column;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -435,5 +438,125 @@ describe('create pipeline action name uniqueness', function (): void {
             ->assertHasNoActionErrors();
 
         expect(Pipeline::query()->where('name', 'Retention')->exists())->toBeTrue();
+    });
+});
+
+describe('milestone title uniqueness', function (): void {
+    it('rejects a milestone title that differs only by case from another milestone in the same pipeline', function (string $title): void {
+        $project = Project::factory()->create();
+        $pipeline = Pipeline::factory()->for($project)->create();
+        ProjectMilestone::factory()->for($project)->for($pipeline)->create(['title' => 'Design Review']);
+
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->set('selectedPipelineId', $pipeline->getKey())
+            ->callTableAction('createMilestone', data: [
+                'title' => $title,
+                'description' => 'Duplicate',
+            ])
+            ->assertHasTableActionErrors(['title' => 'unique']);
+
+        expect($pipeline->milestones()->count())->toBe(1);
+    })->with([
+        'exact' => 'Design Review',
+        'lower case' => 'design review',
+        'upper case' => 'DESIGN REVIEW',
+    ]);
+
+    it('allows a milestone title that is already used in another pipeline', function (): void {
+        $project = Project::factory()->create();
+        $pipeline = Pipeline::factory()->for($project)->create();
+        $otherPipeline = Pipeline::factory()->for($project)->create();
+        ProjectMilestone::factory()->for($project)->for($otherPipeline)->create(['title' => 'Design Review']);
+        ProjectMilestone::factory()->for(Project::factory())->create(['title' => 'Design Review']);
+
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->set('selectedPipelineId', $pipeline->getKey())
+            ->callTableAction('createMilestone', data: [
+                'title' => 'design review',
+                'description' => 'Same title, different pipeline',
+            ])
+            ->assertHasNoTableActionErrors();
+
+        expect($pipeline->milestones()->where('title', 'design review')->exists())->toBeTrue();
+    });
+
+    it('allows a milestone title that was used by a deleted milestone in the same pipeline', function (): void {
+        $project = Project::factory()->create();
+        $pipeline = Pipeline::factory()->for($project)->create();
+        ProjectMilestone::factory()->for($project)->for($pipeline)->create(['title' => 'Design Review'])->delete();
+
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->set('selectedPipelineId', $pipeline->getKey())
+            ->callTableAction('createMilestone', data: [
+                'title' => 'Design Review',
+                'description' => 'Reused title',
+            ])
+            ->assertHasNoTableActionErrors();
+
+        expect($pipeline->milestones()->where('title', 'Design Review')->count())->toBe(1);
+    });
+
+    it('rejects a milestone title that differs only by case from another milestone in the same pipeline when managing a milestone', function (): void {
+        $project = Project::factory()->create();
+        $pipeline = Pipeline::factory()->for($project)->create();
+        ProjectMilestone::factory()->for($project)->for($pipeline)->create(['title' => 'Design Review']);
+        $milestone = ProjectMilestone::factory()->for($project)->for($pipeline)->create(['title' => 'Launch']);
+
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->set('selectedPipelineId', $pipeline->getKey())
+            ->callAction(TestAction::make('manageMilestone')->arguments(['milestone' => $milestone->getKey()]), data: [
+                'title' => 'DESIGN REVIEW',
+            ])
+            ->assertHasActionErrors(['title' => 'unique']);
+
+        expect($milestone->refresh()->title)->toBe('Launch');
+    });
+
+    it('allows a milestone to change the case of its own title when managing a milestone', function (): void {
+        $project = Project::factory()->create();
+        $pipeline = Pipeline::factory()->for($project)->create();
+        $milestone = ProjectMilestone::factory()->for($project)->for($pipeline)->create(['title' => 'Launch']);
+
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->set('selectedPipelineId', $pipeline->getKey())
+            ->callAction(TestAction::make('manageMilestone')->arguments(['milestone' => $milestone->getKey()]), data: [
+                'title' => 'LAUNCH',
+            ])
+            ->assertHasNoActionErrors();
+
+        expect($milestone->refresh()->title)->toBe('LAUNCH');
+    });
+
+    it('allows a milestone title that is already used in another pipeline when managing a milestone', function (): void {
+        $project = Project::factory()->create();
+        $pipeline = Pipeline::factory()->for($project)->create();
+        $otherPipeline = Pipeline::factory()->for($project)->create();
+        ProjectMilestone::factory()->for($project)->for($otherPipeline)->create(['title' => 'Design Review']);
+        $milestone = ProjectMilestone::factory()->for($project)->for($pipeline)->create(['title' => 'Launch']);
+
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->set('selectedPipelineId', $pipeline->getKey())
+            ->callAction(TestAction::make('manageMilestone')->arguments(['milestone' => $milestone->getKey()]), data: [
+                'title' => 'design review',
+            ])
+            ->assertHasNoActionErrors();
+
+        expect($milestone->refresh()->title)->toBe('design review');
+    });
+
+    it('does not apply the unique form rule when the feature is inactive', function (): void {
+        ProjectMilestoneTitleUniquenessFeature::deactivate();
+
+        $project = Project::factory()->create();
+        $pipeline = Pipeline::factory()->for($project)->create();
+        ProjectMilestone::factory()->for($project)->for($pipeline)->create(['title' => 'Design Review']);
+
+        expect(fn () => Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->set('selectedPipelineId', $pipeline->getKey())
+            ->callTableAction('createMilestone', data: [
+                'title' => 'Design Review',
+                'description' => 'Duplicate',
+            ]))
+            ->toThrow(UniqueConstraintViolationException::class);
     });
 });

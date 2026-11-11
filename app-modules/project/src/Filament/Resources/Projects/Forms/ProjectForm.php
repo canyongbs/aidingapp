@@ -37,6 +37,7 @@
 namespace AidingApp\Project\Filament\Resources\Projects\Forms;
 
 use AidingApp\Project\Models\Project;
+use App\Features\ProjectNameUniquenessFeature;
 use App\Filament\Forms\Components\IconSelect;
 use CanyonGBS\Common\Enums\Color;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
@@ -49,6 +50,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
 
 class ProjectForm
 {
@@ -63,7 +65,12 @@ class ProjectForm
                     TextInput::make('name')
                         ->required()
                         ->string()
-                        ->unique(ignoreRecord: true)
+                        // TODO: Cleanup Task (project-and-milestone-name-uniqueness): replace this `when()` with `->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed())` once the flag is removed.
+                        ->when(
+                            ProjectNameUniquenessFeature::active(),
+                            fn (TextInput $input): TextInput => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed()),
+                            fn (TextInput $input): TextInput => $input->unique(ignoreRecord: true),
+                        )
                         ->maxLength(255),
                     Textarea::make('description')
                         ->string()
