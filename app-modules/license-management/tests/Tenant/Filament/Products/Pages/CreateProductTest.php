@@ -161,26 +161,26 @@ describe('authorization', function (): void {
 
         Livewire::test(CreateProduct::class)->assertSuccessful();
     });
-});
 
-// TODO: Cleanup Task (licenses-permission-consolidation): delete this test
-it('allows access to the create page with the legacy `product.create` permission while the consolidation flag is inactive', function (): void {
-    LicensePermissionConsolidationFeature::deactivate();
+    // TODO: Cleanup Task (licenses-permission-consolidation): delete this test
+    it('allows access to the create page with the legacy `product.create` permission while the consolidation flag is inactive', function (): void {
+        LicensePermissionConsolidationFeature::deactivate();
 
-    $legacyPermissions = ['product.view-any', 'product.create'];
+        $legacyPermissions = ['product.view-any', 'product.create'];
 
-    $group = PermissionGroup::create(['name' => 'Product']);
+        $group = PermissionGroup::create(['name' => 'Product']);
 
-    foreach ($legacyPermissions as $name) {
-        Permission::factory()->create(['name' => $name, 'guard_name' => 'web', 'group_id' => $group->getKey()]);
-    }
+        foreach ($legacyPermissions as $name) {
+            Permission::factory()->create(['name' => $name, 'guard_name' => 'web', 'group_id' => $group->getKey()]);
+        }
 
-    $user = User::factory()->create();
-    actingAs($user);
+        $user = User::factory()->create();
+        actingAs($user);
 
-    get(ProductResource::getUrl('create'))->assertForbidden();
+        get(ProductResource::getUrl('create'))->assertForbidden();
 
-    $user->givePermissionTo($legacyPermissions);
+        $user->givePermissionTo($legacyPermissions);
 
-    get(ProductResource::getUrl('create'))->assertSuccessful();
+        get(ProductResource::getUrl('create'))->assertSuccessful();
+    });
 });

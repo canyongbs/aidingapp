@@ -41,11 +41,14 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\PermissionRegistrar;
 
 return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function (): void {
+            app(PermissionRegistrar::class)->forgetCachedPermissions();
+
             foreach ($this->mappings() as $relatedPermission => $permission) {
                 User::query()
                     ->withTrashed()

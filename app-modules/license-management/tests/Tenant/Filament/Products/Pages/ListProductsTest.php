@@ -73,7 +73,7 @@ it('is gated with proper access control', function (): void {
     get(ListProducts::getUrl())->assertSuccessful();
 });
 
-it('only shows the bulk delete action to a user with the licenses.*.delete permission', function (): void {
+it('only shows the bulk delete action to a user with the `licenses.*.delete` permission', function (): void {
     Product::factory(15)->create();
 
     $user = User::factory()

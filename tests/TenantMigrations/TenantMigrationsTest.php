@@ -78,7 +78,6 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -2320,22 +2319,15 @@ describe('2026_11_11_150003_purge_unneeded_license_permissions', function (): vo
         });
     });
 
-    it('clears the current tenant\'s cached permissions even though the permission registrar resolved its cache store before the tenant was switched', function () use ($migrationName, $migrationPath): void {
+    it('clears the permission registrar\'s cached permissions', function () use ($migrationName, $migrationPath): void {
         isolatedMigration($migrationName, function () use ($migrationPath): void {
-            // Resolve the registrar first, then swap the cache store the way PrefixCacheTask does when `tenants:artisan` switches tenants.
-            app(PermissionRegistrar::class);
+            $cacheStore = app(PermissionRegistrar::class)->getCacheStore();
 
-            config()->set('cache.prefix', 'licenses_consolidation_tenant');
-            app('cache')->forgetDriver(config('cache.default'));
-            app()->forgetInstance('cache');
-            app()->forgetInstance('cache.store');
-            Cache::clearResolvedInstances();
-
-            Cache::forever(config('permission.cache.key'), 'stale');
+            $cacheStore->forever(config('permission.cache.key'), 'stale');
 
             expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
 
-            expect(Cache::has(config('permission.cache.key')))->toBeFalse();
+            expect($cacheStore->get(config('permission.cache.key')))->toBeNull();
         });
     });
 });

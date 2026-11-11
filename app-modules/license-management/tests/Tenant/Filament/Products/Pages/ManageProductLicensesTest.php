@@ -192,7 +192,6 @@ describe('action authorization', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo(['licenses.view-any', 'licenses.*.view']);
 
-        // Non-admin users only see the licenses they created
         $productLicense = ProductLicense::factory()->create(['created_by_id' => $user->getKey()]);
 
         actingAs($user);

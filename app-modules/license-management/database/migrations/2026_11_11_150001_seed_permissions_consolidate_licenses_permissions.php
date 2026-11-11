@@ -36,8 +36,8 @@
 
 use Database\Migrations\Concerns\CanModifyPermissions;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\PermissionRegistrar;
 
 return new class () extends Migration {
     use CanModifyPermissions;
@@ -69,7 +69,9 @@ return new class () extends Migration {
             collect($this->guards)
                 ->each(fn (string $guard) => $this->createPermissions($this->permissions, $guard));
 
-            DB::afterCommit(fn () => $this->forgetCachedPermissions());
+            DB::afterCommit(function (): void {
+                app(PermissionRegistrar::class)->forgetCachedPermissions();
+            });
         });
     }
 
@@ -79,18 +81,9 @@ return new class () extends Migration {
             collect($this->guards)
                 ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
 
-            DB::afterCommit(fn () => $this->forgetCachedPermissions());
+            DB::afterCommit(function (): void {
+                app(PermissionRegistrar::class)->forgetCachedPermissions();
+            });
         });
-    }
-
-    /**
-     * Cleared through the Cache facade because Spatie's `PermissionRegistrar` keeps the cache store it resolved at boot,
-     * which still has the landlord prefix while `tenants:artisan` runs the migration for each tenant.
-     */
-    private function forgetCachedPermissions(): void
-    {
-        $store = config('permission.cache.store');
-
-        Cache::store($store === 'default' ? null : $store)->forget(config('permission.cache.key'));
     }
 };

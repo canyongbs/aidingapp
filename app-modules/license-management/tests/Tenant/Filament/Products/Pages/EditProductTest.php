@@ -191,28 +191,28 @@ describe('authorization', function (): void {
 
         Livewire::test(EditProduct::class, ['record' => $product->getRouteKey()])->assertSuccessful();
     });
-});
 
-// TODO: Cleanup Task (licenses-permission-consolidation): delete this test
-it('allows access to the edit page with the legacy `product.*.update` permission while the consolidation flag is inactive', function (): void {
-    LicensePermissionConsolidationFeature::deactivate();
+    // TODO: Cleanup Task (licenses-permission-consolidation): delete this test
+    it('allows access to the edit page with the legacy `product.*.update` permission while the consolidation flag is inactive', function (): void {
+        LicensePermissionConsolidationFeature::deactivate();
 
-    $legacyPermissions = ['product.view-any', 'product.*.update'];
+        $legacyPermissions = ['product.view-any', 'product.*.update'];
 
-    $group = PermissionGroup::create(['name' => 'Product']);
+        $group = PermissionGroup::create(['name' => 'Product']);
 
-    foreach ($legacyPermissions as $name) {
-        Permission::factory()->create(['name' => $name, 'guard_name' => 'web', 'group_id' => $group->getKey()]);
-    }
+        foreach ($legacyPermissions as $name) {
+            Permission::factory()->create(['name' => $name, 'guard_name' => 'web', 'group_id' => $group->getKey()]);
+        }
 
-    $user = User::factory()->create();
-    actingAs($user);
+        $user = User::factory()->create();
+        actingAs($user);
 
-    $product = Product::factory()->create();
+        $product = Product::factory()->create();
 
-    get(ProductResource::getUrl('edit', ['record' => $product]))->assertForbidden();
+        get(ProductResource::getUrl('edit', ['record' => $product]))->assertForbidden();
 
-    $user->givePermissionTo($legacyPermissions);
+        $user->givePermissionTo($legacyPermissions);
 
-    get(ProductResource::getUrl('edit', ['record' => $product]))->assertSuccessful();
+        get(ProductResource::getUrl('edit', ['record' => $product]))->assertSuccessful();
+    });
 });
