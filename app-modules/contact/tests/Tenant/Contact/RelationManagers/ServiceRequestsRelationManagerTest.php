@@ -41,6 +41,7 @@ use AidingApp\Department\Models\Department;
 use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
 use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -53,13 +54,37 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\Select;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Crypt;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
+
+/**
+ * Flattens a `SelectTree` tree (as returned by `getTree()`) into a flat list of its option values.
+ *
+ * @param  Collection<int, mixed>|array<int, mixed>  $tree
+ *
+ * @return array<int, string>
+ */
+$flattenServiceRequestTypeTree = function (Collection|array $tree): array {
+    $flatten = function (array $nodes) use (&$flatten): array {
+        $values = [];
+
+        foreach ($nodes as $node) {
+            $values[] = $node['value'];
+            $values = array_merge($values, $flatten($node['children'] ?? []));
+        }
+
+        return $values;
+    };
+
+    return $flatten(collect($tree)->toArray());
+};
 
 test('ServiceRequestsRelationManager hides the create and edit actions when read only while still listing records', function (): void {
     asSuperAdmin();
@@ -189,7 +214,7 @@ test('ServiceRequestsRelationManager filters service requests by status', functi
         ->assertCanNotSeeTableRecords([$serviceRequest2]);
 });
 
-test('Only service request types managed by user department are available in type select', function (): void {
+test('All non-archived service request types are available in the type select for a department-based non-manager', function () use ($flattenServiceRequestTypeTree): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -214,20 +239,16 @@ test('Only service request types managed by user department are available in typ
         'pageClass' => ViewContact::class,
     ])
         ->mountTableAction('create')
-        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($managedType): bool {
-            $options = $select->getOptions();
+        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (SelectTree $field) use ($managedType, $unmanagedType, $flattenServiceRequestTypeTree): bool {
+            $values = $flattenServiceRequestTypeTree($field->getTree());
 
-            return array_key_exists($managedType->getKey(), $options);
-        })
-        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($unmanagedType): bool {
-            $options = $select->getOptions();
-
-            return ! array_key_exists($unmanagedType->getKey(), $options);
+            return in_array($managedType->getKey(), $values, true)
+                && in_array($unmanagedType->getKey(), $values, true);
         })
         ->assertSuccessful();
 });
 
-test('Only service request types where user is a direct manager are available in type select', function (): void {
+test('All non-archived service request types are available in the type select for a non-manager', function () use ($flattenServiceRequestTypeTree): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -250,20 +271,42 @@ test('Only service request types where user is a direct manager are available in
         'pageClass' => ViewContact::class,
     ])
         ->mountTableAction('create')
-        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($managedType): bool {
-            $options = $select->getOptions();
+        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (SelectTree $field) use ($managedType, $unmanagedType, $flattenServiceRequestTypeTree): bool {
+            $values = $flattenServiceRequestTypeTree($field->getTree());
 
-            return array_key_exists($managedType->getKey(), $options);
-        })
-        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($unmanagedType): bool {
-            $options = $select->getOptions();
-
-            return ! array_key_exists($unmanagedType->getKey(), $options);
+            return in_array($managedType->getKey(), $values, true)
+                && in_array($unmanagedType->getKey(), $values, true);
         })
         ->assertSuccessful();
 });
 
-test('Super admin can see all service request types', function (): void {
+test('Archived service request types are not available in the type select', function () use ($flattenServiceRequestTypeTree): void {
+    asSuperAdmin();
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    $activeType = ServiceRequestType::factory()->create();
+    $archivedType = ServiceRequestType::factory()->create(['archived_at' => now()]);
+
+    $contact = Contact::factory()->create();
+
+    Livewire::test(ServiceRequestsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ViewContact::class,
+    ])
+        ->mountTableAction('create')
+        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (SelectTree $field) use ($activeType, $archivedType, $flattenServiceRequestTypeTree): bool {
+            $values = $flattenServiceRequestTypeTree($field->getTree());
+
+            return in_array($activeType->getKey(), $values, true)
+                && ! in_array($archivedType->getKey(), $values, true);
+        })
+        ->assertSuccessful();
+});
+
+test('Super admin can see all service request types', function () use ($flattenServiceRequestTypeTree): void {
     asSuperAdmin();
 
     $settings = app(LicenseSettings::class);
@@ -280,12 +323,155 @@ test('Super admin can see all service request types', function (): void {
         'pageClass' => ViewContact::class,
     ])
         ->mountTableAction('create')
-        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($type1, $type2): bool {
-            $options = $select->getOptions();
+        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (SelectTree $field) use ($type1, $type2, $flattenServiceRequestTypeTree): bool {
+            $values = $flattenServiceRequestTypeTree($field->getTree());
 
-            return array_key_exists($type1->getKey(), $options) && array_key_exists($type2->getKey(), $options);
+            return in_array($type1->getKey(), $values, true) && in_array($type2->getKey(), $values, true);
         })
         ->assertSuccessful();
+});
+
+describe('inaccessible type warning banner', function (): void {
+    beforeEach(function (): void {
+        $settings = app(LicenseSettings::class);
+        $settings->data->addons->serviceManagement = true;
+        $settings->save();
+    });
+
+    test('is shown when a manager selects a type they neither manage nor audit', function (): void {
+        $user = User::factory()->create();
+        $user->givePermissionTo('service_request.view-any');
+        $user->givePermissionTo('service_request.create');
+
+        ServiceRequestType::factory()->hasAttached($user, [], 'managerUsers')->create();
+
+        $inaccessibleType = ServiceRequestType::factory()->create();
+
+        $contact = Contact::factory()->create();
+
+        actingAs($user);
+
+        Livewire::test(ServiceRequestsRelationManager::class, [
+            'ownerRecord' => $contact,
+            'pageClass' => ViewContact::class,
+        ])
+            ->mountTableAction('create')
+            ->assertSchemaComponentHidden('inaccessibleTypeWarning', 'mountedActionSchema0')
+            ->setTableActionData(['type_id' => $inaccessibleType->getKey()])
+            ->assertSchemaComponentVisible('inaccessibleTypeWarning', 'mountedActionSchema0');
+    });
+
+    test('is not shown when the selected type is managed by the user', function (): void {
+        $user = User::factory()->create();
+        $user->givePermissionTo('service_request.view-any');
+        $user->givePermissionTo('service_request.create');
+
+        $managedType = ServiceRequestType::factory()->hasAttached($user, [], 'managerUsers')->create();
+
+        $contact = Contact::factory()->create();
+
+        actingAs($user);
+
+        Livewire::test(ServiceRequestsRelationManager::class, [
+            'ownerRecord' => $contact,
+            'pageClass' => ViewContact::class,
+        ])
+            ->mountTableAction('create')
+            ->setTableActionData(['type_id' => $managedType->getKey()])
+            ->assertSchemaComponentHidden('inaccessibleTypeWarning', 'mountedActionSchema0');
+    });
+
+    test('is not shown when the selected type is audited by the user', function (): void {
+        $user = User::factory()->create();
+        $user->givePermissionTo('service_request.view-any');
+        $user->givePermissionTo('service_request.create');
+
+        ServiceRequestType::factory()->hasAttached($user, [], 'managerUsers')->create();
+
+        $auditedType = ServiceRequestType::factory()->hasAttached($user, [], 'auditorUsers')->create();
+
+        $contact = Contact::factory()->create();
+
+        actingAs($user);
+
+        Livewire::test(ServiceRequestsRelationManager::class, [
+            'ownerRecord' => $contact,
+            'pageClass' => ViewContact::class,
+        ])
+            ->mountTableAction('create')
+            ->setTableActionData(['type_id' => $auditedType->getKey()])
+            ->assertSchemaComponentHidden('inaccessibleTypeWarning', 'mountedActionSchema0');
+    });
+
+    test('is not shown for a super admin', function (): void {
+        asSuperAdmin();
+
+        $type = ServiceRequestType::factory()->create();
+
+        $contact = Contact::factory()->create();
+
+        Livewire::test(ServiceRequestsRelationManager::class, [
+            'ownerRecord' => $contact,
+            'pageClass' => ViewContact::class,
+        ])
+            ->mountTableAction('create')
+            ->setTableActionData(['type_id' => $type->getKey()])
+            ->assertSchemaComponentHidden('inaccessibleTypeWarning', 'mountedActionSchema0');
+    });
+});
+
+test('Selecting a type sets the category from the type default category', function (): void {
+    asSuperAdmin();
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    $type = ServiceRequestType::factory()->create([
+        'default_category' => ServiceRequestCategory::Incident,
+    ]);
+
+    $contact = Contact::factory()->create();
+
+    Livewire::test(ServiceRequestsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ViewContact::class,
+    ])
+        ->mountTableAction('create')
+        ->setTableActionData(['type_id' => $type->getKey()])
+        ->assertTableActionDataSet([
+            'category' => ServiceRequestCategory::Incident,
+        ]);
+});
+
+test('Can create a service request for a contact with a category', function (): void {
+    asSuperAdmin();
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    $contact = Contact::factory()->create();
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->getKey()])->create();
+    $status = ServiceRequestStatus::factory()->create();
+
+    Livewire::test(ServiceRequestsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ViewContact::class,
+    ])
+        ->callTableAction('create', data: [
+            'status_id' => $status->getKey(),
+            'type_id' => $type->getKey(),
+            'priority_id' => $priority->getKey(),
+            'category' => ServiceRequestCategory::Incident->value,
+            'title' => 'Test Service Request',
+        ])
+        ->assertHasNoTableActionErrors();
+
+    $serviceRequest = $contact->serviceRequests()->sole();
+
+    expect($serviceRequest->category)->toBe(ServiceRequestCategory::Incident);
 });
 
 test('Priority select is populated based on selected type', function (): void {
@@ -333,6 +519,7 @@ test('Can create a service request for a contact', function (): void {
             'status_id' => $status->getKey(),
             'type_id' => $type->getKey(),
             'priority_id' => $priority->getKey(),
+            'category' => ServiceRequestCategory::Request->value,
             'title' => 'Test Service Request',
             'close_details' => 'Description details',
         ])
@@ -394,6 +581,7 @@ test('Attaches password secrets to a service request created for a contact', fun
             'status_id' => $status->getKey(),
             'type_id' => $type->getKey(),
             'priority_id' => $priority->getKey(),
+            'category' => ServiceRequestCategory::Request->value,
             'title' => 'Test Service Request',
             'dynamic_fields' => [
                 $field->getKey() => $secret->getKey(),

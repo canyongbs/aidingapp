@@ -41,9 +41,11 @@ use AidingApp\ServiceManagement\Actions\AttachServiceRequestSecrets;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use AidingApp\ServiceManagement\Filament\Concerns\WarnsAboutInaccessibleServiceRequestType;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\ServiceRequestInfolist;
 use AidingApp\ServiceManagement\Models\Scopes\AccessibleServiceRequests;
-use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\Scopes\SelectableServiceRequestStatuses;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
@@ -51,19 +53,21 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Filament\Concerns\CanBeReadOnly;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Authenticatable;
 use App\Models\Scopes\WhereFullNameLike;
 use App\Models\User;
+use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -82,6 +86,7 @@ use Illuminate\Support\Str;
 class ServiceRequestsRelationManager extends RelationManager
 {
     use CanBeReadOnly;
+    use WarnsAboutInaccessibleServiceRequestType;
 
     protected static string $relationship = 'serviceRequests';
 
@@ -89,6 +94,11 @@ class ServiceRequestsRelationManager extends RelationManager
     {
         return $schema
             ->components([
+                Callout::make(fn (Get $get): ?string => $this->getInaccessibleTypeWarning($get('type_id')))
+                    ->warning()
+                    ->visible(fn (Get $get): bool => filled($this->getInaccessibleTypeWarning($get('type_id'))))
+                    ->key('inaccessibleTypeWarning')
+                    ->columnSpanFull(),
                 Select::make('status_id')
                     ->relationship('status', 'name')
                     ->label('Status')
@@ -106,32 +116,13 @@ class ServiceRequestsRelationManager extends RelationManager
                     ->exists((new ServiceRequestStatus())->getTable(), 'id'),
                 Grid::make()
                     ->schema([
-                        Select::make('type_id')
-                            ->options(
-                                fn (?ServiceRequest $record) => ServiceRequestType::query()
-                                    ->where(
-                                        fn (Builder $query) => $query
-                                            ->withoutArchived()
-                                            ->when(! auth()->user()->isSuperAdmin(), function (Builder $query): void {
-                                                $user = auth()->user();
-                                                assert($user instanceof User);
-
-                                                $query->tap(new ManagedServiceRequestTypes($user));
-                                            }),
-                                    )
-                                    ->when(
-                                        filled($record),
-                                        fn (Builder $query) => $query
-                                            ->orWhere(
-                                                $record?->priority->type->getQualifiedKeyName(),
-                                                $record?->priority->type->getKey(),
-                                            ),
-                                    )
-                                    ->orderBy('name')
-                                    ->pluck('name', 'id')
-                            )
-                            ->rule(new ManagedServiceRequestType())
-                            ->afterStateUpdated(function (Set $set, Select $component): void {
+                        SelectTree::make('type_id')
+                            ->label('Type')
+                            ->getTreeUsing(fn (): array => ListServiceRequests::buildTypeTreeOptions(
+                                withoutArchived: true,
+                            ))
+                            ->searchable()
+                            ->afterStateUpdated(function (?string $state, Set $set, SelectTree $component): void {
                                 $set('priority_id', null);
                                 $component
                                     ->getContainer()
@@ -140,8 +131,15 @@ class ServiceRequestsRelationManager extends RelationManager
                                     ->getComponent('dynamicTypeFields')
                                     ?->getChildSchema()
                                     ->fill();
+
+                                if ($state) {
+                                    $type = ServiceRequestType::find($state);
+
+                                    if ($type?->default_category) {
+                                        $set('category', $type->default_category->value);
+                                    }
+                                }
                             })
-                            ->label('Type')
                             ->required()
                             ->live()
                             ->exists(ServiceRequestType::class, 'id'),
@@ -156,6 +154,13 @@ class ServiceRequestsRelationManager extends RelationManager
                             ->exists(ServiceRequestPriority::class, 'id')
                             ->visible(fn (Get $get): bool => filled($get('type_id'))),
                     ]),
+                Radio::make('category')
+                    ->label('Category')
+                    ->options(ServiceRequestCategory::class)
+                    ->enum(ServiceRequestCategory::class)
+                    ->inline()
+                    ->inlineLabel(false)
+                    ->required(),
                 TextInput::make('title')
                     ->required()
                     ->string()
