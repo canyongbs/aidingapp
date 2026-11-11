@@ -82,7 +82,9 @@ return new class () extends Migration {
     {
         DB::transaction(function (): void {
             foreach ($this->actions as $relatedPermission) {
-                $permission = 'service_request.' . Str::after($relatedPermission, '.');
+                $permission = $relatedPermission === 'service_request_update.create'
+                     ? 'service_request.*.update'
+                     : 'service_request.' . Str::after($relatedPermission, '.');
 
                 User::query()
                     ->withTrashed()

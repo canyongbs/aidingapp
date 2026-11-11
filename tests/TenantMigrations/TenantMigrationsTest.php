@@ -2342,6 +2342,7 @@ describe('2026_11_11_042242_tmp_grant_service_request_permissions_to_users_and_r
             );
 
             $serviceRequestPermissions = $permissionsFor('service_request');
+            $updateMappedPermissions = array_values(array_diff($serviceRequestPermissions, ['service_request.create']));
 
             $assignmentUser = User::factory()->create();
             $assignmentUser->givePermissionTo($permissionsFor('service_request_assignment'));
@@ -2371,6 +2372,9 @@ describe('2026_11_11_042242_tmp_grant_service_request_permissions_to_users_and_r
             $partialUser = User::factory()->create();
             $partialUser->givePermissionTo('service_request_priority.view-any');
 
+            $updateCreatorUser = User::factory()->create();
+            $updateCreatorUser->givePermissionTo('service_request_update.create');
+
             $unrelatedUser = User::factory()->create();
             $unrelatedUser->givePermissionTo('product.view-any');
 
@@ -2383,10 +2387,13 @@ describe('2026_11_11_042242_tmp_grant_service_request_permissions_to_users_and_r
             expect($directPermissionNames($assignmentUser))->toContain(...$serviceRequestPermissions)
                 ->and($directPermissionNames($historyUser))->toContain(...$serviceRequestPermissions)
                 ->and($directPermissionNames($priorityUser))->toContain(...$serviceRequestPermissions)
-                ->and($directPermissionNames($updateUser))->toContain(...$serviceRequestPermissions)
-                ->and($directPermissionNames($systemUser))->toContain(...$serviceRequestPermissions)
+                ->and($directPermissionNames($updateUser))->toContain(...$updateMappedPermissions)
+                ->and($directPermissionNames($updateUser))->not->toContain('service_request.create')
+                ->and($directPermissionNames($systemUser))->toContain(...$updateMappedPermissions)
+                ->and($directPermissionNames($systemUser))->not->toContain('service_request.create')
                 ->and($rolePermissionNames($role))->toContain(...$serviceRequestPermissions)
                 ->and($directPermissionNames($partialUser))->toEqualCanonicalizing(['service_request_priority.view-any', 'service_request.view-any'])
+                ->and($directPermissionNames($updateCreatorUser))->toEqualCanonicalizing(['service_request_update.create', 'service_request.*.update'])
                 ->and($directPermissionNames($unrelatedUser))->toBe(['product.view-any']);
         });
     });
