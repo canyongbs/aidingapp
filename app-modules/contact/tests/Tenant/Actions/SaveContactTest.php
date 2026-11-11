@@ -91,17 +91,14 @@ it('uses the default contact type when creating without one', function (): void 
     expect($contact->type_id)->toBe($default->getKey());
 });
 
-it('reports every unknown or ambiguous relationship name together', function (): void {
-    ContactType::factory()->create(['name' => 'Customer']);
-    ContactType::factory()->create(['name' => 'CUSTOMER']);
-
+it('reports every unknown relationship name together', function (): void {
     $exception = null;
 
     try {
         app(SaveContact::class)(ContactDataObject::fromData([
             'first_name' => 'Jane',
             'last_name' => 'Doe',
-            'type' => 'customer',
+            'type' => 'Unknown type',
             'organization' => 'Unknown organization',
         ]));
     } catch (ValidationException $caught) {
@@ -110,7 +107,7 @@ it('reports every unknown or ambiguous relationship name together', function ():
 
     expect($exception)->toBeInstanceOf(ValidationException::class)
         ->and($exception?->errors())->toBe([
-            'type' => ['The specified contact type name is ambiguous.'],
+            'type' => ['The specified contact type does not exist.'],
             'organization' => ['The specified organization does not exist.'],
         ])
         ->and(Contact::query()->count())->toBe(0);

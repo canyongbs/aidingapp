@@ -63,6 +63,7 @@ class ResolvableContactTypeName implements ValidationRule
 
         if ($matchingTypeCount === 0) {
             $fail('The specified contact type does not exist.');
+            // TODO: Cleanup Task (contact-type-name-uniqueness): remove this ambiguity branch; names are unique once the flag is gone
         } elseif ($matchingTypeCount > 1) {
             $fail('The specified contact type name is ambiguous.');
         }
