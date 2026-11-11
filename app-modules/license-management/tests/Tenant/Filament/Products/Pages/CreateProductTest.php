@@ -34,10 +34,13 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\CreateProduct;
 use AidingApp\LicenseManagement\Filament\Resources\Products\ProductResource;
 use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\LicenseManagement\Tests\Tenant\Filament\Products\RequestFactories\CreateProductRequestFactory;
+use App\Features\LicensePermissionConsolidationFeature;
 use App\Features\ProductNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
@@ -58,7 +61,7 @@ it('can render the create product page', function (): void {
 
 it('can create a product', function (): void {
     $user = User::factory()->create();
-    $user->givePermissionTo(['product.view-any', 'product.create']);
+    $user->givePermissionTo(['licenses.view-any', 'licenses.create']);
     actingAs($user);
 
     $request = CreateProductRequestFactory::new()->create();
@@ -127,9 +130,9 @@ describe('name uniqueness feature flag', function (): void {
 });
 
 describe('authorization', function (): void {
-    it('denies access to the create page without the `product.create` permission', function (): void {
+    it('denies access to the create page without the `licenses.create` permission', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('product.view-any');
+        $user->givePermissionTo('licenses.view-any');
         actingAs($user);
 
         get(ProductResource::getUrl('create'))->assertForbidden();
@@ -143,19 +146,41 @@ describe('authorization', function (): void {
         $settings->save();
 
         $user = User::factory()->create();
-        $user->givePermissionTo(['product.view-any', 'product.create']);
+        $user->givePermissionTo(['licenses.view-any', 'licenses.create']);
         actingAs($user);
 
         get(ProductResource::getUrl('create'))->assertForbidden();
     });
 
-    it('allows access to the create page with the `product.create` permission', function (): void {
+    it('allows access to the create page with the `licenses.create` permission', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo(['product.view-any', 'product.create']);
+        $user->givePermissionTo(['licenses.view-any', 'licenses.create']);
         actingAs($user);
 
         get(ProductResource::getUrl('create'))->assertSuccessful();
 
         Livewire::test(CreateProduct::class)->assertSuccessful();
+    });
+
+    // TODO: Cleanup Task (licenses-permission-consolidation): delete this test
+    it('allows access to the create page with the legacy `product.create` permission while the consolidation flag is inactive', function (): void {
+        LicensePermissionConsolidationFeature::deactivate();
+
+        $legacyPermissions = ['product.view-any', 'product.create'];
+
+        $group = PermissionGroup::create(['name' => 'Product']);
+
+        foreach ($legacyPermissions as $name) {
+            Permission::factory()->create(['name' => $name, 'guard_name' => 'web', 'group_id' => $group->getKey()]);
+        }
+
+        $user = User::factory()->create();
+        actingAs($user);
+
+        get(ProductResource::getUrl('create'))->assertForbidden();
+
+        $user->givePermissionTo($legacyPermissions);
+
+        get(ProductResource::getUrl('create'))->assertSuccessful();
     });
 });
