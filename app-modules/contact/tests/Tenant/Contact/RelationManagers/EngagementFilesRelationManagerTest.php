@@ -45,10 +45,10 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('only shows the files bulk delete action to a user with the engagement_file delete permission', function (): void {
+test('only shows the files bulk delete action to a user with the contacts delete permission', function (): void {
     $user = User::factory()
         ->create()
-        ->givePermissionTo('contact.view-any', 'contact.*.view', 'engagement_file.view-any');
+        ->givePermissionTo('contacts.view-any', 'contacts.*.view');
 
     actingAs($user);
 
@@ -60,7 +60,7 @@ test('only shows the files bulk delete action to a user with the engagement_file
     ])
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
-    $user->givePermissionTo('engagement_file.*.delete');
+    $user->givePermissionTo('contacts.*.delete');
 
     Livewire::test(EngagementFilesRelationManager::class, [
         'ownerRecord' => $contact,

@@ -52,7 +52,7 @@ it('is gated with proper access control', function (): void {
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contacts.view-any');
     actingAsApiUser($user);
     getJson(route('api.v1.contacts.index', [], false))
         ->assertOk();
@@ -60,7 +60,7 @@ it('is gated with proper access control', function (): void {
 
 it('returns a paginated list of contacts', function (): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contacts.view-any');
     actingAsApiUser($user);
 
     Contact::factory()->count(3)->create();
@@ -74,7 +74,7 @@ it('returns a paginated list of contacts', function (): void {
 
 it('does not include deleted contacts', function (): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contacts.view-any');
     actingAsApiUser($user);
 
     $contact = Contact::factory()->create();
@@ -89,7 +89,7 @@ it('does not include deleted contacts', function (): void {
 
 it('does not include archived contacts', function (): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contacts.view-any');
     actingAsApiUser($user);
 
     $contact = Contact::factory()->create();
@@ -104,7 +104,7 @@ it('does not include archived contacts', function (): void {
 
 it('filters contacts by exact type and organization names ignoring case', function (string $filter): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contacts.view-any');
     actingAsApiUser($user);
 
     $included = Contact::factory()
@@ -127,7 +127,7 @@ it('filters contacts by exact type and organization names ignoring case', functi
 
 it('filters contacts by multiple names separated with a pipe', function (string $filter): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contacts.view-any');
     actingAsApiUser($user);
 
     $first = Contact::factory()
@@ -153,7 +153,7 @@ it('filters contacts by multiple names separated with a pipe', function (string 
 
 it('returns no contacts for a type or organization name that does not exist', function (string $filter): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contacts.view-any');
     actingAsApiUser($user);
 
     Contact::factory()->count(2)->create();
@@ -166,7 +166,7 @@ it('returns no contacts for a type or organization name that does not exist', fu
 
 it('can filter contacts by name, email, type, and organization', function (string $filter): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contacts.view-any');
     actingAsApiUser($user);
 
     $type = ContactType::factory()->create(['name' => 'Zebediah Type']);
@@ -197,7 +197,7 @@ it('can filter contacts by name, email, type, and organization', function (strin
 
 it('sorts contacts by name by default and supports descending sorts', function (): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contacts.view-any');
     actingAsApiUser($user);
 
     Contact::factory()->create(['full_name' => 'Bravo Contact']);

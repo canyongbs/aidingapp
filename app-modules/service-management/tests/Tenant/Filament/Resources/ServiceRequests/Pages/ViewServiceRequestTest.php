@@ -1191,8 +1191,8 @@ describe('authorization', function () use ($serviceRequestManagedBy): void {
         Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
             ->assertSchemaComponentHidden(ServiceRequestTab::Timeline->value);
 
-        $user->givePermissionTo('engagement.view-any');
-        $user->givePermissionTo('engagement.*.view');
+        $user->givePermissionTo('contacts.view-any');
+        $user->givePermissionTo('contacts.*.view');
 
         Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
             ->assertSchemaComponentVisible(ServiceRequestTab::Timeline->value);

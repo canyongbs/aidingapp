@@ -219,8 +219,8 @@ test('ViewContact is gated with proper access control', function (): void {
             ])
         )->assertForbidden();
 
-    $user->givePermissionTo('contact.view-any');
-    $user->givePermissionTo('contact.*.view');
+    $user->givePermissionTo('contacts.view-any');
+    $user->givePermissionTo('contacts.*.view');
 
     actingAs($user)
         ->get(
@@ -238,15 +238,15 @@ describe('section edit actions', function (): void {
 
         actingAs($user);
 
-        $user->givePermissionTo('contact.view-any');
-        $user->givePermissionTo('contact.*.view');
+        $user->givePermissionTo('contacts.view-any');
+        $user->givePermissionTo('contacts.*.view');
 
         Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->assertActionDoesNotExist(TestAction::make('editDemographicInformation')->schemaComponent('demographicInformation'));
 
-        $user->givePermissionTo('contact.*.update');
+        $user->givePermissionTo('contacts.*.update');
 
         Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
@@ -256,9 +256,9 @@ describe('section edit actions', function (): void {
 
     test('the contact sections can be updated', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any');
-        $user->givePermissionTo('contact.*.view');
-        $user->givePermissionTo('contact.*.update');
+        $user->givePermissionTo('contacts.view-any');
+        $user->givePermissionTo('contacts.*.view');
+        $user->givePermissionTo('contacts.*.update');
 
         actingAs($user);
 
@@ -288,9 +288,9 @@ describe('section edit actions', function (): void {
 
     test('the employment information section can be updated', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any');
-        $user->givePermissionTo('contact.*.view');
-        $user->givePermissionTo('contact.*.update');
+        $user->givePermissionTo('contacts.view-any');
+        $user->givePermissionTo('contacts.*.view');
+        $user->givePermissionTo('contacts.*.update');
 
         actingAs($user);
 
@@ -319,9 +319,9 @@ describe('section edit actions', function (): void {
 
     test('the academic information section can be updated', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any');
-        $user->givePermissionTo('contact.*.view');
-        $user->givePermissionTo('contact.*.update');
+        $user->givePermissionTo('contacts.view-any');
+        $user->givePermissionTo('contacts.*.view');
+        $user->givePermissionTo('contacts.*.update');
 
         actingAs($user);
 
@@ -350,9 +350,9 @@ describe('section edit actions', function (): void {
 
     test('the address information section can be updated', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any');
-        $user->givePermissionTo('contact.*.view');
-        $user->givePermissionTo('contact.*.update');
+        $user->givePermissionTo('contacts.view-any');
+        $user->givePermissionTo('contacts.*.view');
+        $user->givePermissionTo('contacts.*.update');
 
         actingAs($user);
 
@@ -385,9 +385,9 @@ describe('section edit actions', function (): void {
 
     test('the customer information section can be updated', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any');
-        $user->givePermissionTo('contact.*.view');
-        $user->givePermissionTo('contact.*.update');
+        $user->givePermissionTo('contacts.view-any');
+        $user->givePermissionTo('contacts.*.view');
+        $user->givePermissionTo('contacts.*.update');
 
         actingAs($user);
 
@@ -409,9 +409,9 @@ describe('section edit actions', function (): void {
     describe('organization picker', function (): void {
         beforeEach(function (): void {
             $user = User::factory()->create();
-            $user->givePermissionTo('contact.view-any');
-            $user->givePermissionTo('contact.*.view');
-            $user->givePermissionTo('contact.*.update');
+            $user->givePermissionTo('contacts.view-any');
+            $user->givePermissionTo('contacts.*.view');
+            $user->givePermissionTo('contacts.*.update');
 
             actingAs($user);
         });
@@ -540,9 +540,9 @@ describe('section edit actions', function (): void {
 
     test('the contact information section keeps its own email but rejects another contact\'s email case-insensitively', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any');
-        $user->givePermissionTo('contact.*.view');
-        $user->givePermissionTo('contact.*.update');
+        $user->givePermissionTo('contacts.view-any');
+        $user->givePermissionTo('contacts.*.view');
+        $user->givePermissionTo('contacts.*.update');
 
         Contact::factory()->create(['email' => 'other@example.com']);
         $contact = Contact::factory()->create(['email' => 'mine@example.com']);
@@ -568,9 +568,9 @@ describe('section edit actions', function (): void {
 
     it('does not save the email of an archived contact', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any');
-        $user->givePermissionTo('contact.*.view');
-        $user->givePermissionTo('contact.*.update');
+        $user->givePermissionTo('contacts.view-any');
+        $user->givePermissionTo('contacts.*.view');
+        $user->givePermissionTo('contacts.*.update');
 
         Contact::factory()->archived()->create(['email' => 'archived@example.com']);
         $contact = Contact::factory()->create(['email' => 'mine@example.com']);
@@ -652,9 +652,9 @@ describe('email health', function (): void {
 });
 
 describe('tabs', function (): void {
-    test('renders successfully with no tabs visible when the user has no relation manager abilities', function (): void {
+    test('renders successfully with no service request or asset tabs visible when the user has no relation manager abilities', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any', 'contact.*.view');
+        $user->givePermissionTo('contacts.view-any', 'contacts.*.view');
         actingAs($user);
 
         $contact = Contact::factory()->create();
@@ -663,14 +663,12 @@ describe('tabs', function (): void {
             ->assertSuccessful()
             ->assertDontSeeLivewire(ServiceRequestsRelationManager::class)
             ->assertDontSeeLivewire(AssetCheckOutRelationManager::class)
-            ->assertDontSeeLivewire(AssetCheckInRelationManager::class)
-            ->assertDontSeeLivewire(EngagementFilesRelationManager::class)
-            ->assertDontSeeLivewire(EngagementsRelationManager::class);
+            ->assertDontSeeLivewire(AssetCheckInRelationManager::class);
     });
 
     test('shows the Service Requests tab only with the service_request.view-any ability', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any', 'contact.*.view');
+        $user->givePermissionTo('contacts.view-any', 'contacts.*.view');
         actingAs($user);
 
         $contact = Contact::factory()->create();
@@ -687,7 +685,7 @@ describe('tabs', function (): void {
 
     test('shows the Assets tab only with an asset_check_out/asset_check_in.view-any ability', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any', 'contact.*.view');
+        $user->givePermissionTo('contacts.view-any', 'contacts.*.view');
         actingAs($user);
 
         $contact = Contact::factory()->create();
@@ -711,9 +709,9 @@ describe('tabs', function (): void {
             ->assertSeeLivewire(AssetCheckInRelationManager::class);
     });
 
-    test('shows the Files tab only with the engagement_file.view-any ability', function (): void {
+    test('shows the Files tab only with the contacts.view-any ability', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any', 'contact.*.view');
+        $user->givePermissionTo('contacts.*.view');
         actingAs($user);
 
         $contact = Contact::factory()->create();
@@ -721,16 +719,16 @@ describe('tabs', function (): void {
         \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertDontSeeLivewire(EngagementFilesRelationManager::class);
 
-        $user->givePermissionTo('engagement_file.view-any');
+        $user->givePermissionTo('contacts.view-any');
 
         \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertSuccessful()
             ->assertSeeLivewire(EngagementFilesRelationManager::class);
     });
 
-    test('shows the Emails tab only with an engagement/engagement_response.view-any ability', function (): void {
+    test('shows the Emails tab only with the contacts.view-any ability', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any', 'contact.*.view');
+        $user->givePermissionTo('contacts.*.view');
         actingAs($user);
 
         $contact = Contact::factory()->create();
@@ -738,7 +736,7 @@ describe('tabs', function (): void {
         \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertDontSeeLivewire(EngagementsRelationManager::class);
 
-        $user->givePermissionTo('engagement.view-any');
+        $user->givePermissionTo('contacts.view-any');
 
         \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertSuccessful()

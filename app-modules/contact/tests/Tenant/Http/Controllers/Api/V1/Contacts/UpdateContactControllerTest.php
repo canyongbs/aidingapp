@@ -49,7 +49,7 @@ use function Tests\actingAsApiUser;
 
 $actingAsContactUpdater = function (): SystemUser {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo(['contact.view-any', 'contact.*.update']);
+    $user->givePermissionTo(['contacts.view-any', 'contacts.*.update']);
     actingAsApiUser($user);
 
     return $user;
@@ -68,13 +68,14 @@ it('is gated with proper access control', function () use ($actingAsContactUpdat
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contacts.view-any');
+
     actingAsApiUser($user);
     patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), $payload)
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.*.update');
+    $user->givePermissionTo('contacts.*.update');
     actingAsApiUser($user);
     patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), $payload)
         ->assertForbidden();
@@ -347,7 +348,7 @@ it('returns not found for an archived contact before validating the request', fu
 
 it('checks permissions before returning not found for an archived contact', function (): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contacts.view-any');
     actingAsApiUser($user);
 
     $contact = Contact::factory()->archived()->create();

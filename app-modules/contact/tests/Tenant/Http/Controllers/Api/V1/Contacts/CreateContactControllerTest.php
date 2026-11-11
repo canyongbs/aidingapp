@@ -48,7 +48,7 @@ use function Tests\actingAsApiUser;
 
 $actingAsContactCreator = function (): SystemUser {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo(['contact.view-any', 'contact.create']);
+    $user->givePermissionTo(['contacts.view-any', 'contacts.create']);
     actingAsApiUser($user);
 
     return $user;
@@ -66,13 +66,13 @@ it('is gated with proper access control', function () use ($actingAsContactCreat
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contacts.view-any');
     actingAsApiUser($user);
     postJson(route('api.v1.contacts.store', [], false), $payload)
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.create');
+    $user->givePermissionTo('contacts.create');
     actingAsApiUser($user);
     postJson(route('api.v1.contacts.store', [], false), $payload)
         ->assertForbidden();

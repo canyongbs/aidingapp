@@ -48,7 +48,7 @@ use function Pest\Laravel\actingAs;
 it('does not list archived contacts', function (): void {
     $user = User::factory()
         ->create()
-        ->givePermissionTo('organization.view-any', 'organization.*.view', 'contact.view-any', 'contact.*.view');
+        ->givePermissionTo('organization.view-any', 'organization.*.view', 'contacts.view-any', 'contacts.*.view');
 
     actingAs($user);
 
@@ -70,7 +70,7 @@ it('only shows the associate contact action to a user with the organization.upda
 
     $user = User::factory()
         ->create()
-        ->givePermissionTo('organization.view-any', 'organization.*.view', 'contact.view-any', 'contact.*.view');
+        ->givePermissionTo('organization.view-any', 'organization.*.view', 'contacts.view-any', 'contacts.*.view');
 
     actingAs($user);
 
@@ -96,8 +96,8 @@ it('does not offer archived contacts to associate', function (): void {
             'organization.view-any',
             'organization.*.view',
             'organization.*.update',
-            'contact.view-any',
-            'contact.*.view',
+            'contacts.view-any',
+            'contacts.*.view',
         );
 
     actingAs($user);

@@ -53,19 +53,19 @@ it('is gated with proper access control', function (): void {
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contacts.view-any');
     actingAsApiUser($user);
     getJson(route('api.v1.contacts.show', ['contact' => $contact], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.*.view');
+    $user->givePermissionTo('contacts.*.view');
     actingAsApiUser($user);
     getJson(route('api.v1.contacts.show', ['contact' => $contact], false))
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo(['contact.view-any', 'contact.*.view']);
+    $user->givePermissionTo(['contacts.view-any', 'contacts.*.view']);
     actingAsApiUser($user);
     getJson(route('api.v1.contacts.show', ['contact' => $contact], false))
         ->assertOk();
@@ -73,7 +73,7 @@ it('is gated with proper access control', function (): void {
 
 it('returns the contact', function (): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo(['contact.view-any', 'contact.*.view']);
+    $user->givePermissionTo(['contacts.view-any', 'contacts.*.view']);
     actingAsApiUser($user);
 
     $contact = Contact::factory()->create();
@@ -95,7 +95,7 @@ it('returns the contact', function (): void {
 
 it('returns not found for a deleted contact', function (): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo(['contact.view-any', 'contact.*.view']);
+    $user->givePermissionTo(['contacts.view-any', 'contacts.*.view']);
     actingAsApiUser($user);
 
     $contact = Contact::factory()->create();
@@ -107,7 +107,7 @@ it('returns not found for a deleted contact', function (): void {
 
 it('returns not found for an archived contact', function (): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo(['contact.view-any', 'contact.*.view']);
+    $user->givePermissionTo(['contacts.view-any', 'contacts.*.view']);
     actingAsApiUser($user);
 
     $contact = Contact::factory()->archived()->create();
@@ -118,7 +118,7 @@ it('returns not found for an archived contact', function (): void {
 
 it('checks permissions before returning not found for an archived contact', function (): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contacts.view-any');
     actingAsApiUser($user);
 
     $contact = Contact::factory()->archived()->create();
@@ -131,7 +131,7 @@ it('returns an archived contact while contact archiving is inactive', function (
     ContactArchivingFeature::deactivate();
 
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo(['contact.view-any', 'contact.*.view']);
+    $user->givePermissionTo(['contacts.view-any', 'contacts.*.view']);
     actingAsApiUser($user);
 
     $contact = Contact::factory()->archived()->create();
@@ -143,7 +143,7 @@ it('returns an archived contact while contact archiving is inactive', function (
 
 it('returns not found for an identifier that is not a UUID', function (): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo(['contact.view-any', 'contact.*.view']);
+    $user->givePermissionTo(['contacts.view-any', 'contacts.*.view']);
     actingAsApiUser($user);
 
     getJson(route('api.v1.contacts.show', ['contact' => 'not-a-uuid'], false))

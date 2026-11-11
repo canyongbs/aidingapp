@@ -590,7 +590,7 @@ test('can list audit member to service request type', function (): void {
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.create');
     $user->givePermissionTo('department.view-any');
-    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contacts.view-any');
 
     actingAs($user);
 
@@ -629,7 +629,7 @@ test('can list direct user manager to service request type', function (): void {
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.create');
     $user->givePermissionTo('department.view-any');
-    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contacts.view-any');
 
     actingAs($user);
 

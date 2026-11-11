@@ -48,7 +48,7 @@ use function Tests\actingAsApiUser;
 
 $actingAsContactDeleter = function (): SystemUser {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo(['contact.view-any', 'contact.*.delete']);
+    $user->givePermissionTo(['contacts.view-any', 'contacts.*.delete']);
     actingAsApiUser($user);
 
     return $user;
@@ -88,7 +88,7 @@ it('does not find an already archived contact', function () use ($actingAsContac
 
 it('checks permissions before returning not found for an archived contact', function (): void {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contacts.view-any');
     actingAsApiUser($user);
 
     $contact = Contact::factory()->archived()->create();
@@ -166,8 +166,8 @@ describe('authorization', function () use ($actingAsContactDeleter): void {
         expect($contact->refresh()->isArchived())->toBeFalse();
     })->with([
         'no permissions' => [[]],
-        'view-any only' => [['contact.view-any']],
-        'delete only' => [['contact.*.delete']],
+        'view-any only' => [['contacts.view-any']],
+        'delete only' => [['contacts.*.delete']],
     ]);
 
     it('does not archive managed contacts', function () use ($actingAsContactDeleter): void {
