@@ -90,7 +90,7 @@ class AddServiceRequestUpdateBulkAction
                         // permissions will be removed, and the service request update policy now checks
                         // service_request.*.update for creating service request updates
                         if (
-                            $user->can('service_request.*.update') && 
+                            $user->can('service_request.*.update') &&
                             (
                                 ServiceRequestPermissionCompressionFeature::active()
                                 || $user->can('service_request_update.create')
