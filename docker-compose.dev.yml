@@ -75,6 +75,8 @@ services:
             # - '../common:/var/www/common'
         networks:
             - cgbs-development
+        dns:
+            - 172.16.1.1
         depends_on:
             - aidingapp-redis
             - aidingapp-mailpit
@@ -105,6 +107,8 @@ services:
             # - '../common:/var/www/common'
         networks:
             - cgbs-development
+        dns:
+            - 172.16.1.1
         depends_on:
             - aidingapp-redis
             - aidingapp-mailpit

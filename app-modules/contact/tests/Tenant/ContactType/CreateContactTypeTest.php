@@ -39,7 +39,9 @@ use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\CreateContact
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Tests\Tenant\ContactType\RequestFactories\CreateContactTypeRequestFactory;
+use App\Features\ContactTypeNameUniquenessFeature;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Validation\Rules\Enum;
 use Livewire\Livewire;
 
@@ -85,6 +87,48 @@ test('CreateContactType requires valid data', function (CreateContactTypeRequest
         'color not within enum' => [fn (): CreateContactTypeRequestFactory => CreateContactTypeRequestFactory::new()->state(['color' => 'not-a-color']), ['color' => Enum::class]],
     ]
 );
+
+test('CreateContactType rejects a name that matches an existing contact type case-insensitively', function (string $name): void {
+    asSuperAdmin();
+
+    ContactType::factory()->create(['name' => 'Student']);
+
+    Livewire::test(CreateContactType::class)
+        ->fillForm(CreateContactTypeRequestFactory::new()->state(['name' => $name])->create())
+        ->call('create')
+        ->assertHasFormErrors(['name' => 'unique']);
+
+    assertCount(1, ContactType::all());
+})->with([
+    'same case' => 'Student',
+    'different case' => 'STUDENT',
+]);
+
+test('CreateContactType allows reusing the name of a soft-deleted contact type', function (): void {
+    asSuperAdmin();
+
+    ContactType::factory()->create(['name' => 'Student'])->delete();
+
+    Livewire::test(CreateContactType::class)
+        ->fillForm(CreateContactTypeRequestFactory::new()->state(['name' => 'student'])->create())
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(ContactType::query()->where('name', 'student')->count())->toBe(1);
+});
+
+test('CreateContactType does not apply the unique form rule when the feature is disabled', function (): void {
+    ContactTypeNameUniquenessFeature::deactivate();
+
+    asSuperAdmin();
+
+    ContactType::factory()->create(['name' => 'Student']);
+
+    expect(fn () => Livewire::test(CreateContactType::class)
+        ->fillForm(CreateContactTypeRequestFactory::new()->state(['name' => 'Student'])->create())
+        ->call('create'))
+        ->toThrow(UniqueConstraintViolationException::class);
+});
 
 // Permission Tests
 

@@ -60,13 +60,6 @@ it('fails for a name that matches a deleted type', function () use ($errors): vo
     expect($errors('Customer'))->toBe(['The specified contact type does not exist.']);
 });
 
-it('fails for a name that matches more than one type', function () use ($errors): void {
-    ContactType::factory()->create(['name' => 'Customer']);
-    ContactType::factory()->create(['name' => 'CUSTOMER']);
-
-    expect($errors('customer'))->toBe(['The specified contact type name is ambiguous.']);
-});
-
 it('does not treat wildcard characters as wildcards', function () use ($errors): void {
     ContactType::factory()->create(['name' => 'VIPXContact']);
 
