@@ -1107,7 +1107,7 @@ describe('feedback tab', function () use ($serviceRequestWithFeedbackCollection)
     });
 });
 
-describe('authorization', function () use ($serviceRequestManagedBy): void {
+describe('authorization', function (): void {
     it('hides the feedback tab when the `FeedbackManagement` feature is disabled', function (): void {
         asSuperAdmin();
 
