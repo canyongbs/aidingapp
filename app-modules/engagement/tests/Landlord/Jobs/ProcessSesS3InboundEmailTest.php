@@ -1057,6 +1057,8 @@ describe('Service Request Type Service Request creation from inbound email', fun
         [$archivedContact, $otherOrganization, $serviceRequestType, $domainOrganization] = $tenant->execute(function () use ($hasOrganization): array {
             seed(ContactTypeSeeder::class);
 
+            ContactType::query()->where('name', 'Student')->update(['is_default' => true]);
+
             $domainOrganization = Organization::factory()->create([
                 'domains' => [['domain' => 'canyongbs.com']],
             ]);
@@ -1066,6 +1068,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
             ]);
 
             $archivedContact = Contact::factory()->archived()->create([
+                'type_id' => ContactType::query()->where('name', 'Employee')->firstOrFail()->getKey(),
                 'email' => 'kevin.ullyott@canyongbs.com',
                 'first_name' => 'Old',
                 'last_name' => 'Name',
