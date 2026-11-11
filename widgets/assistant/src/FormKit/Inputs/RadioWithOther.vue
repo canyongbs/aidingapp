@@ -94,7 +94,7 @@
                     class="absolute w-0 h-0 overflow-hidden opacity-0 pointer-events-none peer"
                 />
                 <span
-                    class="block relative h-5 w-5 mr-2 rounded-full bg-white bg-gradient-to-b from-transparent to-gray-200 border border-gray-400 peer-checked:border-primary-500"
+                    class="block relative h-5 w-5 mr-2 rounded-full bg-white bg-gradient-to-b from-transparent to-gray-200 border border-gray-400 peer-checked:border-primary-500 peer-focus-visible:ring-2 peer-focus-visible:ring-primary-500 peer-focus-visible:ring-offset-1"
                 >
                     <span
                         v-if="selectedValue === option.value"
@@ -111,11 +111,12 @@
                     type="radio"
                     :name="context.node.name"
                     :value="otherValue"
+                    aria-label="Other"
                     v-model="selectedValue"
                     class="absolute w-0 h-0 overflow-hidden opacity-0 pointer-events-none peer"
                 />
                 <span
-                    class="block relative h-5 w-5 mr-2 rounded-full bg-white bg-gradient-to-b from-transparent to-gray-200 border border-gray-400 peer-checked:border-primary-500 flex-shrink-0"
+                    class="block relative h-5 w-5 mr-2 rounded-full bg-white bg-gradient-to-b from-transparent to-gray-200 border border-gray-400 peer-checked:border-primary-500 peer-focus-visible:ring-2 peer-focus-visible:ring-primary-500 peer-focus-visible:ring-offset-1 flex-shrink-0"
                 >
                     <span
                         v-if="selectedValue === otherValue"

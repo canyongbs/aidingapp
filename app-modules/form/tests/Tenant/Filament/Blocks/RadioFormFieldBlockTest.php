@@ -138,6 +138,13 @@ describe('other option', function (): void {
             ->and($withoutOther->passes())->toBeFalse();
     });
 
+    it('treats an empty other answer as null only when the field is optional', function () use ($otherOptionField): void {
+        $rules = RadioFormFieldBlock::getValidationRules($otherOptionField(true));
+
+        expect(Validator::make(['response' => null], ['response' => $rules])->passes())->toBeTrue()
+            ->and(Validator::make(['response' => null], ['response' => ['required', ...$rules]])->passes())->toBeFalse();
+    });
+
     it('shows the other option in the preview only when it is included', function (bool $hasOtherOption, bool $isShown): void {
         $html = RadioFormFieldBlock::toPreviewHtml([
             'label' => 'Agree',
