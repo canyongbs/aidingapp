@@ -71,6 +71,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Query\Expression;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 
 class ProjectWorkPipelineWidget extends TableWidget
@@ -151,6 +152,35 @@ class ProjectWorkPipelineWidget extends TableWidget
                             $assignedTo instanceof Contact => $assignedTo->full_name,
                             default => null,
                         };
+                    })
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        $model = $query->getModel();
+                        $assignedToType = $model->qualifyColumn('assigned_to_type');
+                        $assignedToId = $model->qualifyColumn('assigned_to_id');
+
+                        $direction = Str::lower($direction) === 'desc' ? 'desc' : 'asc';
+
+                        return $query->orderByRaw(
+                            "(
+                                case
+                                    when {$assignedToType} = ? then (
+                                        select trim(concat(users.first_name, ' ', users.last_name))
+                                        from users
+                                        where users.id = {$assignedToId}
+                                    )
+                                    when {$assignedToType} = ? then (
+                                        select contacts.full_name
+                                        from contacts
+                                        where contacts.id = {$assignedToId}
+                                    )
+                                    else null
+                                end
+                            ) {$direction} nulls last",
+                            [
+                                (new User())->getMorphClass(),
+                                (new Contact())->getMorphClass(),
+                            ]
+                        );
                     }),
                 TextColumn::make('pipelineStage.name')
                     ->label('Status')
