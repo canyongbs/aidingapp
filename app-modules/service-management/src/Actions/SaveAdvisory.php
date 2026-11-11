@@ -179,6 +179,9 @@ class SaveAdvisory
     /**
      * Contact type names are not unique, so each name must match exactly one type, ignoring case.
      *
+     * TODO: Cleanup Task (contact-type-name-uniqueness): once the flag is removed, every name is unique,
+     * so drop the ambiguous-name error.
+     *
      * @param array<int, string> $names
      * @param array<string, string> $errors
      *

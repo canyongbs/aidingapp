@@ -43,7 +43,9 @@ use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
+use App\Models\User;
 use App\Settings\LicenseSettings;
+use Illuminate\Support\Carbon;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
@@ -134,6 +136,54 @@ it('shows guest-visible pipeline tasks grouped by milestone', function (): void 
         ->assertJsonPath('meta.total', 3)
         ->assertJsonPath('meta.per_page', 50)
         ->assertJsonMissing(['name' => 'Internal Review']);
+});
+
+it('shows who each pipeline task is assigned to', function (): void {
+    $contact = Contact::factory()->create();
+    $project = Project::factory()->create();
+    $project->guestContacts()->attach($contact);
+
+    $pipeline = Pipeline::factory()->for($project)->create();
+    $stage = PipelineStage::factory()->for($pipeline)->create();
+
+    $user = User::factory()->create(['first_name' => 'Joe', 'last_name' => 'Smith']);
+    $assignedContact = Contact::factory()->create(['full_name' => 'Bob Smith']);
+
+    $userEntry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
+        'project_milestone_id' => null,
+        'assigned_to_type' => $user->getMorphClass(),
+        'assigned_to_id' => $user->getKey(),
+        'created_at' => Carbon::parse('2026-01-15 09:00:00'),
+    ]);
+    $contactEntry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
+        'project_milestone_id' => null,
+        'assigned_to_type' => $assignedContact->getMorphClass(),
+        'assigned_to_id' => $assignedContact->getKey(),
+        'created_at' => Carbon::parse('2026-01-15 10:00:00'),
+    ]);
+    $unassignedEntry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
+        'project_milestone_id' => null,
+        'assigned_to_type' => null,
+        'assigned_to_id' => null,
+        'created_at' => Carbon::parse('2026-01-15 11:00:00'),
+    ]);
+
+    actingAs($contact, 'contact');
+
+    getJson(route('api.portal.projects.show', ['portalProject' => $project->getKey()]))
+        ->assertOk()
+        ->assertJsonPath('data.pipelines.0.groups.0.entries.0.id', $userEntry->getKey())
+        ->assertJsonPath('data.pipelines.0.groups.0.entries.0.assigned_to', [
+            'name' => 'Joe Smith',
+            'type' => 'Service Provider',
+        ])
+        ->assertJsonPath('data.pipelines.0.groups.0.entries.1.id', $contactEntry->getKey())
+        ->assertJsonPath('data.pipelines.0.groups.0.entries.1.assigned_to', [
+            'name' => 'Bob Smith',
+            'type' => 'Customer',
+        ])
+        ->assertJsonPath('data.pipelines.0.groups.0.entries.2.id', $unassignedEntry->getKey())
+        ->assertJsonPath('data.pipelines.0.groups.0.entries.2.assigned_to', null);
 });
 
 it('shows a project without any pipelines', function (): void {

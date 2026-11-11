@@ -153,7 +153,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                         };
                     }),
                 TextColumn::make('pipelineStage.name')
-                    ->label('Stage')
+                    ->label('Status')
                     ->badge(),
                 ViewColumn::make('assets')
                     ->label('Assets')

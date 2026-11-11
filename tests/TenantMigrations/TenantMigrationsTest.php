@@ -38,6 +38,7 @@ use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\ContractManagement\Models\ContractType;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\LicenseManagement\Models\Product;
@@ -53,15 +54,16 @@ use App\Features\AdvisoryStatusNameUniquenessFeature;
 use App\Features\ChangeRequestStatusNameUniquenessFeature;
 use App\Features\ChangeRequestTypeNameUniquenessFeature;
 use App\Features\ContactPermissionConsolidationFeature;
+use App\Features\ContactTypeNameUniquenessFeature;
 use App\Features\ContractNameUniquenessFeature;
 use App\Features\ContractTypeNameUniquenessFeature;
 use App\Features\EmailTemplateNameUniquenessFeature;
 use App\Features\KnowledgeBaseCategoryNameUniquenessFeature;
-use App\Features\LicensesPermissionsConsolidationFeature;
 use App\Features\MaintenanceProviderNameUniquenessFeature;
 use App\Features\PipelineNameUniquenessFeature;
 use App\Features\PipelineStageNameUniquenessFeature;
 use App\Features\ProductNameUniquenessFeature;
+use App\Features\ProjectPermissionConsolidationFeature;
 use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Features\ServiceRequestFileUploadTypeFeature;
 use App\Features\ServiceRequestTypeCategoryNameUniquenessFeature;
@@ -75,14 +77,11 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
-
-use Spatie\Permission\PermissionRegistrar;
 
 //describe('2025_01_01_165527_tmp_data_do_a_thing', function () {
 //    it('properly changed the data', function () {
@@ -1991,7 +1990,7 @@ describe('2026_11_06_233425_tmp_grant_change_request_permissions_to_users_and_ro
             $roleUser->assignRole($role);
 
             $unrelatedUser = User::factory()->create();
-            $unrelatedUser->givePermissionTo('knowledge_base_item.view-any');
+            $unrelatedUser->givePermissionTo('product.view-any');
 
             $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_11_06_233425_tmp_grant_change_request_permissions_to_users_and_roles_with_related_permissions.php']);
             expect($migrate)->toBe(Command::SUCCESS);
@@ -2004,7 +2003,7 @@ describe('2026_11_06_233425_tmp_grant_change_request_permissions_to_users_and_ro
                 ->and($directPermissionNames($systemUser))->toContain(...$changeRequestPermissions)
                 ->and($rolePermissionNames($role))->toContain(...$changeRequestPermissions)
                 ->and($directPermissionNames($unrelatedUser))->not->toContain(...$changeRequestPermissions)
-                ->and($directPermissionNames($unrelatedUser))->toBe(['knowledge_base_item.view-any']);
+                ->and($directPermissionNames($unrelatedUser))->toBe(['product.view-any']);
         });
     });
 });
@@ -2041,7 +2040,7 @@ describe('2026_11_10_191246_tmp_grant_contacts_permissions_to_users_and_roles_wi
             $roleUser->assignRole($role);
 
             $unrelatedUser = User::factory()->create();
-            $unrelatedUser->givePermissionTo('knowledge_base_item.view-any');
+            $unrelatedUser->givePermissionTo('product.view-any');
 
             expect(ContactPermissionConsolidationFeature::active())->toBeFalse();
 
@@ -2059,169 +2058,157 @@ describe('2026_11_10_191246_tmp_grant_contacts_permissions_to_users_and_roles_wi
                 ->and($directPermissionNames($systemUser))->toBe($sorted(['contacts.view-any']))
                 ->and($role->refresh()->permissions()->pluck('name')->all())->toContain('contacts.*.update')
                 ->and($directPermissionNames($unrelatedUser))->toBe([])
-                ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['knowledge_base_item.view-any'])
+                ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['product.view-any'])
                 ->and(ContactPermissionConsolidationFeature::active())->toBeTrue();
         });
     });
 });
 
-// TODO: Cleanup Task (licenses-permissions-consolidation): delete this describe and the tests within
-describe('2026_11_06_143633_seed_permissions_consolidate_licenses_permissions', function (): void {
-    $migrationName = '2026_11_06_143633_seed_permissions_consolidate_licenses_permissions';
-    $migrationPath = "app-modules/license-management/database/migrations/{$migrationName}.php";
+// TODO: Cleanup Task (contact-type-name-uniqueness): delete this describe and the tests within
+describe('2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique', function (): void {
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates the feature flag', function (): void {
+        isolatedMigration('2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique', function (): void {
+            $first = ContactType::factory()->create(['name' => 'Student', 'created_at' => now()->subMinutes(3)]);
+            $second = ContactType::factory()->create(['name' => 'student', 'created_at' => now()->subMinutes(2)]);
+            $third = ContactType::factory()->create(['name' => 'STUDENT', 'created_at' => now()->subMinute()]);
+            $existingSuffixed = ContactType::factory()->create(['name' => 'Student-2', 'created_at' => now()->subMinutes(4)]);
+            $unique = ContactType::factory()->create(['name' => 'Employee', 'created_at' => now()->subMinutes(5)]);
 
-    $operations = ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'];
+            expect(ContactTypeNameUniquenessFeature::active())->toBeFalse();
 
-    $permissionId = fn (string $name, string $guard): ?string => DB::table('permissions')
-        ->where('name', $name)
-        ->where('guard_name', $guard)
-        ->value('id');
-
-    $roleGrants = fn (Role $role): array => DB::table('role_has_permissions')
-        ->join('permissions', 'permissions.id', '=', 'role_has_permissions.permission_id')
-        ->where('role_has_permissions.role_id', $role->getKey())
-        ->pluck('permissions.name')
-        ->sort()
-        ->values()
-        ->all();
-
-    $modelGrants = fn (Model $model): array => DB::table('model_has_permissions')
-        ->join('permissions', 'permissions.id', '=', 'model_has_permissions.permission_id')
-        ->where('model_has_permissions.model_type', $model->getMorphClass())
-        ->where('model_has_permissions.model_id', $model->getKey())
-        ->pluck('permissions.name')
-        ->sort()
-        ->values()
-        ->all();
-
-    it('carries every existing grant over to the consolidated Licenses permissions and removes the old groups', function () use ($migrationName, $migrationPath, $operations, $permissionId, $roleGrants, $modelGrants): void {
-        isolatedMigration($migrationName, function () use ($migrationPath, $operations, $permissionId, $roleGrants, $modelGrants): void {
-            $grantRole = fn (Role $role, string $name) => DB::table('role_has_permissions')->insert([
-                'role_id' => $role->getKey(),
-                'permission_id' => $permissionId($name, $role->guard_name),
-            ]);
-
-            $grantModel = fn (Model $model, string $name, string $guard) => DB::table('model_has_permissions')->insert([
-                'permission_id' => $permissionId($name, $guard),
-                'model_type' => $model->getMorphClass(),
-                'model_id' => $model->getKey(),
-            ]);
-
-            $productOnlyRole = Role::factory()->create(['guard_name' => 'web']);
-            $grantRole($productOnlyRole, 'product.*.update');
-
-            $productLicenseOnlyRole = Role::factory()->create(['guard_name' => 'web']);
-            $grantRole($productLicenseOnlyRole, 'product_license.view-any');
-
-            $bothGroupsRole = Role::factory()->create(['guard_name' => 'web']);
-            $grantRole($bothGroupsRole, 'product.*.delete');
-            $grantRole($bothGroupsRole, 'product_license.*.delete');
-            $grantRole($bothGroupsRole, 'product_license.create');
-
-            $apiRole = Role::factory()->create(['guard_name' => 'api']);
-            $grantRole($apiRole, 'product.*.force-delete');
-
-            $unrelatedRole = Role::factory()->create(['guard_name' => 'web']);
-            $grantRole($unrelatedRole, 'role.view-any');
-
-            $user = User::factory()->create();
-            $grantModel($user, 'product_license.*.view', 'web');
-
-            $systemUser = SystemUser::factory()->create();
-            $grantModel($systemUser, 'product.view-any', 'api');
-            $grantModel($systemUser, 'product_license.view-any', 'api');
-
-            expect(LicensesPermissionsConsolidationFeature::active())->toBeFalse();
-
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/contact/database/migrations/2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique.php']);
             expect($migrate)->toBe(Command::SUCCESS);
 
-            expect($roleGrants($productOnlyRole))->toBe(['licenses.*.update'])
-                ->and($roleGrants($productLicenseOnlyRole))->toBe(['licenses.view-any'])
-                ->and($roleGrants($bothGroupsRole))->toBe(['licenses.*.delete', 'licenses.create'])
-                ->and($roleGrants($apiRole))->toBe(['licenses.*.force-delete'])
-                ->and($roleGrants($unrelatedRole))->toBe(['role.view-any'])
-                ->and($modelGrants($user))->toBe(['licenses.*.view'])
-                ->and($modelGrants($systemUser))->toBe(['licenses.view-any']);
-
-            $licensesGroupId = DB::table('permission_groups')->where('name', 'Licenses')->value('id');
-
-            foreach (['web', 'api'] as $guard) {
-                foreach ($operations as $operation) {
-                    assertDatabaseHas('permissions', ['name' => "licenses.{$operation}", 'guard_name' => $guard, 'group_id' => $licensesGroupId]);
-                    assertDatabaseMissing('permissions', ['name' => "product.{$operation}", 'guard_name' => $guard]);
-                    assertDatabaseMissing('permissions', ['name' => "product_license.{$operation}", 'guard_name' => $guard]);
-                }
-
-                expect(DB::table('permissions')->where('group_id', $licensesGroupId)->where('guard_name', $guard)->count())->toBe(7);
-            }
-
-            assertDatabaseMissing('permission_groups', ['name' => 'Product']);
-            assertDatabaseMissing('permission_groups', ['name' => 'Product License']);
-            assertDatabaseHas('permissions', ['name' => 'role.view-any', 'guard_name' => 'web']);
-
-            expect(LicensesPermissionsConsolidationFeature::active())->toBeTrue();
+            expect($first->refresh()->name)->toBe('Student')
+                ->and($second->refresh()->name)->toBe('student-3')
+                ->and($third->refresh()->name)->toBe('STUDENT-4')
+                ->and($existingSuffixed->refresh()->name)->toBe('Student-2')
+                ->and($unique->refresh()->name)->toBe('Employee')
+                ->and(ContactTypeNameUniquenessFeature::active())->toBeTrue();
         });
     });
 
-    it('clears the current tenant\'s cached permissions even though the permission registrar resolved its cache store before the tenant was switched', function () use ($migrationName, $migrationPath): void {
-        isolatedMigration($migrationName, function () use ($migrationPath): void {
-            // Resolve the registrar first, then swap the cache store the way PrefixCacheTask does when `tenants:artisan` switches tenants.
-            app(PermissionRegistrar::class);
+    it('leaves soft-deleted duplicates untouched', function (): void {
+        isolatedMigration('2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique', function (): void {
+            $kept = ContactType::factory()->create(['name' => 'Student', 'created_at' => now()->subMinutes(2)]);
+            $trashed = ContactType::factory()->create(['name' => 'student', 'created_at' => now()->subMinute()]);
+            $trashed->delete();
 
-            config()->set('cache.prefix', 'licenses_consolidation_tenant');
-            app('cache')->forgetDriver(config('cache.default'));
-            app()->forgetInstance('cache');
-            app()->forgetInstance('cache.store');
-            Cache::clearResolvedInstances();
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/contact/database/migrations/2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
 
-            Cache::forever(config('permission.cache.key'), 'stale');
-
-            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
-
-            expect(Cache::has(config('permission.cache.key')))->toBeFalse();
+            expect($kept->refresh()->name)->toBe('Student')
+                ->and($trashed->refresh()->name)->toBe('student');
         });
     });
 
-    it('restores the grants on both original groups on rollback', function () use ($migrationName, $migrationPath, $operations, $permissionId, $roleGrants, $modelGrants): void {
-        isolatedMigration($migrationName, function () use ($migrationPath, $operations, $permissionId, $roleGrants, $modelGrants): void {
-            $role = Role::factory()->create(['guard_name' => 'web']);
+    it('enforces case-insensitive uniqueness among non-trashed contact types at the database level', function (): void {
+        isolatedMigration('2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique', function (): void {
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/contact/database/migrations/2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
 
-            DB::table('role_has_permissions')->insert([
-                'role_id' => $role->getKey(),
-                'permission_id' => $permissionId('product.*.update', 'web'),
-            ]);
+            ContactType::factory()->create(['name' => 'Student']);
 
-            $systemUser = SystemUser::factory()->create();
+            expect(fn () => ContactType::factory()->create(['name' => 'STUDENT']))
+                ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
 
-            DB::table('model_has_permissions')->insert([
-                'permission_id' => $permissionId('product_license.view-any', 'api'),
-                'model_type' => $systemUser->getMorphClass(),
-                'model_id' => $systemUser->getKey(),
-            ]);
+    it('keeps the repaired names on rollback and deactivates the feature flag', function (): void {
+        isolatedMigration('2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique', function (): void {
+            $first = ContactType::factory()->create(['name' => 'Student', 'created_at' => now()->subMinutes(2)]);
+            $second = ContactType::factory()->create(['name' => 'student', 'created_at' => now()->subMinute()]);
 
-            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/contact/database/migrations/2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
 
-            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($second->refresh()->name)->toBe('student-2');
+
+            $first->delete();
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => 'app-modules/contact/database/migrations/2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique.php']);
             expect($rollback)->toBe(Command::SUCCESS);
 
-            expect($roleGrants($role))->toBe(['product.*.update', 'product_license.*.update'])
-                ->and($modelGrants($systemUser))->toBe(['product.view-any', 'product_license.view-any']);
+            expect($second->refresh()->name)->toBe('student-2')
+                ->and(ContactTypeNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
 
-            foreach (['web', 'api'] as $guard) {
-                foreach ($operations as $operation) {
-                    expect(DB::table('permissions')->where('name', "product.{$operation}")->where('guard_name', $guard)->count())->toBe(1)
-                        ->and(DB::table('permissions')->where('name', "product_license.{$operation}")->where('guard_name', $guard)->count())->toBe(1);
+    it('keeps suffixed names within the column length for names at the maximum length', function (): void {
+        isolatedMigration('2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique', function (): void {
+            $first = ContactType::factory()->create(['name' => str_repeat('a', 255), 'created_at' => now()->subMinutes(2)]);
+            $second = ContactType::factory()->create(['name' => str_repeat('A', 255), 'created_at' => now()->subMinute()]);
 
-                    assertDatabaseMissing('permissions', ['name' => "licenses.{$operation}", 'guard_name' => $guard]);
-                }
-            }
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/contact/database/migrations/2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
 
-            assertDatabaseHas('permission_groups', ['name' => 'Product']);
-            assertDatabaseHas('permission_groups', ['name' => 'Product License']);
-            assertDatabaseMissing('permission_groups', ['name' => 'Licenses']);
+            expect($first->refresh()->name)->toBe(str_repeat('a', 255))
+                ->and($second->refresh()->name)->toBe(str_repeat('A', 253) . '-2');
+        });
+    });
 
-            expect(LicensesPermissionsConsolidationFeature::active())->toBeFalse();
+    it('skips a truncated candidate name that is already taken', function (): void {
+        isolatedMigration('2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique', function (): void {
+            ContactType::factory()->create(['name' => str_repeat('a', 255), 'created_at' => now()->subMinutes(3)]);
+            $second = ContactType::factory()->create(['name' => str_repeat('A', 255), 'created_at' => now()->subMinutes(2)]);
+            ContactType::factory()->create(['name' => str_repeat('a', 253) . '-2', 'created_at' => now()->subMinute()]);
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/contact/database/migrations/2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($second->refresh()->name)->toBe(str_repeat('A', 253) . '-3');
+        });
+    });
+});
+
+// TODO: Cleanup Task (projects-permission-consolidation): delete this describe and the test within
+describe('2026_11_10_221002_tmp_grant_projects_permissions_to_users_and_roles_with_related_permissions', function (): void {
+    it('grants the equivalent projects permissions to users and roles with a related permission', function (): void {
+        isolatedMigration('2026_11_10_221002_tmp_grant_projects_permissions_to_users_and_roles_with_related_permissions', function (): void {
+            $permissionsFor = fn (string $prefix): array => array_map(
+                fn (string $action): string => "{$prefix}.{$action}",
+                ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'],
+            );
+
+            $projectsPermissions = $permissionsFor('projects');
+
+            $projectUser = User::factory()->create();
+            $projectUser->givePermissionTo($permissionsFor('project'));
+
+            $pipelineUser = User::factory()->create();
+            $pipelineUser->givePermissionTo($permissionsFor('pipeline'));
+
+            $partialPipelineUser = User::factory()->create();
+            $partialPipelineUser->givePermissionTo('pipeline.*.update');
+
+            $systemUser = SystemUser::factory()->create();
+            $systemUser->givePermissionTo('pipeline.view-any');
+
+            $roleUser = User::factory()->create();
+            $role = Role::factory()->create();
+            $role->givePermissionTo('project.*.delete');
+            $roleUser->assignRole($role);
+
+            $unrelatedUser = User::factory()->create();
+            $unrelatedUser->givePermissionTo('product.view-any');
+
+            expect(ProjectPermissionConsolidationFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/project/database/migrations/2026_11_10_221002_tmp_grant_projects_permissions_to_users_and_roles_with_related_permissions.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $directProjectsPermissionNames = fn (User|SystemUser $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->filter(fn (string $name): bool => str_starts_with($name, 'projects.'))->sort()->values()->all();
+            $sorted = fn (array $names): array => collect($names)->sort()->values()->all();
+
+            expect($directProjectsPermissionNames($projectUser))->toBe($sorted($projectsPermissions))
+                ->and($directProjectsPermissionNames($pipelineUser))->toBe($sorted($projectsPermissions))
+                ->and($directProjectsPermissionNames($partialPipelineUser))->toBe(['projects.*.update'])
+                ->and($directProjectsPermissionNames($systemUser))->toBe(['projects.view-any'])
+                ->and($role->refresh()->permissions()->pluck('name')->all())->toContain('projects.*.delete')
+                ->and($roleUser->refresh()->hasPermissionTo('projects.*.delete'))->toBeTrue()
+                ->and($directProjectsPermissionNames($unrelatedUser))->toBe([])
+                ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['product.view-any'])
+                ->and(ProjectPermissionConsolidationFeature::active())->toBeTrue();
         });
     });
 });
