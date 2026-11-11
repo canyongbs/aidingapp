@@ -74,6 +74,7 @@
             <tr>
                 <BaseTableHeaderCell class="w-64">Task Name</BaseTableHeaderCell>
                 <BaseTableHeaderCell>Stage</BaseTableHeaderCell>
+                <BaseTableHeaderCell>Assigned To</BaseTableHeaderCell>
                 <BaseTableHeaderCell>Start Date</BaseTableHeaderCell>
                 <BaseTableHeaderCell>Target Date</BaseTableHeaderCell>
             </tr>
@@ -84,7 +85,7 @@
                 :key="`${group.milestone_id ?? 'no-milestone'}-${groupIndex}`"
             >
                 <tr class="bg-gray-50/70">
-                    <td colspan="4" class="px-4 py-2 sm:px-6">
+                    <td colspan="5" class="px-4 py-2 sm:px-6">
                         <div class="flex items-center justify-between gap-2">
                             <span class="text-sm font-semibold text-gray-700">{{ group.milestone_title }}</span>
                             <BaseBadge v-if="group.progress_percentage !== null" color="gray" :icon="ChartPieIcon">
@@ -104,6 +105,7 @@
                     <BaseTableCell class="text-gray-400">N/A</BaseTableCell>
                     <BaseTableCell class="text-gray-400">N/A</BaseTableCell>
                     <BaseTableCell class="text-gray-400">N/A</BaseTableCell>
+                    <BaseTableCell class="text-gray-400">N/A</BaseTableCell>
                 </BaseTableRow>
 
                 <BaseTableRow v-for="entry in group.entries" :key="entry.id">
@@ -115,6 +117,13 @@
                     </BaseTableCell>
                     <BaseTableCell>
                         <BaseBadge color="gray">{{ entry.stage ?? 'N/A' }}</BaseBadge>
+                    </BaseTableCell>
+                    <BaseTableCell>
+                        <div v-if="entry.assigned_to" class="flex flex-col items-start gap-1.5">
+                            <span class="text-sm text-gray-900">{{ entry.assigned_to.name }}</span>
+                            <BaseBadge color="gray">{{ entry.assigned_to.type }}</BaseBadge>
+                        </div>
+                        <span v-else class="text-sm text-gray-600">N/A</span>
                     </BaseTableCell>
                     <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
                         {{ formatDateTime(entry.start_date, { dateOnly: true, utc: true }) ?? 'N/A' }}
