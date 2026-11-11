@@ -36,11 +36,15 @@
 
 use AidingApp\InventoryManagement\Filament\Resources\AssetTypes\Pages\ListAssetTypes;
 use AidingApp\InventoryManagement\Models\AssetType;
+use App\Features\AssetTypeNameUniquenessFeature;
 use App\Models\User;
+use Filament\Actions\EditAction;
 use Filament\Actions\Testing\TestAction;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+use function Tests\asSuperAdmin;
 
 it('only shows the bulk delete action to a user with the asset_type.delete permission', function (): void {
     AssetType::factory(15)->create();
@@ -58,4 +62,75 @@ it('only shows the bulk delete action to a user with the asset_type.delete permi
 
     Livewire::test(ListAssetTypes::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+});
+
+describe('edit action', function (): void {
+    it('can update an asset type', function (): void {
+        asSuperAdmin();
+
+        $assetType = AssetType::factory()->create(['name' => 'Laptop']);
+
+        Livewire::test(ListAssetTypes::class)
+            ->callAction(TestAction::make(EditAction::class)->table($assetType), data: ['name' => 'Projector'])
+            ->assertHasNoFormErrors();
+
+        expect($assetType->refresh()->name)->toBe('Projector');
+    });
+
+    it('validates the inputs', function (array $data, array $errors): void {
+        asSuperAdmin();
+
+        AssetType::factory()->create(['name' => 'Laptop']);
+        $assetType = AssetType::factory()->create();
+
+        Livewire::test(ListAssetTypes::class)
+            ->callAction(TestAction::make(EditAction::class)->table($assetType), data: $data)
+            ->assertHasFormErrors($errors);
+    })->with([
+        'name required' => [['name' => null], ['name' => 'required']],
+        'name max' => [['name' => str()->random(256)], ['name' => 'max']],
+        'name unique' => [['name' => 'Laptop'], ['name' => 'unique']],
+        'name unique case insensitive' => [['name' => 'LAPTOP'], ['name' => 'unique']],
+    ]);
+
+    it('allows keeping its own name with a different case', function (): void {
+        asSuperAdmin();
+
+        $assetType = AssetType::factory()->create(['name' => 'Laptop']);
+
+        Livewire::test(ListAssetTypes::class)
+            ->callAction(TestAction::make(EditAction::class)->table($assetType), data: ['name' => 'LAPTOP'])
+            ->assertHasNoFormErrors();
+
+        expect($assetType->refresh()->name)->toBe('LAPTOP');
+    });
+
+    it('allows the name of a soft deleted asset type', function (): void {
+        asSuperAdmin();
+
+        AssetType::factory()->create(['name' => 'Laptop'])->delete();
+        $assetType = AssetType::factory()->create(['name' => 'Projector']);
+
+        Livewire::test(ListAssetTypes::class)
+            ->callAction(TestAction::make(EditAction::class)->table($assetType), data: ['name' => 'Laptop'])
+            ->assertHasNoFormErrors();
+
+        expect($assetType->refresh()->name)->toBe('Laptop');
+    });
+});
+
+// TODO: Cleanup Task (asset-type-status-and-location-name-uniqueness): delete this describe and the test within
+describe('name uniqueness feature flag', function (): void {
+    it('does not apply the unique form rule when the feature is disabled', function (): void {
+        AssetTypeNameUniquenessFeature::deactivate();
+
+        asSuperAdmin();
+
+        AssetType::factory()->create(['name' => 'Laptop']);
+        $assetType = AssetType::factory()->create(['name' => 'Projector']);
+
+        expect(fn () => Livewire::test(ListAssetTypes::class)
+            ->callAction(TestAction::make(EditAction::class)->table($assetType), data: ['name' => 'Laptop']))
+            ->toThrow(UniqueConstraintViolationException::class);
+    });
 });

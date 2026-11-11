@@ -35,12 +35,17 @@
 */
 
 use AidingApp\InventoryManagement\Filament\Resources\AssetStatuses\Pages\ListAssetStatuses;
+use AidingApp\InventoryManagement\Models\AssetStatus;
 use AidingApp\InventoryManagement\Models\AssetType;
+use App\Features\AssetStatusNameUniquenessFeature;
 use App\Models\User;
+use Filament\Actions\EditAction;
 use Filament\Actions\Testing\TestAction;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+use function Tests\asSuperAdmin;
 
 it('only shows the bulk delete action to a user with the asset_status.delete permission', function (): void {
     AssetType::factory(15)->create();
@@ -58,4 +63,75 @@ it('only shows the bulk delete action to a user with the asset_status.delete per
 
     Livewire::test(ListAssetStatuses::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+});
+
+describe('edit action', function (): void {
+    it('can update an asset status', function (): void {
+        asSuperAdmin();
+
+        $assetStatus = AssetStatus::factory()->create(['name' => 'Reserved']);
+
+        Livewire::test(ListAssetStatuses::class)
+            ->callAction(TestAction::make(EditAction::class)->table($assetStatus), data: ['name' => 'Retired'])
+            ->assertHasNoFormErrors();
+
+        expect($assetStatus->refresh()->name)->toBe('Retired');
+    });
+
+    it('validates the inputs', function (array $data, array $errors): void {
+        asSuperAdmin();
+
+        AssetStatus::factory()->create(['name' => 'Reserved']);
+        $assetStatus = AssetStatus::factory()->create();
+
+        Livewire::test(ListAssetStatuses::class)
+            ->callAction(TestAction::make(EditAction::class)->table($assetStatus), data: $data)
+            ->assertHasFormErrors($errors);
+    })->with([
+        'name required' => [['name' => null], ['name' => 'required']],
+        'name max' => [['name' => str()->random(256)], ['name' => 'max']],
+        'name unique' => [['name' => 'Reserved'], ['name' => 'unique']],
+        'name unique case insensitive' => [['name' => 'RESERVED'], ['name' => 'unique']],
+    ]);
+
+    it('allows keeping its own name with a different case', function (): void {
+        asSuperAdmin();
+
+        $assetStatus = AssetStatus::factory()->create(['name' => 'Reserved']);
+
+        Livewire::test(ListAssetStatuses::class)
+            ->callAction(TestAction::make(EditAction::class)->table($assetStatus), data: ['name' => 'RESERVED'])
+            ->assertHasNoFormErrors();
+
+        expect($assetStatus->refresh()->name)->toBe('RESERVED');
+    });
+
+    it('allows the name of a soft deleted asset status', function (): void {
+        asSuperAdmin();
+
+        AssetStatus::factory()->create(['name' => 'Reserved'])->delete();
+        $assetStatus = AssetStatus::factory()->create(['name' => 'Retired']);
+
+        Livewire::test(ListAssetStatuses::class)
+            ->callAction(TestAction::make(EditAction::class)->table($assetStatus), data: ['name' => 'Reserved'])
+            ->assertHasNoFormErrors();
+
+        expect($assetStatus->refresh()->name)->toBe('Reserved');
+    });
+});
+
+// TODO: Cleanup Task (asset-type-status-and-location-name-uniqueness): delete this describe and the test within
+describe('name uniqueness feature flag', function (): void {
+    it('does not apply the unique form rule when the feature is disabled', function (): void {
+        AssetStatusNameUniquenessFeature::deactivate();
+
+        asSuperAdmin();
+
+        AssetStatus::factory()->create(['name' => 'Reserved']);
+        $assetStatus = AssetStatus::factory()->create(['name' => 'Retired']);
+
+        expect(fn () => Livewire::test(ListAssetStatuses::class)
+            ->callAction(TestAction::make(EditAction::class)->table($assetStatus), data: ['name' => 'Reserved']))
+            ->toThrow(UniqueConstraintViolationException::class);
+    });
 });

@@ -40,11 +40,13 @@ use AidingApp\InventoryManagement\Filament\Resources\AssetTypes\Pages\CreateAsse
 use AidingApp\InventoryManagement\Filament\Resources\AssetTypes\Pages\ListAssetTypes;
 use AidingApp\InventoryManagement\Filament\Resources\AssetTypes\Pages\ViewAssetType;
 use AidingApp\InventoryManagement\Models\AssetType;
+use App\Features\AssetTypeNameUniquenessFeature;
 use App\Filament\Clusters\AssetManagement;
 use BackedEnum;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
 class AssetTypeResource extends Resource
 {
@@ -64,7 +66,14 @@ class AssetTypeResource extends Resource
             ->components([
                 TextInput::make('name')
                     ->autofocus()
-                    ->required(),
+                    ->required()
+                    ->maxLength(255)
+                    ->string()
+                    // TODO: Cleanup Task (asset-type-status-and-location-name-uniqueness): replace this `when()` with `->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())` once the flag is removed.
+                    ->when(
+                        AssetTypeNameUniquenessFeature::active(),
+                        fn (TextInput $input): TextInput => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
+                    ),
             ]);
     }
 
