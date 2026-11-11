@@ -383,7 +383,7 @@ it('can see project in list if logged in user is a superadmin, the creator, a ma
         ->assertSuccessful();
 });
 
-it('only shows the archive bulk action to a user with the projects.delete permission', function (): void {
+it('only shows the archive bulk action to a user with the `projects.*.delete` permission', function (): void {
     $user = User::factory()
         ->create()
         ->givePermissionTo('projects.view-any', 'projects.*.view');
