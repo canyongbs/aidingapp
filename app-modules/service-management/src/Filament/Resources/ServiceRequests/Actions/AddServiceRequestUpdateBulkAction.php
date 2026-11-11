@@ -84,9 +84,7 @@ class AddServiceRequestUpdateBulkAction
 
                 BulkProcessingMachine::make($records->all())
                     ->check(function (ServiceRequest $serviceRequest) use ($user): ?Closure {
-                        if (
-                            $user->can('service_request.*.update') && $user->can('service_request_update.create')
-                        ) {
+                        if ($user->can('service_request.*.update')) {
                             return null;
                         }
 

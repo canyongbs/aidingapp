@@ -380,16 +380,16 @@ describe('deletion', function (): void {
 });
 
 describe('authorization', function () use ($openServiceRequest): void {
-    it('denies access without the `service_request_update.view-any` permission', function (): void {
+    it('denies access without the `service_request.view-any` permission', function (): void {
         actingAs(User::factory()->create());
 
         Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => ServiceRequest::factory()->create()])
             ->assertForbidden();
     });
 
-    it('does not create an update without the `service_request_update.create` permission', function () use ($openServiceRequest): void {
+    it('does not create an update without the `service_request.*.update` permission', function () use ($openServiceRequest): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('service_request_update.view-any');
+        $user->givePermissionTo('service_request.view-any');
         actingAs($user);
 
         $serviceRequest = $openServiceRequest();
@@ -405,7 +405,7 @@ describe('authorization', function () use ($openServiceRequest): void {
 
     it('does not change the status without permission to update the service request', function () use ($openServiceRequest): void {
         $user = User::factory()->create();
-        $user->givePermissionTo(['service_request_update.view-any', 'service_request_update.create']);
+        $user->givePermissionTo(['service_request.view-any', 'service_request.create', 'service_request.*.update']);
         actingAs($user);
 
         $serviceRequest = $openServiceRequest();
@@ -427,9 +427,9 @@ describe('authorization', function () use ($openServiceRequest): void {
         expect($serviceRequest->refresh()->status_id)->toBe($originalStatusId);
     });
 
-    it('hides the `deleteUpdate` action without the `service_request_update.*.delete` permission', function (): void {
+    it('hides the `deleteUpdate` action without the `service_request.*.delete` permission', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('service_request_update.view-any');
+        $user->givePermissionTo('service_request.view-any');
         actingAs($user);
 
         $update = ServiceRequestUpdate::factory()->create();

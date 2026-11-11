@@ -51,8 +51,8 @@ beforeEach(function (): void {
 
 test('an authenticated user with permission can download service request update media', function (): void {
     $user = User::factory()->create();
-    $user->givePermissionTo('service_request_update.view-any');
-    $user->givePermissionTo('service_request_update.*.view');
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
 
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
     $serviceRequestUpdate
@@ -136,8 +136,8 @@ test('an authenticated user without permission cannot download service request m
 
 test('the download redirect url contains a temporary url', function (): void {
     $user = User::factory()->create();
-    $user->givePermissionTo('service_request_update.view-any');
-    $user->givePermissionTo('service_request_update.*.view');
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
 
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
     $serviceRequestUpdate
@@ -156,8 +156,6 @@ test('the download redirect url contains a temporary url', function (): void {
 
 test('a user cannot download media that does not belong to a service request or service request update', function (): void {
     $user = User::factory()->create();
-    $user->givePermissionTo('service_request_update.view-any');
-    $user->givePermissionTo('service_request_update.*.view');
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');
 

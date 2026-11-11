@@ -1140,34 +1140,6 @@ describe('authorization', function () use ($serviceRequestManagedBy): void {
             ->assertSchemaComponentDoesNotExist(ServiceRequestTab::Chats->value);
     });
 
-    it('hides the updates tab from a user who cannot view service request updates', function () use ($serviceRequestManagedBy): void {
-        $serviceRequest = $serviceRequestManagedBy($user = User::factory()->create());
-
-        actingAs($user);
-
-        Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->assertSchemaComponentHidden(ServiceRequestTab::Updates->value);
-
-        $user->givePermissionTo('service_request_update.view-any');
-
-        Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->assertSchemaComponentVisible(ServiceRequestTab::Updates->value);
-    });
-
-    it('hides the assignments tab from a user who cannot view any of its relation managers', function () use ($serviceRequestManagedBy): void {
-        $serviceRequest = $serviceRequestManagedBy($user = User::factory()->create());
-
-        actingAs($user);
-
-        Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->assertSchemaComponentDoesNotExist(ServiceRequestTab::Assignments->value);
-
-        $user->givePermissionTo('service_request_assignment.view-any');
-
-        Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->assertSchemaComponentVisible(ServiceRequestTab::Assignments->value);
-    });
-
     it('hides the timeline tab from a user without engagement permissions', function (): void {
         $settings = app(LicenseSettings::class);
         $settings->data->addons->serviceManagement = true;

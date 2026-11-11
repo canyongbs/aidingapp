@@ -2331,3 +2331,63 @@ describe('2026_11_11_150003_purge_unneeded_license_permissions', function (): vo
         });
     });
 });
+
+// TODO: Cleanup Task - Compress Service Request Permissions: delete this describe and the test within
+describe('2026_11_11_042242_tmp_grant_service_request_permissions_to_users_and_roles_with_related_permissions', function (): void {
+    it('grants the equivalent service request permission to users and roles with a related permission and activates the feature flag', function (): void {
+        isolatedMigration('2026_11_11_042242_tmp_grant_service_request_permissions_to_users_and_roles_with_related_permissions', function (): void {
+            $permissionsFor = fn (string $prefix): array => array_map(
+                fn (string $action): string => "{$prefix}.{$action}",
+                ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'],
+            );
+
+            $serviceRequestPermissions = $permissionsFor('service_request');
+
+            $assignmentUser = User::factory()->create();
+            $assignmentUser->givePermissionTo($permissionsFor('service_request_assignment'));
+
+            $historyUser = User::factory()->create();
+            $historyUser->givePermissionTo($permissionsFor('service_request_history'));
+
+            $priorityUser = User::factory()->create();
+            $priorityUser->givePermissionTo($permissionsFor('service_request_priority'));
+
+            $updateUser = User::factory()->create();
+            $updateUser->givePermissionTo($permissionsFor('service_request_update'));
+
+            $systemUser = SystemUser::factory()->create();
+            $systemUser->givePermissionTo($permissionsFor('service_request_update'));
+
+            $roleUser = User::factory()->create();
+            $role = Role::factory()->create();
+            $role->givePermissionTo([
+                ...$permissionsFor('service_request_assignment'),
+                ...$permissionsFor('service_request_history'),
+                ...$permissionsFor('service_request_priority'),
+                ...$permissionsFor('service_request_update'),
+            ]);
+            $roleUser->assignRole($role);
+
+            $partialUser = User::factory()->create();
+            $partialUser->givePermissionTo('service_request_priority.view-any');
+
+            $unrelatedUser = User::factory()->create();
+            $unrelatedUser->givePermissionTo('product.view-any');
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_11_11_042242_tmp_grant_service_request_permissions_to_users_and_roles_with_related_permissions.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $directPermissionNames = fn (User|SystemUser $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->all();
+            $rolePermissionNames = fn (Role $role): array => $role->refresh()->permissions()->pluck('name')->all();
+
+            expect($directPermissionNames($assignmentUser))->toContain(...$serviceRequestPermissions)
+                ->and($directPermissionNames($historyUser))->toContain(...$serviceRequestPermissions)
+                ->and($directPermissionNames($priorityUser))->toContain(...$serviceRequestPermissions)
+                ->and($directPermissionNames($updateUser))->toContain(...$serviceRequestPermissions)
+                ->and($directPermissionNames($systemUser))->toContain(...$serviceRequestPermissions)
+                ->and($rolePermissionNames($role))->toContain(...$serviceRequestPermissions)
+                ->and($directPermissionNames($partialUser))->toEqualCanonicalizing(['service_request_priority.view-any', 'service_request.view-any'])
+                ->and($directPermissionNames($unrelatedUser))->toBe(['product.view-any']);
+        });
+    });
+});
