@@ -237,12 +237,12 @@ describe('status filter', function (): void {
 });
 
 describe('columns', function (): void {
-    it('renders the assigned to column before the stage column', function (): void {
+    it('renders the assigned to column before the status column', function (): void {
         $project = Project::factory()->create();
 
         $widget = Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
             ->assertTableColumnExists('assignedTo', fn (Column $column): bool => $column->getLabel() === 'Assigned To')
-            ->assertTableColumnExists('pipelineStage.name', fn (Column $column): bool => $column->getLabel() === 'Stage');
+            ->assertTableColumnExists('pipelineStage.name', fn (Column $column): bool => $column->getLabel() === 'Status');
 
         $columns = array_keys($widget->instance()->getTable()->getColumns());
         expect(array_search('assignedTo', $columns, true))
