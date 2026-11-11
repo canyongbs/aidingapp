@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Policies;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use App\Enums\Feature;
+use App\Features\ServiceRequestPermissionCompressionFeature;
 use App\Models\Authenticatable;
 use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
@@ -59,7 +60,7 @@ class ServiceRequestHistoryPolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'service_request_history.view-any',
+            abilities: ServiceRequestPermissionCompressionFeature::active() ? 'service_request.view-any' : 'service_request_history.view-any',
             denyResponse: 'You do not have permissions to view service request history.'
         );
     }
@@ -67,7 +68,7 @@ class ServiceRequestHistoryPolicy
     public function view(Authenticatable $authenticatable, ServiceRequestHistory $serviceRequestHistory): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['service_request_history.*.view'],
+            abilities: ServiceRequestPermissionCompressionFeature::active() ? ['service_request.*.view'] : ['service_request_history.*.view'],
             denyResponse: 'You do not have permissions to view this service request history.'
         );
     }
@@ -75,7 +76,7 @@ class ServiceRequestHistoryPolicy
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'service_request_history.create',
+            abilities: ServiceRequestPermissionCompressionFeature::active() ? 'service_request.create' : 'service_request_history.create',
             denyResponse: 'You do not have permissions to create service request history.'
         );
     }
@@ -83,7 +84,7 @@ class ServiceRequestHistoryPolicy
     public function update(Authenticatable $authenticatable, ServiceRequestHistory $serviceRequestHistory): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['service_request_history.*.update'],
+            abilities: ServiceRequestPermissionCompressionFeature::active() ? ['service_request.*.update'] : ['service_request_history.*.update'],
             denyResponse: 'You do not have permissions to update this service request history.'
         );
     }
@@ -91,7 +92,7 @@ class ServiceRequestHistoryPolicy
     public function delete(Authenticatable $authenticatable, ServiceRequestHistory $serviceRequestHistory): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['service_request_history.*.delete'],
+            abilities: ServiceRequestPermissionCompressionFeature::active() ? ['service_request.*.delete'] : ['service_request_history.*.delete'],
             denyResponse: 'You do not have permissions to delete this service request history.'
         );
     }
@@ -99,7 +100,7 @@ class ServiceRequestHistoryPolicy
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['service_request_history.*.delete'],
+            abilities: ServiceRequestPermissionCompressionFeature::active() ? ['service_request.*.delete'] : ['service_request_history.*.delete'],
             denyResponse: 'You do not have permissions to delete any service request history.'
         );
     }
@@ -107,7 +108,7 @@ class ServiceRequestHistoryPolicy
     public function restore(Authenticatable $authenticatable, ServiceRequestHistory $serviceRequestHistory): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['service_request_history.*.restore'],
+            abilities: ServiceRequestPermissionCompressionFeature::active() ? ['service_request.*.restore'] : ['service_request_history.*.restore'],
             denyResponse: 'You do not have permissions to restore this service request history.'
         );
     }
@@ -115,7 +116,7 @@ class ServiceRequestHistoryPolicy
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['service_request_history.*.restore'],
+            abilities: ServiceRequestPermissionCompressionFeature::active() ? ['service_request.*.restore'] : ['service_request_history.*.restore'],
             denyResponse: 'You do not have permissions to restore any service request history.'
         );
     }
@@ -123,7 +124,7 @@ class ServiceRequestHistoryPolicy
     public function forceDelete(Authenticatable $authenticatable, ServiceRequestHistory $serviceRequestHistory): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['service_request_history.*.force-delete'],
+            abilities: ServiceRequestPermissionCompressionFeature::active() ? ['service_request.*.force-delete'] : ['service_request_history.*.force-delete'],
             denyResponse: 'You do not have permissions to force delete this service request history.'
         );
     }
@@ -131,7 +132,7 @@ class ServiceRequestHistoryPolicy
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['service_request_history.*.force-delete'],
+            abilities: ServiceRequestPermissionCompressionFeature::active() ? ['service_request.*.force-delete'] : ['service_request_history.*.force-delete'],
             denyResponse: 'You do not have permissions to force delete any service request history.'
         );
     }

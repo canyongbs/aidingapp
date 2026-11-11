@@ -113,7 +113,6 @@ test('it can add updates to multiple service requests for user directly assigned
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.update');
-    $user->givePermissionTo('service_request_update.create');
 
     actingAs($user->refresh());
 
@@ -168,7 +167,6 @@ test('it can add updates to multiple service requests for user belonging to a ma
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.update');
-    $user->givePermissionTo('service_request_update.create');
 
     actingAs($user->refresh());
 
@@ -207,7 +205,6 @@ test('it can add updates to multiple service requests for user belonging to a ma
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.update');
-    $user->givePermissionTo('service_request_update.create');
     actingAs($user);
 
     Livewire::test(ListServiceRequests::class)
@@ -236,7 +233,6 @@ test('it cannot add updates to service requests for user who is not a manager', 
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.update');
-    $user->givePermissionTo('service_request_update.create');
 
     actingAs($user->refresh());
 

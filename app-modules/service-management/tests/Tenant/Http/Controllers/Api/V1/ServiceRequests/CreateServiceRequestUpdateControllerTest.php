@@ -58,7 +58,7 @@ it('requires service_request.view-any permission', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('service_request_update.create');
+    $user->givePermissionTo('service_request.*.update');
     actingAsApiUser($user);
 
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
@@ -66,7 +66,7 @@ it('requires service_request.view-any permission', function (): void {
     ])->assertForbidden();
 });
 
-it('requires service_request_update.create permission', function (): void {
+it('requires service_request.*.update permission', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $user = SystemUser::factory()->create();
@@ -83,7 +83,7 @@ it('can create a service request update with valid data', function (): void {
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    $user->givePermissionTo('service_request_update.create');
+    $user->givePermissionTo('service_request.*.update');
     actingAsApiUser($user);
 
     $response = postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
@@ -108,7 +108,7 @@ it('can create a non-internal service request update', function (): void {
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    $user->givePermissionTo('service_request_update.create');
+    $user->givePermissionTo('service_request.*.update');
     actingAsApiUser($user);
 
     $response = postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
@@ -131,7 +131,7 @@ it('defaults internal to false when it is omitted', function (): void {
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    $user->givePermissionTo('service_request_update.create');
+    $user->givePermissionTo('service_request.*.update');
     actingAsApiUser($user);
 
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
@@ -147,7 +147,7 @@ it('can create a service request update with only required fields', function ():
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    $user->givePermissionTo('service_request_update.create');
+    $user->givePermissionTo('service_request.*.update');
     actingAsApiUser($user);
 
     $response = postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
@@ -165,7 +165,7 @@ it('validates that update field is required', function (): void {
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    $user->givePermissionTo('service_request_update.create');
+    $user->givePermissionTo('service_request.*.update');
     actingAsApiUser($user);
 
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [])
@@ -178,7 +178,7 @@ it('validates that update field must be a string', function (): void {
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    $user->givePermissionTo('service_request_update.create');
+    $user->givePermissionTo('service_request.*.update');
     actingAsApiUser($user);
 
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
@@ -192,7 +192,7 @@ it('validates that internal field must be a boolean', function (): void {
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    $user->givePermissionTo('service_request_update.create');
+    $user->givePermissionTo('service_request.*.update');
     actingAsApiUser($user);
 
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
@@ -205,7 +205,7 @@ it('validates that internal field must be a boolean', function (): void {
 it('returns 404 for a non-existent service request', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    $user->givePermissionTo('service_request_update.create');
+    $user->givePermissionTo('service_request.*.update');
     actingAsApiUser($user);
 
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => 'non-existent-id'], false), [
@@ -218,7 +218,7 @@ it('stamps the update as created by the authenticated system user', function ():
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    $user->givePermissionTo('service_request_update.create');
+    $user->givePermissionTo('service_request.*.update');
     actingAsApiUser($user);
 
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
@@ -238,7 +238,7 @@ it('can create a service request update with file attachments', function (): voi
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    $user->givePermissionTo('service_request_update.create');
+    $user->givePermissionTo('service_request.*.update');
     actingAsApiUser($user);
 
     $response = postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
@@ -270,7 +270,7 @@ it('persists the update associated with the correct service request', function (
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
-    $user->givePermissionTo('service_request_update.create');
+    $user->givePermissionTo('service_request.*.update');
     actingAsApiUser($user);
 
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
