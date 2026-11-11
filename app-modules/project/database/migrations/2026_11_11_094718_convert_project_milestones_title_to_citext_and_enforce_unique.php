@@ -88,9 +88,8 @@ return new class () extends Migration {
 
             DB::statement('DROP INDEX project_milestones_title_unique');
 
+            // Titles rewritten by `fixDuplicates()` are kept: the `-N` suffix cannot be told apart from a genuine title.
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
-
-            $this->revertDuplicates();
 
             // The restored constraint is global, so titles may no longer be shared across pipelines,
             // nor between a live row and a soft-deleted one. Reconcile duplicates across every row of

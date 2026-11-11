@@ -2279,10 +2279,11 @@ describe('2026_11_11_094715_convert_projects_name_to_citext_and_enforce_unique',
         });
     });
 
-    it('strips the numeric suffix on rollback once the original name is no longer taken', function () use ($migrationName, $migrationPath): void {
+    it('keeps repaired and genuine suffixed names on rollback and deactivates the feature flag', function () use ($migrationName, $migrationPath): void {
         isolatedMigration($migrationName, function () use ($migrationPath): void {
             $first = Project::factory()->create(['name' => 'Campus Renovation', 'created_at' => now()->subMinutes(2)]);
             $second = Project::factory()->create(['name' => 'campus renovation', 'created_at' => now()->subMinute()]);
+            $genuine = Project::factory()->create(['name' => 'Phase-2', 'created_at' => now()->subMinutes(3)]);
 
             $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
             expect($migrate)->toBe(Command::SUCCESS);
@@ -2294,7 +2295,8 @@ describe('2026_11_11_094715_convert_projects_name_to_citext_and_enforce_unique',
             $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
             expect($rollback)->toBe(Command::SUCCESS);
 
-            expect($second->refresh()->name)->toBe('campus renovation')
+            expect($second->refresh()->name)->toBe('campus renovation-2')
+                ->and($genuine->refresh()->name)->toBe('Phase-2')
                 ->and(ProjectNameUniquenessFeature::active())->toBeFalse();
         });
     });
@@ -2401,6 +2403,31 @@ describe('2026_11_11_094718_convert_project_milestones_title_to_citext_and_enfor
             $live = ProjectMilestone::factory()->for($project)->for($pipeline)->create(['title' => 'Design Review']);
 
             expect($live->refresh()->title)->toBe('Design Review');
+        });
+    });
+
+    it('keeps repaired and genuine suffixed titles on rollback and deactivates the feature flag', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            $project = Project::factory()->create();
+            $pipeline = Pipeline::factory()->for($project)->create();
+
+            $first = ProjectMilestone::factory()->for($project)->for($pipeline)->create(['title' => 'Design Review', 'created_at' => now()->subMinutes(2)]);
+            $second = ProjectMilestone::factory()->for($project)->for($pipeline)->create(['title' => 'design review', 'created_at' => now()->subMinute()]);
+            $genuine = ProjectMilestone::factory()->for($project)->for($pipeline)->create(['title' => 'Phase-2', 'created_at' => now()->subMinutes(3)]);
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($second->refresh()->title)->toBe('design review-2');
+
+            $first->delete();
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect($second->refresh()->title)->toBe('design review-2')
+                ->and($genuine->refresh()->title)->toBe('Phase-2')
+                ->and(ProjectMilestoneTitleUniquenessFeature::active())->toBeFalse();
         });
     });
 

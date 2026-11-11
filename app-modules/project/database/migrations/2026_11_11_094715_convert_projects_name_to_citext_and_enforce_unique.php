@@ -85,9 +85,8 @@ return new class () extends Migration {
 
             DB::statement('DROP INDEX projects_name_unique');
 
+            // Names rewritten by `fixDuplicates()` are kept: the `-N` suffix cannot be told apart from a genuine name.
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
-
-            $this->revertDuplicates();
 
             // The partial unique index permits a live row and a soft-deleted row to share an exact
             // name. Reconcile those collisions before restoring the global unique constraint, otherwise
