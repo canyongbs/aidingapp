@@ -1991,7 +1991,7 @@ describe('2026_11_06_233425_tmp_grant_change_request_permissions_to_users_and_ro
             $roleUser->assignRole($role);
 
             $unrelatedUser = User::factory()->create();
-            $unrelatedUser->givePermissionTo('product.view-any');
+            $unrelatedUser->givePermissionTo('knowledge_base_item.view-any');
 
             $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_11_06_233425_tmp_grant_change_request_permissions_to_users_and_roles_with_related_permissions.php']);
             expect($migrate)->toBe(Command::SUCCESS);
@@ -2004,7 +2004,7 @@ describe('2026_11_06_233425_tmp_grant_change_request_permissions_to_users_and_ro
                 ->and($directPermissionNames($systemUser))->toContain(...$changeRequestPermissions)
                 ->and($rolePermissionNames($role))->toContain(...$changeRequestPermissions)
                 ->and($directPermissionNames($unrelatedUser))->not->toContain(...$changeRequestPermissions)
-                ->and($directPermissionNames($unrelatedUser))->toBe(['product.view-any']);
+                ->and($directPermissionNames($unrelatedUser))->toBe(['knowledge_base_item.view-any']);
         });
     });
 });
@@ -2041,7 +2041,7 @@ describe('2026_11_10_191246_tmp_grant_contacts_permissions_to_users_and_roles_wi
             $roleUser->assignRole($role);
 
             $unrelatedUser = User::factory()->create();
-            $unrelatedUser->givePermissionTo('product.view-any');
+            $unrelatedUser->givePermissionTo('knowledge_base_item.view-any');
 
             expect(ContactPermissionConsolidationFeature::active())->toBeFalse();
 
@@ -2059,7 +2059,7 @@ describe('2026_11_10_191246_tmp_grant_contacts_permissions_to_users_and_roles_wi
                 ->and($directPermissionNames($systemUser))->toBe($sorted(['contacts.view-any']))
                 ->and($role->refresh()->permissions()->pluck('name')->all())->toContain('contacts.*.update')
                 ->and($directPermissionNames($unrelatedUser))->toBe([])
-                ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['product.view-any'])
+                ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['knowledge_base_item.view-any'])
                 ->and(ContactPermissionConsolidationFeature::active())->toBeTrue();
         });
     });
