@@ -55,6 +55,10 @@ $abilities = [
     'update' => ['update', '*.update', true],
     'delete' => ['delete', '*.delete', true],
     'deleteAny' => ['deleteAny', '*.delete', false],
+    'restore' => ['restore', '*.restore', true],
+    'restoreAny' => ['restoreAny', '*.restore', false],
+    'forceDelete' => ['forceDelete', '*.force-delete', true],
+    'forceDeleteAny' => ['forceDeleteAny', '*.force-delete', false],
 ];
 
 // The policies' feature checks are performed against the authenticated user
