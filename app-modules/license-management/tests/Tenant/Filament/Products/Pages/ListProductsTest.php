@@ -38,7 +38,7 @@ use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\ListProducts;
 use AidingApp\LicenseManagement\Models\Product;
-use App\Features\LicensesPermissionsConsolidationFeature;
+use App\Features\LicensePermissionConsolidationFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
@@ -91,9 +91,9 @@ it('only shows the bulk delete action to a user with the licenses.*.delete permi
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
 
-// TODO: Cleanup Task (licenses-permissions-consolidation): delete this test
+// TODO: Cleanup Task (licenses-permission-consolidation): delete this test
 it('grants access with the legacy product permission while the consolidation flag is inactive', function (): void {
-    LicensesPermissionsConsolidationFeature::deactivate();
+    LicensePermissionConsolidationFeature::deactivate();
 
     $settings = app(LicenseSettings::class);
     $settings->data->addons->licenseManagement = true;

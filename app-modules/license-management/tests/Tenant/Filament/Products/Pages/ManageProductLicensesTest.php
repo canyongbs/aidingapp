@@ -41,7 +41,7 @@ use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\ManageProductL
 use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\LicenseManagement\Models\ProductLicense;
 use App\Features\ContactArchivingFeature;
-use App\Features\LicensesPermissionsConsolidationFeature;
+use App\Features\LicensePermissionConsolidationFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
@@ -143,9 +143,9 @@ test('ManageProductLicenses offers every contact as the license assignee when th
         });
 });
 
-// TODO: Cleanup Task (licenses-permissions-consolidation): delete this test
+// TODO: Cleanup Task (licenses-permission-consolidation): delete this test
 it('grants access with the legacy product and product license permissions while the consolidation flag is inactive', function (): void {
-    LicensesPermissionsConsolidationFeature::deactivate();
+    LicensePermissionConsolidationFeature::deactivate();
 
     $settings = app(LicenseSettings::class);
     $settings->data->addons->licenseManagement = true;
@@ -210,9 +210,9 @@ describe('action authorization', function (): void {
         'delete' => ['delete', 'licenses.*.delete'],
     ]);
 
-    // TODO: Cleanup Task (licenses-permissions-consolidation): delete this test
+    // TODO: Cleanup Task (licenses-permission-consolidation): delete this test
     it('only shows each license action to a user with the legacy permission while the consolidation flag is inactive', function (string $action, string $permission) use ($testAction): void {
-        LicensesPermissionsConsolidationFeature::deactivate();
+        LicensePermissionConsolidationFeature::deactivate();
 
         $legacyPermissions = [
             'product.view-any' => 'Product',

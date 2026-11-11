@@ -40,7 +40,7 @@ use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\EditProduct;
 use AidingApp\LicenseManagement\Filament\Resources\Products\ProductResource;
 use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\LicenseManagement\Tests\Tenant\Filament\Products\RequestFactories\EditProductRequestFactory;
-use App\Features\LicensesPermissionsConsolidationFeature;
+use App\Features\LicensePermissionConsolidationFeature;
 use App\Features\ProductNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
@@ -193,9 +193,9 @@ describe('authorization', function (): void {
     });
 });
 
-// TODO: Cleanup Task (licenses-permissions-consolidation): delete this test
+// TODO: Cleanup Task (licenses-permission-consolidation): delete this test
 it('allows access to the edit page with the legacy `product.*.update` permission while the consolidation flag is inactive', function (): void {
-    LicensesPermissionsConsolidationFeature::deactivate();
+    LicensePermissionConsolidationFeature::deactivate();
 
     $legacyPermissions = ['product.view-any', 'product.*.update'];
 

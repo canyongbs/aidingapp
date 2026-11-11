@@ -59,6 +59,7 @@ use App\Features\ContractNameUniquenessFeature;
 use App\Features\ContractTypeNameUniquenessFeature;
 use App\Features\EmailTemplateNameUniquenessFeature;
 use App\Features\KnowledgeBaseCategoryNameUniquenessFeature;
+use App\Features\LicensePermissionConsolidationFeature;
 use App\Features\MaintenanceProviderNameUniquenessFeature;
 use App\Features\PipelineNameUniquenessFeature;
 use App\Features\PipelineStageNameUniquenessFeature;
@@ -77,11 +78,14 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
+
+use Spatie\Permission\PermissionRegistrar;
 
 //describe('2025_01_01_165527_tmp_data_do_a_thing', function () {
 //    it('properly changed the data', function () {
@@ -2209,6 +2213,129 @@ describe('2026_11_10_221002_tmp_grant_projects_permissions_to_users_and_roles_wi
                 ->and($directProjectsPermissionNames($unrelatedUser))->toBe([])
                 ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['product.view-any'])
                 ->and(ProjectPermissionConsolidationFeature::active())->toBeTrue();
+        });
+    });
+});
+
+// TODO: Cleanup Task (licenses-permission-consolidation): delete this describe and the test within
+describe('2026_11_11_150002_tmp_grant_licenses_permissions_to_users_and_roles_with_related_permissions', function (): void {
+    it('grants the equivalent licenses permissions to users and roles with a related permission', function (): void {
+        isolatedMigration('2026_11_11_150002_tmp_grant_licenses_permissions_to_users_and_roles_with_related_permissions', function (): void {
+            $permissionsFor = fn (string $prefix): array => array_map(
+                fn (string $action): string => "{$prefix}.{$action}",
+                ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'],
+            );
+
+            $licensesPermissions = $permissionsFor('licenses');
+
+            $productUser = User::factory()->create();
+            $productUser->givePermissionTo($permissionsFor('product'));
+
+            $productLicenseUser = User::factory()->create();
+            $productLicenseUser->givePermissionTo($permissionsFor('product_license'));
+
+            $partialProductLicenseUser = User::factory()->create();
+            $partialProductLicenseUser->givePermissionTo('product_license.*.update');
+
+            $systemUser = SystemUser::factory()->create();
+            $systemUser->givePermissionTo('product_license.view-any');
+
+            $roleUser = User::factory()->create();
+            $role = Role::factory()->create();
+            $role->givePermissionTo('product.*.delete');
+            $roleUser->assignRole($role);
+
+            $apiRole = Role::factory()->create(['guard_name' => 'api']);
+            $apiRole->givePermissionTo('product.view-any');
+
+            $unrelatedUser = User::factory()->create();
+            $unrelatedUser->givePermissionTo('knowledge_base_item.view-any');
+
+            expect(LicensePermissionConsolidationFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/license-management/database/migrations/2026_11_11_150002_tmp_grant_licenses_permissions_to_users_and_roles_with_related_permissions.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $directLicensesPermissionNames = fn (User|SystemUser $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->filter(fn (string $name): bool => str_starts_with($name, 'licenses.'))->sort()->values()->all();
+            $sorted = fn (array $names): array => collect($names)->sort()->values()->all();
+
+            expect($directLicensesPermissionNames($productUser))->toBe($sorted($licensesPermissions))
+                ->and($directLicensesPermissionNames($productLicenseUser))->toBe($sorted($licensesPermissions))
+                ->and($directLicensesPermissionNames($partialProductLicenseUser))->toBe(['licenses.*.update'])
+                ->and($directLicensesPermissionNames($systemUser))->toBe(['licenses.view-any'])
+                ->and($role->refresh()->permissions()->pluck('name')->all())->toContain('licenses.*.delete')
+                ->and($roleUser->refresh()->hasPermissionTo('licenses.*.delete'))->toBeTrue()
+                ->and($apiRole->refresh()->permissions()->pluck('name')->all())->toContain('licenses.view-any')
+                ->and($directLicensesPermissionNames($unrelatedUser))->toBe([])
+                ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['knowledge_base_item.view-any'])
+                ->and(LicensePermissionConsolidationFeature::active())->toBeTrue();
+        });
+    });
+});
+
+describe('2026_11_11_150003_purge_unneeded_license_permissions', function (): void {
+    $migrationName = '2026_11_11_150003_purge_unneeded_license_permissions';
+    $migrationPath = "app-modules/license-management/database/migrations/{$migrationName}.php";
+
+    $retiredNames = fn (): array => collect(['product', 'product_license'])
+        ->flatMap(fn (string $prefix): array => array_map(
+            fn (string $action): string => "{$prefix}.{$action}",
+            ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'],
+        ))
+        ->all();
+
+    it('deletes the Product and Product License permissions and groups without touching the Licenses group or unrelated permissions', function () use ($migrationName, $migrationPath, $retiredNames): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $retiredNames): void {
+            foreach (['web', 'api'] as $guard) {
+                foreach ($retiredNames() as $name) {
+                    assertDatabaseHas('permissions', ['name' => $name, 'guard_name' => $guard]);
+                }
+            }
+
+            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            foreach (['web', 'api'] as $guard) {
+                foreach ($retiredNames() as $name) {
+                    assertDatabaseMissing('permissions', ['name' => $name, 'guard_name' => $guard]);
+                }
+
+                assertDatabaseHas('permissions', ['name' => 'licenses.view-any', 'guard_name' => $guard]);
+            }
+
+            assertDatabaseMissing('permission_groups', ['name' => 'Product']);
+            assertDatabaseMissing('permission_groups', ['name' => 'Product License']);
+            assertDatabaseHas('permission_groups', ['name' => 'Licenses']);
+            assertDatabaseHas('permissions', ['name' => 'knowledge_base_item.view-any', 'guard_name' => 'web']);
+
+            expect(Artisan::call('migrate:rollback', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            foreach (['web', 'api'] as $guard) {
+                foreach ($retiredNames() as $name) {
+                    expect(Permission::where('name', $name)->where('guard_name', $guard)->count())->toBe(1);
+                }
+            }
+
+            assertDatabaseHas('permission_groups', ['name' => 'Product']);
+            assertDatabaseHas('permission_groups', ['name' => 'Product License']);
+        });
+    });
+
+    it('clears the current tenant\'s cached permissions even though the permission registrar resolved its cache store before the tenant was switched', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            // Resolve the registrar first, then swap the cache store the way PrefixCacheTask does when `tenants:artisan` switches tenants.
+            app(PermissionRegistrar::class);
+
+            config()->set('cache.prefix', 'licenses_consolidation_tenant');
+            app('cache')->forgetDriver(config('cache.default'));
+            app()->forgetInstance('cache');
+            app()->forgetInstance('cache.store');
+            Cache::clearResolvedInstances();
+
+            Cache::forever(config('permission.cache.key'), 'stale');
+
+            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            expect(Cache::has(config('permission.cache.key')))->toBeFalse();
         });
     });
 });
