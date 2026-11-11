@@ -85,7 +85,7 @@ describe('authorization', function (): void {
         $file->addMedia(UploadedFile::fake()->image('plan.png'))->toMediaCollection('file');
 
         $user = User::factory()->create();
-        $user->givePermissionTo('project.view-any');
+        $user->givePermissionTo('projects.view-any');
 
         actingAs($user);
 

@@ -300,7 +300,7 @@ it('archives a pipeline task from its slide-over modal', function (): void {
 describe('archive authorization', function (): void {
     it('does not archive when the acting user lacks the pipeline delete ability', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('pipeline.view-any');
+        $user->givePermissionTo('projects.view-any');
         $user->refresh();
         actingAs($user);
 
@@ -315,7 +315,7 @@ describe('archive authorization', function (): void {
 
     it('hides the footer archive control from a user lacking the pipeline delete ability', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('pipeline.view-any');
+        $user->givePermissionTo('projects.view-any');
         $user->refresh();
         actingAs($user);
 
@@ -331,7 +331,7 @@ describe('archive authorization', function (): void {
 describe('task access authorization', function (): void {
     it('opens pipeline task details for a project auditor', function (): void {
         $auditor = User::factory()->create();
-        $auditor->givePermissionTo('project.*.view');
+        $auditor->givePermissionTo('projects.*.view');
         $auditor->refresh();
 
         $project = Project::factory()->create();
@@ -352,7 +352,7 @@ describe('task access authorization', function (): void {
 
     it('opens an editable pipeline task form for a project manager', function (): void {
         $manager = User::factory()->create();
-        $manager->givePermissionTo(['project.*.view', 'project.*.update']);
+        $manager->givePermissionTo(['projects.*.view', 'projects.*.update']);
         $manager->refresh();
 
         $project = Project::factory()->create();

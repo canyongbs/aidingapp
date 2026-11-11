@@ -39,6 +39,7 @@ namespace AidingApp\Project\Policies;
 use AidingApp\Project\Models\Project;
 use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
+use App\Features\ProjectPermissionConsolidationFeature;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
@@ -59,7 +60,7 @@ class ProjectPolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'project.view-any',
+            abilities: ProjectPermissionConsolidationFeature::active() ? 'projects.view-any' : 'project.view-any',
             denyResponse: 'You do not have permission to view projects.'
         );
     }
@@ -67,7 +68,7 @@ class ProjectPolicy
     public function view(Authenticatable $authenticatable, Project $project): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'project.*.view',
+            abilities: ProjectPermissionConsolidationFeature::active() ? 'projects.*.view' : 'project.*.view',
             denyResponse: 'You do not have permission to view this project.'
         );
     }
@@ -75,7 +76,7 @@ class ProjectPolicy
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'project.create',
+            abilities: ProjectPermissionConsolidationFeature::active() ? 'projects.create' : 'project.create',
             denyResponse: 'You do not have permission to create projects.'
         );
     }
@@ -94,7 +95,7 @@ class ProjectPolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: 'project.*.update',
+            abilities: ProjectPermissionConsolidationFeature::active() ? 'projects.*.update' : 'project.*.update',
             denyResponse: 'You do not have permission to update this project.'
         );
     }
@@ -113,7 +114,7 @@ class ProjectPolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: 'project.*.delete',
+            abilities: ProjectPermissionConsolidationFeature::active() ? 'projects.*.delete' : 'project.*.delete',
             denyResponse: 'You do not have permission to delete this project.'
         );
     }
@@ -121,7 +122,7 @@ class ProjectPolicy
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'project.*.delete',
+            abilities: ProjectPermissionConsolidationFeature::active() ? 'projects.*.delete' : 'project.*.delete',
             denyResponse: 'You do not have permission to delete any project.'
         );
     }
@@ -140,7 +141,7 @@ class ProjectPolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: 'project.*.restore',
+            abilities: ProjectPermissionConsolidationFeature::active() ? 'projects.*.restore' : 'project.*.restore',
             denyResponse: 'You do not have permission to restore this project.'
         );
     }
@@ -148,7 +149,7 @@ class ProjectPolicy
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'project.*.restore',
+            abilities: ProjectPermissionConsolidationFeature::active() ? 'projects.*.restore' : 'project.*.restore',
             denyResponse: 'You do not have permission to restore any project.'
         );
     }
@@ -167,7 +168,7 @@ class ProjectPolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: 'project.*.force-delete',
+            abilities: ProjectPermissionConsolidationFeature::active() ? 'projects.*.force-delete' : 'project.*.force-delete',
             denyResponse: 'You do not have permission to permanently delete this project.'
         );
     }
@@ -175,7 +176,7 @@ class ProjectPolicy
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'project.*.force-delete',
+            abilities: ProjectPermissionConsolidationFeature::active() ? 'projects.*.force-delete' : 'project.*.force-delete',
             denyResponse: 'You do not have permission to permanently delete any project.'
         );
     }
@@ -195,7 +196,7 @@ class ProjectPolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: 'project.*.delete',
+            abilities: ProjectPermissionConsolidationFeature::active() ? 'projects.*.delete' : 'project.*.delete',
             denyResponse: 'You do not have permission to archive this project.'
         );
     }

@@ -64,6 +64,7 @@ use App\Features\MaintenanceProviderNameUniquenessFeature;
 use App\Features\PipelineNameUniquenessFeature;
 use App\Features\PipelineStageNameUniquenessFeature;
 use App\Features\ProductNameUniquenessFeature;
+use App\Features\ProjectPermissionConsolidationFeature;
 use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Features\ServiceRequestFileUploadTypeFeature;
 use App\Features\ServiceRequestTypeCategoryNameUniquenessFeature;
@@ -2205,6 +2206,58 @@ describe('2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_uni
             expect($migrate)->toBe(Command::SUCCESS);
 
             expect($second->refresh()->name)->toBe(str_repeat('A', 253) . '-3');
+        });
+    });
+});
+
+// TODO: Cleanup Task (projects-permission-consolidation): delete this describe and the test within
+describe('2026_11_10_221002_tmp_grant_projects_permissions_to_users_and_roles_with_related_permissions', function (): void {
+    it('grants the equivalent projects permissions to users and roles with a related permission', function (): void {
+        isolatedMigration('2026_11_10_221002_tmp_grant_projects_permissions_to_users_and_roles_with_related_permissions', function (): void {
+            $permissionsFor = fn (string $prefix): array => array_map(
+                fn (string $action): string => "{$prefix}.{$action}",
+                ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'],
+            );
+
+            $projectsPermissions = $permissionsFor('projects');
+
+            $projectUser = User::factory()->create();
+            $projectUser->givePermissionTo($permissionsFor('project'));
+
+            $pipelineUser = User::factory()->create();
+            $pipelineUser->givePermissionTo($permissionsFor('pipeline'));
+
+            $partialPipelineUser = User::factory()->create();
+            $partialPipelineUser->givePermissionTo('pipeline.*.update');
+
+            $systemUser = SystemUser::factory()->create();
+            $systemUser->givePermissionTo('pipeline.view-any');
+
+            $roleUser = User::factory()->create();
+            $role = Role::factory()->create();
+            $role->givePermissionTo('project.*.delete');
+            $roleUser->assignRole($role);
+
+            $unrelatedUser = User::factory()->create();
+            $unrelatedUser->givePermissionTo('product.view-any');
+
+            expect(ProjectPermissionConsolidationFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/project/database/migrations/2026_11_10_221002_tmp_grant_projects_permissions_to_users_and_roles_with_related_permissions.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $directProjectsPermissionNames = fn (User|SystemUser $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->filter(fn (string $name): bool => str_starts_with($name, 'projects.'))->sort()->values()->all();
+            $sorted = fn (array $names): array => collect($names)->sort()->values()->all();
+
+            expect($directProjectsPermissionNames($projectUser))->toBe($sorted($projectsPermissions))
+                ->and($directProjectsPermissionNames($pipelineUser))->toBe($sorted($projectsPermissions))
+                ->and($directProjectsPermissionNames($partialPipelineUser))->toBe(['projects.*.update'])
+                ->and($directProjectsPermissionNames($systemUser))->toBe(['projects.view-any'])
+                ->and($role->refresh()->permissions()->pluck('name')->all())->toContain('projects.*.delete')
+                ->and($roleUser->refresh()->hasPermissionTo('projects.*.delete'))->toBeTrue()
+                ->and($directProjectsPermissionNames($unrelatedUser))->toBe([])
+                ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['product.view-any'])
+                ->and(ProjectPermissionConsolidationFeature::active())->toBeTrue();
         });
     });
 });
