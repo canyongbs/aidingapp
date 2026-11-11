@@ -82,6 +82,8 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function (): void {
+            $this->lockGrantTables();
+
             collect($this->guards)->each(function (string $guard): void {
                 $this->createPermissions($this->permissionsFor($this->prefix, $this->group), $guard);
 
@@ -108,6 +110,8 @@ return new class () extends Migration {
     public function down(): void
     {
         DB::transaction(function (): void {
+            $this->lockGrantTables();
+
             LicensesPermissionsConsolidationFeature::deactivate();
 
             collect($this->guards)->each(function (string $guard): void {
@@ -128,6 +132,15 @@ return new class () extends Migration {
 
             DB::afterCommit(fn () => $this->forgetCachedPermissions());
         });
+    }
+
+    /**
+     * Blocks concurrent grant and revoke writes until the transaction ends, so a grant changed between copying and deleting
+     * the old permissions cannot be lost. Reads, including permission checks, are not blocked.
+     */
+    private function lockGrantTables(): void
+    {
+        DB::statement('LOCK TABLE role_has_permissions, model_has_permissions IN SHARE ROW EXCLUSIVE MODE');
     }
 
     /**
