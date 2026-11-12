@@ -101,13 +101,117 @@ return new class () extends Migration {
         });
     }
 
+    /**
+     * Reverses only the fields this migration converted, found by their `isLegacyCheckbox` marker and untouched single option.
+     * A converted response becomes `1` when its option was selected, otherwise `0`.
+     */
     public function down(): void
     {
         DB::transaction(function (): void {
-            CheckboxesFormFieldFeature::deactivate();
+            $fieldIds = [];
 
-            // The converted fields are indistinguishable from `checkboxes` fields created later, so they are kept
+            foreach (DB::table('service_request_form_fields')->where('type', 'checkboxes')->lazyById() as $field) {
+                $config = json_decode($field->config, associative: true);
+
+                if (! is_array($config) || ! $this->isConvertedConfig($config)) {
+                    continue;
+                }
+
+                DB::table('service_request_form_fields')
+                    ->where('id', $field->id)
+                    ->update([
+                        'type' => 'checkbox',
+                        'config' => json_encode($this->withoutOptions($config)),
+                    ]);
+
+                $fieldIds[] = $field->id;
+            }
+
+            foreach (array_chunk($fieldIds, 500) as $chunk) {
+                $submissions = DB::table('service_request_form_field_submission')
+                    ->whereIn('service_request_form_field_id', $chunk)
+                    ->where('response', 'like', '[%')
+                    ->lazyById();
+
+                foreach ($submissions as $submission) {
+                    $selections = json_decode($submission->response, associative: true);
+
+                    DB::table('service_request_form_field_submission')
+                        ->where('id', $submission->id)
+                        ->update(['response' => is_array($selections) && in_array(self::OPTION_VALUE, $selections, true) ? '1' : '0']);
+                }
+            }
+
+            foreach (['service_request_forms', 'service_request_form_steps'] as $table) {
+                $rows = DB::table($table)
+                    ->whereRaw("content::text ~ '\"id\"\\s*:\\s*\"checkboxes\"'")
+                    ->lazyById();
+
+                foreach ($rows as $row) {
+                    $content = json_decode($row->content, associative: true);
+
+                    if (! is_array($content)) {
+                        continue;
+                    }
+
+                    DB::table($table)
+                        ->where('id', $row->id)
+                        ->update(['content' => json_encode($this->revertNode($content))]);
+                }
+            }
+
+            CheckboxesFormFieldFeature::deactivate();
         });
+    }
+
+    /**
+     * @param array<mixed> $node
+     *
+     * @return array<mixed>
+     */
+    private function revertNode(array $node): array
+    {
+        if (
+            ($node['type'] ?? null) === 'customBlock'
+            && ($node['attrs']['id'] ?? null) === 'checkboxes'
+            && is_array($node['attrs']['config'] ?? null)
+            && $this->isConvertedConfig($node['attrs']['config'])
+        ) {
+            $node['attrs']['id'] = 'checkbox';
+            $node['attrs']['config'] = $this->withoutOptions($node['attrs']['config']);
+        }
+
+        foreach ($node as $key => $value) {
+            if (is_array($value)) {
+                $node[$key] = $this->revertNode($value);
+            }
+        }
+
+        return $node;
+    }
+
+    /**
+     * @param array<mixed> $config
+     */
+    private function isConvertedConfig(array $config): bool
+    {
+        return ($config['isLegacyCheckbox'] ?? false) === true
+            && ($config['hasOtherOption'] ?? null) === false
+            && is_array($config['options'] ?? null)
+            && count($config['options']) === 1
+            && ($config['options'][0]['value'] ?? null) === self::OPTION_VALUE;
+    }
+
+    /**
+     * @param array<mixed> $config
+     *
+     * @return array<mixed>
+     */
+    private function withoutOptions(array $config): array
+    {
+        unset($config['hasOtherOption'], $config['options'], $config['isLegacyCheckbox']);
+
+        return $config;
     }
 
     /**

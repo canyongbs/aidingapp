@@ -42,6 +42,7 @@ use Closure;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Enums\Width;
 
 class CheckboxesFormFieldBlock extends FormFieldBlock
@@ -64,8 +65,10 @@ class CheckboxesFormFieldBlock extends FormFieldBlock
     {
         return [
             Checkbox::make('hasOtherOption')
-                ->label('Include Other'),
-            OptionsKeyValue::make('options'),
+                ->label('Include Other')
+                ->live(),
+            OptionsKeyValue::make('options')
+                ->required(fn (Get $get): bool => ! $get('hasOtherOption')),
         ];
     }
 
