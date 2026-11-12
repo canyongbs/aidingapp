@@ -58,7 +58,7 @@ it('can render the create maintenance provider page', function (): void {
 
 it('can create a maintenance provider', function (): void {
     $user = User::factory()->create();
-    $user->givePermissionTo(['maintenance_provider.view-any', 'maintenance_provider.create']);
+    $user->givePermissionTo(['assets.view-any', 'assets.create']);
     actingAs($user);
 
     $request = CreateMaintenanceProviderRequestFactory::new()->create();
@@ -123,9 +123,9 @@ describe('name uniqueness feature flag', function (): void {
 });
 
 describe('authorization', function (): void {
-    it('denies access to the create page without the `maintenance_provider.create` permission', function (): void {
+    it('denies access to the create page without the `assets.create` permission', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo('maintenance_provider.view-any');
+        $user->givePermissionTo('assets.view-any');
         actingAs($user);
 
         get(MaintenanceProviderResource::getUrl('create'))->assertForbidden();
@@ -139,15 +139,15 @@ describe('authorization', function (): void {
         $settings->save();
 
         $user = User::factory()->create();
-        $user->givePermissionTo(['maintenance_provider.view-any', 'maintenance_provider.create']);
+        $user->givePermissionTo(['assets.view-any', 'assets.create']);
         actingAs($user);
 
         get(MaintenanceProviderResource::getUrl('create'))->assertForbidden();
     });
 
-    it('allows access to the create page with the `maintenance_provider.create` permission', function (): void {
+    it('allows access to the create page with the `assets.create` permission', function (): void {
         $user = User::factory()->create();
-        $user->givePermissionTo(['maintenance_provider.view-any', 'maintenance_provider.create']);
+        $user->givePermissionTo(['assets.view-any', 'assets.create']);
         actingAs($user);
 
         get(MaintenanceProviderResource::getUrl('create'))->assertSuccessful();
