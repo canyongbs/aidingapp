@@ -119,19 +119,21 @@ class ServiceRequestsRelationManager extends RelationManager
                         SelectTree::make('type_id')
                             ->label('Type')
                             ->getTreeUsing(function (?ServiceRequest $record): array {
-                                 $tree = ListServiceRequests::buildTypeTreeOptions(
-                                     withoutArchived: true,
-                                 );
-                                 $currentType = $record?->priority?->type;
-                                 if ($currentType?->isArchived()) {
-                                     $tree[] = [
-                                         'name' => $currentType->name,
-                                         'value' => $currentType->getKey(),
-                                         'children' => [],
-                                     ];
-                                 }
-                                 return $tree;
-                             })
+                                $tree = ListServiceRequests::buildTypeTreeOptions(
+                                    withoutArchived: true,
+                                );
+                                $currentType = $record?->priority?->type;
+
+                                if ($currentType?->isArchived()) {
+                                    $tree[] = [
+                                        'name' => $currentType->name,
+                                        'value' => $currentType->getKey(),
+                                        'children' => [],
+                                    ];
+                                }
+
+                                return $tree;
+                            })
                             ->searchable()
                             ->afterStateUpdated(function (?string $state, Set $set, SelectTree $component): void {
                                 $set('priority_id', null);
