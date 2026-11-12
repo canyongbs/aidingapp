@@ -38,6 +38,7 @@ namespace AidingApp\InventoryManagement\Filament\Actions;
 
 use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
 use AidingApp\InventoryManagement\Models\Asset;
+use AidingApp\InventoryManagement\Models\AssetCheckIn;
 use AidingApp\InventoryManagement\Models\AssetStatus;
 use AidingApp\InventoryManagement\Models\Scopes\ClassifiedAs;
 use Filament\Actions\Action;
@@ -54,6 +55,12 @@ class CheckInAssetHeaderAction extends Action
         $this->button();
 
         $this->label(__('Check In'));
+
+        $this->authorize(function (): bool {
+            assert($this->getRecord() instanceof Asset);
+
+            return auth()->user()?->can('create', [AssetCheckIn::class, $this->getRecord()]) ?? false;
+        });
 
         $this->modalHeading(function (): string {
             assert($this->getRecord() instanceof Asset);

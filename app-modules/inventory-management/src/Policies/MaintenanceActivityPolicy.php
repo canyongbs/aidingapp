@@ -37,6 +37,7 @@
 namespace AidingApp\InventoryManagement\Policies;
 
 use AidingApp\InventoryManagement\Models\MaintenanceActivity;
+use App\Features\AssetPermissionConsolidationFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -45,7 +46,7 @@ class MaintenanceActivityPolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'maintenance_activity.view-any',
+            abilities: AssetPermissionConsolidationFeature::active() ? 'assets.view-any' : 'maintenance_activity.view-any',
             denyResponse: 'You do not have permission to view maintenance activities.'
         );
     }
@@ -53,7 +54,7 @@ class MaintenanceActivityPolicy
     public function view(Authenticatable $authenticatable, MaintenanceActivity $maintenanceActivity): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['maintenance_activity.*.view'],
+            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.view'] : ['maintenance_activity.*.view'],
             denyResponse: 'You do not have permission to view this maintenance activity.'
         );
     }
@@ -61,7 +62,7 @@ class MaintenanceActivityPolicy
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'maintenance_activity.create',
+            abilities: AssetPermissionConsolidationFeature::active() ? 'assets.create' : 'maintenance_activity.create',
             denyResponse: 'You do not have permission to create maintenance activities.'
         );
     }
@@ -69,13 +70,19 @@ class MaintenanceActivityPolicy
     public function update(Authenticatable $authenticatable, MaintenanceActivity $maintenanceActivity): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['maintenance_activity.*.update'],
+            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.update'] : ['maintenance_activity.*.update'],
             denyResponse: 'You do not have permission to update this maintenance activity.'
         );
     }
 
     public function delete(Authenticatable $authenticatable, MaintenanceActivity $maintenanceActivity): Response
     {
+        if (AssetPermissionConsolidationFeature::active()) {
+            return $authenticatable->cannot('update', $maintenanceActivity->asset)
+                ? Response::deny('You do not have permission to delete this maintenance activity.')
+                : Response::allow();
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['maintenance_activity.*.delete'],
             denyResponse: 'You do not have permission to delete this maintenance activity.'
@@ -84,6 +91,13 @@ class MaintenanceActivityPolicy
 
     public function deleteAny(Authenticatable $authenticatable): Response
     {
+        if (AssetPermissionConsolidationFeature::active()) {
+            return $authenticatable->canOrElse(
+                abilities: ['assets.*.update'],
+                denyResponse: 'You do not have permission to delete any maintenance activity.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['maintenance_activity.*.delete'],
             denyResponse: 'You do not have permission to delete any maintenance activity.'
@@ -92,6 +106,12 @@ class MaintenanceActivityPolicy
 
     public function restore(Authenticatable $authenticatable, MaintenanceActivity $maintenanceActivity): Response
     {
+        if (AssetPermissionConsolidationFeature::active()) {
+            return $authenticatable->cannot('update', $maintenanceActivity->asset)
+                ? Response::deny('You do not have permission to restore this maintenance activity.')
+                : Response::allow();
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['maintenance_activity.*.restore'],
             denyResponse: 'You do not have permission to restore this maintenance activity.'
@@ -100,6 +120,13 @@ class MaintenanceActivityPolicy
 
     public function restoreAny(Authenticatable $authenticatable): Response
     {
+        if (AssetPermissionConsolidationFeature::active()) {
+            return $authenticatable->canOrElse(
+                abilities: ['assets.*.update'],
+                denyResponse: 'You do not have permission to restore any maintenance activity.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['maintenance_activity.*.restore'],
             denyResponse: 'You do not have permission to restore any maintenance activity.'
@@ -108,6 +135,12 @@ class MaintenanceActivityPolicy
 
     public function forceDelete(Authenticatable $authenticatable, MaintenanceActivity $maintenanceActivity): Response
     {
+        if (AssetPermissionConsolidationFeature::active()) {
+            return $authenticatable->cannot('update', $maintenanceActivity->asset)
+                ? Response::deny('You do not have permission to permanently delete this maintenance activity.')
+                : Response::allow();
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['maintenance_activity.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this maintenance activity.'
@@ -116,6 +149,13 @@ class MaintenanceActivityPolicy
 
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
+        if (AssetPermissionConsolidationFeature::active()) {
+            return $authenticatable->canOrElse(
+                abilities: ['assets.*.update'],
+                denyResponse: 'You do not have permission to permanently delete any maintenance activity.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['maintenance_activity.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete any maintenance activity.'

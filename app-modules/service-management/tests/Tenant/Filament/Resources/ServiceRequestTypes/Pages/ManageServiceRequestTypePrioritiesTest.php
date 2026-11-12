@@ -322,7 +322,7 @@ test('ManageServiceRequestTypePriorities is gated with proper access control', f
 
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.*.view');
-    $user->givePermissionTo('service_request_priority.view-any');
+    $user->givePermissionTo('service_request.view-any');
 
     actingAs($user)
         ->get(
@@ -343,7 +343,7 @@ test('ManageServiceRequestTypePriorities is gated with proper feature access con
 
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.*.view');
-    $user->givePermissionTo('service_request_priority.view-any');
+    $user->givePermissionTo('service_request.view-any');
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 

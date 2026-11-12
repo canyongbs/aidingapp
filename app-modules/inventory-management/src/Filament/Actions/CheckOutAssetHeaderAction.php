@@ -39,6 +39,7 @@ namespace AidingApp\InventoryManagement\Filament\Actions;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
 use AidingApp\InventoryManagement\Models\Asset;
+use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use AidingApp\InventoryManagement\Models\AssetStatus;
 use AidingApp\InventoryManagement\Models\Scopes\ClassifiedAs;
 use Filament\Actions\Action;
@@ -55,6 +56,12 @@ class CheckOutAssetHeaderAction extends Action
         $this->button();
 
         $this->label(__('Check Out'));
+
+        $this->authorize(function (): bool {
+            assert($this->getRecord() instanceof Asset);
+
+            return auth()->user()?->can('create', [AssetCheckOut::class, $this->getRecord()]) ?? false;
+        });
 
         $this->modalHeading(function (): string {
             assert($this->getRecord() instanceof Asset);

@@ -84,8 +84,6 @@ test('ViewServiceRequestUpdate is gated with proper access control', function ()
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');
-    $user->givePermissionTo('service_request_update.view-any');
-    $user->givePermissionTo('service_request_update.*.view');
 
     actingAs($user)
         ->get(
@@ -110,8 +108,6 @@ test('ViewServiceRequestUpdate is gated with proper feature access control', fun
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');
-    $user->givePermissionTo('service_request_update.view-any');
-    $user->givePermissionTo('service_request_update.*.view');
 
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
     $serviceRequestUpdate->serviceRequest->priority->type->managerDepartments()->attach($department);

@@ -39,6 +39,7 @@ namespace AidingApp\InventoryManagement\Policies;
 use AidingApp\InventoryManagement\Models\MaintenanceProvider;
 use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
+use App\Features\AssetPermissionConsolidationFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -58,7 +59,7 @@ class MaintenanceProviderPolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'maintenance_provider.view-any',
+            abilities: AssetPermissionConsolidationFeature::active() ? 'assets.view-any' : 'maintenance_provider.view-any',
             denyResponse: 'You do not have permission to view maintenance providers.'
         );
     }
@@ -66,7 +67,7 @@ class MaintenanceProviderPolicy
     public function view(Authenticatable $authenticatable, MaintenanceProvider $maintenanceProvider): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['maintenance_provider.*.view'],
+            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.view'] : ['maintenance_provider.*.view'],
             denyResponse: 'You do not have permission to view this maintenance provider.'
         );
     }
@@ -74,7 +75,7 @@ class MaintenanceProviderPolicy
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'maintenance_provider.create',
+            abilities: AssetPermissionConsolidationFeature::active() ? 'assets.create' : 'maintenance_provider.create',
             denyResponse: 'You do not have permission to create maintenance providers.'
         );
     }
@@ -82,7 +83,7 @@ class MaintenanceProviderPolicy
     public function update(Authenticatable $authenticatable, MaintenanceProvider $maintenanceProvider): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['maintenance_provider.*.update'],
+            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.update'] : ['maintenance_provider.*.update'],
             denyResponse: 'You do not have permission to update this maintenance provider.'
         );
     }
@@ -90,7 +91,7 @@ class MaintenanceProviderPolicy
     public function delete(Authenticatable $authenticatable, MaintenanceProvider $maintenanceProvider): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['maintenance_provider.*.delete'],
+            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.delete'] : ['maintenance_provider.*.delete'],
             denyResponse: 'You do not have permission to delete this maintenance provider.'
         );
     }
@@ -98,7 +99,7 @@ class MaintenanceProviderPolicy
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['maintenance_provider.*.delete'],
+            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.delete'] : ['maintenance_provider.*.delete'],
             denyResponse: 'You do not have permission to delete any maintenance provider.'
         );
     }
@@ -106,7 +107,7 @@ class MaintenanceProviderPolicy
     public function restore(Authenticatable $authenticatable, MaintenanceProvider $maintenanceProvider): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['maintenance_provider.*.restore'],
+            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.restore'] : ['maintenance_provider.*.restore'],
             denyResponse: 'You do not have permission to restore this maintenance provider.'
         );
     }
@@ -114,7 +115,7 @@ class MaintenanceProviderPolicy
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['maintenance_provider.*.restore'],
+            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.restore'] : ['maintenance_provider.*.restore'],
             denyResponse: 'You do not have permission to restore any maintenance provider.'
         );
     }
@@ -122,7 +123,7 @@ class MaintenanceProviderPolicy
     public function forceDelete(Authenticatable $authenticatable, MaintenanceProvider $maintenanceProvider): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['maintenance_provider.*.force-delete'],
+            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.force-delete'] : ['maintenance_provider.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this maintenance provider.'
         );
     }
@@ -130,7 +131,7 @@ class MaintenanceProviderPolicy
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['maintenance_provider.*.force-delete'],
+            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.force-delete'] : ['maintenance_provider.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete any maintenance provider.'
         );
     }

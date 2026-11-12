@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Department\Models\Department;
 use AidingApp\InventoryManagement\Models\Asset;
@@ -58,6 +59,7 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\Repeater;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Auth\Access\Events\GateEvaluated;
 use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
@@ -532,6 +534,47 @@ it('displays a pipeline entry start date in the project work pipeline widget', f
         'record' => $project,
     ])
         ->assertTableColumnStateSet('start_date', $entry->start_date, $entry);
+});
+
+it('can sort pipeline tasks by assigned to across users and contacts', function (): void {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->state(['classification' => PipelineStageClassification::Planning]), 'stages')
+        ->create();
+
+    $stageId = $pipeline->stages->sole()->getKey();
+
+    $alice = User::factory()->create(['first_name' => 'Alice', 'last_name' => 'Anderson']);
+    $charlie = User::factory()->create(['first_name' => 'Charlie', 'last_name' => 'Clark']);
+    $bob = Contact::factory()->create(['first_name' => 'Bob', 'last_name' => 'Brown', 'full_name' => 'Bob Brown']);
+
+    $assignedToAlice = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $stageId,
+        'assigned_to_type' => $alice->getMorphClass(),
+        'assigned_to_id' => $alice->getKey(),
+    ]);
+    $assignedToBob = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $stageId,
+        'assigned_to_type' => $bob->getMorphClass(),
+        'assigned_to_id' => $bob->getKey(),
+    ]);
+    $assignedToCharlie = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $stageId,
+        'assigned_to_type' => $charlie->getMorphClass(),
+        'assigned_to_id' => $charlie->getKey(),
+    ]);
+
+    Livewire::test(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->assertTableColumnExists('assignedTo', fn (TextColumn $column): bool => $column->isSortable())
+        ->sortTable('assignedTo')
+        ->assertCanSeeTableRecords([$assignedToAlice, $assignedToBob, $assignedToCharlie], inOrder: true)
+        ->sortTable('assignedTo', 'desc')
+        ->assertCanSeeTableRecords([$assignedToCharlie, $assignedToBob, $assignedToAlice], inOrder: true);
 });
 
 it('displays a pipeline entry created by and customer visibility in the project work pipeline widget', function (): void {

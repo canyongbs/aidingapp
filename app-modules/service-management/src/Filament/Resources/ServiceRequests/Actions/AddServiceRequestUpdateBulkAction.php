@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use App\Features\ServiceRequestPermissionCompressionFeature;
 use App\Models\User;
 use App\Support\BulkProcessingMachine;
 use Closure;
@@ -84,8 +85,16 @@ class AddServiceRequestUpdateBulkAction
 
                 BulkProcessingMachine::make($records->all())
                     ->check(function (ServiceRequest $serviceRequest) use ($user): ?Closure {
+                        // TODO: Cleanup Task - Compress Service Request Permissions: Have this conditional only check
+                        // $user->can('service_request.*.update'). Once the feature flag is active, service_request_update
+                        // permissions will be removed, and the service request update policy now checks
+                        // service_request.*.update for creating service request updates
                         if (
-                            $user->can('service_request.*.update') && $user->can('service_request_update.create')
+                            $user->can('service_request.*.update') &&
+                            (
+                                ServiceRequestPermissionCompressionFeature::active()
+                                || $user->can('service_request_update.create')
+                            )
                         ) {
                             return null;
                         }
