@@ -41,8 +41,7 @@ const BLOCK_SELECTOR = 'div[data-type="customBlock"]';
 function createBadge(label) {
     const badge = document.createElement('span');
 
-    badge.className =
-        'inline-flex items-center whitespace-nowrap rounded-full border border-gray-300 bg-white px-2 py-0.5 text-xs font-medium text-gray-600 dark:border-white/20 dark:bg-transparent dark:text-gray-400';
+    badge.className = 'fi-fo-rich-editor-custom-block-badge';
     badge.textContent = label;
 
     return badge;
@@ -81,7 +80,7 @@ function decorateBlock(block) {
 
     const badges = document.createElement('span');
 
-    badges.className = 'fi-fo-rich-editor-custom-block-badges inline-flex items-center';
+    badges.className = 'fi-fo-rich-editor-custom-block-badges';
     badges.appendChild(createBadge(requiredFlags.some(Boolean) ? 'Required' : 'Optional'));
 
     // Inside the heading, so the badge sits beside the label rather than at the far right.

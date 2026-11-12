@@ -38,15 +38,41 @@
 --}}
 @php
     $id = $getId();
+    $reorderAction = $getAction("reorder");
+    $canReorder = ! $isDisabled() && $isReorderable() && $reorderAction->isVisible() && ! $reorderAction->isDisabled();
+
+    if ($canReorder) {
+        // As in Filament's KeyValue: the hidden move buttons are the keyboard path once there is more than one row.
+        $reorderAction->extraAttributes(
+            [
+                "x-bind:tabindex" => "rows.length > 1 ? -1 : 0",
+                "x-bind:aria-hidden" => "rows.length > 1 ? 'true' : null",
+            ],
+            merge: true,
+        );
+    }
 @endphp
 
 <x-dynamic-component :component="$getFieldWrapperView()" :field="$field" label-tag="div" class="fi-fo-key-value-wrp">
     <x-filament::input.wrapper :valid="! $errors->has($getStatePath())" class="fi-fo-key-value">
         <div
             x-load
-            x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc('key-value', 'filament/forms') }}"
+            x-load-src="{{ \Filament\Support\Facades\FilamentAsset::getAlpineComponentSrc("key-value", "filament/forms") }}"
+            x-id="['key-value-row']"
             x-data="keyValueFormComponent({
                         state: $wire.{{ $applyStateBindingModifiers("\$entangle('{$getStatePath()}')") }},
+                        reordering:
+                            {{
+                            \Illuminate\Support\Js::from(
+                                $canReorder
+                                    ? [
+                                        "row" => __("filament-forms::components.key_value.reordering.row"),
+                                        "position" => __("filament-forms::components.key_value.reordering.position"),
+                                        "moved" => __("filament-forms::components.key_value.reordering.moved"),
+                                    ]
+                                    : [],
+                            )
+                        }},
                     })"
             x-init="
                 updateRows = function () {
@@ -59,10 +85,15 @@
                 getState = function () {
                     return this.rows.map(({ key, value }) => ({ key, value }))
                 }
+                {{-- The stock description and announcements label a row by its key, which here is the generated value. --}}
+                rowDescription = ((base) =>
+                    function (row, index, message) {
+                        return base.call(this, { key: row.value }, index, message)
+                    })(rowDescription)
             "
             wire:ignore
-            wire:key="{{ $getLivewireKey() }}"
-            {{ $getExtraAlpineAttributeBag()->class(['fi-fo-key-value-table-ctn']) }}
+            wire:key="{{ $getLivewireKey() }}.{{ (int) $canReorder }}"
+            {{ $getExtraAlpineAttributeBag()->class(["fi-fo-key-value-table-ctn"]) }}
         >
             <table
                 aria-labelledby="{{ $id }}-label"
@@ -94,11 +125,13 @@
             >
                 <thead>
                     <tr>
-                        <th scope="col" class="fi-has-action">
-                            <span class="fi-sr-only">
-                                {{ __('filament-forms::components.key_value.columns.reorder.label') }}
-                            </span>
-                        </th>
+                        @if ($canReorder)
+                            <th scope="col" class="fi-has-action">
+                                <span class="fi-sr-only">
+                                    {{ __("filament-forms::components.key_value.columns.reorder.label") }}
+                                </span>
+                            </th>
+                        @endif
 
                         <th scope="col">Label</th>
 
@@ -106,24 +139,58 @@
 
                         <th scope="col" class="fi-has-action">
                             <span class="fi-sr-only">
-                                {{ __('filament-forms::components.key_value.columns.actions.label') }}
+                                {{ __("filament-forms::components.key_value.columns.actions.label") }}
                             </span>
                         </th>
                     </tr>
                 </thead>
 
                 <tbody
-                    x-on:end.stop="reorderRows($event)"
-                    x-sortable
-                    data-sortable-animation-duration="{{ $getReorderAnimationDuration() }}"
+                    @if ($canReorder)
+                        x-on:end.stop="reorderRows($event)"
+                        x-sortable
+                        data-sortable-animation-duration="{{ $getReorderAnimationDuration() }}"
+                    @endif
                 >
-                    <template x-bind:key="index" x-for="(row, index) in rows">
-                        <tr x-bind:x-sortable-item="row.key">
-                            <td class="fi-has-action">
-                                <div x-sortable-handle class="fi-fo-key-value-table-row-sortable-handle">
-                                    {{ $getAction('reorder') }}
-                                </div>
-                            </td>
+                    <template x-bind:key="row.id" x-for="(row, index) in rows">
+                        <tr @if ($canReorder) x-bind:x-sortable-item="row.id" @endif>
+                            @if ($canReorder)
+                                <td class="fi-has-action">
+                                    <span
+                                        class="fi-sr-only"
+                                        data-reorder-description
+                                        x-bind:id="$id('key-value-row') + '-' + row.id"
+                                        x-text="rowDescription(row, index)"
+                                    ></span>
+                                    <div x-sortable-handle class="fi-fo-key-value-table-row-sortable-handle">
+                                        {{ $reorderAction }}
+                                    </div>
+                                    <div class="fi-sr-only">
+                                        <button
+                                            type="button"
+                                            tabindex="-1"
+                                            data-reorder-hidden
+                                            data-reorder-direction="up"
+                                            x-on:click.stop="moveRow(row.id, index - 1)"
+                                            x-bind:disabled="index === 0"
+                                            x-bind:aria-describedby="$id('key-value-row') + '-' + row.id"
+                                        >
+                                            {{ __("filament-forms::components.key_value.actions.move_up.label") }}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            tabindex="-1"
+                                            data-reorder-hidden
+                                            data-reorder-direction="down"
+                                            x-on:click.stop="moveRow(row.id, index + 1)"
+                                            x-bind:disabled="index === rows.length - 1"
+                                            x-bind:aria-describedby="$id('key-value-row') + '-' + row.id"
+                                        >
+                                            {{ __("filament-forms::components.key_value.actions.move_down.label") }}
+                                        </button>
+                                    </div>
+                                </td>
+                            @endif
 
                             <td>
                                 <input
@@ -144,7 +211,7 @@
 
                             <td class="fi-has-action">
                                 <div x-on:click="deleteRow(index)">
-                                    {{ $getAction('delete') }}
+                                    {{ $getAction("delete") }}
                                 </div>
                             </td>
                         </tr>
@@ -152,8 +219,18 @@
                 </tbody>
             </table>
 
+            @if ($canReorder)
+                <span
+                    x-ref="reorderStatus"
+                    class="fi-sr-only"
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                ></span>
+            @endif
+
             <div x-on:click="addRow" class="fi-fo-key-value-add-action-ctn">
-                {{ $getAction('add') }}
+                {{ $getAction("add") }}
             </div>
         </div>
     </x-filament::input.wrapper>

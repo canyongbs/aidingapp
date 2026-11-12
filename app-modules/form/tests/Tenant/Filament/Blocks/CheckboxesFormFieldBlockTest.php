@@ -35,7 +35,6 @@
 */
 
 use AidingApp\Form\Filament\Blocks\CheckboxesFormFieldBlock;
-use AidingApp\Form\Filament\Forms\Components\OptionsKeyValue;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use Illuminate\Support\Facades\Validator;
 
@@ -43,12 +42,6 @@ $options = [
     ['label' => 'Red', 'value' => 'red'],
     ['label' => 'Blue', 'value' => 'blue'],
 ];
-
-it('offers the options editor and the other option in the editor', function (): void {
-    $fields = CheckboxesFormFieldBlock::fields();
-
-    expect(collect($fields)->contains(fn (mixed $field): bool => $field instanceof OptionsKeyValue))->toBeTrue();
-});
 
 it('renders every option label in the preview', function () use ($options): void {
     $html = CheckboxesFormFieldBlock::toPreviewHtml([

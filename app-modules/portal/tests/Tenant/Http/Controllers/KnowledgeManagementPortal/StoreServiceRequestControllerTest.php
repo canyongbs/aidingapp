@@ -311,6 +311,41 @@ describe('checkbox form fields', function (): void {
         expect($html)->toContain('Red')->and($html)->not->toContain('No response');
     });
 
+    // TODO: Cleanup Task (convert-checkbox-form-fields): delete this dataset test.
+    it('normalizes a boolean answer from a form opened before the migration for a migrated checkboxes field', function (bool $checked, string $expectedResponse) use ($setUp): void {
+        [$type, $priority, $field] = $setUp('checkboxes', ['hasOtherOption' => false, 'options' => [['label' => 'Agree', 'value' => '1']], 'isLegacyCheckbox' => true, 'isRequired' => false]);
+        $contact = Contact::factory()->create();
+
+        actingAs($contact, 'contact')->postJson(
+            route('api.portal.service-request.store', ['type' => $type]),
+            [
+                'Main' => ['title' => 'Stale form', 'description' => 'Stale checkbox form.', 'priority' => $priority->getKey()],
+                'Details' => [$field->getKey() => $checked],
+            ],
+        )->assertSuccessful();
+
+        $submission = ServiceRequest::query()->sole()->serviceRequestFormSubmission;
+
+        expect($submission->fields()->whereKey($field)->firstOrFail()->pivot->getAttribute('response'))->toBe($expectedResponse);
+    })->with([
+        'checked' => [true, '["1"]'],
+        'unchecked' => [false, '[]'],
+    ]);
+
+    it('rejects a boolean answer for a checkboxes field that was not migrated', function () use ($setUp): void {
+        [$type, $priority, $field] = $setUp('checkboxes', ['hasOtherOption' => false, 'options' => [['label' => 'Red', 'value' => 'red']]]);
+        $contact = Contact::factory()->create();
+
+        actingAs($contact, 'contact')->postJson(
+            route('api.portal.service-request.store', ['type' => $type]),
+            [
+                'Main' => ['title' => 'Boolean', 'description' => 'Boolean answer.', 'priority' => $priority->getKey()],
+                'Details' => [$field->getKey() => true],
+            ],
+        )->assertUnprocessable()
+            ->assertJsonValidationErrors("Details.{$field->getKey()}");
+    });
+
     it('ignores a field with an unknown type instead of failing the submission', function () use ($setUp): void {
         [$type, $priority, $field] = $setUp('removed_block_type');
         $contact = Contact::factory()->create();

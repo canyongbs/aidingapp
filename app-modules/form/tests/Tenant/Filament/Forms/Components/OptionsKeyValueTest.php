@@ -126,6 +126,15 @@ it('renders the label column before the generated value column', function (): vo
         ->assertSeeHtmlInOrder(['aria-label="Label"', 'aria-label="Value"']);
 });
 
+it('renders keyboard reordering controls and screen reader announcements', function (): void {
+    Livewire::test(OptionsKeyValueTestHost::class)
+        ->assertSeeHtml('moveRow(row.id, index - 1)')
+        ->assertSeeHtml('moveRow(row.id, index + 1)')
+        ->assertSeeHtml('data-reorder-description')
+        ->assertSeeHtml('x-ref="reorderStatus"')
+        ->assertSeeHtml('aria-live="polite"');
+});
+
 it('validates that every label generates a distinct value', function (): void {
     Livewire::test(OptionsKeyValueTestHost::class)
         ->set('data.options', [['key' => 'a-b', 'value' => 'A B'], ['key' => 'a-b', 'value' => 'A-B']])

@@ -2496,6 +2496,21 @@ describe('2026_11_03_124335_tmp_convert_checkbox_form_fields_to_checkboxes', fun
                 ]]),
             ]);
 
+            $stepId = (string) Str::uuid();
+
+            DB::table('service_request_form_steps')->insert([
+                'id' => $stepId,
+                'label' => 'Details',
+                'content' => json_encode(['type' => 'doc', 'content' => [
+                    $block('checkbox', (string) Str::uuid()),
+                    ['type' => 'grid', 'content' => [['type' => 'gridColumn', 'content' => [$block('text_input', (string) Str::uuid())]]]],
+                ]]),
+                'service_request_form_id' => $form->getKey(),
+                'sort' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
             $submissionId = (string) Str::uuid();
 
             DB::table('service_request_form_submissions')->insert([
@@ -2536,13 +2551,22 @@ describe('2026_11_03_124335_tmp_convert_checkbox_form_fields_to_checkboxes', fun
                 ->and($config['description'])->toBe('Please confirm')
                 ->and($config['hasOtherOption'])->toBeFalse()
                 ->and($config['options'])->toBe([['label' => 'Agree', 'value' => '1']])
+                ->and($config['isLegacyCheckbox'])->toBeTrue()
                 ->and(DB::table('service_request_form_fields')->where('id', $textId)->value('type'))->toBe('text_input');
 
             $content = json_decode(DB::table('service_request_forms')->where('id', $form->getKey())->value('content'), associative: true);
 
             expect($content['content'][0]['attrs']['id'])->toBe('checkboxes')
                 ->and($content['content'][0]['attrs']['config']['options'])->toBe([['label' => 'Agree', 'value' => '1']])
+                ->and($content['content'][0]['attrs']['config']['isLegacyCheckbox'])->toBeTrue()
                 ->and($content['content'][1]['content'][0]['content'][0]['attrs']['id'])->toBe('text_input');
+
+            $stepContent = json_decode(DB::table('service_request_form_steps')->where('id', $stepId)->value('content'), associative: true);
+
+            expect($stepContent['content'][0]['attrs']['id'])->toBe('checkboxes')
+                ->and($stepContent['content'][0]['attrs']['config']['options'])->toBe([['label' => 'Agree', 'value' => '1']])
+                ->and($stepContent['content'][0]['attrs']['config']['isLegacyCheckbox'])->toBeTrue()
+                ->and($stepContent['content'][1]['content'][0]['content'][0]['attrs']['id'])->toBe('text_input');
 
             $response = fn (string $id): string => DB::table('service_request_form_field_submission')->where('id', $id)->value('response');
 

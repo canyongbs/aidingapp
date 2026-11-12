@@ -44,6 +44,7 @@ return new class () extends Migration {
     /**
      * Each single `checkbox` field becomes a `checkboxes` field with one option labelled with the old field label.
      * A checked response becomes that option's value; anything else becomes no selection.
+     * Converted fields are marked `isLegacyCheckbox` so submissions from forms opened before this migration are normalized.
      */
     public function up(): void
     {
@@ -143,6 +144,7 @@ return new class () extends Migration {
             ...$config,
             'hasOtherOption' => false,
             'options' => [['label' => $label, 'value' => self::OPTION_VALUE]],
+            'isLegacyCheckbox' => true,
         ];
     }
 };
