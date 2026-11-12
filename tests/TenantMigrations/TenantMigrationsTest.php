@@ -2576,4 +2576,100 @@ describe('2026_11_03_124335_tmp_convert_checkbox_form_fields_to_checkboxes', fun
                 ->and(CheckboxesFormFieldFeature::active())->toBeTrue();
         });
     });
+
+    it('reverts only the converted fields, their content blocks and their responses on rollback', function (): void {
+        isolatedMigration('2026_11_03_124335_tmp_convert_checkbox_form_fields_to_checkboxes', function (): void {
+            $migrationPath = 'app-modules/service-management/database/migrations/2026_11_03_124335_tmp_convert_checkbox_form_fields_to_checkboxes.php';
+            $block = fn (string $type, string $fieldId, array $config = []): array => [
+                'type' => 'customBlock',
+                'attrs' => ['id' => $type, 'config' => ['fieldId' => $fieldId, 'label' => 'Agree', 'isRequired' => true, ...$config]],
+            ];
+
+            $form = ServiceRequestForm::factory()->create();
+            $legacyId = (string) Str::uuid();
+            $newId = (string) Str::uuid();
+
+            $insertField = fn (string $id, string $type, array $config): bool => DB::table('service_request_form_fields')->insert([
+                'id' => $id,
+                'label' => 'Agree',
+                'type' => $type,
+                'is_required' => true,
+                'config' => json_encode($config),
+                'service_request_form_id' => $form->getKey(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $insertField($legacyId, 'checkbox', ['description' => 'Please confirm']);
+
+            DB::table('service_request_forms')->where('id', $form->getKey())->update([
+                'content' => json_encode(['type' => 'doc', 'content' => [$block('checkbox', $legacyId)]]),
+            ]);
+
+            $submissionId = (string) Str::uuid();
+
+            DB::table('service_request_form_submissions')->insert([
+                'id' => $submissionId,
+                'service_request_form_id' => $form->getKey(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $insertResponse = function (string $fieldId, string $response) use ($submissionId): string {
+                $id = (string) Str::uuid();
+
+                DB::table('service_request_form_field_submission')->insert([
+                    'id' => $id,
+                    'response' => $response,
+                    'service_request_form_field_id' => $fieldId,
+                    'service_request_form_submission_id' => $submissionId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                return $id;
+            };
+
+            $checkedResponseId = $insertResponse($legacyId, 'true');
+            $uncheckedResponseId = $insertResponse($legacyId, '0');
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            // A `checkboxes` field created after the migration has no legacy equivalent.
+            $newConfig = ['hasOtherOption' => false, 'options' => [['label' => 'Red', 'value' => 'red'], ['label' => 'Blue', 'value' => 'blue']]];
+            $insertField($newId, 'checkboxes', $newConfig);
+            $newResponseId = $insertResponse($newId, '["red"]');
+
+            DB::table('service_request_forms')->where('id', $form->getKey())->update([
+                'content' => json_encode(['type' => 'doc', 'content' => [
+                    ...json_decode(DB::table('service_request_forms')->where('id', $form->getKey())->value('content'), associative: true)['content'],
+                    $block('checkboxes', $newId, $newConfig),
+                ]]),
+            ]);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            $legacyField = DB::table('service_request_form_fields')->where('id', $legacyId)->first();
+
+            expect($legacyField->type)->toBe('checkbox')
+                ->and(json_decode($legacyField->config, associative: true))->toBe(['description' => 'Please confirm'])
+                ->and(DB::table('service_request_form_fields')->where('id', $newId)->value('type'))->toBe('checkboxes');
+
+            $content = json_decode(DB::table('service_request_forms')->where('id', $form->getKey())->value('content'), associative: true);
+
+            expect($content['content'][0]['attrs']['id'])->toBe('checkbox')
+                ->and($content['content'][0]['attrs']['config'])->toBe(['fieldId' => $legacyId, 'label' => 'Agree', 'isRequired' => true])
+                ->and($content['content'][1]['attrs']['id'])->toBe('checkboxes')
+                ->and($content['content'][1]['attrs']['config']['options'])->toHaveCount(2);
+
+            $response = fn (string $id): string => DB::table('service_request_form_field_submission')->where('id', $id)->value('response');
+
+            expect($response($checkedResponseId))->toBe('1')
+                ->and($response($uncheckedResponseId))->toBe('0')
+                ->and($response($newResponseId))->toBe('["red"]')
+                ->and(CheckboxesFormFieldFeature::active())->toBeFalse();
+        });
+    });
 });

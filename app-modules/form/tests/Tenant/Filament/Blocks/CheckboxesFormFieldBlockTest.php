@@ -36,12 +36,55 @@
 
 use AidingApp\Form\Filament\Blocks\CheckboxesFormFieldBlock;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Validator;
+use Livewire\Component;
+use Livewire\Livewire;
+
+class CheckboxesFormFieldBlockTestHost extends Component implements HasSchemas
+{
+    use InteractsWithSchemas;
+
+    /** @var array<string, mixed> */
+    public array $data = [];
+
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components(CheckboxesFormFieldBlock::fields())
+            ->statePath('data');
+    }
+
+    public function save(): void
+    {
+        $this->getSchema('form')?->getState();
+    }
+
+    public function render(): string
+    {
+        return '<div>{{ $this->form }}</div>';
+    }
+}
 
 $options = [
     ['label' => 'Red', 'value' => 'red'],
     ['label' => 'Blue', 'value' => 'blue'],
 ];
+
+it('requires at least one option unless the other option is included', function (bool $hasOtherOption, array $options, bool $hasErrors): void {
+    $test = Livewire::test(CheckboxesFormFieldBlockTestHost::class)
+        ->set('data.hasOtherOption', $hasOtherOption)
+        ->set('data.options', $options)
+        ->call('save');
+
+    $hasErrors ? $test->assertHasErrors(['data.options' => 'required']) : $test->assertHasNoErrors();
+})->with([
+    'no options without other' => [false, [], true],
+    'no options with other' => [true, [], false],
+    'an option without other' => [false, [['key' => 'red', 'value' => 'Red']], false],
+]);
 
 it('renders every option label in the preview', function () use ($options): void {
     $html = CheckboxesFormFieldBlock::toPreviewHtml([
