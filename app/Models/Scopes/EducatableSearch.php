@@ -36,8 +36,8 @@
 
 namespace App\Models\Scopes;
 
-use AidingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -49,8 +49,8 @@ class EducatableSearch
     ) {}
 
     /**
-     * @param Builder<Contact> $query
-     */
+       * @param Builder<covariant Model> $query
+       */
     public function __invoke(Builder $query): void
     {
         $search = Str::lower($this->search);

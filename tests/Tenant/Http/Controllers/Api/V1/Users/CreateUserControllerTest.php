@@ -43,6 +43,7 @@ use App\Notifications\SetPasswordNotification;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
+use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\postJson;
 use function Tests\actingAsApiUser;
@@ -229,8 +230,8 @@ it('sends SetPasswordNotification only to non-external users', function (bool $i
     'external user does not receive notification' => [true, false],
 ]);
 
-it('resolves department case-insensitively', function (): void {
-    $department = Department::factory()->create(['name' => 'Human Resources']);
+it('resolves department case-insensitively', function (string $departmentName, string $input): void {
+    $department = Department::factory()->create(['name' => $departmentName]);
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
@@ -241,15 +242,18 @@ it('resolves department case-insensitively', function (): void {
         'last_name' => 'User',
         'email' => 'hr@example.com',
         'is_external' => false,
-        'department' => 'human resources',
+        'department' => $input,
     ]);
 
     $response->assertCreated();
     expect($response['data']['department']['id'])->toBe($department->id);
-});
+})->with([
+    'ASCII' => ['Human Resources', 'human resources'],
+    'multibyte uppercase' => ["\u{00E9}ducation", "\u{00C9}DUCATION"],
+]);
 
-it('resolves department case-insensitively for multibyte characters', function (): void {
-    $department = Department::factory()->create(['name' => 'Équipe']);
+it('resolves department case-insensitively for multibyte characters', function (string $departmentName, string $input): void {
+    $department = Department::factory()->create(['name' => $departmentName]);
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
@@ -260,15 +264,18 @@ it('resolves department case-insensitively for multibyte characters', function (
         'last_name' => 'User',
         'email' => 'team@example.com',
         'is_external' => false,
-        'department' => 'ÉQUIPE',
+        'department' => $input,
     ]);
 
     $response->assertCreated();
     expect($response['data']['department']['id'])->toBe($department->id);
-});
+})->with([
+    'ASCII' => ['Human Resources', 'human resources'],
+    'multibyte uppercase' => ["\u{00E9}ducation", "\u{00C9}DUCATION"],
+]);
 
-it('resolves role names case-insensitively', function (): void {
-    $role = Role::factory()->create(['name' => 'Support Agent', 'guard_name' => 'web']);
+it('resolves role names case-insensitively', function (string $roleName, string $input): void {
+    $role = Role::factory()->create(['name' => $roleName, 'guard_name' => 'web']);
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
@@ -279,14 +286,17 @@ it('resolves role names case-insensitively', function (): void {
         'last_name' => 'User',
         'email' => 'agent@example.com',
         'is_external' => false,
-        'roles' => ['support agent'],
+        'roles' => [$input],
     ]);
 
     $response->assertCreated();
 
     $created = User::where('email', 'agent@example.com')->firstOrFail();
     expect($created->hasRole($role))->toBeTrue();
-});
+})->with([
+    'ASCII' => ['Support Agent', 'support agent'],
+    'multibyte uppercase' => ["\u{00E9}quipe Support", "\u{00C9}QUIPE SUPPORT"],
+]);
 
 it('rejects a duplicate email address', function (): void {
     User::factory()->create(['email' => 'taken@example.com']);
@@ -349,6 +359,24 @@ it('returns 422 when a role name does not exist', function (): void {
         'roles' => ['nonexistent-role'],
     ])->assertUnprocessable()
         ->assertJsonValidationErrors(['roles.0']);
+});
+
+it('reports only the missing role when a multibyte role also resolves', function (): void {
+    Role::factory()->create(['name' => "\u{00E9}quipe Support", 'guard_name' => 'web']);
+
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('user.create');
+    Sanctum::actingAs($user, ['api']);
+
+    postJson(route('api.v1.users.store', absolute: false), [
+        'first_name' => 'Mixed',
+        'last_name' => 'Roles',
+        'email' => 'mixedroles@example.com',
+        'is_external' => false,
+        'roles' => ["\u{00C9}QUIPE SUPPORT", 'nonexistent-role'],
+    ])->assertUnprocessable()
+        ->assertJsonValidationErrors(['roles.1'])
+        ->assertJsonMissingValidationErrors(['roles.0']);
 });
 
 it('rejects admin roles', function (string $roleToCreate, string $roleNameToSend): void {
