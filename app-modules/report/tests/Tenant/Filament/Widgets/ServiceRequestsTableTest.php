@@ -245,7 +245,7 @@ it('searches the assigned to column by full name, including a quoted phrase', fu
 it('searches the assigned to filter options by full name', function (string $search): void {
     $openStatus = ServiceRequestStatus::factory()->state(['classification' => SystemServiceRequestClassification::Open])->create();
 
-    $assignees = collect([['Avery', 'Smith'], ['Jordan', 'Lee']])->map(function (array $name) use ($openStatus): User {
+    $assignees = collect([['Zyrian', 'Quenby'], ['Jordan', 'Lee']])->map(function (array $name) use ($openStatus): User {
         $assignee = User::factory()->create(['first_name' => $name[0], 'last_name' => $name[1]]);
 
         $serviceRequest = ServiceRequest::factory()->state(['status_id' => $openStatus->getKey()])->create();
@@ -266,9 +266,9 @@ it('searches the assigned to filter options by full name', function (string $sea
 
     $select = $component->instance()->getTableFiltersForm()->getComponentByStatePath('assigned_to.value');
 
-    expect($select->getSearchResults($search))->toBe([$assignees[0]->getKey() => 'Avery Smith']);
+    expect($select->getSearchResults($search))->toBe([$assignees[0]->getKey() => 'Zyrian Quenby']);
 })->with([
-    'first name' => 'Avery',
-    'last name' => 'Smith',
-    'full name' => 'Avery Smith',
+    'first name' => 'Zyrian',
+    'last name' => 'Quenby',
+    'full name' => 'Zyrian Quenby',
 ]);
