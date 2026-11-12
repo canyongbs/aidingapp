@@ -474,6 +474,45 @@ test('Can create a service request for a contact with a category', function (): 
     expect($serviceRequest->category)->toBe(ServiceRequestCategory::Incident);
 });
 
+test('A non-super-admin manager can create a service request for a contact under a type they neither manage nor audit', function (): void {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.create');
+
+    // The user manages some other type, so they are a manager in general, but not of the selected type.
+    ServiceRequestType::factory()->hasAttached($user, [], 'managerUsers')->create();
+
+    $inaccessibleType = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()->state(['type_id' => $inaccessibleType->getKey()])->create();
+    $status = ServiceRequestStatus::factory()->create();
+
+    $contact = Contact::factory()->create();
+
+    actingAs($user);
+
+    Livewire::test(ServiceRequestsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ViewContact::class,
+    ])
+        ->callTableAction('create', data: [
+            'status_id' => $status->getKey(),
+            'type_id' => $inaccessibleType->getKey(),
+            'priority_id' => $priority->getKey(),
+            'category' => ServiceRequestCategory::Request->value,
+            'title' => 'Test Service Request',
+        ])
+        ->assertHasNoTableActionErrors();
+
+    $serviceRequest = $contact->serviceRequests()->sole();
+
+    expect($serviceRequest->respondent_id)->toBe($contact->getKey())
+        ->and($serviceRequest->priority->type->is($inaccessibleType))->toBeTrue();
+});
+
 test('Priority select is populated based on selected type', function (): void {
     asSuperAdmin();
 
