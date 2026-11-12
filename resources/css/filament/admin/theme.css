@@ -76,7 +76,11 @@ li[data-group-label=''] > ul {
 }
 
 .fi-fo-rich-editor-custom-block-badges {
-    @apply ms-3 gap-x-2;
+    @apply ms-3 inline-flex items-center gap-x-2;
+}
+
+.fi-fo-rich-editor-custom-block-badge {
+    @apply inline-flex items-center rounded-full border border-gray-300 bg-white px-2 py-0.5 text-xs font-medium whitespace-nowrap text-gray-900 dark:border-white dark:bg-white dark:text-gray-950;
 }
 
 .fi-sidebar-group-label {

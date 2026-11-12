@@ -34,30 +34,11 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Form\Filament\Blocks\CheckboxesFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\CheckboxFormFieldBlock;
-use AidingApp\Form\Filament\Blocks\FormFieldBlockRegistry;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
-use App\Features\CheckboxesFormFieldFeature;
 use Illuminate\Support\Facades\Validator;
 
-// TODO: Cleanup Task (convert-checkbox-form-fields): delete the inactive-flag tests and the legacy block tests.
-it('offers the legacy checkbox block while the feature flag is inactive', function (): void {
-    CheckboxesFormFieldFeature::deactivate();
-
-    expect(FormFieldBlockRegistry::get())
-        ->toContain(CheckboxFormFieldBlock::class)
-        ->and(FormFieldBlockRegistry::get())->not()->toContain(CheckboxesFormFieldBlock::class)
-        ->and(FormFieldBlockRegistry::keyByType())->toHaveKey('checkbox')->not()->toHaveKey('checkboxes');
-});
-
-it('offers the checkboxes block once the feature flag is active', function (): void {
-    expect(FormFieldBlockRegistry::get())
-        ->toContain(CheckboxesFormFieldBlock::class)
-        ->and(FormFieldBlockRegistry::get())->not()->toContain(CheckboxFormFieldBlock::class)
-        ->and(FormFieldBlockRegistry::keyByType())->toHaveKey('checkboxes')->not()->toHaveKey('checkbox');
-});
-
+// TODO: Cleanup Task (convert-checkbox-form-fields): delete this file.
 it('validates a legacy checkbox answer as a boolean', function (mixed $response, bool $passes): void {
     $field = new ServiceRequestFormField(['label' => 'Agree', 'config' => []]);
 
