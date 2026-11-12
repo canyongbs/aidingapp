@@ -39,6 +39,7 @@ namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Filament\Resources\Projects\RelationManagers\ManagerDepartmentsRelationManager;
 use AidingApp\Project\Filament\Resources\Projects\RelationManagers\ManagerUsersRelationManager;
+use App\Features\ProjectPermissionConsolidationFeature;
 use Filament\Resources\Pages\ManageRelatedRecords;
 
 class ManageManagers extends ManageRelatedRecords
@@ -64,6 +65,6 @@ class ManageManagers extends ManageRelatedRecords
     {
         $user = auth()->user();
 
-        return $user->can(['project.view-any', 'project.*.view']) && parent::canAccess($arguments);
+        return $user->can(ProjectPermissionConsolidationFeature::active() ? ['projects.view-any', 'projects.*.view'] : ['project.view-any', 'project.*.view']) && parent::canAccess($arguments);
     }
 }

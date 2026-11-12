@@ -47,14 +47,14 @@ it('only shows the bulk delete action to a user with the asset_status.delete per
 
     $user = User::factory()
         ->create()
-        ->givePermissionTo('asset_status.view-any', 'asset_status.*.view');
+        ->givePermissionTo('assets.view-any', 'assets.*.view');
 
     actingAs($user);
 
     Livewire::test(ListAssetStatuses::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
-    $user->givePermissionTo('asset_status.*.delete');
+    $user->givePermissionTo('assets.*.delete');
 
     Livewire::test(ListAssetStatuses::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());

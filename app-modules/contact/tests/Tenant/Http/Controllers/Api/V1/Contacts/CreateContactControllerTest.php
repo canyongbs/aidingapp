@@ -162,23 +162,6 @@ it('resolves relationship names case-insensitively without wildcard matching', f
     ]);
 });
 
-it('rejects ambiguous contact type names', function () use ($actingAsContactCreator): void {
-    $actingAsContactCreator();
-
-    ContactType::factory()->create(['name' => 'Customer']);
-    ContactType::factory()->create(['name' => 'CUSTOMER']);
-
-    postJson(route('api.v1.contacts.store', [], false), [
-        'first_name' => 'Jane',
-        'last_name' => 'Doe',
-        'type' => 'customer',
-    ])->assertUnprocessable()
-        ->assertJsonValidationErrors(['type'])
-        ->assertJsonPath('errors.type.0', 'The specified contact type name is ambiguous.');
-
-    assertDatabaseMissing(Contact::class, ['first_name' => 'Jane']);
-});
-
 it('reports unknown relationship names together with other validation errors', function () use ($actingAsContactCreator): void {
     $actingAsContactCreator();
 

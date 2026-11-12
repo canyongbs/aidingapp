@@ -193,8 +193,8 @@ it('validates the inputs', function (EditProjectRequestFactory $data, array $err
 ]);
 
 describe('authorization', function (): void {
-    it('hides the edit action from a user without the `project.*.update` permission', function (): void {
-        $user = User::factory()->create()->givePermissionTo('project.view-any', 'project.*.view');
+    it('hides the edit action from a user without the `projects.*.update` permission', function (): void {
+        $user = User::factory()->create()->givePermissionTo('projects.view-any', 'projects.*.view');
 
         actingAs($user);
 
@@ -206,8 +206,8 @@ describe('authorization', function (): void {
             ->assertActionNotMounted();
     });
 
-    it('shows the edit action to the creator of the project with the `project.*.update` permission', function (): void {
-        $user = User::factory()->create()->givePermissionTo('project.view-any', 'project.*.view', 'project.*.update');
+    it('shows the edit action to the creator of the project with the `projects.*.update` permission', function (): void {
+        $user = User::factory()->create()->givePermissionTo('projects.view-any', 'projects.*.view', 'projects.*.update');
 
         actingAs($user);
 
@@ -217,8 +217,8 @@ describe('authorization', function (): void {
             ->assertActionVisible('editProject');
     });
 
-    it('shows the edit action to a manager of the project with the `project.*.update` permission', function (): void {
-        $user = User::factory()->create()->givePermissionTo('project.view-any', 'project.*.view', 'project.*.update');
+    it('shows the edit action to a manager of the project with the `projects.*.update` permission', function (): void {
+        $user = User::factory()->create()->givePermissionTo('projects.view-any', 'projects.*.view', 'projects.*.update');
 
         actingAs($user);
 
@@ -228,9 +228,9 @@ describe('authorization', function (): void {
             ->assertActionVisible('editProject');
     });
 
-    it('shows the edit action to a member of a managing department with the `project.*.update` permission', function (): void {
+    it('shows the edit action to a member of a managing department with the `projects.*.update` permission', function (): void {
         $department = Department::factory()->create();
-        $user = User::factory()->for($department)->create()->givePermissionTo('project.view-any', 'project.*.view', 'project.*.update');
+        $user = User::factory()->for($department)->create()->givePermissionTo('projects.view-any', 'projects.*.view', 'projects.*.update');
 
         actingAs($user);
 
@@ -240,9 +240,9 @@ describe('authorization', function (): void {
             ->assertActionVisible('editProject');
     });
 
-    it('hides the edit action from an auditor or an unrelated user even with the `project.*.update` permission', function (): void {
-        $auditor = User::factory()->create()->givePermissionTo('project.view-any', 'project.*.view', 'project.*.update');
-        $unrelated = User::factory()->create()->givePermissionTo('project.view-any', 'project.*.view', 'project.*.update');
+    it('hides the edit action from an auditor or an unrelated user even with the `projects.*.update` permission', function (): void {
+        $auditor = User::factory()->create()->givePermissionTo('projects.view-any', 'projects.*.view', 'projects.*.update');
+        $unrelated = User::factory()->create()->givePermissionTo('projects.view-any', 'projects.*.view', 'projects.*.update');
 
         $project = Project::factory()->hasAttached($auditor, relationship: 'auditorUsers')->create();
 
@@ -258,7 +258,7 @@ describe('authorization', function (): void {
     });
 
     it('does not save when the user stops being a manager and becomes an auditor or unrelated after opening the slide-over', function (bool $becomesAuditor): void {
-        $user = User::factory()->create()->givePermissionTo('project.view-any', 'project.*.view', 'project.*.update');
+        $user = User::factory()->create()->givePermissionTo('projects.view-any', 'projects.*.view', 'projects.*.update');
 
         actingAs($user);
 
@@ -336,8 +336,8 @@ describe('authorization', function (): void {
         assertDatabaseMissing(Project::class, ['id' => $project->getKey(), 'name' => $request['name']]);
     });
 
-    it('does not save when the user loses the `project.*.update` permission after opening the slide-over', function (): void {
-        $user = User::factory()->create()->givePermissionTo('project.view-any', 'project.*.view', 'project.*.update');
+    it('does not save when the user loses the `projects.*.update` permission after opening the slide-over', function (): void {
+        $user = User::factory()->create()->givePermissionTo('projects.view-any', 'projects.*.view', 'projects.*.update');
 
         actingAs($user);
 
@@ -348,7 +348,7 @@ describe('authorization', function (): void {
             ->mountAction('editProject')
             ->assertActionMounted('editProject');
 
-        $user->revokePermissionTo('project.*.update');
+        $user->revokePermissionTo('projects.*.update');
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $component

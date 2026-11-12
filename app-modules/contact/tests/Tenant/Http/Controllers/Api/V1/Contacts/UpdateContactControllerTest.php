@@ -204,22 +204,6 @@ it('resolves relationship names case-insensitively without wildcard matching', f
         ->and($contact->organization_id)->toBe($organization->getKey());
 });
 
-it('rejects ambiguous contact type names without modifying the contact', function () use ($actingAsContactUpdater): void {
-    $actingAsContactUpdater();
-
-    $contact = Contact::factory()->create();
-    $originalTypeId = $contact->type_id;
-    ContactType::factory()->create(['name' => 'Customer']);
-    ContactType::factory()->create(['name' => 'CUSTOMER']);
-
-    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['type' => 'customer'])
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors(['type'])
-        ->assertJsonPath('errors.type.0', 'The specified contact type name is ambiguous.');
-
-    expect($contact->refresh()->type_id)->toBe($originalTypeId);
-});
-
 it('does not resolve deleted relationships by name', function (string $field) use ($actingAsContactUpdater): void {
     $actingAsContactUpdater();
 

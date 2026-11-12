@@ -36,8 +36,10 @@
 
 namespace AidingApp\InventoryManagement\Policies;
 
+use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use App\Enums\Feature;
+use App\Features\AssetPermissionConsolidationFeature;
 use App\Models\Authenticatable;
 use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
@@ -59,7 +61,7 @@ class AssetCheckOutPolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'asset_check_out.view-any',
+            abilities: AssetPermissionConsolidationFeature::active() ? 'assets.view-any' : 'asset_check_out.view-any',
             denyResponse: 'You do not have permission to view asset check outs.'
         );
     }
@@ -67,21 +69,28 @@ class AssetCheckOutPolicy
     public function view(Authenticatable $authenticatable, AssetCheckOut $assetCheckOut): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_check_out.*.view'],
+            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.view'] : ['asset_check_out.*.view'],
             denyResponse: 'You do not have permission to view this asset check out.'
         );
     }
 
-    public function create(Authenticatable $authenticatable): Response
+    public function create(Authenticatable $authenticatable, Asset $asset): Response
     {
-        return $authenticatable->canOrElse(
-            abilities: 'asset_check_out.create',
-            denyResponse: 'You do not have permission to create asset check outs.'
-        );
+        if ($authenticatable->cannot('update', $asset)) {
+            return Response::deny('You do not have permission to check out this asset.');
+        }
+
+        return Response::allow();
     }
 
     public function update(Authenticatable $authenticatable, AssetCheckOut $assetCheckOut): Response
     {
+        if (AssetPermissionConsolidationFeature::active()) {
+            return $authenticatable->cannot('update', $assetCheckOut->asset)
+                ? Response::deny('You do not have permission to update this asset check out.')
+                : Response::allow();
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['asset_check_out.*.update'],
             denyResponse: 'You do not have permission to update this asset check out.'
@@ -90,6 +99,12 @@ class AssetCheckOutPolicy
 
     public function delete(Authenticatable $authenticatable, AssetCheckOut $assetCheckOut): Response
     {
+        if (AssetPermissionConsolidationFeature::active()) {
+            return $authenticatable->cannot('update', $assetCheckOut->asset)
+                ? Response::deny('You do not have permission to delete this asset check out.')
+                : Response::allow();
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['asset_check_out.*.delete'],
             denyResponse: 'You do not have permission to delete this asset check out.'
@@ -98,6 +113,13 @@ class AssetCheckOutPolicy
 
     public function deleteAny(Authenticatable $authenticatable): Response
     {
+        if (AssetPermissionConsolidationFeature::active()) {
+            return $authenticatable->canOrElse(
+                abilities: ['assets.*.update'],
+                denyResponse: 'You do not have permission to delete any asset check out.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['asset_check_out.*.delete'],
             denyResponse: 'You do not have permission to delete any asset check out.'
@@ -106,6 +128,12 @@ class AssetCheckOutPolicy
 
     public function restore(Authenticatable $authenticatable, AssetCheckOut $assetCheckOut): Response
     {
+        if (AssetPermissionConsolidationFeature::active()) {
+            return $authenticatable->cannot('update', $assetCheckOut->asset)
+                ? Response::deny('You do not have permission to restore this asset check out.')
+                : Response::allow();
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['asset_check_out.*.restore'],
             denyResponse: 'You do not have permission to restore this asset check out.'
@@ -114,6 +142,13 @@ class AssetCheckOutPolicy
 
     public function restoreAny(Authenticatable $authenticatable): Response
     {
+        if (AssetPermissionConsolidationFeature::active()) {
+            return $authenticatable->canOrElse(
+                abilities: ['assets.*.update'],
+                denyResponse: 'You do not have permission to restore any asset check out.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['asset_check_out.*.restore'],
             denyResponse: 'You do not have permission to restore any asset check out.'
@@ -122,6 +157,12 @@ class AssetCheckOutPolicy
 
     public function forceDelete(Authenticatable $authenticatable, AssetCheckOut $assetCheckOut): Response
     {
+        if (AssetPermissionConsolidationFeature::active()) {
+            return $authenticatable->cannot('update', $assetCheckOut->asset)
+                ? Response::deny('You do not have permission to permanently delete this asset check out.')
+                : Response::allow();
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['asset_check_out.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this asset check out.'
@@ -130,6 +171,13 @@ class AssetCheckOutPolicy
 
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
+        if (AssetPermissionConsolidationFeature::active()) {
+            return $authenticatable->canOrElse(
+                abilities: ['assets.*.update'],
+                denyResponse: 'You do not have permission to permanently delete any asset check out.'
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['asset_check_out.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete any asset check out.'

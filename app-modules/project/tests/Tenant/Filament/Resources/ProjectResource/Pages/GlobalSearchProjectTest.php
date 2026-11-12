@@ -181,8 +181,8 @@ test('global search does not return projects the user has no relation to', funct
 test('global search result URL points to the project view page', function (): void {
     $user = User::factory()->create();
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('projects.view-any');
+    $user->givePermissionTo('projects.*.view');
 
     actingAs($user);
 
