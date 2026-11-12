@@ -2600,6 +2600,34 @@ describe('2026_11_11_100001_convert_asset_statuses_name_to_citext_and_enforce_un
         AssetStatusNameUniquenessFeature::class,
         [AssetTypeNameUniquenessFeature::class, AssetLocationNameUniquenessFeature::class],
     );
+
+    it('keeps the exact `Under Maintenance` status over an older case-variant duplicate', function (): void {
+        isolatedMigration('2026_11_11_100001_convert_asset_statuses_name_to_citext_and_enforce_unique', function (): void {
+            $insertStatus = function (string $name, string $classification, CarbonInterface $createdAt): string {
+                $id = (string) Str::uuid();
+
+                DB::table('asset_statuses')->insert([
+                    'id' => $id,
+                    'name' => $name,
+                    'classification' => $classification,
+                    'created_at' => $createdAt,
+                    'updated_at' => $createdAt,
+                ]);
+
+                return $id;
+            };
+
+            $olderVariantId = $insertStatus('under maintenance', 'available', now()->subMinutes(2));
+            $underMaintenanceId = $insertStatus('Under Maintenance', 'unavailable', now()->subMinute());
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/inventory-management/database/migrations/2026_11_11_100001_convert_asset_statuses_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('asset_statuses')->where('id', $underMaintenanceId)->value('name'))->toBe('Under Maintenance')
+                ->and(DB::table('asset_statuses')->where('id', $olderVariantId)->value('name'))->toBe('under maintenance-2')
+                ->and(DB::table('asset_statuses')->where('name', 'Under Maintenance')->value('id'))->toBe($underMaintenanceId);
+        });
+    });
 });
 
 describe('2026_11_11_100002_convert_asset_locations_name_to_citext_and_enforce_unique', function () use ($defineAssetNameUniquenessTests): void {

@@ -45,7 +45,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     /*
      * TODO: Cleanup Task (asset-type-status-and-location-name-uniqueness): after AssetStatusNameUniquenessFeature is removed:
-     * - remove the `FixesDuplicateNames` trait, the `$chunkSize` and `$usesSoftDeletes` properties, and the `fixDuplicates()` call
+     * - remove the `FixesDuplicateNames` trait, the `orderDuplicateRecords()` override, the `$chunkSize` and `$usesSoftDeletes` properties, and the `fixDuplicates()` call
      * - keep the citext column conversion and the unique index, they are permanent
      */
     use FixesDuplicateNames;
@@ -84,5 +84,18 @@ return new class () extends Migration {
             // Names rewritten by `fixDuplicates()` are kept: the `-N` suffix cannot be told apart from a genuine name.
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
         });
+    }
+
+    /**
+     * Keep the exact `Under Maintenance` status ahead of the default oldest-first ordering, since
+     * `Asset::transitionToUnderMaintenance()` looks it up by name and would otherwise resolve to a
+     * case-variant duplicate once the column becomes case-insensitive.
+     */
+    protected function orderDuplicateRecords(Builder $query): Builder
+    {
+        return $query
+            ->orderByRaw("CASE WHEN {$this->column} = ? THEN 0 ELSE 1 END", ['Under Maintenance'])
+            ->orderBy('created_at', 'asc')
+            ->orderBy('id', 'asc');
     }
 };
