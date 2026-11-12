@@ -139,7 +139,7 @@ class CreateUserRequest extends FormRequest
             Authenticatable::AI_ADMIN_ROLE,
         ];
 
-        $loweredAdminNames = array_map('strtolower', $adminRoleNames);
+        $loweredAdminNames = array_map(fn (string $roleName): string => Str::lower($roleName), $adminRoleNames);
 
         foreach ($roleNames as $index => $roleName) {
             if (in_array(Str::lower($roleName), $loweredAdminNames, true)) {
@@ -153,11 +153,11 @@ class CreateUserRequest extends FormRequest
         }
 
         $this->resolvedRoles = Role::query()
-            ->whereRaw('LOWER(name) IN (' . implode(',', array_fill(0, count($roleNames), '?')) . ')', array_map('strtolower', $roleNames))
+            ->whereRaw('LOWER(name) IN (' . implode(',', array_fill(0, count($roleNames), '?')) . ')', array_map(fn (string $roleName): string => Str::lower($roleName), $roleNames))
             ->get();
 
         if ($this->resolvedRoles->count() !== count($roleNames)) {
-            $foundNames = $this->resolvedRoles->pluck('name')->map(fn ($name): string => Str::lower($name))->toArray();
+            $foundNames = $this->resolvedRoles->pluck('name')->map(fn ($name) => Str::lower($name))->toArray();
 
             foreach ($roleNames as $index => $roleName) {
                 if (! in_array(Str::lower($roleName), $foundNames, true)) {
