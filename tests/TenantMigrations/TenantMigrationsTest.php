@@ -2487,7 +2487,7 @@ describe('2026_11_03_124335_tmp_convert_checkbox_form_fields_to_checkboxes', fun
             ]);
 
             $insertField($checkboxId, 'checkbox', 'Agree');
-             $insertField($textId, 'text_input', 'Name');
+            $insertField($textId, 'text_input', 'Name');
 
             DB::table('service_request_forms')->where('id', $form->getKey())->update([
                 'content' => json_encode(['type' => 'doc', 'content' => [
