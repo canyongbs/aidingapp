@@ -187,7 +187,8 @@ class ManageCommunicationSettings extends Page implements HasActions, HasForms, 
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->authorizeIndividualRecords('delete'),
+                        ->authorizeIndividualRecords('delete')
+                        ->visible(fn (): bool => auth()->user()?->can('deleteAny', EmailTemplate::class) ?? false),
                 ]),
             ]);
     }
