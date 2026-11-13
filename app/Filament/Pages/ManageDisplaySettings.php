@@ -36,61 +36,313 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Clusters\DisplaySettings as DisplaySettingsCluster;
+use App\Enums\NavigationGroup;
+use App\Models\Tenant;
 use App\Models\User;
 use App\Settings\DisplaySettings;
+use App\Settings\EmailSettings;
+use App\Settings\PresenceSettings;
 use CanyonGBS\Common\Filament\Forms\Components\TimezoneSelect;
 use Filament\Actions\Action;
-use Filament\Actions\ActionGroup;
-use Filament\Pages\SettingsPage;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\EmbeddedSchema;
+use Filament\Schemas\Components\Form;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Url;
+use UnitEnum;
 
-class ManageDisplaySettings extends SettingsPage
+/**
+ * @property-read Schema $datesAndTimesForm
+ * @property-read Schema $emailForm
+ * @property-read Schema $presenceForm
+ */
+class ManageDisplaySettings extends Page implements HasActions, HasForms
 {
-    protected static ?string $navigationLabel = 'Dates and Times';
+    use InteractsWithActions;
+    use InteractsWithForms;
 
-    protected static ?int $navigationSort = 10;
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Settings;
 
-    protected static string $settings = DisplaySettings::class;
+    protected static ?string $navigationLabel = 'Display Settings';
 
-    protected static ?string $cluster = DisplaySettingsCluster::class;
+    protected static ?string $title = 'Display Settings';
+
+    protected static ?int $navigationSort = 110;
+
+    #[Url(as: 'tab')]
+    public string $activeTab = 'dates-and-times';
+
+    /** @var array<string, mixed> */
+    public ?array $datesAndTimesData = [];
+
+    /** @var array<string, mixed> */
+    public ?array $emailData = [];
+
+    /** @var array<string, mixed> */
+    public ?array $presenceData = [];
 
     public static function canAccess(): bool
     {
-        /** @var User $user */
         $user = auth()->user();
+
+        assert($user instanceof User);
 
         return $user->can('settings.view-any');
     }
 
-    public function form(Schema $schema): Schema
+    public function mount(): void
+    {
+        $this->fillForms();
+    }
+
+    public function content(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Tabs::make()
+                    ->livewireProperty('activeTab')
+                    ->tabs([
+                        'dates-and-times' => Tab::make('Dates and Times')
+                            ->schema([
+                                $this->makeFormContentComponent('datesAndTimesForm', 'saveDatesAndTimes'),
+                            ]),
+                        'email' => Tab::make('Email')
+                            ->schema([
+                                $this->makeFormContentComponent('emailForm', 'saveEmail'),
+                            ]),
+                        'presence' => Tab::make('Presence')
+                            ->schema([
+                                $this->makeFormContentComponent('presenceForm', 'savePresence'),
+                            ]),
+                    ]),
+            ]);
+    }
+
+    public function datesAndTimesForm(Schema $schema): Schema
     {
         return $schema
             ->components([
                 TimezoneSelect::make('timezone')
                     ->helperText('Default: ' . config('app.timezone')),
             ])
-            ->disabled(! auth()->user()->can('settings.*.update'));
+            ->disabled(! $this->canUpdate())
+            ->statePath('datesAndTimesData');
     }
 
-    public function save(): void
+    public function emailForm(Schema $schema): Schema
     {
-        if (! auth()->user()->can('settings.*.update')) {
+        return $schema
+            ->components([
+                TextInput::make('tenant_mail_from_name')
+                    ->label('From Name')
+                    ->string()
+                    ->required()
+                    ->maxLength(255),
+                SpatieMediaLibraryFileUpload::make('header_logo')
+                    ->collection('header_logo')
+                    ->disk('s3-public')
+                    ->visibility('public')
+                    ->image()
+                    ->maxSize(10240)
+                    ->acceptedFileTypes([
+                        'image/png',
+                        'image/jpeg',
+                        'image/jpg',
+                        'image/webp',
+                        'image/svg+xml',
+                    ])
+                    ->model(
+                        EmailSettings::getSettingsPropertyModel('email.header_logo'),
+                    )
+                    ->columnSpanFull(),
+                ColorPicker::make('background_color')
+                    ->regex('/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b$/'),
+                ColorPicker::make('h1_text_color')
+                    ->regex('/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b$/'),
+                ColorPicker::make('h2_text_color')
+                    ->regex('/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b$/'),
+                ColorPicker::make('paragraph_text_color')
+                    ->regex('/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b$/'),
+                RichEditor::make('footer')
+                    ->label('Footer text')
+                    ->columnSpanFull()
+                    ->toolbarButtons(['bold', 'italic', 'underline', 'link'])
+                    ->json(),
+            ])
+            ->disabled(! $this->canUpdate())
+            ->statePath('emailData');
+    }
+
+    public function presenceForm(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextInput::make('active_threshold')
+                    ->label('Active threshold')
+                    ->helperText('Minutes of inactivity before a user or contact is considered idle.')
+                    ->numeric()
+                    ->minValue(1)
+                    ->maxValue(fn (Get $get): int|float => ($get('idle_threshold') ?? 2) - 1)
+                    ->required()
+                    ->live(onBlur: true)
+                    ->suffix('minutes'),
+                TextInput::make('idle_threshold')
+                    ->label('Idle threshold')
+                    ->helperText('Minutes of inactivity before a user or contact is considered inactive.')
+                    ->numeric()
+                    ->minValue(fn (Get $get): int|float => ($get('active_threshold') ?? 0) + 1)
+                    ->maxValue(fn (Get $get): int|float => ($get('inactive_threshold') ?? 2) - 1)
+                    ->required()
+                    ->live(onBlur: true)
+                    ->suffix('minutes'),
+                TextInput::make('inactive_threshold')
+                    ->label('Inactive threshold')
+                    ->helperText('Minutes of inactivity before a user or contact is considered offline.')
+                    ->numeric()
+                    ->minValue(fn (Get $get): int|float => ($get('idle_threshold') ?? 0) + 1)
+                    ->required()
+                    ->live(onBlur: true)
+                    ->suffix('minutes'),
+            ])
+            ->disabled(! $this->canUpdate())
+            ->statePath('presenceData');
+    }
+
+    public function saveDatesAndTimes(): void
+    {
+        if (! $this->canUpdate()) {
             return;
         }
 
-        parent::save();
+        DB::transaction(function (): void {
+            $settings = app(DisplaySettings::class);
+
+            $settings->fill($this->datesAndTimesForm->getState());
+            $settings->save();
+        });
+
+        $this->sendSavedNotification();
+    }
+
+    public function saveEmail(): void
+    {
+        if (! $this->canUpdate()) {
+            return;
+        }
+
+        DB::transaction(function (): void {
+            $data = $this->mutateEmailDataBeforeSave($this->emailForm->getState());
+
+            $settings = app(EmailSettings::class);
+
+            $settings->fill($data);
+            $settings->save();
+        });
+
+        $this->sendSavedNotification();
+    }
+
+    public function savePresence(): void
+    {
+        if (! $this->canUpdate()) {
+            return;
+        }
+
+        DB::transaction(function (): void {
+            $settings = app(PresenceSettings::class);
+
+            $settings->fill($this->presenceForm->getState());
+            $settings->save();
+        });
+
+        $this->sendSavedNotification();
+    }
+
+    protected function fillForms(): void
+    {
+        $this->datesAndTimesForm->fill(app(DisplaySettings::class)->toArray());
+        $this->emailForm->fill($this->mutateEmailDataBeforeFill(app(EmailSettings::class)->toArray()));
+        $this->presenceForm->fill(app(PresenceSettings::class)->toArray());
+    }
+
+    protected function makeFormContentComponent(string $schema, string $submitHandler): Component
+    {
+        return Form::make([EmbeddedSchema::make($schema)])
+            ->id($schema)
+            ->livewireSubmitHandler($submitHandler)
+            ->footer([
+                Actions::make([
+                    Action::make($submitHandler)
+                        ->label('Save')
+                        ->submit($submitHandler)
+                        ->visible(fn (): bool => $this->canUpdate()),
+                ]),
+            ]);
     }
 
     /**
-     * @return array<Action | ActionGroup>
+     * @param array<string, mixed> $data
+     *
+     * @return array<string, mixed>
      */
-    public function getFormActions(): array
+    protected function mutateEmailDataBeforeFill(array $data): array
     {
-        if (! auth()->user()->can('settings.*.update')) {
-            return [];
+        $tenant = Tenant::current();
+
+        if ($tenant) {
+            $data['tenant_mail_from_name'] = $tenant->config->mail->fromName;
         }
 
-        return parent::getFormActions();
+        return $data;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     *
+     * @return array<string, mixed>
+     */
+    protected function mutateEmailDataBeforeSave(array $data): array
+    {
+        if (filled($data['tenant_mail_from_name'] ?? null)) {
+            $tenant = Tenant::current();
+
+            throw_unless($tenant);
+
+            $tenant->config->mail->fromName = $data['tenant_mail_from_name'];
+
+            $tenant->saveOrFail();
+        }
+
+        unset($data['tenant_mail_from_name']);
+
+        return $data;
+    }
+
+    protected function canUpdate(): bool
+    {
+        return auth()->user()?->can('settings.*.update') ?? false;
+    }
+
+    protected function sendSavedNotification(): void
+    {
+        Notification::make()
+            ->success()
+            ->title(__('filament-spatie-laravel-settings-plugin::pages/settings-page.notifications.saved.title'))
+            ->send();
     }
 }

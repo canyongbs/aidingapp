@@ -36,19 +36,160 @@
 
 use App\Filament\Pages\ManageDisplaySettings;
 use App\Models\User;
+use App\Settings\DisplaySettings;
+use App\Settings\EmailSettings;
+use App\Settings\PresenceSettings;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-it('is gated with proper access control', function (): void {
+it('renders the dates and times, email, and presence tabs', function (): void {
     $user = User::factory()->create();
+    $user->givePermissionTo('settings.view-any');
 
     actingAs($user);
 
-    Livewire::test(ManageDisplaySettings::class)->assertForbidden();
+    Livewire::test(ManageDisplaySettings::class)
+        ->assertOk()
+        ->assertSet('activeTab', 'dates-and-times')
+        ->assertSeeText('Dates and Times')
+        ->assertSeeText('Email')
+        ->assertSeeText('Presence');
+});
 
+it('loads the existing dates and times settings', function (): void {
+    $user = User::factory()->create();
     $user->givePermissionTo('settings.view-any');
-    $user->refresh();
 
-    Livewire::test(ManageDisplaySettings::class)->assertOk();
+    actingAs($user);
+
+    $settings = app(DisplaySettings::class);
+    $settings->timezone = 'America/Chicago';
+    $settings->save();
+
+    Livewire::test(ManageDisplaySettings::class)
+        ->assertSchemaStateSet(['timezone' => 'America/Chicago'], 'datesAndTimesForm');
+});
+
+it('can update the dates and times settings', function (): void {
+    $user = User::factory()->create();
+    $user->givePermissionTo(['settings.view-any', 'settings.*.update']);
+
+    actingAs($user);
+
+    Livewire::test(ManageDisplaySettings::class)
+        ->fillForm(['timezone' => 'America/New_York'], 'datesAndTimesForm')
+        ->call('saveDatesAndTimes')
+        ->assertHasNoFormErrors(form: 'datesAndTimesForm');
+
+    expect(app(DisplaySettings::class)->timezone)->toBe('America/New_York');
+});
+
+it('can update the presence settings', function (): void {
+    $user = User::factory()->create();
+    $user->givePermissionTo(['settings.view-any', 'settings.*.update']);
+
+    actingAs($user);
+
+    Livewire::test(ManageDisplaySettings::class)
+        ->fillForm([
+            'active_threshold' => 10,
+            'idle_threshold' => 20,
+            'inactive_threshold' => 40,
+        ], 'presenceForm')
+        ->call('savePresence')
+        ->assertHasNoFormErrors(form: 'presenceForm');
+
+    $settings = app(PresenceSettings::class);
+
+    expect($settings->active_threshold)->toBe(10)
+        ->and($settings->idle_threshold)->toBe(20)
+        ->and($settings->inactive_threshold)->toBe(40);
+});
+
+it('can update the email settings', function (): void {
+    $user = User::factory()->create();
+    $user->givePermissionTo(['settings.view-any', 'settings.*.update']);
+
+    actingAs($user);
+
+    Livewire::test(ManageDisplaySettings::class)
+        ->fillForm([
+            'tenant_mail_from_name' => 'Example From Name',
+            'background_color' => '#ffffff',
+        ], 'emailForm')
+        ->call('saveEmail')
+        ->assertHasNoFormErrors(form: 'emailForm');
+
+    expect(app(EmailSettings::class)->background_color)->toBe('#ffffff');
+});
+
+describe('authorization', function (): void {
+    it('denies access to the display settings page without the `settings.view-any` permission', function (): void {
+        $user = User::factory()->create();
+
+        actingAs($user);
+
+        Livewire::test(ManageDisplaySettings::class)->assertForbidden();
+    });
+
+    it('allows access to the display settings page with the `settings.view-any` permission', function (): void {
+        $user = User::factory()->create();
+        $user->givePermissionTo('settings.view-any');
+
+        actingAs($user);
+
+        Livewire::test(ManageDisplaySettings::class)->assertOk();
+    });
+
+    it('does not update the dates and times settings without the `settings.*.update` permission', function (): void {
+        $user = User::factory()->create();
+        $user->givePermissionTo('settings.view-any');
+
+        actingAs($user);
+
+        $settings = app(DisplaySettings::class);
+        $settings->timezone = 'America/Chicago';
+        $settings->save();
+
+        Livewire::test(ManageDisplaySettings::class)
+            ->set('datesAndTimesData.timezone', 'America/New_York')
+            ->call('saveDatesAndTimes');
+
+        expect(app(DisplaySettings::class)->timezone)->toBe('America/Chicago');
+    });
+
+    it('does not update the presence settings without the `settings.*.update` permission', function (): void {
+        $user = User::factory()->create();
+        $user->givePermissionTo('settings.view-any');
+
+        actingAs($user);
+
+        $settings = app(PresenceSettings::class);
+        $settings->active_threshold = 5;
+        $settings->save();
+
+        Livewire::test(ManageDisplaySettings::class)
+            ->set('presenceData.active_threshold', 15)
+            ->call('savePresence');
+
+        expect(app(PresenceSettings::class)->active_threshold)->toBe(5);
+    });
+
+    it('does not update the email settings without the `settings.*.update` permission', function (): void {
+        $user = User::factory()->create();
+        $user->givePermissionTo('settings.view-any');
+
+        actingAs($user);
+
+        $settings = app(EmailSettings::class);
+        $settings->background_color = '#000000';
+        $settings->save();
+
+        Livewire::test(ManageDisplaySettings::class)
+            ->set('emailData.background_color', '#ffffff')
+            ->call('saveEmail');
+
+        expect(app(EmailSettings::class)->background_color)->toBe('#000000');
+    });
 });
