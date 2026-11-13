@@ -34,12 +34,15 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ViewAdvisory;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\RelationManagers\AdvisoryUpdatesRelationManager;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
+use App\Features\AdvisoryPermissionConsolidationFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
@@ -76,10 +79,10 @@ test('the records are displayed on the AdvisoryUpdatesRelationManager', function
         ->assertCountTableRecords(10);
 });
 
-test('only shows the updates bulk delete action to a user with the advisory_update delete permission', function (): void {
+test('only shows the updates bulk delete action to a user with the `advisories.*.delete` permission', function (): void {
     $user = User::factory()
         ->create()
-        ->givePermissionTo('advisory.view-any', 'advisory.*.view', 'advisory_update.view-any');
+        ->givePermissionTo('advisories.view-any', 'advisories.*.view');
 
     actingAs($user);
 
@@ -93,7 +96,7 @@ test('only shows the updates bulk delete action to a user with the advisory_upda
     ])
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
-    $user->givePermissionTo('advisory_update.*.delete');
+    $user->givePermissionTo('advisories.*.delete');
 
     Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
@@ -257,7 +260,7 @@ test('the view or edit action hides the status change guidance when the user can
 
     $user = User::factory()
         ->create()
-        ->givePermissionTo('advisory.view-any', 'advisory.*.view', 'advisory_update.view-any', 'advisory_update.*.view', 'advisory_update.*.update');
+        ->givePermissionTo('advisories.view-any', 'advisories.*.view', 'advisories.*.update');
 
     actingAs($user);
 
@@ -345,7 +348,7 @@ test('clicking the title opens a read-only modal when the user cannot update the
 
     $user = User::factory()
         ->create()
-        ->givePermissionTo('advisory.view-any', 'advisory.*.view', 'advisory_update.view-any', 'advisory_update.*.view', 'advisory_update.*.update');
+        ->givePermissionTo('advisories.view-any', 'advisories.*.view', 'advisories.*.update');
 
     actingAs($user);
 
@@ -369,7 +372,7 @@ test('a user cannot mount the view or edit advisory update action without the vi
 
     $user = User::factory()
         ->create()
-        ->givePermissionTo('advisory.view-any', 'advisory.*.view', 'advisory_update.view-any');
+        ->givePermissionTo('advisories.view-any');
 
     actingAs($user);
 
@@ -454,7 +457,7 @@ test('AdvisoryUpdatesRelationManager create action is gated with proper access c
         ])->getKey(),
     ]);
 
-    $user->givePermissionTo('advisory.view-any', 'advisory.*.view', 'advisory_update.view-any');
+    $user->givePermissionTo('advisories.view-any', 'advisories.*.view');
 
     actingAs($user);
 
@@ -464,11 +467,83 @@ test('AdvisoryUpdatesRelationManager create action is gated with proper access c
     ])
         ->assertTableActionHidden('create');
 
-    $user->givePermissionTo('advisory_update.create');
+    $user->givePermissionTo('advisories.create');
 
     Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])
         ->assertTableActionVisible('create');
+});
+
+describe('action authorization', function (): void {
+    $testAction = fn (string $action, AdvisoryUpdate $advisoryUpdate): TestAction => match ($action) {
+        'create' => TestAction::make($action)->table(),
+        'delete' => TestAction::make($action)->table()->bulk(),
+        default => TestAction::make($action)->table($advisoryUpdate),
+    };
+
+    $openAdvisoryUpdate = fn (): AdvisoryUpdate => AdvisoryUpdate::factory()
+        ->for(Advisory::factory()->for(AdvisoryStatus::factory()->open(), 'status'), 'advisory')
+        ->create();
+
+    it('only shows each advisory update action to a user with the consolidated permission', function (string $action, string $permission) use ($testAction, $openAdvisoryUpdate): void {
+        $user = User::factory()->create();
+        $user->givePermissionTo('advisories.view-any');
+
+        $advisoryUpdate = $openAdvisoryUpdate();
+
+        actingAs($user);
+
+        Livewire::test(AdvisoryUpdatesRelationManager::class, ['ownerRecord' => $advisoryUpdate->advisory, 'pageClass' => ViewAdvisory::class])
+            ->assertActionHidden($testAction($action, $advisoryUpdate));
+
+        $user->givePermissionTo($permission);
+
+        Livewire::test(AdvisoryUpdatesRelationManager::class, ['ownerRecord' => $advisoryUpdate->advisory, 'pageClass' => ViewAdvisory::class])
+            ->assertActionVisible($testAction($action, $advisoryUpdate));
+    })->with([
+        'create' => ['create', 'advisories.create'],
+        'view or edit' => ['viewOrEditAdvisoryUpdate', 'advisories.*.view'],
+        'delete' => ['delete', 'advisories.*.delete'],
+    ]);
+
+    // TODO: Cleanup Task (advisories-permission-consolidation): delete this test
+    it('only shows each advisory update action to a user with the legacy permission while the consolidation flag is inactive', function (string $action, string $permission) use ($testAction, $openAdvisoryUpdate): void {
+        AdvisoryPermissionConsolidationFeature::deactivate();
+
+        $legacyPermissions = [
+            'advisory.view-any' => 'Advisory',
+            'advisory.*.view' => 'Advisory',
+            'advisory_update.view-any' => 'Advisory Update',
+            $permission => 'Advisory Update',
+        ];
+
+        foreach ($legacyPermissions as $name => $groupName) {
+            Permission::factory()->create([
+                'name' => $name,
+                'guard_name' => 'web',
+                'group_id' => PermissionGroup::firstOrCreate(['name' => $groupName])->getKey(),
+            ]);
+        }
+
+        $user = User::factory()->create();
+        $user->givePermissionTo(['advisory.view-any', 'advisory.*.view', 'advisory_update.view-any']);
+
+        $advisoryUpdate = $openAdvisoryUpdate();
+
+        actingAs($user);
+
+        Livewire::test(AdvisoryUpdatesRelationManager::class, ['ownerRecord' => $advisoryUpdate->advisory, 'pageClass' => ViewAdvisory::class])
+            ->assertActionHidden($testAction($action, $advisoryUpdate));
+
+        $user->givePermissionTo($permission);
+
+        Livewire::test(AdvisoryUpdatesRelationManager::class, ['ownerRecord' => $advisoryUpdate->advisory, 'pageClass' => ViewAdvisory::class])
+            ->assertActionVisible($testAction($action, $advisoryUpdate));
+    })->with([
+        'create' => ['create', 'advisory_update.create'],
+        'view or edit' => ['viewOrEditAdvisoryUpdate', 'advisory_update.*.view'],
+        'delete' => ['delete', 'advisory_update.*.delete'],
+    ]);
 });

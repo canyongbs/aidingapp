@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
 use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
+use App\Features\AdvisoryPermissionConsolidationFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -59,7 +60,7 @@ class AdvisoryUpdatePolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'advisory_update.view-any',
+            abilities: AdvisoryPermissionConsolidationFeature::active() ? 'advisories.view-any' : 'advisory_update.view-any',
             denyResponse: 'You do not have permissions to view advisory updates.'
         );
     }
@@ -67,7 +68,7 @@ class AdvisoryUpdatePolicy
     public function view(Authenticatable $authenticatable, AdvisoryUpdate $advisoryUpdate): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'advisory_update.*.view',
+            abilities: AdvisoryPermissionConsolidationFeature::active() ? 'advisories.*.view' : 'advisory_update.*.view',
             denyResponse: 'You do not have permissions to view this advisory update.'
         );
     }
@@ -75,7 +76,7 @@ class AdvisoryUpdatePolicy
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'advisory_update.create',
+            abilities: AdvisoryPermissionConsolidationFeature::active() ? 'advisories.create' : 'advisory_update.create',
             denyResponse: 'You do not have permissions to create advisory updates.'
         );
     }
@@ -87,7 +88,7 @@ class AdvisoryUpdatePolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: 'advisory_update.*.update',
+            abilities: AdvisoryPermissionConsolidationFeature::active() ? 'advisories.*.update' : 'advisory_update.*.update',
             denyResponse: 'You do not have permissions to update advisory updates.'
         );
     }
@@ -95,7 +96,7 @@ class AdvisoryUpdatePolicy
     public function delete(Authenticatable $authenticatable, AdvisoryUpdate $advisoryUpdate): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'advisory_update.*.delete',
+            abilities: AdvisoryPermissionConsolidationFeature::active() ? 'advisories.*.delete' : 'advisory_update.*.delete',
             denyResponse: 'You do not have permissions to delete advisory updates.'
         );
     }
@@ -103,7 +104,7 @@ class AdvisoryUpdatePolicy
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'advisory_update.*.delete',
+            abilities: AdvisoryPermissionConsolidationFeature::active() ? 'advisories.*.delete' : 'advisory_update.*.delete',
             denyResponse: 'You do not have permissions to delete advisory updates.'
         );
     }
@@ -111,7 +112,7 @@ class AdvisoryUpdatePolicy
     public function restore(Authenticatable $authenticatable, AdvisoryUpdate $advisoryUpdate): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'advisory_update.*.restore',
+            abilities: AdvisoryPermissionConsolidationFeature::active() ? 'advisories.*.restore' : 'advisory_update.*.restore',
             denyResponse: 'You do not have permissions to restore advisory updates.'
         );
     }
@@ -119,7 +120,7 @@ class AdvisoryUpdatePolicy
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'advisory_update.*.restore',
+            abilities: AdvisoryPermissionConsolidationFeature::active() ? 'advisories.*.restore' : 'advisory_update.*.restore',
             denyResponse: 'You do not have permissions to restore advisory updates.'
         );
     }
@@ -127,7 +128,7 @@ class AdvisoryUpdatePolicy
     public function forceDelete(Authenticatable $authenticatable, AdvisoryUpdate $advisoryUpdate): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'advisory_update.*.force-delete',
+            abilities: AdvisoryPermissionConsolidationFeature::active() ? 'advisories.*.force-delete' : 'advisory_update.*.force-delete',
             denyResponse: 'You do not have permissions to force delete advisory updates.'
         );
     }
@@ -135,7 +136,7 @@ class AdvisoryUpdatePolicy
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'advisory_update.*.force-delete',
+            abilities: AdvisoryPermissionConsolidationFeature::active() ? 'advisories.*.force-delete' : 'advisory_update.*.force-delete',
             denyResponse: 'You do not have permissions to force delete advisory updates.'
         );
     }
