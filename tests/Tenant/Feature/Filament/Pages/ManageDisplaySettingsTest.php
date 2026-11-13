@@ -57,6 +57,30 @@ it('renders the dates and times, email, and presence tabs', function (): void {
         ->assertSeeText('Presence');
 });
 
+it('opens the requested tab when it is valid and visible', function (): void {
+    $user = User::factory()->create();
+    $user->givePermissionTo('settings.view-any');
+
+    actingAs($user);
+
+    Livewire::withQueryParams(['tab' => 'email'])
+        ->test(ManageDisplaySettings::class)
+        ->assertOk()
+        ->assertSet('activeTab', 'email');
+});
+
+it('falls back to the first visible tab when the requested tab is unknown', function (): void {
+    $user = User::factory()->create();
+    $user->givePermissionTo('settings.view-any');
+
+    actingAs($user);
+
+    Livewire::withQueryParams(['tab' => 'does-not-exist'])
+        ->test(ManageDisplaySettings::class)
+        ->assertOk()
+        ->assertSet('activeTab', 'dates-and-times');
+});
+
 it('loads the existing dates and times settings', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('settings.view-any');
@@ -154,7 +178,8 @@ describe('authorization', function (): void {
 
         Livewire::test(ManageDisplaySettings::class)
             ->set('datesAndTimesData.timezone', 'America/New_York')
-            ->call('saveDatesAndTimes');
+            ->call('saveDatesAndTimes')
+            ->assertForbidden();
 
         expect(app(DisplaySettings::class)->timezone)->toBe('America/Chicago');
     });
@@ -171,7 +196,8 @@ describe('authorization', function (): void {
 
         Livewire::test(ManageDisplaySettings::class)
             ->set('presenceData.active_threshold', 15)
-            ->call('savePresence');
+            ->call('savePresence')
+            ->assertForbidden();
 
         expect(app(PresenceSettings::class)->active_threshold)->toBe(5);
     });
@@ -188,7 +214,8 @@ describe('authorization', function (): void {
 
         Livewire::test(ManageDisplaySettings::class)
             ->set('emailData.background_color', '#ffffff')
-            ->call('saveEmail');
+            ->call('saveEmail')
+            ->assertForbidden();
 
         expect(app(EmailSettings::class)->background_color)->toBe('#000000');
     });

@@ -36,9 +36,9 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\DisplaySettingsTab;
 use App\Enums\NavigationGroup;
 use App\Models\Tenant;
-use App\Models\User;
 use App\Settings\DisplaySettings;
 use App\Settings\EmailSettings;
 use App\Settings\PresenceSettings;
@@ -86,7 +86,7 @@ class ManageDisplaySettings extends Page implements HasActions, HasForms
     protected static ?int $navigationSort = 110;
 
     #[Url(as: 'tab')]
-    public string $activeTab = 'dates-and-times';
+    public ?string $activeTab = null;
 
     /** @var array<string, mixed> */
     public ?array $datesAndTimesData = [];
@@ -99,15 +99,17 @@ class ManageDisplaySettings extends Page implements HasActions, HasForms
 
     public static function canAccess(): bool
     {
-        $user = auth()->user();
-
-        assert($user instanceof User);
-
-        return $user->can('settings.view-any');
+        return collect(DisplaySettingsTab::cases())
+            ->contains(fn (DisplaySettingsTab $tab): bool => $tab->canView());
     }
 
     public function mount(): void
     {
+        if (! DisplaySettingsTab::tryFrom($this->activeTab ?? '')?->canView()) {
+            $this->activeTab = collect(DisplaySettingsTab::cases())
+                ->first(fn (DisplaySettingsTab $tab): bool => $tab->canView())?->value;
+        }
+
         $this->fillForms();
     }
 
@@ -118,15 +120,18 @@ class ManageDisplaySettings extends Page implements HasActions, HasForms
                 Tabs::make()
                     ->livewireProperty('activeTab')
                     ->tabs([
-                        'dates-and-times' => Tab::make('Dates and Times')
+                        DisplaySettingsTab::DatesAndTimes->value => Tab::make(DisplaySettingsTab::DatesAndTimes->getLabel())
+                            ->visible(fn (): bool => DisplaySettingsTab::DatesAndTimes->canView())
                             ->schema([
                                 $this->makeFormContentComponent('datesAndTimesForm', 'saveDatesAndTimes'),
                             ]),
-                        'email' => Tab::make('Email')
+                        DisplaySettingsTab::Email->value => Tab::make(DisplaySettingsTab::Email->getLabel())
+                            ->visible(fn (): bool => DisplaySettingsTab::Email->canView())
                             ->schema([
                                 $this->makeFormContentComponent('emailForm', 'saveEmail'),
                             ]),
-                        'presence' => Tab::make('Presence')
+                        DisplaySettingsTab::Presence->value => Tab::make(DisplaySettingsTab::Presence->getLabel())
+                            ->visible(fn (): bool => DisplaySettingsTab::Presence->canView())
                             ->schema([
                                 $this->makeFormContentComponent('presenceForm', 'savePresence'),
                             ]),
@@ -232,9 +237,7 @@ class ManageDisplaySettings extends Page implements HasActions, HasForms
 
     public function saveDatesAndTimes(): void
     {
-        if (! $this->canUpdate()) {
-            return;
-        }
+        abort_unless($this->canUpdate(), 403);
 
         DB::transaction(function (): void {
             $settings = app(DisplaySettings::class);
@@ -248,9 +251,7 @@ class ManageDisplaySettings extends Page implements HasActions, HasForms
 
     public function saveEmail(): void
     {
-        if (! $this->canUpdate()) {
-            return;
-        }
+        abort_unless($this->canUpdate(), 403);
 
         DB::transaction(function (): void {
             $data = $this->mutateEmailDataBeforeSave($this->emailForm->getState());
@@ -266,9 +267,7 @@ class ManageDisplaySettings extends Page implements HasActions, HasForms
 
     public function savePresence(): void
     {
-        if (! $this->canUpdate()) {
-            return;
-        }
+        abort_unless($this->canUpdate(), 403);
 
         DB::transaction(function (): void {
             $settings = app(PresenceSettings::class);
