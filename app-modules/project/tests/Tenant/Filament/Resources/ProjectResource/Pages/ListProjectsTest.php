@@ -663,7 +663,15 @@ it('shows the same managers on the list as the project dashboard', function (): 
     Livewire::test(ListProjects::class)
         ->assertTableColumnExists(
             'managers',
-            fn (Column $column): bool => collect($column->getState())->sort()->values()->all() === $dashboardManagerAvatarUrls,
+            function (Column $column) use ($dashboardManagerAvatarUrls): bool {
+                $state = $column->getState();
+
+                assert(is_array($state));
+
+                sort($state);
+
+                return $state === $dashboardManagerAvatarUrls;
+            },
             $project,
         );
 });
