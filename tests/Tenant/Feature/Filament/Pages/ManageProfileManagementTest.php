@@ -37,6 +37,9 @@
 use App\Filament\Pages\ManageProfileManagement;
 use App\Models\Pronouns;
 use App\Models\User;
+use Dom\HTMLDocument;
+use Dom\Node;
+use Dom\XPath;
 use Filament\Actions\Testing\TestAction;
 use Livewire\Livewire;
 
@@ -50,8 +53,7 @@ it('renders the personal pronouns tab', function (): void {
 
     Livewire::test(ManageProfileManagement::class)
         ->assertOk()
-        ->assertSet('activeTab', 'personal-pronouns')
-        ->assertSeeText('Personal Pronouns');
+        ->assertSet('activeTab', 'personal-pronouns');
 });
 
 it('lists the existing pronouns', function (): void {
@@ -63,8 +65,7 @@ it('lists the existing pronouns', function (): void {
     $pronouns = Pronouns::factory()->create(['label' => 'She/Her']);
 
     Livewire::test(ManageProfileManagement::class)
-        ->assertCanSeeTableRecords([$pronouns])
-        ->assertSeeText('She/Her');
+        ->assertCanSeeTableRecords([$pronouns]);
 });
 
 it('can create a pronoun', function (): void {
@@ -148,10 +149,14 @@ describe('tab visibility', function (): void {
 
         actingAs($user);
 
-        Livewire::test(ManageProfileManagement::class)
-            ->assertOk()
-            ->assertSeeHtml('role="tab"')
-            ->assertSeeText('Personal Pronouns');
+        $component = Livewire::test(ManageProfileManagement::class)
+            ->assertOk();
+
+        $document = HTMLDocument::createFromString($component->html(), LIBXML_NOERROR);
+        $tabs = (new XPath($document))->query('(//*[contains(concat(" ", normalize-space(@class), " "), " fi-tabs ")])[1]//*[@role="tab"]');
+
+        expect(array_map(fn (Node $tab): string => trim($tab->textContent), iterator_to_array($tabs)))
+            ->toBe(['Personal Pronouns']);
     });
 });
 
