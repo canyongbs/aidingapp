@@ -58,6 +58,7 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
@@ -170,14 +171,20 @@ class ManageDisplaySettings extends Page implements HasActions, HasForms
                         EmailSettings::getSettingsPropertyModel('email.header_logo'),
                     )
                     ->columnSpanFull(),
-                ColorPicker::make('background_color')
-                    ->regex('/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b$/'),
-                ColorPicker::make('h1_text_color')
-                    ->regex('/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b$/'),
-                ColorPicker::make('h2_text_color')
-                    ->regex('/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b$/'),
-                ColorPicker::make('paragraph_text_color')
-                    ->regex('/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b$/'),
+                Grid::make(2)
+                    ->schema([
+                        ColorPicker::make('background_color')
+                            ->regex('/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b$/'),
+                        ColorPicker::make('h1_text_color')
+                            ->regex('/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b$/'),
+                    ]),
+                Grid::make(2)
+                    ->schema([
+                        ColorPicker::make('h2_text_color')
+                            ->regex('/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b$/'),
+                        ColorPicker::make('paragraph_text_color')
+                            ->regex('/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b$/'),
+                    ]),
                 RichEditor::make('footer')
                     ->label('Footer text')
                     ->columnSpanFull()
