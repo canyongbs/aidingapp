@@ -50,8 +50,8 @@ beforeEach(function (): void {
 
 it('excludes archived milestones from the related-milestones picker', function (): void {
     $project = Project::factory()->create();
-    $active = ProjectMilestone::factory()->for($project)->create();
-    $archived = ProjectMilestone::factory()->for($project)->create();
+    $active = ProjectMilestone::factory()->forProject($project)->create();
+    $archived = ProjectMilestone::factory()->forProject($project)->create();
     $archived->archive();
 
     $component = Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])->instance();

@@ -56,6 +56,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -187,11 +188,11 @@ class Project extends Model implements Auditable
     }
 
     /**
-     * @return HasMany<ProjectMilestone, $this>
+     * @return HasManyThrough<ProjectMilestone, Pipeline, $this>
      */
-    public function milestones(): HasMany
+    public function milestones(): HasManyThrough
     {
-        return $this->hasMany(ProjectMilestone::class, 'project_id');
+        return $this->hasManyThrough(ProjectMilestone::class, Pipeline::class, 'project_id', 'pipeline_id');
     }
 
     /**
