@@ -34,14 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+use AidingApp\Engagement\Models\EmailTemplate;
+use Illuminate\Database\UniqueConstraintViolationException;
 
-use App\Support\AbstractFeatureFlag;
+it('does not allow two live email templates with names that differ only by case', function (): void {
+    EmailTemplate::factory()->create(['name' => 'Welcome Email']);
 
-class EmailTemplateNameUniquenessFeature extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
-    {
-        return false;
-    }
-}
+    expect(fn () => EmailTemplate::factory()->create(['name' => 'WELCOME EMAIL']))
+        ->toThrow(UniqueConstraintViolationException::class);
+});

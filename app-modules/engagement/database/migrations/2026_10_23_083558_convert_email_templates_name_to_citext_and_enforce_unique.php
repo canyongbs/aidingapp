@@ -34,8 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\EmailTemplateNameUniquenessFeature;
-use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -43,47 +41,24 @@ use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
-    /*
-     * TODO: Cleanup Task (email-template-name-uniqueness): after EmailTemplateNameUniquenessFeature is removed:
-     * - remove the `FixesDuplicateNames` trait, the `$chunkSize` and `$usesSoftDeletes` properties, and the `fixDuplicates()` / `revertDuplicates()` calls
-     * - keep the citext column conversion and the unique index, they are permanent
-     */
-    use FixesDuplicateNames;
-
-    private string $table = 'email_templates';
-
-    private string $column = 'name';
-
-    private int $chunkSize = 500;
-
-    private bool $usesSoftDeletes = true;
-
     public function up(): void
     {
         DB::transaction(function (): void {
-            $this->fixDuplicates();
+            DB::statement('ALTER TABLE email_templates ALTER COLUMN name TYPE citext');
 
-            DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
-
-            Schema::table($this->table, function (Blueprint $table): void {
-                $table->uniqueIndex($this->column, 'email_templates_name_unique')
+            Schema::table('email_templates', function (Blueprint $table): void {
+                $table->uniqueIndex('name', 'email_templates_name_unique')
                     ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
             });
-
-            EmailTemplateNameUniquenessFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function (): void {
-            EmailTemplateNameUniquenessFeature::deactivate();
-
             DB::statement('DROP INDEX IF EXISTS email_templates_name_unique');
 
-            DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
-
-            $this->revertDuplicates();
+            DB::statement('ALTER TABLE email_templates ALTER COLUMN name TYPE varchar(255)');
         });
     }
 };
