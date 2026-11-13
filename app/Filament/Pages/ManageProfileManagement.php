@@ -50,6 +50,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\EmbeddedTable;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -128,7 +129,7 @@ class ManageProfileManagement extends Page implements HasActions, HasForms, HasT
     }
 
     /**
-     * @return array<\Filament\Schemas\Components\Component>
+     * @return array<Component>
      */
     protected function getPronounsFormComponents(): array
     {
