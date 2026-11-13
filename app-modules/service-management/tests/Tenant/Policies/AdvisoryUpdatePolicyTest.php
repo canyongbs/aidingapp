@@ -61,7 +61,6 @@ $abilities = [
     'forceDeleteAny' => ['forceDeleteAny', '*.force-delete', false],
 ];
 
-// The policies' feature checks are performed against the authenticated user
 $inspect = function (User $user, string $ability, mixed $arguments): Response {
     actingAs($user);
 
