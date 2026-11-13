@@ -109,14 +109,17 @@ class ManageProfileManagement extends Page implements HasActions, HasForms, HasT
             ])
             ->headerActions([
                 CreateAction::make()
+                    ->authorize('create', Pronouns::class)
                     ->modalWidth('md')
                     ->schema($this->getPronounsFormComponents()),
             ])
             ->recordActions([
                 EditAction::make()
+                    ->authorize('update')
                     ->modalWidth('md')
                     ->schema($this->getPronounsFormComponents()),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->authorize('delete'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
