@@ -50,7 +50,6 @@ it('has many milestones', function (): void {
     $milestones = ProjectMilestone::factory()
         ->count(2)
         ->create([
-            'project_id' => $project->id,
             'pipeline_id' => $pipeline->id,
         ]);
 
