@@ -79,7 +79,7 @@ test('the records are displayed on the AdvisoryUpdatesRelationManager', function
         ->assertCountTableRecords(10);
 });
 
-test('only shows the updates bulk delete action to a user with the advisories delete permission', function (): void {
+test('only shows the updates bulk delete action to a user with the `advisories.*.delete` permission', function (): void {
     $user = User::factory()
         ->create()
         ->givePermissionTo('advisories.view-any', 'advisories.*.view');
