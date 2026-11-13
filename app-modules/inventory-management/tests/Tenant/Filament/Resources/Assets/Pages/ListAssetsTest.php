@@ -47,14 +47,14 @@ it('only shows the bulk delete action to a user with the asset.delete permission
 
     $user = User::factory()
         ->create(['timezone' => config('app.timezone')])
-        ->givePermissionTo('asset.view-any', 'asset.*.view');
+        ->givePermissionTo('assets.view-any', 'assets.*.view');
 
     actingAs($user);
 
     Livewire::test(ListAssets::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
-    $user->givePermissionTo('asset.*.delete');
+    $user->givePermissionTo('assets.*.delete');
 
     Livewire::test(ListAssets::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());

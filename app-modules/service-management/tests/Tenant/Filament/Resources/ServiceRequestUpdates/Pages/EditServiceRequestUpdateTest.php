@@ -152,8 +152,7 @@ test('EditServiceRequestUpdate is gated with proper access control', function ()
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');
-    $user->givePermissionTo('service_request_update.view-any');
-    $user->givePermissionTo('service_request_update.*.update');
+    $user->givePermissionTo('service_request.*.update');
 
     actingAs($user)
         ->get(
@@ -190,8 +189,7 @@ test('EditServiceRequestUpdate is gated with proper feature access control', fun
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');
-    $user->givePermissionTo('service_request_update.view-any');
-    $user->givePermissionTo('service_request_update.*.update');
+    $user->givePermissionTo('service_request.*.update');
 
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([

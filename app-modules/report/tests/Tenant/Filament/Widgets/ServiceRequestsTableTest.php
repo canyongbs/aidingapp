@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Report\Filament\Widgets\ServiceRequestsTable;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
@@ -159,6 +160,51 @@ it('returns all service requests when no date filters are applied', function ():
         ]));
 });
 
+it('searches service requests by contact or organization name case insensitively', function (string $contactName, string $organizationName, string $search): void {
+    actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
+
+    $contact = Contact::factory()
+        ->for(Organization::factory()->state(['name' => $organizationName]), 'organization')
+        ->state([
+            'first_name' => $contactName,
+            'last_name' => 'Example',
+            'full_name' => "{$contactName} Example",
+        ])
+        ->create();
+
+    $matchingRequest = ServiceRequest::factory()
+        ->for($contact, 'respondent')
+        ->state(['title' => 'Matching request'])
+        ->create();
+
+    $otherContact = Contact::factory()
+        ->for(Organization::factory()->state(['name' => 'Unrelated Company']), 'organization')
+        ->state([
+            'first_name' => 'Other',
+            'last_name' => 'Person',
+            'full_name' => 'Other Person',
+        ])
+        ->create();
+
+    $otherRequest = ServiceRequest::factory()
+        ->for($otherContact, 'respondent')
+        ->state(['title' => 'Unrelated request'])
+        ->create();
+
+    Livewire::test(ServiceRequestsTable::class, [
+        'cacheTag' => 'test-service-requests-table-related-search',
+        'pageFilters' => [],
+    ])
+        ->searchTable($search)
+        ->assertCanSeeTableRecords(collect([$matchingRequest]))
+        ->assertCanNotSeeTableRecords(collect([$otherRequest]));
+})->with([
+    'ASCII contact' => ['Alice', 'Other Company', 'ALICE'],
+    'ASCII organization' => ['Other', 'Example University', 'UNIVERSITY'],
+    'multibyte contact' => ["Ren\u{00E9}e", 'Other Company', "REN\u{00C9}E"],
+    'multibyte organization' => ['Other', "\u{00E9}cole Example", "\u{00C9}COLE"],
+]);
+
 it('has table an export action', function (): void {
     Livewire::test(ServiceRequestsTable::class, [
         'cacheTag' => 'test-service-requests-table-export',
@@ -245,7 +291,7 @@ it('searches the assigned to column by full name, including a quoted phrase', fu
 it('searches the assigned to filter options by full name', function (string $search): void {
     $openStatus = ServiceRequestStatus::factory()->state(['classification' => SystemServiceRequestClassification::Open])->create();
 
-    $assignees = collect([['Avery', 'Smith'], ['Jordan', 'Lee']])->map(function (array $name) use ($openStatus): User {
+    $assignees = collect([['Zyrian', 'Quenby'], ['Jordan', 'Lee']])->map(function (array $name) use ($openStatus): User {
         $assignee = User::factory()->create(['first_name' => $name[0], 'last_name' => $name[1]]);
 
         $serviceRequest = ServiceRequest::factory()->state(['status_id' => $openStatus->getKey()])->create();
@@ -266,9 +312,9 @@ it('searches the assigned to filter options by full name', function (string $sea
 
     $select = $component->instance()->getTableFiltersForm()->getComponentByStatePath('assigned_to.value');
 
-    expect($select->getSearchResults($search))->toBe([$assignees[0]->getKey() => 'Avery Smith']);
+    expect($select->getSearchResults($search))->toBe([$assignees[0]->getKey() => 'Zyrian Quenby']);
 })->with([
-    'first name' => 'Avery',
-    'last name' => 'Smith',
-    'full name' => 'Avery Smith',
+    'first name' => 'Zyrian',
+    'last name' => 'Quenby',
+    'full name' => 'Zyrian Quenby',
 ]);

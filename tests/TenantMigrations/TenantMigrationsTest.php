@@ -52,6 +52,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\AdvisoryPermissionConsolidationFeature;
 use App\Features\AdvisorySeverityNameUniquenessFeature;
 use App\Features\AdvisoryStatusNameUniquenessFeature;
+use App\Features\AssetPermissionConsolidationFeature;
 use App\Features\ChangeRequestStatusNameUniquenessFeature;
 use App\Features\ChangeRequestTypeNameUniquenessFeature;
 use App\Features\ContactPermissionConsolidationFeature;
@@ -60,6 +61,7 @@ use App\Features\ContractNameUniquenessFeature;
 use App\Features\ContractTypeNameUniquenessFeature;
 use App\Features\EmailTemplateNameUniquenessFeature;
 use App\Features\KnowledgeBaseCategoryNameUniquenessFeature;
+use App\Features\LicensePermissionConsolidationFeature;
 use App\Features\MaintenanceProviderNameUniquenessFeature;
 use App\Features\PipelineNameUniquenessFeature;
 use App\Features\PipelineStageNameUniquenessFeature;
@@ -83,6 +85,8 @@ use Illuminate\Support\Str;
 
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
+
+use Spatie\Permission\PermissionRegistrar;
 
 //describe('2025_01_01_165527_tmp_data_do_a_thing', function () {
 //    it('properly changed the data', function () {
@@ -2258,6 +2262,249 @@ describe('2026_11_10_221002_tmp_grant_projects_permissions_to_users_and_roles_wi
                 ->and($directProjectsPermissionNames($unrelatedUser))->toBe([])
                 ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['product.view-any'])
                 ->and(ProjectPermissionConsolidationFeature::active())->toBeTrue();
+        });
+    });
+});
+
+// TODO: Cleanup Task (licenses-permission-consolidation): delete this describe and the test within
+describe('2026_11_11_150002_tmp_grant_licenses_permissions_to_users_and_roles_with_related_permissions', function (): void {
+    it('grants the equivalent licenses permissions to users and roles with a related permission', function (): void {
+        isolatedMigration('2026_11_11_150002_tmp_grant_licenses_permissions_to_users_and_roles_with_related_permissions', function (): void {
+            $permissionsFor = fn (string $prefix): array => array_map(
+                fn (string $action): string => "{$prefix}.{$action}",
+                ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'],
+            );
+
+            $licensesPermissions = $permissionsFor('licenses');
+
+            $productUser = User::factory()->create();
+            $productUser->givePermissionTo($permissionsFor('product'));
+
+            $productLicenseUser = User::factory()->create();
+            $productLicenseUser->givePermissionTo($permissionsFor('product_license'));
+
+            $partialProductLicenseUser = User::factory()->create();
+            $partialProductLicenseUser->givePermissionTo('product_license.*.update');
+
+            $systemUser = SystemUser::factory()->create();
+            $systemUser->givePermissionTo('product_license.view-any');
+
+            $roleUser = User::factory()->create();
+            $role = Role::factory()->create();
+            $role->givePermissionTo('product.*.delete');
+            $roleUser->assignRole($role);
+
+            $apiRole = Role::factory()->create(['guard_name' => 'api']);
+            $apiRole->givePermissionTo('product.view-any');
+
+            $unrelatedUser = User::factory()->create();
+            $unrelatedUser->givePermissionTo('knowledge_base_item.view-any');
+
+            expect(LicensePermissionConsolidationFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/license-management/database/migrations/2026_11_11_150002_tmp_grant_licenses_permissions_to_users_and_roles_with_related_permissions.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $directLicensesPermissionNames = fn (User|SystemUser $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->filter(fn (string $name): bool => str_starts_with($name, 'licenses.'))->sort()->values()->all();
+            $sorted = fn (array $names): array => collect($names)->sort()->values()->all();
+
+            expect($directLicensesPermissionNames($productUser))->toBe($sorted($licensesPermissions))
+                ->and($directLicensesPermissionNames($productLicenseUser))->toBe($sorted($licensesPermissions))
+                ->and($directLicensesPermissionNames($partialProductLicenseUser))->toBe(['licenses.*.update'])
+                ->and($directLicensesPermissionNames($systemUser))->toBe(['licenses.view-any'])
+                ->and($role->refresh()->permissions()->pluck('name')->all())->toContain('licenses.*.delete')
+                ->and($roleUser->refresh()->hasPermissionTo('licenses.*.delete'))->toBeTrue()
+                ->and($apiRole->refresh()->permissions()->pluck('name')->all())->toContain('licenses.view-any')
+                ->and($directLicensesPermissionNames($unrelatedUser))->toBe([])
+                ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['knowledge_base_item.view-any'])
+                ->and(LicensePermissionConsolidationFeature::active())->toBeTrue();
+        });
+    });
+});
+
+describe('2026_11_11_150003_purge_unneeded_license_permissions', function (): void {
+    $migrationName = '2026_11_11_150003_purge_unneeded_license_permissions';
+    $migrationPath = "app-modules/license-management/database/migrations/{$migrationName}.php";
+
+    $retiredNames = fn (): array => collect(['product', 'product_license'])
+        ->flatMap(fn (string $prefix): array => array_map(
+            fn (string $action): string => "{$prefix}.{$action}",
+            ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'],
+        ))
+        ->all();
+
+    it('deletes the Product and Product License permissions and groups without touching the Licenses group or unrelated permissions', function () use ($migrationName, $migrationPath, $retiredNames): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $retiredNames): void {
+            foreach (['web', 'api'] as $guard) {
+                foreach ($retiredNames() as $name) {
+                    assertDatabaseHas('permissions', ['name' => $name, 'guard_name' => $guard]);
+                }
+            }
+
+            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            foreach (['web', 'api'] as $guard) {
+                foreach ($retiredNames() as $name) {
+                    assertDatabaseMissing('permissions', ['name' => $name, 'guard_name' => $guard]);
+                }
+
+                assertDatabaseHas('permissions', ['name' => 'licenses.view-any', 'guard_name' => $guard]);
+            }
+
+            assertDatabaseMissing('permission_groups', ['name' => 'Product']);
+            assertDatabaseMissing('permission_groups', ['name' => 'Product License']);
+            assertDatabaseHas('permission_groups', ['name' => 'Licenses']);
+            assertDatabaseHas('permissions', ['name' => 'knowledge_base_item.view-any', 'guard_name' => 'web']);
+
+            expect(Artisan::call('migrate:rollback', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            foreach (['web', 'api'] as $guard) {
+                foreach ($retiredNames() as $name) {
+                    expect(Permission::where('name', $name)->where('guard_name', $guard)->count())->toBe(1);
+                }
+            }
+
+            assertDatabaseHas('permission_groups', ['name' => 'Product']);
+            assertDatabaseHas('permission_groups', ['name' => 'Product License']);
+        });
+    });
+
+    it('clears the permission registrar\'s cached permissions', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            $cacheStore = app(PermissionRegistrar::class)->getCacheStore();
+
+            $cacheStore->forever(config('permission.cache.key'), 'stale');
+
+            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            expect($cacheStore->get(config('permission.cache.key')))->toBeNull();
+        });
+    });
+});
+
+// TODO: Cleanup Task - Compress Service Request Permissions: delete this describe and the test within
+describe('2026_11_11_042242_tmp_grant_service_request_permissions_to_users_and_roles_with_related_permissions', function (): void {
+    it('grants the equivalent service request permission to users and roles with a related permission and activates the feature flag', function (): void {
+        isolatedMigration('2026_11_11_042242_tmp_grant_service_request_permissions_to_users_and_roles_with_related_permissions', function (): void {
+            $permissionsFor = fn (string $prefix): array => array_map(
+                fn (string $action): string => "{$prefix}.{$action}",
+                ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'],
+            );
+
+            $serviceRequestPermissions = $permissionsFor('service_request');
+            $updateMappedPermissions = array_values(array_diff($serviceRequestPermissions, ['service_request.create']));
+
+            $assignmentUser = User::factory()->create();
+            $assignmentUser->givePermissionTo($permissionsFor('service_request_assignment'));
+
+            $historyUser = User::factory()->create();
+            $historyUser->givePermissionTo($permissionsFor('service_request_history'));
+
+            $priorityUser = User::factory()->create();
+            $priorityUser->givePermissionTo($permissionsFor('service_request_priority'));
+
+            $updateUser = User::factory()->create();
+            $updateUser->givePermissionTo($permissionsFor('service_request_update'));
+
+            $systemUser = SystemUser::factory()->create();
+            $systemUser->givePermissionTo($permissionsFor('service_request_update'));
+
+            $roleUser = User::factory()->create();
+            $role = Role::factory()->create();
+            $role->givePermissionTo([
+                ...$permissionsFor('service_request_assignment'),
+                ...$permissionsFor('service_request_history'),
+                ...$permissionsFor('service_request_priority'),
+                ...$permissionsFor('service_request_update'),
+            ]);
+            $roleUser->assignRole($role);
+
+            $partialUser = User::factory()->create();
+            $partialUser->givePermissionTo('service_request_priority.view-any');
+
+            $updateCreatorUser = User::factory()->create();
+            $updateCreatorUser->givePermissionTo('service_request_update.create');
+
+            $unrelatedUser = User::factory()->create();
+            $unrelatedUser->givePermissionTo('product.view-any');
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_11_11_042242_tmp_grant_service_request_permissions_to_users_and_roles_with_related_permissions.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $directPermissionNames = fn (User|SystemUser $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->all();
+            $rolePermissionNames = fn (Role $role): array => $role->refresh()->permissions()->pluck('name')->all();
+
+            expect($directPermissionNames($assignmentUser))->toContain(...$serviceRequestPermissions)
+                ->and($directPermissionNames($historyUser))->toContain(...$serviceRequestPermissions)
+                ->and($directPermissionNames($priorityUser))->toContain(...$serviceRequestPermissions)
+                ->and($directPermissionNames($updateUser))->toContain(...$updateMappedPermissions)
+                ->and($directPermissionNames($updateUser))->not->toContain('service_request.create')
+                ->and($directPermissionNames($systemUser))->toContain(...$updateMappedPermissions)
+                ->and($directPermissionNames($systemUser))->not->toContain('service_request.create')
+                ->and($rolePermissionNames($role))->toContain(...$serviceRequestPermissions)
+                ->and($directPermissionNames($partialUser))->toEqualCanonicalizing(['service_request_priority.view-any', 'service_request.view-any'])
+                ->and($directPermissionNames($updateCreatorUser))->toEqualCanonicalizing(['service_request_update.create', 'service_request.*.update'])
+                ->and($directPermissionNames($unrelatedUser))->toBe(['product.view-any']);
+        });
+    });
+});
+
+// TODO: Cleanup Task (assets-permission-consolidation): delete this describe and the test within
+describe('2026_11_10_205002_tmp_grant_assets_permissions_to_users_and_roles_with_related_permissions', function (): void {
+    it('grants the equivalent assets permissions to users and roles with a related permission without adding unsupported actions', function (): void {
+        isolatedMigration('2026_11_10_205002_tmp_grant_assets_permissions_to_users_and_roles_with_related_permissions', function (): void {
+            $allActions = ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'];
+            $permissionsFor = fn (string $prefix, ?array $actions = null): array => array_map(fn (string $action): string => "{$prefix}.{$action}", $actions ?? $allActions);
+            $assetsPermissions = $permissionsFor('assets');
+
+            $fullUsers = collect(['asset', 'asset_location', 'asset_status', 'asset_type', 'maintenance_provider'])
+                ->mapWithKeys(function (string $prefix) use ($permissionsFor): array {
+                    $user = User::factory()->create();
+                    $user->givePermissionTo($permissionsFor($prefix));
+
+                    return [$prefix => $user];
+                });
+
+            $maintenanceActivityUser = User::factory()->create();
+            $maintenanceActivityUser->givePermissionTo($permissionsFor('maintenance_activity'));
+
+            $checkInUser = User::factory()->create();
+            $checkInUser->givePermissionTo($permissionsFor('asset_check_in'));
+
+            $checkOutUser = User::factory()->create();
+            $checkOutUser->givePermissionTo($permissionsFor('asset_check_out'));
+
+            $systemUser = SystemUser::factory()->create();
+            $systemUser->givePermissionTo('asset.view-any');
+
+            $roleUser = User::factory()->create();
+            $role = Role::factory()->create();
+            $role->givePermissionTo('asset_type.*.update');
+            $roleUser->assignRole($role);
+
+            $unrelatedUser = User::factory()->create();
+            $unrelatedUser->givePermissionTo('product.view-any');
+
+            expect(AssetPermissionConsolidationFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/inventory-management/database/migrations/2026_11_10_205002_tmp_grant_assets_permissions_to_users_and_roles_with_related_permissions.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $directPermissionNames = fn (User|SystemUser $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->filter(fn (string $name): bool => str_starts_with($name, 'assets.'))->sort()->values()->all();
+            $sorted = fn (array $names): array => collect($names)->sort()->values()->all();
+
+            foreach ($fullUsers as $user) {
+                expect($directPermissionNames($user))->toBe($sorted($assetsPermissions));
+            }
+
+            expect($directPermissionNames($maintenanceActivityUser))->toBe($sorted(['assets.view-any', 'assets.create', 'assets.*.view', 'assets.*.update']))
+                ->and($directPermissionNames($checkInUser))->toBe($sorted(['assets.view-any', 'assets.*.view']))
+                ->and($directPermissionNames($checkOutUser))->toBe($sorted(['assets.view-any', 'assets.*.view']))
+                ->and($directPermissionNames($systemUser))->toBe($sorted(['assets.view-any']))
+                ->and($role->refresh()->permissions()->pluck('name')->all())->toContain('assets.*.update')
+                ->and($directPermissionNames($unrelatedUser))->toBe([])
+                ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['product.view-any'])
+                ->and(AssetPermissionConsolidationFeature::active())->toBeTrue();
         });
     });
 });

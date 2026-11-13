@@ -34,8 +34,11 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\ListProducts;
 use AidingApp\LicenseManagement\Models\Product;
+use App\Features\LicensePermissionConsolidationFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
@@ -52,7 +55,7 @@ it('is gated with proper access control', function (): void {
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('product.view-any');
+    $user->givePermissionTo('licenses.view-any');
 
     actingAs($user);
 
@@ -61,29 +64,54 @@ it('is gated with proper access control', function (): void {
     $settings->data->addons->licenseManagement = true;
     $settings->save();
 
-    $user->revokePermissionTo('product.view-any');
+    $user->revokePermissionTo('licenses.view-any');
 
     get(ListProducts::getUrl())->assertForbidden();
 
-    $user->givePermissionTo('product.view-any');
+    $user->givePermissionTo('licenses.view-any');
 
     get(ListProducts::getUrl())->assertSuccessful();
 });
 
-it('only shows the bulk delete action to a user with the product.delete permission', function (): void {
+it('only shows the bulk delete action to a user with the `licenses.*.delete` permission', function (): void {
     Product::factory(15)->create();
 
     $user = User::factory()
         ->create()
-        ->givePermissionTo('product.view-any', 'product.*.view');
+        ->givePermissionTo('licenses.view-any', 'licenses.*.view');
 
     actingAs($user);
 
     Livewire::test(ListProducts::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
-    $user->givePermissionTo('product.*.delete');
+    $user->givePermissionTo('licenses.*.delete');
 
     Livewire::test(ListProducts::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+});
+
+// TODO: Cleanup Task (licenses-permission-consolidation): delete this test
+it('grants access with the legacy product permission while the consolidation flag is inactive', function (): void {
+    LicensePermissionConsolidationFeature::deactivate();
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->licenseManagement = true;
+    $settings->save();
+
+    Permission::factory()->create([
+        'name' => 'product.view-any',
+        'guard_name' => 'web',
+        'group_id' => PermissionGroup::create(['name' => 'Product'])->getKey(),
+    ]);
+
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    get(ListProducts::getUrl())->assertForbidden();
+
+    $user->givePermissionTo('product.view-any');
+
+    get(ListProducts::getUrl())->assertSuccessful();
 });
