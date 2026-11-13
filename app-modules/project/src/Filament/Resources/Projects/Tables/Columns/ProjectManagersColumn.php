@@ -43,6 +43,7 @@ use Filament\Facades\Filament;
 use Filament\Tables\Columns\ImageColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
 
 class ProjectManagersColumn
 {
@@ -50,20 +51,14 @@ class ProjectManagersColumn
 
     public static function make(): ImageColumn
     {
-        $getManagerName = function (Project $record, ImageColumn $column, string $state): ?string {
-            $managerIndex = array_search($state, $column->getState(), strict: true);
-
-            if ($managerIndex === false) {
-                return null;
-            }
-
-            return static::getManagers($record)->get($managerIndex)?->full_name;
-        };
+        $getManagerName = fn (Project $record, string $state): ?string => $record->allManagers()
+            ->find(Str::afterLast($state, '#'))
+            ?->full_name;
 
         return ImageColumn::make('managers')
             ->label('Manager(s)')
             ->state(fn (Project $record): array => static::getManagers($record)
-                ->map(fn (User $manager): string => Filament::getUserAvatarUrl($manager))
+                ->map(fn (User $manager): string => static::getAvatarUrl($manager))
                 ->all())
             ->circular()
             ->stacked()
@@ -88,6 +83,15 @@ class ProjectManagersColumn
                         fn (Builder $query) => $query->tap(new WhereFullNameLike($search)),
                     );
             });
+    }
+
+    /**
+     * Managers can share an avatar URL, so their key is appended as a URL fragment to identify
+     * which manager each image belongs to. Browsers ignore the fragment when loading the image.
+     */
+    public static function getAvatarUrl(User $manager): string
+    {
+        return Filament::getUserAvatarUrl($manager) . '#' . $manager->getKey();
     }
 
     /**

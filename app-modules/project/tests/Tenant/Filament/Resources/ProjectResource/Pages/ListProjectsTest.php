@@ -38,6 +38,7 @@ use AidingApp\Department\Models\Department;
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ListProjects;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Filament\Resources\Projects\Tables\Columns\ProjectManagersColumn;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectDashboardHeaderWidget;
 use AidingApp\Project\Models\Pipeline;
@@ -49,7 +50,6 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Action;
 use Filament\Actions\Testing\TestAction;
-use Filament\Facades\Filament;
 use Filament\Tables\Columns\Column;
 use Filament\Tables\Columns\ImageColumn;
 use Livewire\Livewire;
@@ -479,10 +479,10 @@ it('displays project name, manager(s), department, start date, target date, and 
         ->assertTableColumnStateSet('start_date', $project->start_date, $project)
         ->assertTableColumnStateSet('target_completion_date', null, $project)
         ->assertTableColumnStateSet('progress', 50, $project)
-        ->assertTableColumnStateSet('managers', [Filament::getUserAvatarUrl($manager)], $project)
+        ->assertTableColumnStateSet('managers', [ProjectManagersColumn::getAvatarUrl($manager)], $project)
         ->assertTableColumnExists(
             'managers',
-            fn (ImageColumn $column): bool => $column->getTooltip(Filament::getUserAvatarUrl($manager)) === 'Casey Manager',
+            fn (ImageColumn $column): bool => $column->getTooltip(ProjectManagersColumn::getAvatarUrl($manager)) === 'Casey Manager',
             $project,
         )
         ->assertTableColumnExists(
@@ -616,7 +616,7 @@ it('shows the first three managers alphabetically with name tooltips and lists t
         ->whereKey([...$managers->modelKeys(), ...$department->users->modelKeys()])
         ->get()
         ->sortBy('full_name')
-        ->map(fn (User $manager): string => Filament::getUserAvatarUrl($manager))
+        ->map(fn (User $manager): string => ProjectManagersColumn::getAvatarUrl($manager))
         ->values()
         ->all();
 
@@ -638,6 +638,35 @@ it('shows the first three managers alphabetically with name tooltips and lists t
         ->assertSeeHtml('+3');
 });
 
+it('shows each manager their own name tooltip when managers share an avatar URL', function (): void {
+    asSuperAdmin();
+
+    $managers = User::factory()
+        ->count(2)
+        ->sequence(
+            ['first_name' => 'Alex', 'last_name' => 'Shared'],
+            ['first_name' => 'Blair', 'last_name' => 'Shared'],
+        )
+        ->create(['avatar_url' => 'https://example.com/shared-avatar.png']);
+
+    $project = Project::factory()
+        ->hasAttached($managers, relationship: 'managerUsers')
+        ->create();
+
+    Livewire::test(ListProjects::class)
+        ->assertTableColumnExists(
+            'managers',
+            function (ImageColumn $column): bool {
+                $state = $column->getState();
+
+                assert(is_array($state));
+
+                return array_map(fn (string $avatarUrl): ?string => $column->getTooltip($avatarUrl), $state) === ['Alex Shared', 'Blair Shared'];
+            },
+            $project,
+        );
+});
+
 it('shows the same managers on the list as the project dashboard', function (): void {
     asSuperAdmin();
 
@@ -653,7 +682,7 @@ it('shows the same managers on the list as the project dashboard', function (): 
     $dashboardManagerAvatarUrls = Livewire::test(ProjectAccessWidget::class, ['record' => $project])
         ->instance()
         ->managers()
-        ->map(fn (User $manager): string => Filament::getUserAvatarUrl($manager))
+        ->map(fn (User $manager): string => ProjectManagersColumn::getAvatarUrl($manager))
         ->sort()
         ->values()
         ->all();
