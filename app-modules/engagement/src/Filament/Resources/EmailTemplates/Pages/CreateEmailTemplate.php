@@ -92,6 +92,6 @@ class CreateEmailTemplate extends CreateRecord
         /** @var class-string<Resource> $resource */
         $resource = $this->getResource();
 
-        return $resource::getUrl();
+        return $resource::getIndexUrl();
     }
 }
