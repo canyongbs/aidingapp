@@ -105,55 +105,6 @@ use Spatie\Permission\PermissionRegistrar;
 //    });
 //});
 
-// TODO: Cleanup Task (restore-reclassified-assignments): delete this describe and the test within
-describe('2026_10_06_150704_tmp_restore_reclassified_service_request_assignments', function (): void {
-    it('restores soft-deleted assignments as inactive and leaves other assignments untouched', function (): void {
-        isolatedMigration('2026_10_06_150704_tmp_restore_reclassified_service_request_assignments', function (): void {
-            // Setup data before migration
-            $serviceRequest = ServiceRequest::factory()->create();
-            $user = User::factory()->create();
-
-            $insertAssignment = function (string $status, ?CarbonInterface $deletedAt) use ($serviceRequest, $user): string {
-                $id = (string) Str::uuid();
-
-                DB::table('service_request_assignments')->insert([
-                    'id' => $id,
-                    'service_request_id' => $serviceRequest->getKey(),
-                    'user_id' => $user->getKey(),
-                    'assigned_at' => now(),
-                    'status' => $status,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                    'deleted_at' => $deletedAt,
-                ]);
-
-                return $id;
-            };
-
-            $deletedAssignmentId = $insertAssignment('active', now());
-            $activeAssignmentId = $insertAssignment('active', null);
-
-            // Run the migration
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_10_06_150704_tmp_restore_reclassified_service_request_assignments.php']);
-            // Confirm migration ran successfully
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            // Add any assertions to verify the migration's effects
-            assertDatabaseHas('service_request_assignments', [
-                'id' => $deletedAssignmentId,
-                'deleted_at' => null,
-                'status' => 'inactive',
-            ]);
-
-            assertDatabaseHas('service_request_assignments', [
-                'id' => $activeAssignmentId,
-                'deleted_at' => null,
-                'status' => 'active',
-            ]);
-        });
-    });
-});
-
 // TODO: Cleanup Task (service-request-file-upload-type): delete this describe and the test within
 describe('2026_10_15_081432_tmp_backfill_service_request_media_upload_type', function (): void {
     it('backfills the upload type of files attached directly to service requests and activates the feature flag', function (): void {
