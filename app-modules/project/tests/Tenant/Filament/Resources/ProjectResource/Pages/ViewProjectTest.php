@@ -901,7 +901,7 @@ it('does not re-authorize milestone updates per milestone group row', function (
 
     ProjectMilestone::factory()
         ->count(5)
-        ->for($project)
+        ->forProject($project)
         ->create()
         ->each(function (ProjectMilestone $milestone) use ($pipeline): void {
             PipelineEntry::factory()->create([
