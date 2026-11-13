@@ -38,8 +38,8 @@ namespace App\Filament\Pages;
 
 use AidingApp\Engagement\Filament\Resources\EmailTemplates\EmailTemplateResource;
 use AidingApp\Engagement\Models\EmailTemplate;
+use App\Enums\CommunicationSettingsTab;
 use App\Enums\NavigationGroup;
-use App\Models\User;
 use App\Settings\NotificationSettings;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Actions\Action;
@@ -96,15 +96,21 @@ class ManageCommunicationSettings extends Page implements HasActions, HasForms, 
 
     public static function canAccess(): bool
     {
-        $user = auth()->user();
-
-        assert($user instanceof User);
-
-        return $user->can('settings.view-any');
+        return collect(CommunicationSettingsTab::cases())
+            ->contains(fn (CommunicationSettingsTab $tab): bool => $tab->canView());
     }
 
     public function mount(): void
     {
+        if (! CommunicationSettingsTab::tryFrom($this->activeTab)?->canView()) {
+            $firstVisibleTab = collect(CommunicationSettingsTab::cases())
+                ->first(fn (CommunicationSettingsTab $tab): bool => $tab->canView());
+
+            if ($firstVisibleTab instanceof CommunicationSettingsTab) {
+                $this->activeTab = $firstVisibleTab->value;
+            }
+        }
+
         $this->fillForms();
     }
 
@@ -115,11 +121,13 @@ class ManageCommunicationSettings extends Page implements HasActions, HasForms, 
                 Tabs::make()
                     ->livewireProperty('activeTab')
                     ->tabs([
-                        'notifications' => Tab::make('Notifications')
+                        CommunicationSettingsTab::Notifications->value => Tab::make(CommunicationSettingsTab::Notifications->getLabel())
+                            ->visible(fn (): bool => CommunicationSettingsTab::Notifications->canView())
                             ->schema([
                                 $this->makeFormContentComponent('notificationsForm', 'saveNotifications'),
                             ]),
-                        'email-templates' => Tab::make('Email Templates')
+                        CommunicationSettingsTab::EmailTemplates->value => Tab::make(CommunicationSettingsTab::EmailTemplates->getLabel())
+                            ->visible(fn (): bool => CommunicationSettingsTab::EmailTemplates->canView())
                             ->schema([
                                 EmbeddedTable::make(),
                             ]),

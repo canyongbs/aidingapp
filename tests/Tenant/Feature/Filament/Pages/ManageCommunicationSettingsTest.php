@@ -57,6 +57,28 @@ it('renders the notifications and email templates tabs', function (): void {
         ->assertSeeText('Email Templates');
 });
 
+it('falls back to the first visible tab when the requested tab is unknown', function (): void {
+    $user = User::factory()->create();
+    $user->givePermissionTo('settings.view-any');
+
+    actingAs($user);
+
+    Livewire::withQueryParams(['tab' => 'unknown'])
+        ->test(ManageCommunicationSettings::class)
+        ->assertSet('activeTab', 'notifications');
+});
+
+it('keeps the email templates tab selected when the user can view it', function (): void {
+    $user = User::factory()->create();
+    $user->givePermissionTo('settings.view-any');
+
+    actingAs($user);
+
+    Livewire::withQueryParams(['tab' => 'email-templates'])
+        ->test(ManageCommunicationSettings::class)
+        ->assertSet('activeTab', 'email-templates');
+});
+
 it('loads the existing notification settings', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('settings.view-any');
