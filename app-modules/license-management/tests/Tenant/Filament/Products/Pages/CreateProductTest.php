@@ -41,10 +41,8 @@ use AidingApp\LicenseManagement\Filament\Resources\Products\ProductResource;
 use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\LicenseManagement\Tests\Tenant\Filament\Products\RequestFactories\CreateProductRequestFactory;
 use App\Features\LicensePermissionConsolidationFeature;
-use App\Features\ProductNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -111,23 +109,6 @@ it('validates the inputs', function (CreateProductRequestFactory $data, array $e
     'name unique case insensitive' => [CreateProductRequestFactory::new()->state(['name' => 'AIDING APP']), ['name' => 'unique']],
     'url url' => [CreateProductRequestFactory::new()->state(['url' => 'not-a-url']), ['url' => 'url']],
 ]);
-
-describe('name uniqueness feature flag', function (): void {
-    it('does not apply the unique form rule when the feature is disabled', function (): void {
-        ProductNameUniquenessFeature::deactivate();
-
-        asSuperAdmin();
-
-        Product::factory()->create(['name' => 'Aiding App']);
-
-        $request = CreateProductRequestFactory::new()->state(['name' => 'Aiding App'])->create();
-
-        expect(fn () => Livewire::test(CreateProduct::class)
-            ->fillForm($request)
-            ->call('create'))
-            ->toThrow(UniqueConstraintViolationException::class);
-    });
-});
 
 describe('authorization', function (): void {
     it('denies access to the create page without the `licenses.create` permission', function (): void {
