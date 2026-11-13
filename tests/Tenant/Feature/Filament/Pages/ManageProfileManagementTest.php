@@ -126,6 +126,61 @@ it('only shows the bulk delete action to a user with the settings.*.delete permi
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
 
+it('hides every table action from a view-only user', function (): void {
+    $pronoun = Pronouns::factory()->create();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo(['settings.view-any', 'settings.*.view']);
+
+    actingAs($user);
+
+    Livewire::test(ManageProfileManagement::class)
+        ->assertActionHidden(TestAction::make('create')->table())
+        ->assertActionHidden(TestAction::make('edit')->table($pronoun))
+        ->assertActionHidden(TestAction::make('delete')->table($pronoun))
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+});
+
+describe('tab visibility', function (): void {
+    it('renders the personal pronouns tab for a user who can view it', function (): void {
+        $user = User::factory()->create();
+        $user->givePermissionTo('settings.view-any');
+
+        actingAs($user);
+
+        Livewire::test(ManageProfileManagement::class)
+            ->assertOk()
+            ->assertSeeHtml('role="tab"')
+            ->assertSeeText('Personal Pronouns');
+    });
+});
+
+describe('active tab fallback', function (): void {
+    it('falls back to the first visible tab when the requested tab is unknown', function (): void {
+        $user = User::factory()->create();
+        $user->givePermissionTo('settings.view-any');
+
+        actingAs($user);
+
+        Livewire::withQueryParams(['tab' => 'does-not-exist'])
+            ->test(ManageProfileManagement::class)
+            ->assertOk()
+            ->assertSet('activeTab', 'personal-pronouns');
+    });
+
+    it('keeps the personal pronouns tab active when it is explicitly requested', function (): void {
+        $user = User::factory()->create();
+        $user->givePermissionTo('settings.view-any');
+
+        actingAs($user);
+
+        Livewire::withQueryParams(['tab' => 'personal-pronouns'])
+            ->test(ManageProfileManagement::class)
+            ->assertOk()
+            ->assertSet('activeTab', 'personal-pronouns');
+    });
+});
+
 describe('authorization', function (): void {
     it('denies access to the profile management page without the `settings.view-any` permission', function (): void {
         $user = User::factory()->create();
@@ -142,5 +197,20 @@ describe('authorization', function (): void {
         actingAs($user);
 
         Livewire::test(ManageProfileManagement::class)->assertOk();
+    });
+
+    it('rejects a bulk delete attempt by a view-only user', function (): void {
+        $pronouns = Pronouns::factory(3)->create();
+
+        $user = User::factory()->create();
+        $user->givePermissionTo(['settings.view-any', 'settings.*.view']);
+
+        actingAs($user);
+
+        Livewire::test(ManageProfileManagement::class)
+            ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+        expect($user->can('deleteAny', Pronouns::class))->toBeFalse();
+        expect(Pronouns::query()->whereIn('id', $pronouns->pluck('id'))->count())->toBe(3);
     });
 });

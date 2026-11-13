@@ -37,8 +37,8 @@
 namespace App\Filament\Pages;
 
 use App\Enums\NavigationGroup;
+use App\Enums\ProfileManagementTab;
 use App\Models\Pronouns;
-use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
@@ -59,6 +59,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Livewire\Attributes\Url;
 use UnitEnum;
 
 class ManageProfileManagement extends Page implements HasActions, HasForms, HasTable
@@ -75,15 +76,25 @@ class ManageProfileManagement extends Page implements HasActions, HasForms, HasT
 
     protected static ?int $navigationSort = 70;
 
-    public string $activeTab = 'personal-pronouns';
+    #[Url(as: 'tab')]
+    public string $activeTab = ProfileManagementTab::PersonalPronouns->value;
 
     public static function canAccess(): bool
     {
-        $user = auth()->user();
+        return collect(ProfileManagementTab::cases())
+            ->contains(fn (ProfileManagementTab $tab): bool => $tab->canView());
+    }
 
-        assert($user instanceof User);
+    public function mount(): void
+    {
+        if (! ProfileManagementTab::tryFrom($this->activeTab)?->canView()) {
+            $firstVisibleTab = collect(ProfileManagementTab::cases())
+                ->first(fn (ProfileManagementTab $tab): bool => $tab->canView());
 
-        return $user->can('settings.view-any');
+            if ($firstVisibleTab instanceof ProfileManagementTab) {
+                $this->activeTab = $firstVisibleTab->value;
+            }
+        }
     }
 
     public function content(Schema $schema): Schema
@@ -93,7 +104,8 @@ class ManageProfileManagement extends Page implements HasActions, HasForms, HasT
                 Tabs::make()
                     ->livewireProperty('activeTab')
                     ->tabs([
-                        'personal-pronouns' => Tab::make('Personal Pronouns')
+                        ProfileManagementTab::PersonalPronouns->value => Tab::make(ProfileManagementTab::PersonalPronouns->getLabel())
+                            ->visible(fn (): bool => ProfileManagementTab::PersonalPronouns->canView())
                             ->schema([
                                 EmbeddedTable::make(),
                             ]),
@@ -125,8 +137,8 @@ class ManageProfileManagement extends Page implements HasActions, HasForms, HasT
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->authorizeIndividualRecords('delete')
-                        ->visible(fn (): bool => auth()->user()?->can('deleteAny', Pronouns::class) ?? false),
+                        ->authorize('deleteAny', Pronouns::class)
+                        ->authorizeIndividualRecords('delete'),
                 ]),
             ]);
     }
