@@ -41,11 +41,14 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\PermissionRegistrar;
 
 return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function (): void {
+            app(PermissionRegistrar::class)->forgetCachedPermissions();
+
             foreach ($this->mappings() as $relatedPermission => $permission) {
                 User::query()
                     ->withTrashed()
@@ -73,6 +76,9 @@ return new class () extends Migration {
     }
 
     /**
+     * Each related permission maps to the same action in the consolidated group. Advisory updates cannot be restored or
+     * force deleted, so those permissions are not carried over, to avoid granting those abilities over advisories.
+     *
      * @return array<string, string>
      */
     private function mappings(): array
@@ -83,7 +89,6 @@ return new class () extends Migration {
             $mappings["advisory.{$action}"] = "advisories.{$action}";
         }
 
-        // Advisory updates cannot be restored or force deleted, so those permissions are not carried over to avoid granting that ability over advisories
         foreach (['view-any', 'create', '*.view', '*.update', '*.delete'] as $action) {
             $mappings["advisory_update.{$action}"] = "advisories.{$action}";
         }

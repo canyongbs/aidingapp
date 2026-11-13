@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\AdvisoryVisibility;
@@ -43,6 +45,7 @@ use AidingApp\ServiceManagement\Filament\Resources\Advisories\RelationManagers\A
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
+use App\Features\AdvisoryPermissionConsolidationFeature;
 use App\Features\AdvisoryVisibilityFeature;
 use App\Models\User;
 use CanyonGBS\Common\Enums\Color;
@@ -54,6 +57,7 @@ use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
 $visibilityInfolistEntry = function (Testable $component, string $name): TextEntry {
@@ -156,6 +160,49 @@ test('ViewAdvisory is gated with proper access control', function (): void {
                 'record' => $advisory,
             ])
         )->assertSuccessful();
+});
+
+// TODO: Cleanup Task (advisories-permission-consolidation): delete this test
+it('grants access with the legacy advisory and advisory update permissions while the consolidation flag is inactive', function (): void {
+    AdvisoryPermissionConsolidationFeature::deactivate();
+
+    $legacyPermissions = [
+        'advisory.view-any' => 'Advisory',
+        'advisory.*.view' => 'Advisory',
+        'advisory.*.update' => 'Advisory',
+        'advisory_update.view-any' => 'Advisory Update',
+    ];
+
+    foreach ($legacyPermissions as $name => $groupName) {
+        Permission::factory()->create([
+            'name' => $name,
+            'guard_name' => 'web',
+            'group_id' => PermissionGroup::firstOrCreate(['name' => $groupName])->getKey(),
+        ]);
+    }
+
+    $user = User::factory()->create();
+    $advisory = Advisory::factory()->create();
+
+    actingAs($user);
+
+    get(ViewAdvisory::getUrl(['record' => $advisory]))->assertForbidden();
+
+    $user->givePermissionTo(['advisory.view-any', 'advisory.*.view']);
+
+    get(ViewAdvisory::getUrl(['record' => $advisory]))->assertSuccessful();
+
+    Livewire::test(ViewAdvisory::class, ['record' => $advisory->getRouteKey()])
+        ->assertSuccessful()
+        ->assertDontSeeLivewire(AdvisoryUpdatesRelationManager::class)
+        ->assertActionDoesNotExist(TestAction::make('editProperties')->schemaComponent('properties'));
+
+    $user->givePermissionTo(['advisory.*.update', 'advisory_update.view-any']);
+
+    Livewire::test(ViewAdvisory::class, ['record' => $advisory->getRouteKey()])
+        ->assertSuccessful()
+        ->assertSeeLivewire(AdvisoryUpdatesRelationManager::class)
+        ->assertActionExists(TestAction::make('editProperties')->schemaComponent('properties'));
 });
 
 test('the Properties section edit action is gated with proper access control', function (): void {

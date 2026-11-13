@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\AdvisoryVisibility;
@@ -42,6 +44,7 @@ use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ListAdvisori
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\AdvisoryRequestFactory;
+use App\Features\AdvisoryPermissionConsolidationFeature;
 use App\Features\AdvisoryVisibilityFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
@@ -98,6 +101,27 @@ it('is gated with proper access control', function (): void {
     get(ListAdvisories::getUrl())->assertForbidden();
 
     $user->givePermissionTo('advisories.view-any');
+
+    get(ListAdvisories::getUrl())->assertSuccessful();
+});
+
+// TODO: Cleanup Task (advisories-permission-consolidation): delete this test
+it('grants access with the legacy advisory permission while the consolidation flag is inactive', function (): void {
+    AdvisoryPermissionConsolidationFeature::deactivate();
+
+    Permission::factory()->create([
+        'name' => 'advisory.view-any',
+        'guard_name' => 'web',
+        'group_id' => PermissionGroup::create(['name' => 'Advisory'])->getKey(),
+    ]);
+
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    get(ListAdvisories::getUrl())->assertForbidden();
+
+    $user->givePermissionTo('advisory.view-any');
 
     get(ListAdvisories::getUrl())->assertSuccessful();
 });

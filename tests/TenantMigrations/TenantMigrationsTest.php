@@ -2117,6 +2117,66 @@ describe('2026_11_11_120001_tmp_grant_advisories_permissions_to_users_and_roles_
     });
 });
 
+describe('2026_11_11_120002_purge_unneeded_advisory_permissions', function (): void {
+    $migrationName = '2026_11_11_120002_purge_unneeded_advisory_permissions';
+    $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
+
+    $retiredNames = fn (): array => collect(['advisory', 'advisory_update'])
+        ->flatMap(fn (string $prefix): array => array_map(
+            fn (string $action): string => "{$prefix}.{$action}",
+            ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'],
+        ))
+        ->all();
+
+    it('deletes the Advisory and Advisory Update permissions and groups without touching the Advisories group or unrelated permissions', function () use ($migrationName, $migrationPath, $retiredNames): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $retiredNames): void {
+            foreach (['web', 'api'] as $guard) {
+                foreach ($retiredNames() as $name) {
+                    assertDatabaseHas('permissions', ['name' => $name, 'guard_name' => $guard]);
+                }
+            }
+
+            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            foreach (['web', 'api'] as $guard) {
+                foreach ($retiredNames() as $name) {
+                    assertDatabaseMissing('permissions', ['name' => $name, 'guard_name' => $guard]);
+                }
+
+                assertDatabaseHas('permissions', ['name' => 'advisories.view-any', 'guard_name' => $guard]);
+            }
+
+            assertDatabaseMissing('permission_groups', ['name' => 'Advisory']);
+            assertDatabaseMissing('permission_groups', ['name' => 'Advisory Update']);
+            assertDatabaseHas('permission_groups', ['name' => 'Advisories']);
+            assertDatabaseHas('permissions', ['name' => 'knowledge_base_item.view-any', 'guard_name' => 'web']);
+
+            expect(Artisan::call('migrate:rollback', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            foreach (['web', 'api'] as $guard) {
+                foreach ($retiredNames() as $name) {
+                    expect(Permission::where('name', $name)->where('guard_name', $guard)->count())->toBe(1);
+                }
+            }
+
+            assertDatabaseHas('permission_groups', ['name' => 'Advisory']);
+            assertDatabaseHas('permission_groups', ['name' => 'Advisory Update']);
+        });
+    });
+
+    it('clears the permission registrar\'s cached permissions', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            $cacheStore = app(PermissionRegistrar::class)->getCacheStore();
+
+            $cacheStore->forever(config('permission.cache.key'), 'stale');
+
+            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            expect($cacheStore->get(config('permission.cache.key')))->toBeNull();
+        });
+    });
+});
+
 // TODO: Cleanup Task (contact-type-name-uniqueness): delete this describe and the tests within
 describe('2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique', function (): void {
     it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates the feature flag', function (): void {

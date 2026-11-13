@@ -34,12 +34,15 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ViewAdvisory;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\RelationManagers\AdvisoryUpdatesRelationManager;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
+use App\Features\AdvisoryPermissionConsolidationFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
@@ -471,4 +474,76 @@ test('AdvisoryUpdatesRelationManager create action is gated with proper access c
         'pageClass' => ViewAdvisory::class,
     ])
         ->assertTableActionVisible('create');
+});
+
+describe('action authorization', function (): void {
+    $testAction = fn (string $action, AdvisoryUpdate $advisoryUpdate): TestAction => match ($action) {
+        'create' => TestAction::make($action)->table(),
+        'delete' => TestAction::make($action)->table()->bulk(),
+        default => TestAction::make($action)->table($advisoryUpdate),
+    };
+
+    $openAdvisoryUpdate = fn (): AdvisoryUpdate => AdvisoryUpdate::factory()
+        ->for(Advisory::factory()->for(AdvisoryStatus::factory()->open(), 'status'), 'advisory')
+        ->create();
+
+    it('only shows each advisory update action to a user with the consolidated permission', function (string $action, string $permission) use ($testAction, $openAdvisoryUpdate): void {
+        $user = User::factory()->create();
+        $user->givePermissionTo('advisories.view-any');
+
+        $advisoryUpdate = $openAdvisoryUpdate();
+
+        actingAs($user);
+
+        Livewire::test(AdvisoryUpdatesRelationManager::class, ['ownerRecord' => $advisoryUpdate->advisory, 'pageClass' => ViewAdvisory::class])
+            ->assertActionHidden($testAction($action, $advisoryUpdate));
+
+        $user->givePermissionTo($permission);
+
+        Livewire::test(AdvisoryUpdatesRelationManager::class, ['ownerRecord' => $advisoryUpdate->advisory, 'pageClass' => ViewAdvisory::class])
+            ->assertActionVisible($testAction($action, $advisoryUpdate));
+    })->with([
+        'create' => ['create', 'advisories.create'],
+        'view or edit' => ['viewOrEditAdvisoryUpdate', 'advisories.*.view'],
+        'delete' => ['delete', 'advisories.*.delete'],
+    ]);
+
+    // TODO: Cleanup Task (advisories-permission-consolidation): delete this test
+    it('only shows each advisory update action to a user with the legacy permission while the consolidation flag is inactive', function (string $action, string $permission) use ($testAction, $openAdvisoryUpdate): void {
+        AdvisoryPermissionConsolidationFeature::deactivate();
+
+        $legacyPermissions = [
+            'advisory.view-any' => 'Advisory',
+            'advisory.*.view' => 'Advisory',
+            'advisory_update.view-any' => 'Advisory Update',
+            $permission => 'Advisory Update',
+        ];
+
+        foreach ($legacyPermissions as $name => $groupName) {
+            Permission::factory()->create([
+                'name' => $name,
+                'guard_name' => 'web',
+                'group_id' => PermissionGroup::firstOrCreate(['name' => $groupName])->getKey(),
+            ]);
+        }
+
+        $user = User::factory()->create();
+        $user->givePermissionTo(['advisory.view-any', 'advisory.*.view', 'advisory_update.view-any']);
+
+        $advisoryUpdate = $openAdvisoryUpdate();
+
+        actingAs($user);
+
+        Livewire::test(AdvisoryUpdatesRelationManager::class, ['ownerRecord' => $advisoryUpdate->advisory, 'pageClass' => ViewAdvisory::class])
+            ->assertActionHidden($testAction($action, $advisoryUpdate));
+
+        $user->givePermissionTo($permission);
+
+        Livewire::test(AdvisoryUpdatesRelationManager::class, ['ownerRecord' => $advisoryUpdate->advisory, 'pageClass' => ViewAdvisory::class])
+            ->assertActionVisible($testAction($action, $advisoryUpdate));
+    })->with([
+        'create' => ['create', 'advisory_update.create'],
+        'view or edit' => ['viewOrEditAdvisoryUpdate', 'advisory_update.*.view'],
+        'delete' => ['delete', 'advisory_update.*.delete'],
+    ]);
 });
