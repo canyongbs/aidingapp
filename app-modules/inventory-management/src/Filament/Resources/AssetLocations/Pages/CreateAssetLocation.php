@@ -37,9 +37,11 @@
 namespace AidingApp\InventoryManagement\Filament\Resources\AssetLocations\Pages;
 
 use AidingApp\InventoryManagement\Filament\Resources\AssetLocations\AssetLocationResource;
+use App\Features\AssetLocationNameUniquenessFeature;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
 class CreateAssetLocation extends CreateRecord
 {
@@ -50,7 +52,14 @@ class CreateAssetLocation extends CreateRecord
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->required(),
+                    ->required()
+                    ->maxLength(255)
+                    ->string()
+                    // TODO: Cleanup Task (asset-type-status-and-location-name-uniqueness): replace this `when()` with `->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())` once the flag is removed.
+                    ->when(
+                        AssetLocationNameUniquenessFeature::active(),
+                        fn (TextInput $input): TextInput => $input->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
+                    ),
             ]);
     }
 }
