@@ -39,7 +39,6 @@ use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use App\Features\AdvisorySeveritySortFeature;
 use App\Features\AdvisoryVisibilityFeature;
 use App\Models\SystemUser;
 use App\Settings\LicenseSettings;
@@ -223,19 +222,6 @@ it('can sort advisories by severity', function () use ($actingAsAdvisoryViewer):
 
     expect(getJson(route('api.v1.advisories.index', ['sort' => '-severity'], false))->json('data.*.title'))
         ->toBe(['Maintenance advisory', 'Degraded advisory', 'Outage advisory']);
-});
-
-it('sorts advisories by severity name when `AdvisorySeveritySortFeature` is inactive', function () use ($actingAsAdvisoryViewer): void {
-    AdvisorySeveritySortFeature::deactivate();
-
-    $actingAsAdvisoryViewer();
-
-    Advisory::factory()->for(AdvisorySeverity::factory()->state(['name' => 'Minor', 'sort' => 1]), 'severity')->create(['title' => 'Minor advisory']);
-    Advisory::factory()->for(AdvisorySeverity::factory()->state(['name' => 'Critical', 'sort' => 3]), 'severity')->create(['title' => 'Critical advisory']);
-    Advisory::factory()->for(AdvisorySeverity::factory()->state(['name' => 'Major', 'sort' => 2]), 'severity')->create(['title' => 'Major advisory']);
-
-    expect(getJson(route('api.v1.advisories.index', ['sort' => 'severity'], false))->json('data.*.title'))
-        ->toBe(['Critical advisory', 'Major advisory', 'Minor advisory']);
 });
 
 it('rejects unknown filters and sorts', function (array $query) use ($actingAsAdvisoryViewer): void {

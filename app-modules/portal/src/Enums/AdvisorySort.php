@@ -38,7 +38,6 @@ namespace AidingApp\Portal\Enums;
 
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\Scopes\WithLastUpdatedAt;
-use App\Features\AdvisorySeveritySortFeature;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -56,13 +55,10 @@ enum AdvisorySort: string
      */
     public function apply(Builder $query): void
     {
-        if (AdvisorySeveritySortFeature::active()) {
-            $direction = $this === self::HighestSeverity ? 'asc' : 'desc';
-
-            $query->orderByRaw("(select advisory_severities.sort from advisory_severities where advisory_severities.id = advisories.severity_id and advisory_severities.deleted_at is null) {$direction} nulls last");
-        }
+        $direction = $this === self::HighestSeverity ? 'asc' : 'desc';
 
         $query
+            ->orderByRaw("(select advisory_severities.sort from advisory_severities where advisory_severities.id = advisories.severity_id and advisory_severities.deleted_at is null) {$direction} nulls last")
             ->orderByRaw(WithLastUpdatedAt::expression() . ' desc')
             ->orderBy('advisories.id');
     }

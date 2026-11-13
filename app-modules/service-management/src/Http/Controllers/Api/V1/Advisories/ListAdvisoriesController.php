@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Http\Controllers\Api\V1\Advisories;
 use AidingApp\ServiceManagement\Http\Resources\Api\V1\AdvisoryResource;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use App\Features\AdvisorySeveritySortFeature;
 use App\Features\AdvisoryVisibilityFeature;
 use Closure;
 use Dedoc\Scramble\Attributes\Example;
@@ -114,11 +113,9 @@ class ListAdvisoriesController
                 AllowedSort::callback('severity', function (Builder $query, bool $descending): void {
                     $direction = $descending ? 'desc' : 'asc';
 
-                    if (AdvisorySeveritySortFeature::active()) {
-                        $query->orderBy($this->severityColumn('sort'), $direction);
-                    }
-
-                    $query->orderBy($this->severityColumn('name'), $direction);
+                    $query
+                        ->orderBy($this->severityColumn('sort'), $direction)
+                        ->orderBy($this->severityColumn('name'), $direction);
                 }),
                 AllowedSort::field('created_at'),
                 AllowedSort::field('updated_at'),

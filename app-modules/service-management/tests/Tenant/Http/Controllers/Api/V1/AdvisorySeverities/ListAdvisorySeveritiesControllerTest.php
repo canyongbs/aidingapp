@@ -35,7 +35,6 @@
 */
 
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use App\Features\AdvisorySeveritySortFeature;
 use App\Models\SystemUser;
 use App\Settings\LicenseSettings;
 use CanyonGBS\Common\Enums\Color;
@@ -139,19 +138,6 @@ it('sorts advisory severities by `sort` by default and supports descending sorts
 
     expect(getJson(route('api.v1.advisory-severities.index', ['sort' => '-sort'], false))->json('data.*.name'))
         ->toBe(['Maintenance', 'Degraded', 'Outage']);
-});
-
-it('sorts advisory severities by name by default when `AdvisorySeveritySortFeature` is inactive', function () use ($actingAsAdvisorySeverityViewer): void {
-    AdvisorySeveritySortFeature::deactivate();
-
-    $actingAsAdvisorySeverityViewer();
-
-    AdvisorySeverity::factory()->create(['name' => 'Minor', 'sort' => 1]);
-    AdvisorySeverity::factory()->create(['name' => 'Critical', 'sort' => 3]);
-    AdvisorySeverity::factory()->create(['name' => 'Major', 'sort' => 2]);
-
-    expect(getJson(route('api.v1.advisory-severities.index', [], false))->json('data.*.name'))
-        ->toBe(['Critical', 'Major', 'Minor']);
 });
 
 it('can sort advisory severities by name', function () use ($actingAsAdvisorySeverityViewer): void {
