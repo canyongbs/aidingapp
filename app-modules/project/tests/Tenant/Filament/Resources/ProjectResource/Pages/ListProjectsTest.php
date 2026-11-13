@@ -45,6 +45,7 @@ use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Tests\Tenant\Filament\Resources\ProjectResource\RequestFactory\CreateProjectRequestFactory;
+use App\Features\ProjectNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Action;
@@ -273,6 +274,56 @@ it('validates the inputs when creating a project', function (CreateProjectReques
         ['color' => 'in'],
     ],
 ]);
+
+describe('name uniqueness', function (): void {
+    it('rejects a project name that differs only by case from another project', function (string $name): void {
+        asSuperAdmin();
+
+        Project::factory()->create(['name' => 'Campus Renovation']);
+
+        $request = CreateProjectRequestFactory::new()->create(['name' => $name]);
+
+        Livewire::test(ListProjects::class)
+            ->callAction(TestAction::make('create'), $request)
+            ->assertHasFormErrors(['name' => 'unique']);
+
+        assertDatabaseCount(Project::class, 1);
+    })->with([
+        'exact' => 'Campus Renovation',
+        'lower case' => 'campus renovation',
+        'upper case' => 'CAMPUS RENOVATION',
+    ]);
+
+    it('allows a project name that was used by a deleted project', function (): void {
+        asSuperAdmin();
+
+        Project::factory()->create(['name' => 'Campus Renovation'])->delete();
+
+        $request = CreateProjectRequestFactory::new()->create(['name' => 'campus renovation']);
+
+        Livewire::test(ListProjects::class)
+            ->callAction(TestAction::make('create'), $request)
+            ->assertHasNoFormErrors();
+
+        assertDatabaseHas(Project::class, ['name' => 'campus renovation', 'deleted_at' => null]);
+    });
+
+    it('rejects a project name that was used by a deleted project when the feature is inactive', function (): void {
+        ProjectNameUniquenessFeature::deactivate();
+
+        asSuperAdmin();
+
+        Project::factory()->create(['name' => 'Campus Renovation'])->delete();
+
+        $request = CreateProjectRequestFactory::new()->create(['name' => 'Campus Renovation']);
+
+        Livewire::test(ListProjects::class)
+            ->callAction(TestAction::make('create'), $request)
+            ->assertHasFormErrors(['name' => 'unique']);
+
+        expect(Project::query()->count())->toBe(0);
+    });
+});
 
 it('hides the create action when the license addon is disabled after the page loads', function (): void {
     $user = User::factory()

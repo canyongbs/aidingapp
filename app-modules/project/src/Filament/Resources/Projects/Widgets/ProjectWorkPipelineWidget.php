@@ -394,7 +394,14 @@ class ProjectWorkPipelineWidget extends TableWidget
 
                 return $milestone?->attributesToArray() ?? [];
             })
-            ->schema(CreateProjectMilestoneAction::formSchema())
+            ->schema(function (Action $action): array {
+                $milestone = $this->getActionMilestone($action);
+
+                return CreateProjectMilestoneAction::formSchema(
+                    pipelineId: $milestone?->pipeline_id,
+                    ignoreMilestoneId: $milestone?->getKey(),
+                );
+            })
             ->authorize(function (Action $action): bool {
                 $milestone = $this->getActionMilestone($action);
 
