@@ -45,7 +45,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use App\Enums\PresenceStatus;
 use App\Features\ContactArchivingFeature;
-use App\Features\ContactTrackingFeature;
 use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -94,7 +93,6 @@ class ViewContact extends ViewRecord
                                             ->label('Preferred Name'),
                                         TextEntry::make('presence_status')
                                             ->label('Presence')
-                                            ->visible(fn (): bool => ContactTrackingFeature::active())
                                             ->state(fn (Contact $record): PresenceStatus => $record->presenceStatus())
                                             ->badge()
                                             ->color(fn (Contact $record): string => $record->presenceStatus()->getColor())
