@@ -38,10 +38,10 @@ namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
 use AidingApp\Project\Filament\Resources\Projects\Actions\CreateProjectAction;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Filament\Resources\Projects\Tables\Columns\ProjectManagersColumn;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\Scopes\WithProgressCounts;
 use App\Filament\Tables\Columns\IdColumn;
-use App\Models\Scopes\WhereFullNameLike;
 use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Resources\Pages\ListRecords;
@@ -50,7 +50,6 @@ use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 
 class ListProjects extends ListRecords
 {
@@ -68,22 +67,7 @@ class ListProjects extends ListRecords
                     ->description(fn (Project $record): ?string => $record->description)
                     ->searchable()
                     ->sortable(),
-                ViewColumn::make('managers')
-                    ->label('Manager(s)')
-                    ->state(fn (Project $record): Collection => $record->allManagers())
-                    ->default(fn (): Collection => new Collection())
-                    ->view('project::filament.tables.columns.project.managers')
-                    ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query
-                            ->whereHas(
-                                'managerUsers',
-                                fn (Builder $query) => $query->tap(new WhereFullNameLike($search)),
-                            )
-                            ->orWhereHas(
-                                'managerDepartments.users',
-                                fn (Builder $query) => $query->tap(new WhereFullNameLike($search)),
-                            );
-                    }),
+                ProjectManagersColumn::make(),
                 TextColumn::make('department.name')
                     ->label('Department')
                     ->sortable()
