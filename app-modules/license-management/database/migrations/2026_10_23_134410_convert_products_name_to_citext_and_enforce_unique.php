@@ -34,8 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\ProductNameUniquenessFeature;
-use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -43,47 +41,24 @@ use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
-    /*
-     * TODO: Cleanup Task (product-name-uniqueness): after ProductNameUniquenessFeature is removed:
-     * - remove the `FixesDuplicateNames` trait, the `$chunkSize` and `$usesSoftDeletes` properties, and the `fixDuplicates()` / `revertDuplicates()` calls
-     * - keep the citext column conversion and the unique index, they are permanent
-     */
-    use FixesDuplicateNames;
-
-    private string $table = 'products';
-
-    private string $column = 'name';
-
-    private int $chunkSize = 500;
-
-    private bool $usesSoftDeletes = true;
-
     public function up(): void
     {
         DB::transaction(function (): void {
-            $this->fixDuplicates();
+            DB::statement('ALTER TABLE products ALTER COLUMN name TYPE citext');
 
-            DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
-
-            Schema::table($this->table, function (Blueprint $table): void {
-                $table->uniqueIndex($this->column, 'products_name_unique')
+            Schema::table('products', function (Blueprint $table): void {
+                $table->uniqueIndex('name', 'products_name_unique')
                     ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
             });
-
-            ProductNameUniquenessFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function (): void {
-            ProductNameUniquenessFeature::deactivate();
-
             DB::statement('DROP INDEX IF EXISTS products_name_unique');
 
-            DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
-
-            $this->revertDuplicates();
+            DB::statement('ALTER TABLE products ALTER COLUMN name TYPE varchar(255)');
         });
     }
 };
