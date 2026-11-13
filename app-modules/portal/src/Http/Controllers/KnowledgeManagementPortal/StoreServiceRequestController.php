@@ -38,6 +38,7 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Form\Actions\GenerateSubmissibleValidation;
+use AidingApp\Form\Actions\NormalizeLegacyCheckboxResponses;
 use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
@@ -182,7 +183,16 @@ class StoreServiceRequestController extends Controller
             fn (): bool => $type->defaultPriority()->exists(),
         );
 
-        $validator = Validator::make($request->all(), $rules);
+        $input = $request->all();
+
+        // TODO: Cleanup Task (convert-checkbox-form-fields): remove this normalization loop.
+        foreach ($form->steps as $step) {
+            if (is_array($input[$step->label] ?? null)) {
+                $input[$step->label] = app(NormalizeLegacyCheckboxResponses::class)($step->fields, $input[$step->label]);
+            }
+        }
+
+        $validator = Validator::make($input, $rules);
 
         $contact = auth('contact')->user();
 

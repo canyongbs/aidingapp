@@ -300,3 +300,67 @@ it('records files submitted through upload fields as request submissions uploade
     expect(ServiceRequestFileUploadType::fromMedia($media))->toBe(ServiceRequestFileUploadType::RequestSubmission)
         ->and($media->createdBy->is($contact))->toBeTrue();
 });
+
+// TODO: Cleanup Task (convert-checkbox-form-fields): delete this test.
+it('normalizes a boolean answer from a form opened before the migration for a migrated checkboxes field', function (bool $checked, string $expectedResponse) use ($postAssistantServiceRequest): void {
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+    $type->update(['default_priority_id' => $priority->getKey()]);
+    $form = ServiceRequestForm::factory()->wizard()->for($type, 'type')->create();
+    $step = new ServiceRequestFormStep(['label' => 'Details', 'sort' => 1]);
+    $step->submissible()->associate($form);
+    $step->save();
+    $field = new ServiceRequestFormField([
+        'label' => 'Agree',
+        'type' => 'checkboxes',
+        'is_required' => false,
+        'config' => ['hasOtherOption' => false, 'options' => [['label' => 'Agree', 'value' => '1']], 'isLegacyCheckbox' => true],
+    ]);
+    $field->submissible()->associate($form);
+    $field->step()->associate($step);
+    $field->save();
+    $contact = Contact::factory()->create();
+
+    $postAssistantServiceRequest($contact, $type, [
+        'title' => 'Stale form',
+        'description' => 'Stale checkbox form.',
+        'custom_fields' => [$field->getKey() => $checked],
+    ])->assertOk();
+
+    $submittedField = ServiceRequest::query()->sole()->serviceRequestFormSubmission->fields()->whereKey($field)->firstOrFail();
+
+    expect($submittedField->pivot->getAttribute('response'))->toBe($expectedResponse);
+})->with([
+    'checked' => [true, '["1"]'],
+    'unchecked' => [false, '[]'],
+]);
+
+it('rejects a boolean answer for a checkboxes field that was not migrated', function () use ($postAssistantServiceRequest): void {
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+    $type->update(['default_priority_id' => $priority->getKey()]);
+    $form = ServiceRequestForm::factory()->wizard()->for($type, 'type')->create();
+    $step = new ServiceRequestFormStep(['label' => 'Details', 'sort' => 1]);
+    $step->submissible()->associate($form);
+    $step->save();
+    $field = new ServiceRequestFormField([
+        'label' => 'Colors',
+        'type' => 'checkboxes',
+        'is_required' => false,
+        'config' => ['hasOtherOption' => false, 'options' => [['label' => 'Red', 'value' => 'red']]],
+    ]);
+    $field->submissible()->associate($form);
+    $field->step()->associate($step);
+    $field->save();
+    $contact = Contact::factory()->create();
+
+    $postAssistantServiceRequest($contact, $type, [
+        'title' => 'Boolean answer',
+        'description' => 'Booleans are invalid for new checkboxes fields.',
+        'custom_fields' => [$field->getKey() => true],
+    ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors($field->getKey());
+
+    expect(ServiceRequest::query()->exists())->toBeFalse();
+});

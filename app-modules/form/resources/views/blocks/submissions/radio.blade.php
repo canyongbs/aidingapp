@@ -39,9 +39,30 @@
                 ->pluck('label', 'value')
                 ->all()
             : $options;
+
+        $hasOtherOption = $hasOtherOption ?? false;
+        $displayValue = null;
+
+        if (filled($response ?? null)) {
+            $displayValue = $normalizedOptions[$response] ?? null;
+
+            if ($displayValue === null) {
+                foreach ($normalizedOptions as $value => $optionLabel) {
+                    if (strcasecmp((string) $value, (string) $response) === 0) {
+                        $displayValue = $optionLabel;
+
+                        break;
+                    }
+                }
+            }
+
+            if ($displayValue === null && $hasOtherOption) {
+                $displayValue = 'Other: ' . $response;
+            }
+        }
     @endphp
 
-    {{ $normalizedOptions[$response ?? null] ?? null }}
+    {{ $displayValue }}
 
     @if (blank($response ?? null))
         <span class="text-gray-500">No response</span>

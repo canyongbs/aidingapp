@@ -49,7 +49,7 @@ class ServiceRequestTypeCategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => str($this->faker->unique()->word())->ucfirst()->toString(),
+            'name' => str($this->faker->unique()->words(3, true))->ucfirst()->toString(),
             'sort' => $this->faker->randomNumber(1),
             'parent_id' => null,
         ];
