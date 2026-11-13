@@ -56,7 +56,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Co
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Rules\ValidServiceMonitoringKeywordValues;
-use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Rules\ValidUrl;
 use Filament\Forms\Components\Select;
@@ -88,11 +87,7 @@ class CreateServiceMonitoring extends CreateRecord
                             ->string()
                             ->required()
                             ->maxLength(255)
-                            // TODO: Cleanup Task (service-monitoring-target-name-uniqueness): replace this `when()` with `->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())` once the flag is removed.
-                            ->when(
-                                ServiceMonitoringTargetNameUniquenessFeature::active(),
-                                fn (TextInput $input): TextInput => $input->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
-                            )
+                            ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())
                             ->columnSpanFull(),
                         Textarea::make('description')
                             ->label('Description')
