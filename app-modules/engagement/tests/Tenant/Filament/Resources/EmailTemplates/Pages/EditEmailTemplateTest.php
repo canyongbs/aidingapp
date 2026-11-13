@@ -39,12 +39,15 @@ use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\EditEmailTempla
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\Engagement\Tests\Tenant\Filament\Resources\EmailTemplates\RequestFactories\EditEmailTemplateRequestFactory;
 use App\Features\EmailTemplateNameUniquenessFeature;
+use App\Filament\Pages\ManageCommunicationSettings;
 use App\Models\User;
+use Filament\Actions\DeleteAction;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
@@ -78,13 +81,28 @@ it('can update an email template', function (): void {
     Livewire::test(EditEmailTemplate::class, ['record' => $emailTemplate->getRouteKey()])
         ->fillForm($request)
         ->call('save')
-        ->assertHasNoFormErrors();
+        ->assertHasNoFormErrors()
+        ->assertRedirect(ManageCommunicationSettings::getUrl(['tab' => 'email-templates']));
 
     assertDatabaseHas(EmailTemplate::class, [
         'id' => $emailTemplate->getKey(),
         'name' => $request['name'],
         'description' => $request['description'],
     ]);
+});
+
+it('redirects to the communication settings email templates tab after deleting an email template', function (): void {
+    $user = User::factory()->create();
+    $user->givePermissionTo(['settings.view-any', 'settings.*.update', 'settings.*.delete']);
+    actingAs($user);
+
+    $emailTemplate = EmailTemplate::factory()->create();
+
+    Livewire::test(EditEmailTemplate::class, ['record' => $emailTemplate->getRouteKey()])
+        ->callAction(DeleteAction::class)
+        ->assertRedirect(ManageCommunicationSettings::getUrl(['tab' => 'email-templates']));
+
+    assertSoftDeleted($emailTemplate);
 });
 
 it('allows saving with the same name as the current email template', function (): void {

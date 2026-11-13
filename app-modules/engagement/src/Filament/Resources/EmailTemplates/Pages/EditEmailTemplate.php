@@ -90,7 +90,13 @@ class EditEmailTemplate extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->successRedirectUrl(EmailTemplateResource::getIndexUrl()),
         ];
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return EmailTemplateResource::getIndexUrl();
     }
 }

@@ -38,29 +38,27 @@ namespace AidingApp\Engagement\Filament\Resources\EmailTemplates;
 
 use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\CreateEmailTemplate;
 use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\EditEmailTemplate;
-use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\ListEmailTemplates;
 use AidingApp\Engagement\Models\EmailTemplate;
-use App\Enums\CommunicationNavigationGroup;
-use App\Filament\Clusters\Communication;
+use App\Filament\Pages\ManageCommunicationSettings;
 use Filament\Resources\Resource;
-use UnitEnum;
+use Illuminate\Database\Eloquent\Model;
 
 class EmailTemplateResource extends Resource
 {
     protected static ?string $model = EmailTemplate::class;
 
-    protected static string | UnitEnum | null $navigationGroup = CommunicationNavigationGroup::Communication;
-
-    protected static ?int $navigationSort = 120;
-
-    protected static ?string $cluster = Communication::class;
+    protected static bool $shouldRegisterNavigation = false;
 
     public static function getPages(): array
     {
         return [
-            'index' => ListEmailTemplates::route('/'),
             'create' => CreateEmailTemplate::route('/create'),
             'edit' => EditEmailTemplate::route('/{record}/edit'),
         ];
+    }
+
+    public static function getIndexUrl(array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?Model $tenant = null, bool $shouldGuessMissingParameters = false): string
+    {
+        return ManageCommunicationSettings::getUrl(['tab' => 'email-templates'], $isAbsolute, $panel, $tenant);
     }
 }
