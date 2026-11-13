@@ -37,7 +37,6 @@
 namespace AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages;
 
 use AidingApp\Engagement\Filament\Resources\EmailTemplates\EmailTemplateResource;
-use App\Features\EmailTemplateNameUniquenessFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
@@ -61,11 +60,7 @@ class EditEmailTemplate extends EditRecord
                     ->required()
                     ->maxLength(255)
                     ->autocomplete(false)
-                    // TODO: Cleanup Task (email-template-name-uniqueness): replace this `when()` with `->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())` once the flag is removed.
-                    ->when(
-                        EmailTemplateNameUniquenessFeature::active(),
-                        fn (TextInput $input): TextInput => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
-                    ),
+                    ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
                 Textarea::make('description')
                     ->string(),
                 RichEditor::make('content')
