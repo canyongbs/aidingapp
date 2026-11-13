@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\AdvisorySeveritySortFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
@@ -58,16 +57,12 @@ return new class () extends Migration {
                 ) AS ranked
                 WHERE advisory_severities.id = ranked.id
             SQL);
-
-            AdvisorySeveritySortFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function (): void {
-            AdvisorySeveritySortFeature::deactivate();
-
             Schema::table('advisory_severities', function (Blueprint $table): void {
                 $table->dropIndex(['sort']);
                 $table->dropColumn('sort');

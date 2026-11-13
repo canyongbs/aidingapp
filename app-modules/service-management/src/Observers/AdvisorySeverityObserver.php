@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Observers;
 
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use App\Features\AdvisorySeveritySortFeature;
 use Illuminate\Support\Facades\DB;
 
 class AdvisorySeverityObserver
@@ -47,10 +46,6 @@ class AdvisorySeverityObserver
      */
     public function creating(AdvisorySeverity $advisorySeverity): void
     {
-        if (! AdvisorySeveritySortFeature::active()) {
-            return;
-        }
-
         if (! isset($advisorySeverity->sort)) {
             $advisorySeverity->setAttribute(
                 'sort',

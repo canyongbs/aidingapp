@@ -41,7 +41,6 @@ use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Schemas\AdvisoryForm;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use App\Features\AdvisorySeveritySortFeature;
 use App\Features\AdvisoryVisibilityFeature;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -67,7 +66,7 @@ class ListAdvisories extends ListRecords
                     ->label('Severity')
                     ->badge()
                     ->color(fn (Advisory $record): string => $record->severity->color->value)
-                    ->sortable(AdvisorySeveritySortFeature::active(), fn (Builder $query, string $direction): Builder => $query->orderBy(
+                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderBy(
                         AdvisorySeverity::query()
                             ->select('advisory_severities.sort')
                             ->whereColumn('advisory_severities.id', 'advisories.severity_id'),
