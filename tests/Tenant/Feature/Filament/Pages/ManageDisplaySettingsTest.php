@@ -35,6 +35,7 @@
 */
 
 use App\Filament\Pages\ManageDisplaySettings;
+use App\Models\Tenant;
 use App\Models\User;
 use App\Settings\DisplaySettings;
 use App\Settings\EmailSettings;
@@ -145,7 +146,8 @@ it('can update the email settings', function (): void {
         ->call('saveEmail')
         ->assertHasNoFormErrors(form: 'emailForm');
 
-    expect(app(EmailSettings::class)->background_color)->toBe('#ffffff');
+    expect(app(EmailSettings::class)->background_color)->toBe('#ffffff')
+        ->and(Tenant::current()->refresh()->config->mail->fromName)->toBe('Example From Name');
 });
 
 describe('authorization', function (): void {
