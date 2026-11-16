@@ -520,7 +520,7 @@ test('EditUser does not persist user changes when synchronizing the managed cont
     $user = User::factory()->create(['first_name' => 'Original', 'last_name' => 'Name']);
     $contact = app(ManagedContactService::class)->enable($user, ContactType::factory()->create()->getKey());
 
-    Event::listen('eloquent.saving: ' . Contact::class, fn () => throw new RuntimeException('Contact sync failed.'));
+    Event::listen('eloquent.saving: ' . Contact::class, fn (): never => throw new RuntimeException('Contact sync failed.'));
 
     expect(fn () => Livewire::test(EditUser::class, ['record' => $user->getKey()])
         ->fillForm(['first_name' => 'Changed'])
