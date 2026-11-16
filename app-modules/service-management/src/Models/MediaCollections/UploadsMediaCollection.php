@@ -136,7 +136,7 @@ class UploadsMediaCollection extends MediaCollection
     }
 
     /**
-     * @return array<string, array<string>>
+     * @return array<int, string>
      */
     public function getExtensions(): array
     {
@@ -154,7 +154,7 @@ class UploadsMediaCollection extends MediaCollection
     }
 
     /**
-     * @return array<string, array<string>>
+     * @return array<int, string>
      */
     public function getExtensionsFull(): array
     {
