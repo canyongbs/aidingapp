@@ -60,7 +60,6 @@ use Filament\Support\Enums\Size;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Vite;
@@ -201,9 +200,7 @@ class ServiceRequestUpdates extends Component implements HasActions, HasSchemas
         $updates = $this->serviceRequest
             ->serviceRequestUpdates()
             ->with([
-                'createdBy' => function (Relation $relation): void {
-                    assert($relation instanceof MorphTo);
-
+                'createdBy' => function (MorphTo $relation): void {
                     $relation->withTrashed();
                 },
                 'media',

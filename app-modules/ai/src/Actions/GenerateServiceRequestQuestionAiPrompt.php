@@ -108,7 +108,7 @@ class GenerateServiceRequestQuestionAiPrompt
     }
 
     /**
-     * @return Collection<int, string>
+     * @return Collection<string, string>
      */
     protected function buildFieldsMapFromType(ServiceRequestType $serviceRequestType): Collection
     {
@@ -129,7 +129,7 @@ class GenerateServiceRequestQuestionAiPrompt
 
     /**
      * @param array<string, mixed> $formData
-     * @param Collection<int, string> $fieldsMap
+     * @param Collection<string, string> $fieldsMap
      *
      * @return array<int, string>
      */
@@ -146,7 +146,7 @@ class GenerateServiceRequestQuestionAiPrompt
     /**
      * @param array<int, string> $ids
      *
-     * @return array<int, string>
+     * @return array<string, string>
      */
     protected function fetchMissingFieldLabels(array $ids): array
     {
@@ -158,7 +158,7 @@ class GenerateServiceRequestQuestionAiPrompt
 
     /**
      * @param array<string, mixed> $formData
-     * @param Collection<int, string> $fieldsMap
+     * @param Collection<string, string> $fieldsMap
      */
     protected function renderFormDataMarkdown(array $formData, Collection $fieldsMap): string
     {
