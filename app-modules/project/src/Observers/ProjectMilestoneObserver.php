@@ -58,4 +58,15 @@ class ProjectMilestoneObserver
             $projectMilestone->setAttribute('project_id', $projectMilestone->pipeline()->value('project_id'));
         }
     }
+
+    /**
+     * When a milestone is moved to a different pipeline, synchronize the legacy project_id column
+     * to prevent cascade deletion if the original project is deleted (while the flag is inactive).
+     */
+    public function updating(ProjectMilestone $projectMilestone): void
+    {
+        if (! MilestoneProjectFromPipelineFeature::active() && $projectMilestone->isDirty('pipeline_id')) {
+            $projectMilestone->setAttribute('project_id', $projectMilestone->pipeline()->value('project_id'));
+        }
+    }
 }

@@ -62,9 +62,18 @@ return new class () extends Migration {
                 $table->foreignUuid('project_id')->nullable()->constrained('projects')->cascadeOnDelete();
             });
 
+            // Backfill project_id from the pipeline's project_id. Milestones whose pipelines have
+            // no project are orphaned and are deleted (rollback cleans up).
             DB::table('project_milestones')->update([
                 'project_id' => DB::raw('(select pipelines.project_id from pipelines where pipelines.id = project_milestones.pipeline_id)'),
             ]);
+
+            // Delete milestones that reference projectless pipelines (project_id is still NULL
+            // after backfill), since the legacy schema enforced project_id NOT NULL.
+            DB::table('project_milestones')
+                ->join('pipelines', 'pipelines.id', '=', 'project_milestones.pipeline_id')
+                ->whereNull('pipelines.project_id')
+                ->delete();
 
             Schema::table('project_milestones', function (Blueprint $table): void {
                 $table->foreignUuid('project_id')->nullable(false)->change();
