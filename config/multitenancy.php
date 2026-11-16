@@ -37,6 +37,7 @@
 use App\Models\Tenant;
 use App\Multitenancy\Tasks\ForgetResolvedSettingsTask;
 use App\Multitenancy\Tasks\PrefixCacheTask;
+use App\Multitenancy\Tasks\ResetPermissionRegistrarTask;
 use App\Multitenancy\Tasks\SwitchAppUrl;
 use App\Multitenancy\Tasks\SwitchMailTask;
 use App\Multitenancy\Tasks\SwitchS3FilesystemTask;
@@ -79,6 +80,7 @@ return [
      */
     'switch_tenant_tasks' => [
         PrefixCacheTask::class,
+        ResetPermissionRegistrarTask::class,
         SwitchTenantDatabasesTask::class,
         SwitchSessionDriver::class,
         SwitchAppUrl::class,

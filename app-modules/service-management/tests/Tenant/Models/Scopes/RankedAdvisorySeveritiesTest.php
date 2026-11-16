@@ -36,7 +36,6 @@
 
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\Scopes\RankedAdvisorySeverities;
-use App\Features\AdvisorySeveritySortFeature;
 
 it('orders severities by rank, then by name', function (): void {
     $minor = AdvisorySeverity::factory()->create(['name' => 'Minor', 'sort' => 2]);
@@ -45,14 +44,4 @@ it('orders severities by rank, then by name', function (): void {
 
     expect(AdvisorySeverity::query()->tap(new RankedAdvisorySeverities())->pluck('id')->all())
         ->toBe([$critical->getKey(), $informational->getKey(), $minor->getKey()]);
-});
-
-it('orders severities by name when `AdvisorySeveritySortFeature` is inactive', function (): void {
-    $minor = AdvisorySeverity::factory()->create(['name' => 'Minor', 'sort' => 1]);
-    $critical = AdvisorySeverity::factory()->create(['name' => 'Critical', 'sort' => 2]);
-
-    AdvisorySeveritySortFeature::deactivate();
-
-    expect(AdvisorySeverity::query()->tap(new RankedAdvisorySeverities())->pluck('id')->all())
-        ->toBe([$critical->getKey(), $minor->getKey()]);
 });

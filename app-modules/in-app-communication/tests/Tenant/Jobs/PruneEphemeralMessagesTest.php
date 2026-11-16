@@ -160,7 +160,7 @@ it('does not queue `MessagesPruned` when deleting a message fails', function ():
     Queue::fake();
     Event::listen(
         'eloquent.deleting: ' . Message::class,
-        fn () => throw new RuntimeException('Unable to delete message.'),
+        fn (): never => throw new RuntimeException('Unable to delete message.'),
     );
 
     expect(fn () => (new PruneEphemeralMessages())->handle())

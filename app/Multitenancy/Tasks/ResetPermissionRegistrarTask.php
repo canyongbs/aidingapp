@@ -34,15 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+namespace App\Multitenancy\Tasks;
 
-use App\Enums\NavigationGroup;
-use Filament\Clusters\Cluster;
-use UnitEnum;
+use Spatie\Multitenancy\Contracts\IsTenant;
+use Spatie\Multitenancy\Tasks\SwitchTenantTask;
+use Spatie\Permission\PermissionRegistrar;
 
-class ProfileManagement extends Cluster
+/**
+ * The registrar is a singleton that keeps the cache store it resolved when it was first built, so without this it keeps
+ * reading and clearing the permission cache of whichever tenant context was active at that moment. That left a permission
+ * cache that migrations could not clear, hiding newly seeded permissions from the web app.
+ */
+class ResetPermissionRegistrarTask implements SwitchTenantTask
 {
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Settings;
+    public function makeCurrent(IsTenant $tenant): void
+    {
+        $this->forgetPermissionRegistrar();
+    }
 
-    protected static ?int $navigationSort = 70;
+    public function forgetCurrent(): void
+    {
+        $this->forgetPermissionRegistrar();
+    }
+
+    protected function forgetPermissionRegistrar(): void
+    {
+        app()->forgetInstance(PermissionRegistrar::class);
+    }
 }

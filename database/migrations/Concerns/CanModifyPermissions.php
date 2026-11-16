@@ -38,6 +38,7 @@ namespace Database\Migrations\Concerns;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Spatie\Permission\PermissionRegistrar;
 
 trait CanModifyPermissions
 {
@@ -85,6 +86,8 @@ trait CanModifyPermissions
                     'created_at' => now(),
                 ];
             }, array_keys($names), array_values($names)));
+
+        $this->forgetCachedPermissionsAfterCommit();
     }
 
     /**
@@ -102,6 +105,8 @@ trait CanModifyPermissions
             ->leftJoin('permissions', 'permission_groups.id', '=', 'permissions.group_id')
             ->whereNull('permissions.id')
             ->delete();
+
+        $this->forgetCachedPermissionsAfterCommit();
     }
 
     /**
@@ -118,6 +123,8 @@ trait CanModifyPermissions
                         'name' => $newName,
                     ]);
             });
+
+        $this->forgetCachedPermissionsAfterCommit();
     }
 
     /**
@@ -133,5 +140,16 @@ trait CanModifyPermissions
                         'name' => $newName,
                     ]);
             });
+    }
+
+    /**
+     * Permissions are cached for 24 hours, so without this a migration that forgets to clear the cache leaves the new
+     * permission names missing for everyone, super admins included, until the cache expires.
+     */
+    private function forgetCachedPermissionsAfterCommit(): void
+    {
+        DB::afterCommit(function (): void {
+            app(PermissionRegistrar::class)->forgetCachedPermissions();
+        });
     }
 }

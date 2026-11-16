@@ -34,21 +34,34 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Resources\Pronouns\Pages;
+use App\Models\Tenant;
+use Illuminate\Support\Facades\Cache;
+use Spatie\Permission\PermissionRegistrar;
 
-use App\Filament\Resources\Pronouns\PronounsResource;
-use Filament\Actions\CreateAction;
-use Filament\Resources\Pages\ManageRecords;
+it('uses the same cache store as the current tenant after switching to it', function (): void {
+    $tenant = Tenant::query()->firstOrFail();
 
-class ManagePronouns extends ManageRecords
-{
-    protected static string $resource = PronounsResource::class;
+    app(PermissionRegistrar::class);
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            CreateAction::make()
-                ->modalWidth('md'),
-        ];
-    }
-}
+    $tenant->makeCurrent();
+
+    app(PermissionRegistrar::class)->getCacheStore()->forever('permission-registrar-task-test', 'cached');
+
+    expect(Cache::get('permission-registrar-task-test'))->toBe('cached');
+
+    Tenant::forgetCurrent();
+});
+
+it('uses the same cache store as the landlord after returning to it', function (): void {
+    $tenant = Tenant::query()->firstOrFail();
+
+    $tenant->makeCurrent();
+
+    app(PermissionRegistrar::class);
+
+    Tenant::forgetCurrent();
+
+    app(PermissionRegistrar::class)->getCacheStore()->forever('permission-registrar-task-test', 'cached');
+
+    expect(Cache::get('permission-registrar-task-test'))->toBe('cached');
+});
