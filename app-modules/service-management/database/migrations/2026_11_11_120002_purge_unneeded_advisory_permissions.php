@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use App\Features\AdvisoryPermissionConsolidationFeature;
 use Database\Migrations\Concerns\CanModifyPermissions;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Arr;
@@ -41,6 +42,10 @@ use Illuminate\Support\Facades\DB;
 use Spatie\Permission\PermissionRegistrar;
 
 return new class () extends Migration {
+    /*
+     * TODO: Cleanup Task (advisories-permission-consolidation): remove the AdvisoryPermissionConsolidationFeature
+     * activate() and deactivate() calls when the flag is removed
+     */
     use CanModifyPermissions;
 
     /**
@@ -78,6 +83,8 @@ return new class () extends Migration {
             collect($this->guards)
                 ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions()), $guard));
 
+            AdvisoryPermissionConsolidationFeature::activate();
+
             DB::afterCommit(function (): void {
                 app(PermissionRegistrar::class)->forgetCachedPermissions();
             });
@@ -87,6 +94,8 @@ return new class () extends Migration {
     public function down(): void
     {
         DB::transaction(function (): void {
+            AdvisoryPermissionConsolidationFeature::deactivate();
+
             collect($this->guards)
                 ->each(function (string $guard): void {
                     $permissions = Arr::except($this->permissions(), keys: DB::table('permissions')

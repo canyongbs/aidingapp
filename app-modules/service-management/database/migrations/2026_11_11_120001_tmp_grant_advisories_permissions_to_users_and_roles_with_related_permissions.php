@@ -35,7 +35,6 @@
 */
 
 use AidingApp\Authorization\Models\Role;
-use App\Features\AdvisoryPermissionConsolidationFeature;
 use App\Models\SystemUser;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -64,15 +63,12 @@ return new class () extends Migration {
                     ->whereHas('permissions', fn (Builder $query) => $query->where('name', $relatedPermission))
                     ->each(fn (Role $role) => $role->givePermissionTo($permission));
             }
-
-            AdvisoryPermissionConsolidationFeature::activate();
         });
     }
 
     public function down(): void
     {
         // Grants that existed before this migration cannot be told apart from the ones it added, so that is irreversible
-        AdvisoryPermissionConsolidationFeature::deactivate();
     }
 
     /**

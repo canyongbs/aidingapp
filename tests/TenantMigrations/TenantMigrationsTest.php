@@ -2097,8 +2097,6 @@ describe('2026_11_11_120001_tmp_grant_advisories_permissions_to_users_and_roles_
             $unrelatedUser = User::factory()->create();
             $unrelatedUser->givePermissionTo('product.view-any');
 
-            expect(AdvisoryPermissionConsolidationFeature::active())->toBeFalse();
-
             $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_11_11_120001_tmp_grant_advisories_permissions_to_users_and_roles_with_related_permissions.php']);
             expect($migrate)->toBe(Command::SUCCESS);
 
@@ -2112,7 +2110,7 @@ describe('2026_11_11_120001_tmp_grant_advisories_permissions_to_users_and_roles_
                 ->and($role->refresh()->permissions()->pluck('name')->all())->toContain('advisories.*.update')
                 ->and($directPermissionNames($unrelatedUser))->toBe([])
                 ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['product.view-any'])
-                ->and(AdvisoryPermissionConsolidationFeature::active())->toBeTrue();
+                ->and(AdvisoryPermissionConsolidationFeature::active())->toBeFalse();
         });
     });
 });
@@ -2128,7 +2126,7 @@ describe('2026_11_11_120002_purge_unneeded_advisory_permissions', function (): v
         ))
         ->all();
 
-    it('deletes the Advisory and Advisory Update permissions and groups without touching the Advisories group or unrelated permissions', function () use ($migrationName, $migrationPath, $retiredNames): void {
+    it('deletes the Advisory and Advisory Update permissions and groups and activates the consolidation flag without touching the Advisories group or unrelated permissions', function () use ($migrationName, $migrationPath, $retiredNames): void {
         isolatedMigration($migrationName, function () use ($migrationPath, $retiredNames): void {
             foreach (['web', 'api'] as $guard) {
                 foreach ($retiredNames() as $name) {
@@ -2136,7 +2134,11 @@ describe('2026_11_11_120002_purge_unneeded_advisory_permissions', function (): v
                 }
             }
 
+            expect(AdvisoryPermissionConsolidationFeature::active())->toBeFalse();
+
             expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            expect(AdvisoryPermissionConsolidationFeature::active())->toBeTrue();
 
             foreach (['web', 'api'] as $guard) {
                 foreach ($retiredNames() as $name) {
@@ -2161,6 +2163,8 @@ describe('2026_11_11_120002_purge_unneeded_advisory_permissions', function (): v
 
             assertDatabaseHas('permission_groups', ['name' => 'Advisory']);
             assertDatabaseHas('permission_groups', ['name' => 'Advisory Update']);
+
+            expect(AdvisoryPermissionConsolidationFeature::active())->toBeFalse();
         });
     });
 
