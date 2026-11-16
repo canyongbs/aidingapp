@@ -34,21 +34,41 @@
 </COPYRIGHT>
 */
 
-use App\Filament\Pages\ManageEmailSettings;
+namespace App\Enums;
+
 use App\Models\User;
-use Livewire\Livewire;
+use Filament\Support\Contracts\HasLabel;
 
-use function Pest\Laravel\actingAs;
+enum DisplaySettingsTab: string implements HasLabel
+{
+    case DatesAndTimes = 'dates-and-times';
 
-it('is gated with proper access control', function (): void {
-    $user = User::factory()->create();
+    case Email = 'email';
 
-    actingAs($user);
+    case Presence = 'presence';
 
-    Livewire::test(ManageEmailSettings::class)->assertForbidden();
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::DatesAndTimes => 'Dates and Times',
+            self::Email => 'Email',
+            self::Presence => 'Presence',
+        };
+    }
 
-    $user->givePermissionTo('settings.view-any');
-    $user->refresh();
+    public function canView(): bool
+    {
+        $user = auth()->user();
 
-    Livewire::test(ManageEmailSettings::class)->assertOk();
-});
+        if (! $user instanceof User) {
+            return false;
+        }
+
+        // These authorization checks have been preserved from the original settings pages.
+        return match ($this) {
+            self::DatesAndTimes,
+            self::Email,
+            self::Presence => $user->can('settings.view-any'),
+        };
+    }
+}
