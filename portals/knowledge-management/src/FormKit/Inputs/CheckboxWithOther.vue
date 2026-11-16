@@ -99,7 +99,7 @@
                     class="absolute w-0 h-0 overflow-hidden opacity-0 pointer-events-none peer"
                 />
                 <span
-                    class="block relative h-5 w-5 mr-2 rounded bg-white bg-gradient-to-b from-transparent to-gray-200 border border-gray-400 peer-checked:border-primary-500 text-transparent peer-checked:text-primary-500 peer-focus-visible:ring-2 peer-focus-visible:ring-primary-500 peer-focus-visible:ring-offset-1"
+                    class="block relative h-5 w-5 mr-2 rounded bg-white bg-gradient-to-b from-transparent to-gray-200 border border-gray-400 peer-checked:border-brand-500 text-transparent peer-checked:text-brand-500 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500 peer-focus-visible:ring-offset-1"
                 >
                     <span
                         class="flex p-[3px] w-full h-full absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2"
@@ -125,7 +125,7 @@
                     class="absolute w-0 h-0 overflow-hidden opacity-0 pointer-events-none peer"
                 />
                 <span
-                    class="block relative h-5 w-5 mr-2 rounded bg-white bg-gradient-to-b from-transparent to-gray-200 border border-gray-400 peer-checked:border-primary-500 text-transparent peer-checked:text-primary-500 peer-focus-visible:ring-2 peer-focus-visible:ring-primary-500 peer-focus-visible:ring-offset-1 flex-shrink-0"
+                    class="block relative h-5 w-5 mr-2 rounded bg-white bg-gradient-to-b from-transparent to-gray-200 border border-gray-400 peer-checked:border-brand-500 text-transparent peer-checked:text-brand-500 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500 peer-focus-visible:ring-offset-1 flex-shrink-0"
                 >
                     <span
                         class="flex p-[3px] w-full h-full absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2"
@@ -142,8 +142,8 @@
                     type="text"
                     v-model="otherText"
                     placeholder="Other"
-                    class="w-full px-3 py-1.5 border rounded text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-primary-500"
-                    :class="otherChecked ? 'border-primary-500' : 'border-gray-400'"
+                    class="w-full px-3 py-1.5 border rounded text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-brand-500"
+                    :class="otherChecked ? 'border-brand-500' : 'border-gray-400'"
                 />
             </label>
         </div>
