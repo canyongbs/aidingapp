@@ -1071,6 +1071,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
                 'last_name' => 'Name',
                 'full_name' => 'Old Name',
                 'organization_id' => $hasOrganization ? $otherOrganization->getKey() : null,
+                'type_id' => ContactType::factory()->create(['created_at' => now()->addMinute()])->getKey(),
             ]);
 
             $serviceRequestType = ServiceRequestType::factory()

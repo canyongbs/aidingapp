@@ -93,7 +93,8 @@ it('resolves the SystemUser name via the audit user() relationship', function ()
         ->where('event', 'updated')
         ->first();
 
-    expect($audit->user)->toBeInstanceOf(SystemUser::class);
+    assert($audit->user instanceof SystemUser);
+
     expect($audit->user->name)->toBe('Test System User');
 });
 
