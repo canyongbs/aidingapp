@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Models\Scopes;
 
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use App\Features\AdvisorySeveritySortFeature;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -50,10 +49,8 @@ class RankedAdvisorySeverities
      */
     public function __invoke(Builder $query): void
     {
-        if (AdvisorySeveritySortFeature::active()) {
-            $query->orderBy('advisory_severities.sort');
-        }
-
-        $query->orderBy('advisory_severities.name');
+        $query
+            ->orderBy('advisory_severities.sort')
+            ->orderBy('advisory_severities.name');
     }
 }
