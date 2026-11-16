@@ -36,7 +36,6 @@
 
 use AidingApp\Contact\Models\Contact;
 use App\Features\ContactArchivingFeature;
-use Illuminate\Auth\SessionGuard;
 use Illuminate\Support\Facades\Auth;
 
 it('does not retrieve an archived contact for the contact guard', function (): void {
@@ -44,7 +43,6 @@ it('does not retrieve an archived contact for the contact guard', function (): v
     $active = Contact::factory()->create();
 
     $guard = Auth::guard('contact');
-    assert($guard instanceof SessionGuard);
     $provider = $guard->getProvider();
 
     expect($provider->retrieveById($archived->getKey()))->toBeNull()
@@ -57,7 +55,6 @@ it('retrieves an archived contact for the contact guard when the contact archivi
     $archived = Contact::factory()->archived()->create();
 
     $guard = Auth::guard('contact');
-    assert($guard instanceof SessionGuard);
 
     expect($guard->getProvider()->retrieveById($archived->getKey())?->is($archived))->toBeTrue();
 });

@@ -49,7 +49,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -102,8 +101,7 @@ class ShowPortalProjectController
             })
             ->with([
                 'pipelineStage:id,pipeline_id,name,classification',
-                'assignedTo' => function (Relation $relation): void {
-                    assert($relation instanceof MorphTo);
+                'assignedTo' => function (MorphTo $relation): void {
                     $relation->constrain([
                         User::class => fn (Builder $query): Builder => $query->select(['id', 'first_name', 'last_name']),
                         Contact::class => fn (Builder $query): Builder => $query->select(['id', 'full_name']),
