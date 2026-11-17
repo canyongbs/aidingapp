@@ -38,7 +38,7 @@ namespace App\Features;
 
 use App\Support\AbstractFeatureFlag;
 
-class AssetPermissionConsolidationFeature extends AbstractFeatureFlag
+class MilestoneProjectFromPipelineFeature extends AbstractFeatureFlag
 {
     public function resolve(mixed $scope): mixed
     {
