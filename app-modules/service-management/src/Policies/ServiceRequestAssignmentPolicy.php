@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Policies;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Enums\Feature;
-use App\Features\ServiceRequestPermissionCompressionFeature;
 use App\Models\Authenticatable;
 use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
@@ -60,7 +59,7 @@ class ServiceRequestAssignmentPolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ServiceRequestPermissionCompressionFeature::active() ? 'service_request.view-any' : 'service_request_assignment.view-any',
+            abilities: 'service_request.view-any',
             denyResponse: 'You do not have permissions to view service request assignments.'
         );
     }
@@ -68,7 +67,7 @@ class ServiceRequestAssignmentPolicy
     public function view(Authenticatable $authenticatable, ServiceRequestAssignment $serviceRequestAssignment): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ServiceRequestPermissionCompressionFeature::active() ? ['service_request.*.view'] : ['service_request_assignment.*.view'],
+            abilities: ['service_request.*.view'],
             denyResponse: 'You do not have permissions to view this service request assignment.'
         );
     }
@@ -76,7 +75,7 @@ class ServiceRequestAssignmentPolicy
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ServiceRequestPermissionCompressionFeature::active() ? 'service_request.create' : 'service_request_assignment.create',
+            abilities: 'service_request.create',
             denyResponse: 'You do not have permissions to create service request assignments.'
         );
     }
@@ -84,7 +83,7 @@ class ServiceRequestAssignmentPolicy
     public function update(Authenticatable $authenticatable, ServiceRequestAssignment $serviceRequestAssignment): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ServiceRequestPermissionCompressionFeature::active() ? ['service_request.*.update'] : ['service_request_assignment.*.update'],
+            abilities: ['service_request.*.update'],
             denyResponse: 'You do not have permissions to update this service request assignment.'
         );
     }
@@ -92,7 +91,7 @@ class ServiceRequestAssignmentPolicy
     public function delete(Authenticatable $authenticatable, ServiceRequestAssignment $serviceRequestAssignment): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ServiceRequestPermissionCompressionFeature::active() ? ['service_request.*.delete'] : ['service_request_assignment.*.delete'],
+            abilities: ['service_request.*.delete'],
             denyResponse: 'You do not have permissions to delete this service request assignment.'
         );
     }
@@ -100,7 +99,7 @@ class ServiceRequestAssignmentPolicy
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ServiceRequestPermissionCompressionFeature::active() ? ['service_request.*.delete'] : ['service_request_assignment.*.delete'],
+            abilities: ['service_request.*.delete'],
             denyResponse: 'You do not have permissions to delete any service request assignment.'
         );
     }
@@ -108,7 +107,7 @@ class ServiceRequestAssignmentPolicy
     public function restore(Authenticatable $authenticatable, ServiceRequestAssignment $serviceRequestAssignment): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ServiceRequestPermissionCompressionFeature::active() ? ['service_request.*.restore'] : ['service_request_assignment.*.restore'],
+            abilities: ['service_request.*.restore'],
             denyResponse: 'You do not have permissions to restore this service request assignment.'
         );
     }
@@ -116,7 +115,7 @@ class ServiceRequestAssignmentPolicy
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ServiceRequestPermissionCompressionFeature::active() ? ['service_request.*.restore'] : ['service_request_assignment.*.restore'],
+            abilities: ['service_request.*.restore'],
             denyResponse: 'You do not have permissions to restore any service request assignment.'
         );
     }
@@ -124,7 +123,7 @@ class ServiceRequestAssignmentPolicy
     public function forceDelete(Authenticatable $authenticatable, ServiceRequestAssignment $serviceRequestAssignment): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ServiceRequestPermissionCompressionFeature::active() ? ['service_request.*.force-delete'] : ['service_request_assignment.*.force-delete'],
+            abilities: ['service_request.*.force-delete'],
             denyResponse: 'You do not have permissions to force delete this service request assignment.'
         );
     }
@@ -132,7 +131,7 @@ class ServiceRequestAssignmentPolicy
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ServiceRequestPermissionCompressionFeature::active() ? ['service_request.*.force-delete'] : ['service_request_assignment.*.force-delete'],
+            abilities: ['service_request.*.force-delete'],
             denyResponse: 'You do not have permissions to force delete any service request assignment.'
         );
     }
