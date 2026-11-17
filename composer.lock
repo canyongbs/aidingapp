@@ -3768,7 +3768,8 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2026-11-15T21:55:26+00:00"
+            "time": "2026-11-15T21:55:26+00:00",
+            "published-time": "2026-11-15T21:55:34+00:00"
         },
         {
             "name": "filament/filament",
@@ -3826,7 +3827,8 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2026-11-15T21:50:37+00:00"
+            "time": "2026-11-15T21:50:37+00:00",
+            "published-time": "2026-11-15T21:50:45+00:00"
         },
         {
             "name": "filament/forms",
@@ -3879,7 +3881,8 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2026-11-15T21:50:36+00:00"
+            "time": "2026-11-15T21:50:36+00:00",
+            "published-time": "2026-11-15T21:50:46+00:00"
         },
         {
             "name": "filament/infolists",
@@ -3924,7 +3927,8 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2026-11-13T13:04:35+00:00"
+            "time": "2026-11-13T13:04:35+00:00",
+            "published-time": "2026-11-15T21:51:03+00:00"
         },
         {
             "name": "filament/notifications",
@@ -3971,7 +3975,8 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2026-11-15T21:52:03+00:00"
+            "time": "2026-11-15T21:52:03+00:00",
+            "published-time": "2026-11-15T21:52:12+00:00"
         },
         {
             "name": "filament/query-builder",
@@ -4017,7 +4022,8 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2026-11-15T21:56:54+00:00"
+            "time": "2026-11-15T21:56:54+00:00",
+            "published-time": "2026-11-15T21:57:00+00:00"
         },
         {
             "name": "filament/schemas",
@@ -4062,7 +4068,8 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2026-11-15T21:50:31+00:00"
+            "time": "2026-11-15T21:50:31+00:00",
+            "published-time": "2026-11-15T21:50:37+00:00"
         },
         {
             "name": "filament/spatie-laravel-media-library-plugin",
@@ -4099,7 +4106,8 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2026-11-13T13:09:37+00:00"
+            "time": "2026-11-13T13:09:37+00:00",
+            "published-time": "2026-11-15T21:56:42+00:00"
         },
         {
             "name": "filament/spatie-laravel-settings-plugin",
@@ -4143,7 +4151,8 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2026-11-03T11:22:17+00:00"
+            "time": "2026-11-03T11:22:17+00:00",
+            "published-time": "2026-11-15T21:51:17+00:00"
         },
         {
             "name": "filament/support",
@@ -4203,7 +4212,8 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2026-11-15T21:50:35+00:00"
+            "time": "2026-11-15T21:50:35+00:00",
+            "published-time": "2026-11-15T21:50:45+00:00"
         },
         {
             "name": "filament/tables",
@@ -4249,7 +4259,8 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2026-11-15T21:55:43+00:00"
+            "time": "2026-11-15T21:55:43+00:00",
+            "published-time": "2026-11-15T21:55:53+00:00"
         },
         {
             "name": "filament/widgets",
@@ -4293,7 +4304,8 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2026-11-13T13:10:30+00:00"
+            "time": "2026-11-13T13:10:30+00:00",
+            "published-time": "2026-11-15T21:55:01+00:00"
         },
         {
             "name": "firebase/php-jwt",
