@@ -39,8 +39,8 @@ use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\EditEmailTempla
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\Engagement\Tests\Tenant\Filament\Resources\EmailTemplates\RequestFactories\EditEmailTemplateRequestFactory;
 use App\Filament\Pages\ManageCommunicationSettings;
-use Filament\Actions\DeleteAction;
 use App\Models\User;
+use Filament\Actions\DeleteAction;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
