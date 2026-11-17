@@ -43,7 +43,6 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestFileUploadType;
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use App\Features\ServiceRequestFileUploadTypeFeature;
 use App\Models\Media;
 use App\Models\Scopes\WhereFullNameLike;
 use App\Models\User;
@@ -85,7 +84,7 @@ class ServiceRequestMediaTable extends TableWidget
         $modelType = $this->record->getMorphClass();
         $modelId = $this->record->getKey();
         $collectionName = $this->collectionName;
-        $isShowingUploadType = ServiceRequestFileUploadTypeFeature::active() && ($this->record instanceof ServiceRequest);
+        $isShowingUploadType = $this->record instanceof ServiceRequest;
         $isListingServiceRequestUpdateFiles = $isShowingUploadType && auth()->user()->can('viewAny', ServiceRequestUpdate::class);
 
         return $table

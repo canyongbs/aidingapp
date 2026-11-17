@@ -34,11 +34,8 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Models\Permission;
-use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\ListProducts;
 use AidingApp\LicenseManagement\Models\Product;
-use App\Features\LicensePermissionConsolidationFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
@@ -89,29 +86,4 @@ it('only shows the bulk delete action to a user with the `licenses.*.delete` per
 
     Livewire::test(ListProducts::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
-});
-
-// TODO: Cleanup Task (licenses-permission-consolidation): delete this test
-it('grants access with the legacy product permission while the consolidation flag is inactive', function (): void {
-    LicensePermissionConsolidationFeature::deactivate();
-
-    $settings = app(LicenseSettings::class);
-    $settings->data->addons->licenseManagement = true;
-    $settings->save();
-
-    Permission::factory()->create([
-        'name' => 'product.view-any',
-        'guard_name' => 'web',
-        'group_id' => PermissionGroup::create(['name' => 'Product'])->getKey(),
-    ]);
-
-    $user = User::factory()->create();
-
-    actingAs($user);
-
-    get(ListProducts::getUrl())->assertForbidden();
-
-    $user->givePermissionTo('product.view-any');
-
-    get(ListProducts::getUrl())->assertSuccessful();
 });
