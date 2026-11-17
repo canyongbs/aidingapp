@@ -34,13 +34,10 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Models\Permission;
-use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\EditProduct;
 use AidingApp\LicenseManagement\Filament\Resources\Products\ProductResource;
 use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\LicenseManagement\Tests\Tenant\Filament\Products\RequestFactories\EditProductRequestFactory;
-use App\Features\LicensePermissionConsolidationFeature;
 use App\Features\ProductNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
@@ -190,29 +187,5 @@ describe('authorization', function (): void {
         get(ProductResource::getUrl('edit', ['record' => $product]))->assertSuccessful();
 
         Livewire::test(EditProduct::class, ['record' => $product->getRouteKey()])->assertSuccessful();
-    });
-
-    // TODO: Cleanup Task (licenses-permission-consolidation): delete this test
-    it('allows access to the edit page with the legacy `product.*.update` permission while the consolidation flag is inactive', function (): void {
-        LicensePermissionConsolidationFeature::deactivate();
-
-        $legacyPermissions = ['product.view-any', 'product.*.update'];
-
-        $group = PermissionGroup::create(['name' => 'Product']);
-
-        foreach ($legacyPermissions as $name) {
-            Permission::factory()->create(['name' => $name, 'guard_name' => 'web', 'group_id' => $group->getKey()]);
-        }
-
-        $user = User::factory()->create();
-        actingAs($user);
-
-        $product = Product::factory()->create();
-
-        get(ProductResource::getUrl('edit', ['record' => $product]))->assertForbidden();
-
-        $user->givePermissionTo($legacyPermissions);
-
-        get(ProductResource::getUrl('edit', ['record' => $product]))->assertSuccessful();
     });
 });
