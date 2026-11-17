@@ -61,7 +61,6 @@ use App\Features\ContractNameUniquenessFeature;
 use App\Features\ContractTypeNameUniquenessFeature;
 use App\Features\EmailTemplateNameUniquenessFeature;
 use App\Features\KnowledgeBaseCategoryNameUniquenessFeature;
-use App\Features\LicensePermissionConsolidationFeature;
 use App\Features\MaintenanceProviderNameUniquenessFeature;
 use App\Features\PipelineNameUniquenessFeature;
 use App\Features\PipelineStageNameUniquenessFeature;
@@ -2277,62 +2276,6 @@ describe('2026_11_10_221002_tmp_grant_projects_permissions_to_users_and_roles_wi
                 ->and($directProjectsPermissionNames($unrelatedUser))->toBe([])
                 ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['product.view-any'])
                 ->and(ProjectPermissionConsolidationFeature::active())->toBeTrue();
-        });
-    });
-});
-
-// TODO: Cleanup Task (licenses-permission-consolidation): delete this describe and the test within
-describe('2026_11_11_150002_tmp_grant_licenses_permissions_to_users_and_roles_with_related_permissions', function (): void {
-    it('grants the equivalent licenses permissions to users and roles with a related permission', function (): void {
-        isolatedMigration('2026_11_11_150002_tmp_grant_licenses_permissions_to_users_and_roles_with_related_permissions', function (): void {
-            $permissionsFor = fn (string $prefix): array => array_map(
-                fn (string $action): string => "{$prefix}.{$action}",
-                ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'],
-            );
-
-            $licensesPermissions = $permissionsFor('licenses');
-
-            $productUser = User::factory()->create();
-            $productUser->givePermissionTo($permissionsFor('product'));
-
-            $productLicenseUser = User::factory()->create();
-            $productLicenseUser->givePermissionTo($permissionsFor('product_license'));
-
-            $partialProductLicenseUser = User::factory()->create();
-            $partialProductLicenseUser->givePermissionTo('product_license.*.update');
-
-            $systemUser = SystemUser::factory()->create();
-            $systemUser->givePermissionTo('product_license.view-any');
-
-            $roleUser = User::factory()->create();
-            $role = Role::factory()->create();
-            $role->givePermissionTo('product.*.delete');
-            $roleUser->assignRole($role);
-
-            $apiRole = Role::factory()->create(['guard_name' => 'api']);
-            $apiRole->givePermissionTo('product.view-any');
-
-            $unrelatedUser = User::factory()->create();
-            $unrelatedUser->givePermissionTo('knowledge_base_item.view-any');
-
-            expect(LicensePermissionConsolidationFeature::active())->toBeFalse();
-
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/license-management/database/migrations/2026_11_11_150002_tmp_grant_licenses_permissions_to_users_and_roles_with_related_permissions.php']);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $directLicensesPermissionNames = fn (User|SystemUser $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->filter(fn (string $name): bool => str_starts_with($name, 'licenses.'))->sort()->values()->all();
-            $sorted = fn (array $names): array => collect($names)->sort()->values()->all();
-
-            expect($directLicensesPermissionNames($productUser))->toBe($sorted($licensesPermissions))
-                ->and($directLicensesPermissionNames($productLicenseUser))->toBe($sorted($licensesPermissions))
-                ->and($directLicensesPermissionNames($partialProductLicenseUser))->toBe(['licenses.*.update'])
-                ->and($directLicensesPermissionNames($systemUser))->toBe(['licenses.view-any'])
-                ->and($role->refresh()->permissions()->pluck('name')->all())->toContain('licenses.*.delete')
-                ->and($roleUser->refresh()->hasPermissionTo('licenses.*.delete'))->toBeTrue()
-                ->and($apiRole->refresh()->permissions()->pluck('name')->all())->toContain('licenses.view-any')
-                ->and($directLicensesPermissionNames($unrelatedUser))->toBe([])
-                ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['knowledge_base_item.view-any'])
-                ->and(LicensePermissionConsolidationFeature::active())->toBeTrue();
         });
     });
 });
