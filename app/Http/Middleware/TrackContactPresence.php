@@ -37,7 +37,6 @@
 namespace App\Http\Middleware;
 
 use AidingApp\Contact\Models\Contact;
-use App\Features\ContactTrackingFeature;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -55,10 +54,6 @@ class TrackContactPresence
         }
 
         if (! $contact instanceof Contact) {
-            return $response;
-        }
-
-        if (! ContactTrackingFeature::active()) {
             return $response;
         }
 

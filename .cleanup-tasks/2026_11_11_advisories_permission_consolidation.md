@@ -1,15 +1,19 @@
 ---
-title: Drop Unused Tables
-created: 2026-09-30
+title: Advisories Permission Consolidation
+created: 2026-11-11
 ---
 
 ## Feature Flags
 
+- App\Features\AdvisoryPermissionConsolidationFeature
+
 ## Temporary Migrations
 
-- database/migrations/2026_09_29_211428_tmp_drop_unused_tables.php
+- app-modules/service-management/database/migrations/2026_11_11_120001_tmp_grant_advisories_permissions_to_users_and_roles_with_related_permissions.php
 
 ## Additional Cleanup
+
+- Search for `TODO: Cleanup Task (advisories-permission-consolidation)` and follow the instructions at each site.
 
 <!--
 Only list cleanup that has no home in code. Do NOT restate obvious feature-flag

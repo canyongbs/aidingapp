@@ -164,7 +164,7 @@ it('renders a task as having no associated milestone when its milestone has been
     $pipeline = Pipeline::factory()->for($project)->create();
     $stage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Planning]);
 
-    $milestone = ProjectMilestone::factory()->for($project)->create();
+    $milestone = ProjectMilestone::factory()->forProject($project)->create();
 
     $entry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
         'project_milestone_id' => $milestone->getKey(),
@@ -445,7 +445,7 @@ describe('milestone title uniqueness', function (): void {
     it('rejects a milestone title that differs only by case from another milestone in the same pipeline', function (string $title): void {
         $project = Project::factory()->create();
         $pipeline = Pipeline::factory()->for($project)->create();
-        ProjectMilestone::factory()->for($project)->for($pipeline)->create(['title' => 'Design Review']);
+        ProjectMilestone::factory()->for($pipeline)->create(['title' => 'Design Review']);
 
         Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
             ->set('selectedPipelineId', $pipeline->getKey())
@@ -466,8 +466,8 @@ describe('milestone title uniqueness', function (): void {
         $project = Project::factory()->create();
         $pipeline = Pipeline::factory()->for($project)->create();
         $otherPipeline = Pipeline::factory()->for($project)->create();
-        ProjectMilestone::factory()->for($project)->for($otherPipeline)->create(['title' => 'Design Review']);
-        ProjectMilestone::factory()->for(Project::factory())->create(['title' => 'Design Review']);
+        ProjectMilestone::factory()->for($otherPipeline)->create(['title' => 'Design Review']);
+        ProjectMilestone::factory()->forProject(Project::factory()->create())->create(['title' => 'Design Review']);
 
         Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
             ->set('selectedPipelineId', $pipeline->getKey())
@@ -483,7 +483,7 @@ describe('milestone title uniqueness', function (): void {
     it('allows a milestone title that was used by a deleted milestone in the same pipeline', function (): void {
         $project = Project::factory()->create();
         $pipeline = Pipeline::factory()->for($project)->create();
-        ProjectMilestone::factory()->for($project)->for($pipeline)->create(['title' => 'Design Review'])->delete();
+        ProjectMilestone::factory()->for($pipeline)->create(['title' => 'Design Review'])->delete();
 
         Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
             ->set('selectedPipelineId', $pipeline->getKey())
@@ -499,8 +499,8 @@ describe('milestone title uniqueness', function (): void {
     it('rejects a milestone title that differs only by case from another milestone in the same pipeline when managing a milestone', function (): void {
         $project = Project::factory()->create();
         $pipeline = Pipeline::factory()->for($project)->create();
-        ProjectMilestone::factory()->for($project)->for($pipeline)->create(['title' => 'Design Review']);
-        $milestone = ProjectMilestone::factory()->for($project)->for($pipeline)->create(['title' => 'Launch']);
+        ProjectMilestone::factory()->for($pipeline)->create(['title' => 'Design Review']);
+        $milestone = ProjectMilestone::factory()->for($pipeline)->create(['title' => 'Launch']);
 
         Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
             ->set('selectedPipelineId', $pipeline->getKey())
@@ -515,7 +515,7 @@ describe('milestone title uniqueness', function (): void {
     it('allows a milestone to change the case of its own title when managing a milestone', function (): void {
         $project = Project::factory()->create();
         $pipeline = Pipeline::factory()->for($project)->create();
-        $milestone = ProjectMilestone::factory()->for($project)->for($pipeline)->create(['title' => 'Launch']);
+        $milestone = ProjectMilestone::factory()->for($pipeline)->create(['title' => 'Launch']);
 
         Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
             ->set('selectedPipelineId', $pipeline->getKey())
@@ -531,8 +531,8 @@ describe('milestone title uniqueness', function (): void {
         $project = Project::factory()->create();
         $pipeline = Pipeline::factory()->for($project)->create();
         $otherPipeline = Pipeline::factory()->for($project)->create();
-        ProjectMilestone::factory()->for($project)->for($otherPipeline)->create(['title' => 'Design Review']);
-        $milestone = ProjectMilestone::factory()->for($project)->for($pipeline)->create(['title' => 'Launch']);
+        ProjectMilestone::factory()->for($otherPipeline)->create(['title' => 'Design Review']);
+        $milestone = ProjectMilestone::factory()->for($pipeline)->create(['title' => 'Launch']);
 
         Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
             ->set('selectedPipelineId', $pipeline->getKey())
@@ -549,7 +549,7 @@ describe('milestone title uniqueness', function (): void {
 
         $project = Project::factory()->create();
         $pipeline = Pipeline::factory()->for($project)->create();
-        ProjectMilestone::factory()->for($project)->for($pipeline)->create(['title' => 'Design Review']);
+        ProjectMilestone::factory()->for($pipeline)->create(['title' => 'Design Review']);
 
         expect(fn () => Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
             ->set('selectedPipelineId', $pipeline->getKey())

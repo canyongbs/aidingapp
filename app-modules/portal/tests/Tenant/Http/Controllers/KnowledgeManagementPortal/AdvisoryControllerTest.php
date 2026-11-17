@@ -42,7 +42,6 @@ use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
-use App\Features\AdvisorySeveritySortFeature;
 use App\Features\AdvisoryVisibilityFeature;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Carbon;
@@ -297,20 +296,6 @@ describe('sorting', function (): void {
         [$criticalAdvisory, $recentMinorAdvisory, $olderMinorAdvisory] = $createAdvisories();
 
         $ids = getJson(route('api.portal.advisories', ['sort' => 'lowest_severity']))->assertOk()->collect('data')->pluck('id');
-
-        expect($ids->all())->toBe([
-            $recentMinorAdvisory->getKey(),
-            $olderMinorAdvisory->getKey(),
-            $criticalAdvisory->getKey(),
-        ]);
-    });
-
-    it('sorts advisories by the most recently updated when `AdvisorySeveritySortFeature` is inactive', function () use ($createAdvisories): void {
-        [$criticalAdvisory, $recentMinorAdvisory, $olderMinorAdvisory] = $createAdvisories();
-
-        AdvisorySeveritySortFeature::deactivate();
-
-        $ids = getJson(route('api.portal.advisories'))->assertOk()->collect('data')->pluck('id');
 
         expect($ids->all())->toBe([
             $recentMinorAdvisory->getKey(),

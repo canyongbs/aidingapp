@@ -396,7 +396,7 @@ it('can create a milestone through the project milestones widget create action',
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    $milestone = ProjectMilestone::factory()->for($project)->make();
+    $milestone = ProjectMilestone::factory()->forProject($project)->make();
 
     Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
@@ -749,7 +749,7 @@ it('displays milestone progress from completed pipeline tasks', function (): voi
         ->has(PipelineStage::factory()->state(['classification' => PipelineStageClassification::Complete]), 'stages')
         ->create();
 
-    $milestone = ProjectMilestone::factory()->for($project)->create();
+    $milestone = ProjectMilestone::factory()->forProject($project)->create();
 
     PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->firstWhere('classification', PipelineStageClassification::Planning)->getKey(),
@@ -775,7 +775,7 @@ it('groups unassigned pipeline tasks after milestone groups', function (): void 
         ->for($project)
         ->has(PipelineStage::factory()->state(['classification' => PipelineStageClassification::Planning]), 'stages')
         ->create();
-    $milestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Named Milestone']);
+    $milestone = ProjectMilestone::factory()->forProject($project)->create(['title' => 'Named Milestone']);
 
     PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
@@ -799,7 +799,7 @@ it('shows a manage milestone action when the user can manage the project', funct
         ->for($project)
         ->has(PipelineStage::factory()->state(['classification' => PipelineStageClassification::Planning]), 'stages')
         ->create();
-    $milestone = ProjectMilestone::factory()->for($project)->create();
+    $milestone = ProjectMilestone::factory()->forProject($project)->create();
     PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
         'project_milestone_id' => $milestone->getKey(),
@@ -825,7 +825,7 @@ it('does not show a manage milestone action when the user cannot manage the proj
         ->for($project)
         ->has(PipelineStage::factory()->state(['classification' => PipelineStageClassification::Planning]), 'stages')
         ->create();
-    $milestone = ProjectMilestone::factory()->for($project)->create();
+    $milestone = ProjectMilestone::factory()->forProject($project)->create();
     PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
         'project_milestone_id' => $milestone->getKey(),
@@ -850,7 +850,7 @@ it('renders the milestone title as plain text and denies the manage milestone ac
         ->for($project)
         ->has(PipelineStage::factory()->state(['classification' => PipelineStageClassification::Planning]), 'stages')
         ->create();
-    $milestone = ProjectMilestone::factory()->for($project)->create();
+    $milestone = ProjectMilestone::factory()->forProject($project)->create();
     PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
         'project_milestone_id' => $milestone->getKey(),
@@ -871,7 +871,7 @@ it('renders a clean aria-label for the collapsible milestone group toggle instea
         ->for($project)
         ->has(PipelineStage::factory()->state(['classification' => PipelineStageClassification::Planning]), 'stages')
         ->create();
-    $milestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Alpha']);
+    $milestone = ProjectMilestone::factory()->forProject($project)->create(['title' => 'Alpha']);
     PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
         'project_milestone_id' => $milestone->getKey(),
@@ -901,7 +901,7 @@ it('does not re-authorize milestone updates per milestone group row', function (
 
     ProjectMilestone::factory()
         ->count(5)
-        ->for($project)
+        ->forProject($project)
         ->create()
         ->each(function (ProjectMilestone $milestone) use ($pipeline): void {
             PipelineEntry::factory()->create([
@@ -933,7 +933,7 @@ it('deletes a milestone and leaves its pipeline tasks unassigned', function (): 
         ->for($project)
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
-    $milestone = ProjectMilestone::factory()->for($project)->create();
+    $milestone = ProjectMilestone::factory()->forProject($project)->create();
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
         'project_milestone_id' => $milestone->getKey(),
@@ -956,7 +956,7 @@ it('shows the delete milestone action to users who can manage the project', func
     asSuperAdmin();
 
     $project = Project::factory()->create();
-    $milestone = ProjectMilestone::factory()->for($project)->create();
+    $milestone = ProjectMilestone::factory()->forProject($project)->create();
 
     Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
@@ -975,7 +975,7 @@ it('hides the delete milestone action from users who cannot manage the project',
     actingAs($user);
 
     $project = Project::factory()->create();
-    $milestone = ProjectMilestone::factory()->for($project)->create();
+    $milestone = ProjectMilestone::factory()->forProject($project)->create();
 
     Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
@@ -994,7 +994,7 @@ it('does not show a soft-deleted milestone as a phantom empty group after the ta
         ->for($project)
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
-    $milestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Milestone To Delete']);
+    $milestone = ProjectMilestone::factory()->forProject($project)->create(['title' => 'Milestone To Delete']);
     PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
         'project_milestone_id' => $milestone->getKey(),
@@ -1019,7 +1019,7 @@ it('shows milestones that have no pipeline tasks as an empty group', function ()
         ->for($project)
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
-    $milestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Empty Milestone']);
+    $milestone = ProjectMilestone::factory()->forProject($project)->create(['title' => 'Empty Milestone']);
 
     Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
@@ -1041,11 +1041,11 @@ it('only shows empty milestones that belong to the selected pipeline', function 
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    $selectedPipelineMilestone = ProjectMilestone::factory()->for($project)->create([
+    $selectedPipelineMilestone = ProjectMilestone::factory()->forProject($project)->create([
         'pipeline_id' => $selectedPipeline->getKey(),
         'title' => 'Selected Pipeline Milestone',
     ]);
-    $otherPipelineMilestone = ProjectMilestone::factory()->for($project)->create([
+    $otherPipelineMilestone = ProjectMilestone::factory()->forProject($project)->create([
         'pipeline_id' => $otherPipeline->getKey(),
         'title' => 'Other Pipeline Milestone',
     ]);
@@ -1072,7 +1072,7 @@ it('disables the name column click for placeholder rows but keeps it clickable f
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->sole()->getKey(),
     ]);
-    $milestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Empty Milestone']);
+    $milestone = ProjectMilestone::factory()->forProject($project)->create(['title' => 'Empty Milestone']);
 
     Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
@@ -1092,7 +1092,7 @@ it('shows the inbox icon for milestone placeholder rows and the clipboard icon f
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->sole()->getKey(),
     ]);
-    $milestone = ProjectMilestone::factory()->for($project)->create();
+    $milestone = ProjectMilestone::factory()->forProject($project)->create();
 
     $livewire = Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
@@ -1116,10 +1116,10 @@ it('does not show an archived or soft-deleted milestone as an empty group', func
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    $archivedMilestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Archived Milestone']);
+    $archivedMilestone = ProjectMilestone::factory()->forProject($project)->create(['title' => 'Archived Milestone']);
     $archivedMilestone->archive();
 
-    $deletedMilestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Deleted Milestone']);
+    $deletedMilestone = ProjectMilestone::factory()->forProject($project)->create(['title' => 'Deleted Milestone']);
     $deletedMilestone->delete();
 
     Livewire::test(ProjectWorkPipelineWidget::class, [
@@ -1142,7 +1142,7 @@ it('keeps placeholder milestone rows visible when the classification filter excl
         'pipeline_stage_id' => $pipeline->stages->sole()->getKey(),
     ]);
 
-    $emptyMilestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Empty Milestone']);
+    $emptyMilestone = ProjectMilestone::factory()->forProject($project)->create(['title' => 'Empty Milestone']);
 
     Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
@@ -1161,7 +1161,7 @@ it('updates a milestone from the manage slide-over', function (): void {
         ->for($project)
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
-    $milestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Old Title']);
+    $milestone = ProjectMilestone::factory()->forProject($project)->create(['title' => 'Old Title']);
     PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
         'project_milestone_id' => $milestone->getKey(),
@@ -1193,7 +1193,7 @@ it('clears related milestones, assets, and service requests on the widget edit a
 
     $entry = PipelineEntry::factory()->create(['pipeline_stage_id' => $stage->getKey()]);
 
-    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->id]);
+    $milestone = ProjectMilestone::factory()->forProject($project)->create();
     $asset = Asset::factory()->create();
     $serviceRequest = ServiceRequest::factory()->create();
 
@@ -1249,7 +1249,7 @@ it('shows the header create entry action when the pipeline has a milestone but n
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    ProjectMilestone::factory()->create(['project_id' => $project->getKey()]);
+    ProjectMilestone::factory()->forProject($project)->create();
 
     Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,

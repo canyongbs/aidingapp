@@ -34,14 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace App\Enums;
 
-use App\Support\AbstractFeatureFlag;
+use App\Models\User;
+use Filament\Support\Contracts\HasLabel;
 
-class ContactTrackingFeature extends AbstractFeatureFlag
+enum DisplaySettingsTab: string implements HasLabel
 {
-    public function resolve(mixed $scope): mixed
+    case DatesAndTimes = 'dates-and-times';
+
+    case Email = 'email';
+
+    case Presence = 'presence';
+
+    public function getLabel(): string
     {
-        return false;
+        return match ($this) {
+            self::DatesAndTimes => 'Dates and Times',
+            self::Email => 'Email',
+            self::Presence => 'Presence',
+        };
+    }
+
+    public function canView(): bool
+    {
+        $user = auth()->user();
+
+        if (! $user instanceof User) {
+            return false;
+        }
+
+        // These authorization checks have been preserved from the original settings pages.
+        return match ($this) {
+            self::DatesAndTimes,
+            self::Email,
+            self::Presence => $user->can('settings.view-any'),
+        };
     }
 }
