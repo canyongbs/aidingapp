@@ -34,17 +34,12 @@
 </COPYRIGHT>
 */
 
-use App\Features\AiDisclaimerFeature;
-use Illuminate\Database\Migrations\Migration;
+use AidingApp\Engagement\Models\EmailTemplate;
+use Illuminate\Database\UniqueConstraintViolationException;
 
-return new class () extends Migration {
-    public function up(): void
-    {
-        AiDisclaimerFeature::activate();
-    }
+it('does not allow two live email templates with names that differ only by case', function (): void {
+    EmailTemplate::factory()->create(['name' => 'Welcome Email']);
 
-    public function down(): void
-    {
-        AiDisclaimerFeature::deactivate();
-    }
-};
+    expect(fn () => EmailTemplate::factory()->create(['name' => 'WELCOME EMAIL']))
+        ->toThrow(UniqueConstraintViolationException::class);
+});
