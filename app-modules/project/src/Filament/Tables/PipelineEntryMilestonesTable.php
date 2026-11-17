@@ -50,7 +50,7 @@ class PipelineEntryMilestonesTable
                 $projectId = $table->getArguments()['projectId'] ?? null;
 
                 return ProjectMilestone::query()
-                    ->where('project_id', $projectId)
+                    ->whereRelation('pipeline', 'project_id', $projectId)
                     ->withoutArchived();
             })
             ->columns([
