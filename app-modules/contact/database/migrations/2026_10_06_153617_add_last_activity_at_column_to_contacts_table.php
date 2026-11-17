@@ -34,32 +34,22 @@
 </COPYRIGHT>
 */
 
-use App\Features\ContactTrackingFeature;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function (): void {
-            Schema::table('contacts', function (Blueprint $table): void {
-                $table->timestamp('last_activity_at')->nullable()->index();
-            });
-
-            ContactTrackingFeature::activate();
+        Schema::table('contacts', function (Blueprint $table): void {
+            $table->timestamp('last_activity_at')->nullable()->index();
         });
     }
 
     public function down(): void
     {
-        DB::transaction(function (): void {
-            ContactTrackingFeature::deactivate();
-
-            Schema::table('contacts', function (Blueprint $table): void {
-                $table->dropColumn('last_activity_at');
-            });
+        Schema::table('contacts', function (Blueprint $table): void {
+            $table->dropColumn('last_activity_at');
         });
     }
 };

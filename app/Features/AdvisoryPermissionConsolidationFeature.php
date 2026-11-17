@@ -38,7 +38,7 @@ namespace App\Features;
 
 use App\Support\AbstractFeatureFlag;
 
-class ServiceRequestPermissionCompressionFeature extends AbstractFeatureFlag
+class AdvisoryPermissionConsolidationFeature extends AbstractFeatureFlag
 {
     public function resolve(mixed $scope): mixed
     {

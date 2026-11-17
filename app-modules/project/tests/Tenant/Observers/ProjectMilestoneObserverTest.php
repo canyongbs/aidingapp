@@ -36,6 +36,8 @@
 
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Observers\ProjectMilestoneObserver;
+use App\Features\MilestoneProjectFromPipelineFeature;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -48,7 +50,7 @@ it('defaults created_by to the authenticated user when not provided', function (
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()->for($project)->create();
 
-    $milestone = $project->milestones()->create([
+    $milestone = $pipeline->milestones()->create([
         'title' => 'MVP Ready',
         'description' => 'First release',
         'pipeline_id' => $pipeline->getKey(),
@@ -68,7 +70,7 @@ it('keeps an explicitly provided created_by', function (): void {
 
     // created_by_id is not mass assignable, so set it directly before saving to exercise the
     // observer's "leave an explicitly provided created_by untouched" path.
-    $milestone = $project->milestones()->make([
+    $milestone = $pipeline->milestones()->make([
         'title' => 'MVP Ready',
         'description' => 'First release',
         'pipeline_id' => $pipeline->getKey(),
@@ -89,11 +91,33 @@ it('does not assign or override the pipeline, leaving it to the caller', functio
     Pipeline::factory()->for($project)->create(['created_at' => now()->subDays(2)]);
     $chosenPipeline = Pipeline::factory()->for($project)->create(['created_at' => now()->subDay()]);
 
-    $milestone = $project->milestones()->create([
+    $milestone = $chosenPipeline->milestones()->create([
         'title' => 'Beta',
         'description' => 'Beta milestone',
         'pipeline_id' => $chosenPipeline->getKey(),
     ]);
 
     expect($milestone->pipeline_id)->toBe($chosenPipeline->getKey());
+});
+
+// TODO: Cleanup Task (milestone-project-from-pipeline): Remove this pre-migration compatibility test after the feature flag is active in production.
+it('synchronizes the legacy project ID when a milestone pipeline changes while the feature is inactive', function (): void {
+    $projectA = Project::factory()->create();
+    $projectB = Project::factory()->create();
+
+    $pipelineA = Pipeline::factory()->for($projectA)->create();
+    $pipelineB = Pipeline::factory()->for($projectB)->create();
+
+    $milestone = $pipelineA->milestones()->create([
+        'title' => 'Moving Milestone',
+        'description' => 'Will be moved to another project',
+        'pipeline_id' => $pipelineA->getKey(),
+    ]);
+
+    MilestoneProjectFromPipelineFeature::deactivate();
+    $milestone->setAttribute('pipeline_id', $pipelineB->getKey());
+
+    (new ProjectMilestoneObserver())->updating($milestone);
+
+    expect($milestone->getAttributes())->toHaveKey('project_id', $projectB->getKey());
 });

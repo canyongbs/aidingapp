@@ -34,14 +34,11 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Models\Permission;
-use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\ManageProductLicenses;
 use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\LicenseManagement\Models\ProductLicense;
 use App\Features\ContactArchivingFeature;
-use App\Features\LicensePermissionConsolidationFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
@@ -143,40 +140,6 @@ test('ManageProductLicenses offers every contact as the license assignee when th
         });
 });
 
-// TODO: Cleanup Task (licenses-permission-consolidation): delete this test
-it('grants access with the legacy product and product license permissions while the consolidation flag is inactive', function (): void {
-    LicensePermissionConsolidationFeature::deactivate();
-
-    $settings = app(LicenseSettings::class);
-    $settings->data->addons->licenseManagement = true;
-    $settings->save();
-
-    $legacyPermissions = [
-        'product.view-any' => 'Product',
-        'product.*.view' => 'Product',
-        'product_license.view-any' => 'Product License',
-    ];
-
-    foreach ($legacyPermissions as $name => $groupName) {
-        Permission::factory()->create([
-            'name' => $name,
-            'guard_name' => 'web',
-            'group_id' => PermissionGroup::firstOrCreate(['name' => $groupName])->getKey(),
-        ]);
-    }
-
-    $user = User::factory()->create();
-    $product = Product::factory()->create();
-
-    actingAs($user);
-
-    get(ManageProductLicenses::getUrl(['record' => $product]))->assertForbidden();
-
-    $user->givePermissionTo(array_keys($legacyPermissions));
-
-    get(ManageProductLicenses::getUrl(['record' => $product]))->assertSuccessful();
-});
-
 describe('action authorization', function (): void {
     beforeEach(function (): void {
         $settings = app(LicenseSettings::class);
@@ -207,44 +170,5 @@ describe('action authorization', function (): void {
         'create' => ['create', 'licenses.create'],
         'edit' => ['edit', 'licenses.*.update'],
         'delete' => ['delete', 'licenses.*.delete'],
-    ]);
-
-    // TODO: Cleanup Task (licenses-permission-consolidation): delete this test
-    it('only shows each license action to a user with the legacy permission while the consolidation flag is inactive', function (string $action, string $permission) use ($testAction): void {
-        LicensePermissionConsolidationFeature::deactivate();
-
-        $legacyPermissions = [
-            'product.view-any' => 'Product',
-            'product.*.view' => 'Product',
-            'product_license.view-any' => 'Product License',
-            $permission => 'Product License',
-        ];
-
-        foreach ($legacyPermissions as $name => $groupName) {
-            Permission::factory()->create([
-                'name' => $name,
-                'guard_name' => 'web',
-                'group_id' => PermissionGroup::firstOrCreate(['name' => $groupName])->getKey(),
-            ]);
-        }
-
-        $user = User::factory()->create();
-        $user->givePermissionTo(['product.view-any', 'product.*.view', 'product_license.view-any']);
-
-        $productLicense = ProductLicense::factory()->create(['created_by_id' => $user->getKey()]);
-
-        actingAs($user);
-
-        Livewire::test(ManageProductLicenses::class, ['record' => $productLicense->product->getRouteKey()])
-            ->assertActionHidden($testAction($action, $productLicense));
-
-        $user->givePermissionTo($permission);
-
-        Livewire::test(ManageProductLicenses::class, ['record' => $productLicense->product->getRouteKey()])
-            ->assertActionVisible($testAction($action, $productLicense));
-    })->with([
-        'create' => ['create', 'product_license.create'],
-        'edit' => ['edit', 'product_license.*.update'],
-        'delete' => ['delete', 'product_license.*.delete'],
     ]);
 });

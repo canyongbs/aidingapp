@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Http\Controllers\Api\V1\AdvisorySeverities
 
 use AidingApp\ServiceManagement\Http\Resources\Api\V1\AdvisorySeverityResource;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use App\Features\AdvisorySeveritySortFeature;
 use Dedoc\Scramble\Attributes\Example;
 use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\QueryParameter;
@@ -77,11 +76,9 @@ class ListAdvisorySeveritiesController
         $sort = AllowedSort::callback('sort', function (Builder $query, bool $descending): void {
             $direction = $descending ? 'desc' : 'asc';
 
-            if (AdvisorySeveritySortFeature::active()) {
-                $query->orderBy('sort', $direction);
-            }
-
-            $query->orderBy('name', $direction);
+            $query
+                ->orderBy('sort', $direction)
+                ->orderBy('name', $direction);
         });
 
         return QueryBuilder::for(AdvisorySeverity::query())

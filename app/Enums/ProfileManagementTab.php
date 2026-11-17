@@ -34,14 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace App\Enums;
 
-use App\Support\AbstractFeatureFlag;
+use App\Models\Pronouns;
+use Filament\Support\Contracts\HasLabel;
 
-class AssetPermissionConsolidationFeature extends AbstractFeatureFlag
+enum ProfileManagementTab: string implements HasLabel
 {
-    public function resolve(mixed $scope): mixed
+    case PersonalPronouns = 'personal-pronouns';
+
+    public function getLabel(): string
     {
-        return false;
+        return match ($this) {
+            self::PersonalPronouns => 'Personal Pronouns',
+        };
+    }
+
+    public function canView(): bool
+    {
+        return match ($this) {
+            self::PersonalPronouns => auth()->user()?->can('viewAny', Pronouns::class) ?? false,
+        };
     }
 }

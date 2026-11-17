@@ -1,11 +1,11 @@
 ---
-title: Contact Tracking Feature
-created: 2026-10-06
+title: Milestone Project From Pipeline Feature
+created: 2026-11-06
 ---
 
 ## Feature Flags
 
-- App\Features\ContactTrackingFeature
+- App\Features\MilestoneProjectFromPipelineFeature
 
 ## Temporary Migrations
 
@@ -18,3 +18,5 @@ paths or line numbers. For non-obvious changes, put a `TODO: Cleanup Task (<tag>
 comment at the change site and reference the tag here — e.g.
 "Search for `TODO: Cleanup Task (some-feature)`".
 -->
+
+- Search for `TODO: Cleanup Task (milestone-project-from-pipeline)`

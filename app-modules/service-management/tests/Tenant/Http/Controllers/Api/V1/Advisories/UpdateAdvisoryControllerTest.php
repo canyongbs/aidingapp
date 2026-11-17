@@ -49,7 +49,7 @@ use function Tests\actingAsApiUser;
 
 $actingAsAdvisoryUpdater = function (): SystemUser {
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo(['advisory.view-any', 'advisory.*.update']);
+    $user->givePermissionTo(['advisories.view-any', 'advisories.*.update']);
 
     return actingAsApiUser($user);
 };
@@ -62,13 +62,13 @@ it('is gated with proper access control', function (): void {
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisories.view-any');
     actingAsApiUser($user);
     patchJson(route('api.v1.advisories.update', ['advisory' => $advisory], false), ['title' => 'Changed'])
         ->assertForbidden();
 
     $user = SystemUser::factory()->create();
-    $user->givePermissionTo('advisory.*.update');
+    $user->givePermissionTo('advisories.*.update');
     actingAsApiUser($user);
     patchJson(route('api.v1.advisories.update', ['advisory' => $advisory], false), ['title' => 'Changed'])
         ->assertForbidden();

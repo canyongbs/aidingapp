@@ -34,21 +34,14 @@
 </COPYRIGHT>
 */
 
-use App\Filament\Pages\ManageEmailSettings;
-use App\Models\User;
-use Livewire\Livewire;
+namespace App\Features;
 
-use function Pest\Laravel\actingAs;
+use App\Support\AbstractFeatureFlag;
 
-it('is gated with proper access control', function (): void {
-    $user = User::factory()->create();
-
-    actingAs($user);
-
-    Livewire::test(ManageEmailSettings::class)->assertForbidden();
-
-    $user->givePermissionTo('settings.view-any');
-    $user->refresh();
-
-    Livewire::test(ManageEmailSettings::class)->assertOk();
-});
+class MilestoneProjectFromPipelineFeature extends AbstractFeatureFlag
+{
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
+    }
+}

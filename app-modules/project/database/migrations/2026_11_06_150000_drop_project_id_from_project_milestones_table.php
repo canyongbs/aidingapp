@@ -34,46 +34,50 @@
 </COPYRIGHT>
 */
 
-use App\Features\ServiceRequestFileUploadTypeFeature;
+use App\Features\MilestoneProjectFromPipelineFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function (): void {
-            // Files attached to a service request update are always an "Update", so only files attached directly
-            // to a service request are labelled. Staff could never attach files while creating a service request,
-            // so a file uploaded by a contact was a submission and a file uploaded by a user was a staff upload.
-            // Files from before uploaders were recorded fall back to how soon after the request they were added.
-            // A non-object value (`[]`) is replaced with `{}`, since merging into a jsonb array would append to it.
-            DB::statement(<<<'SQL'
-                UPDATE media
-                SET custom_properties = (
-                    CASE WHEN jsonb_typeof(media.custom_properties) = 'object' THEN media.custom_properties ELSE '{}'::jsonb END
-                ) || jsonb_build_object('upload_type', CASE
-                    WHEN media.created_by_type = 'contact' THEN 'request_submission'
-                    WHEN media.created_by_type = 'user' THEN 'staff_upload'
-                    WHEN media.created_at <= service_requests.created_at + INTERVAL '10 minutes' THEN 'request_submission'
-                    ELSE 'staff_upload'
-                END)
-                FROM service_requests
-                WHERE service_requests.id = media.model_id
-                    AND media.model_type = 'service_request'
-                    AND media.collection_name = 'uploads'
-                    AND media.custom_properties -> 'upload_type' IS NULL
-                SQL);
+            Schema::table('project_milestones', function (Blueprint $table): void {
+                $table->dropForeign(['project_id']);
+                $table->dropColumn('project_id');
+            });
 
-            ServiceRequestFileUploadTypeFeature::activate();
+            MilestoneProjectFromPipelineFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function (): void {
-            ServiceRequestFileUploadTypeFeature::deactivate();
+            MilestoneProjectFromPipelineFeature::deactivate();
 
-            // The backfilled upload types are indistinguishable from those recorded at upload time, so they are kept
+            Schema::table('project_milestones', function (Blueprint $table): void {
+                $table->foreignUuid('project_id')->nullable()->constrained('projects')->cascadeOnDelete();
+            });
+
+            // Backfill project_id from the pipeline's project_id. Milestones whose pipelines have
+            // no project are orphaned and are deleted (rollback cleans up).
+            DB::table('project_milestones')->update([
+                'project_id' => DB::raw('(select pipelines.project_id from pipelines where pipelines.id = project_milestones.pipeline_id)'),
+            ]);
+
+            // Delete milestones that reference projectless pipelines (project_id is still NULL
+            // after backfill), since the legacy schema enforced project_id NOT NULL.
+            DB::table('project_milestones')
+                ->join('pipelines', 'pipelines.id', '=', 'project_milestones.pipeline_id')
+                ->whereNull('pipelines.project_id')
+                ->delete();
+
+            Schema::table('project_milestones', function (Blueprint $table): void {
+                $table->foreignUuid('project_id')->nullable(false)->change();
+            });
         });
     }
 };
