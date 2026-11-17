@@ -34,14 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+use AidingApp\LicenseManagement\Models\Product;
+use Illuminate\Database\UniqueConstraintViolationException;
 
-use App\Support\AbstractFeatureFlag;
+it('does not allow two live products with names that differ only by case', function (): void {
+    Product::factory()->create(['name' => 'Aiding App']);
 
-class ProductNameUniquenessFeature extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
-    {
-        return false;
-    }
-}
+    expect(fn () => Product::factory()->create(['name' => 'AIDING APP']))
+        ->toThrow(UniqueConstraintViolationException::class);
+});
