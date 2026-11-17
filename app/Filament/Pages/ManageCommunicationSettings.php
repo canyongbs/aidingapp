@@ -124,7 +124,8 @@ class ManageCommunicationSettings extends Page implements HasActions, HasForms, 
 
     public function notificationsForm(Schema $schema): Schema
     {
-        return NotificationSettingsComponent::configureSchema($schema, $this->canUpdate());
+        return NotificationSettingsComponent::configureSchema($schema, $this->canUpdate())
+            ->statePath('notificationsData');
     }
 
     public function saveNotifications(): void

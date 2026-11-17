@@ -144,6 +144,42 @@ it('only shows the email templates bulk delete action to a user with the setting
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
 
+it('only shows the email templates create action to a user with the settings.create permission', function (): void {
+    $user = User::factory()->create();
+    $user->givePermissionTo(['settings.view-any', 'settings.*.view']);
+
+    actingAs($user);
+
+    Livewire::test(ManageCommunicationSettings::class)
+        ->set('activeTab', 'email-templates')
+        ->assertActionHidden(TestAction::make('create')->table());
+
+    $user->givePermissionTo('settings.create');
+
+    Livewire::test(ManageCommunicationSettings::class)
+        ->set('activeTab', 'email-templates')
+        ->assertActionVisible(TestAction::make('create')->table());
+});
+
+it('only shows the email templates edit action to a user with the settings.*.update permission', function (): void {
+    $emailTemplate = EmailTemplate::factory()->create();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo(['settings.view-any', 'settings.*.view']);
+
+    actingAs($user);
+
+    Livewire::test(ManageCommunicationSettings::class)
+        ->set('activeTab', 'email-templates')
+        ->assertActionHidden(TestAction::make('edit')->table($emailTemplate));
+
+    $user->givePermissionTo('settings.*.update');
+
+    Livewire::test(ManageCommunicationSettings::class)
+        ->set('activeTab', 'email-templates')
+        ->assertActionVisible(TestAction::make('edit')->table($emailTemplate));
+});
+
 describe('authorization', function (): void {
     it('denies access to the communication settings page without the `settings.view-any` permission', function (): void {
         $user = User::factory()->create();

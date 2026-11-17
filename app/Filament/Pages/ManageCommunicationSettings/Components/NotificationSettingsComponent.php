@@ -82,7 +82,6 @@ class NotificationSettingsComponent
                     ->image()
                     ->maxSize(10240),
             ])
-            ->disabled(! $canUpdate)
-            ->statePath('notificationsData');
+                      ->disabled(! $canUpdate);
     }
 }
