@@ -99,6 +99,7 @@ class SqsDiskQueue extends BaseSqsDiskQueue
      */
     public function pop($queue = null)
     {
+        // @phpstan-ignore argument.type (mirrors Laravel's SqsQueue::pop(); AttributeNames is deprecated in favour of MessageSystemAttributeNames, which the AWS SDK shape now enforces, but is still accepted)
         $response = $this->sqs->receiveMessage([
             'QueueUrl' => $queue = $this->getQueue($queue),
             'AttributeNames' => ['ApproximateReceiveCount'],

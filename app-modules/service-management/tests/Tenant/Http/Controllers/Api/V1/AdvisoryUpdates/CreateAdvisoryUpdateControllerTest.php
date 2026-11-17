@@ -44,7 +44,7 @@ use function Pest\Laravel\postJson;
 use function Pest\Laravel\travelTo;
 use function Tests\actingAsApiUser;
 
-$creatorPermissions = ['advisory.view-any', 'advisory.*.view', 'advisory_update.view-any', 'advisory_update.create'];
+$creatorPermissions = ['advisories.view-any', 'advisories.*.view', 'advisories.create'];
 
 $actingAsAdvisoryUpdateCreator = function (array $extraPermissions = []) use ($creatorPermissions): SystemUser {
     $user = SystemUser::factory()->create();
@@ -68,10 +68,9 @@ it('is gated with proper access control', function (array $permissions) use ($op
     expect(AdvisoryUpdate::query()->count())->toBe(0);
 })->with([
     'no permissions' => [[]],
-    'missing advisory view any' => [['advisory.*.view', 'advisory_update.view-any', 'advisory_update.create']],
-    'missing advisory view' => [['advisory.view-any', 'advisory_update.view-any', 'advisory_update.create']],
-    'missing advisory update view any' => [['advisory.view-any', 'advisory.*.view', 'advisory_update.create']],
-    'missing advisory update create' => [['advisory.view-any', 'advisory.*.view', 'advisory_update.view-any']],
+    'missing view any' => [['advisories.*.view', 'advisories.create']],
+    'missing view' => [['advisories.view-any', 'advisories.create']],
+    'missing create' => [['advisories.view-any', 'advisories.*.view']],
 ]);
 
 it('requires permission to update the advisory to change its status', function () use ($actingAsAdvisoryUpdateCreator, $openAdvisory): void {
@@ -169,7 +168,7 @@ it('converts a date with a timezone offset to the same moment', function () use 
 });
 
 it('can move the advisory to another status, referenced by name regardless of case', function () use ($actingAsAdvisoryUpdateCreator, $openAdvisory): void {
-    $actingAsAdvisoryUpdateCreator(['advisory.*.update']);
+    $actingAsAdvisoryUpdateCreator(['advisories.*.update']);
 
     $advisory = $openAdvisory();
     $resolved = AdvisoryStatus::factory()->resolved()->create(['name' => 'Resolved']);
@@ -186,7 +185,7 @@ it('can move the advisory to another status, referenced by name regardless of ca
 });
 
 it('cannot add an update to a resolved advisory', function () use ($actingAsAdvisoryUpdateCreator): void {
-    $actingAsAdvisoryUpdateCreator(['advisory.*.update']);
+    $actingAsAdvisoryUpdateCreator(['advisories.*.update']);
 
     $advisory = Advisory::factory()->for(AdvisoryStatus::factory()->resolved(), 'status')->create();
     $statusId = $advisory->status_id;
@@ -205,7 +204,7 @@ it('cannot add an update to a resolved advisory', function () use ($actingAsAdvi
 });
 
 it('validates the request', function (array $data, array $errors) use ($actingAsAdvisoryUpdateCreator, $openAdvisory): void {
-    $actingAsAdvisoryUpdateCreator(['advisory.*.update']);
+    $actingAsAdvisoryUpdateCreator(['advisories.*.update']);
 
     AdvisoryStatus::factory()->create(['name' => 'Retired status'])->delete();
 

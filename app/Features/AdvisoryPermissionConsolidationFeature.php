@@ -34,15 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+namespace App\Features;
 
-use App\Enums\NavigationGroup;
-use Filament\Clusters\Cluster;
-use UnitEnum;
+use App\Support\AbstractFeatureFlag;
 
-class ProfileManagement extends Cluster
+class AdvisoryPermissionConsolidationFeature extends AbstractFeatureFlag
 {
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Settings;
-
-    protected static ?int $navigationSort = 70;
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
+    }
 }

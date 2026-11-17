@@ -7,5 +7,5 @@ request:
   auth: inherit
 
 docs:
-  content: Advisory endpoints. **Create Advisory** sets `advisoryId` for the other requests, and **Delete Advisory** removes the advisory it created. Create uses the `advisoryStatus` and `advisorySeverity` environment variables, which must name a status and severity that exist in the tenant. These endpoints use the **Advisory** permissions, like the admin panel, and require the Advisory Management add-on.
+  content: Advisory endpoints. **Create Advisory** sets `advisoryId` for the other requests, and **Delete Advisory** removes the advisory it created. Create uses the `advisoryStatus` and `advisorySeverity` environment variables, which must name a status and severity that exist in the tenant. These endpoints use the **Advisories** permissions, like the admin panel, and require the Advisory Management add-on.
   type: text/markdown

@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\AdvisoryVisibility;
@@ -42,6 +44,7 @@ use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ListAdvisori
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\AdvisoryRequestFactory;
+use App\Features\AdvisoryPermissionConsolidationFeature;
 use App\Features\AdvisoryVisibilityFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
@@ -68,7 +71,7 @@ test('ListAdvisories is gated with proper access control', function (): void {
             AdvisoryResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisories.view-any');
 
     actingAs($user)
         ->get(
@@ -84,7 +87,7 @@ it('is gated with proper access control', function (): void {
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisories.view-any');
 
     actingAs($user);
 
@@ -93,7 +96,28 @@ it('is gated with proper access control', function (): void {
     $settings->data->addons->advisoryManagement = true;
     $settings->save();
 
-    $user->revokePermissionTo('advisory.view-any');
+    $user->revokePermissionTo('advisories.view-any');
+
+    get(ListAdvisories::getUrl())->assertForbidden();
+
+    $user->givePermissionTo('advisories.view-any');
+
+    get(ListAdvisories::getUrl())->assertSuccessful();
+});
+
+// TODO: Cleanup Task (advisories-permission-consolidation): delete this test
+it('grants access with the legacy advisory permission while the consolidation flag is inactive', function (): void {
+    AdvisoryPermissionConsolidationFeature::deactivate();
+
+    Permission::factory()->create([
+        'name' => 'advisory.view-any',
+        'guard_name' => 'web',
+        'group_id' => PermissionGroup::create(['name' => 'Advisory'])->getKey(),
+    ]);
+
+    $user = User::factory()->create();
+
+    actingAs($user);
 
     get(ListAdvisories::getUrl())->assertForbidden();
 
@@ -110,7 +134,7 @@ test('can list records', function (): void {
             AdvisoryResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisories.view-any');
 
     $records = Advisory::factory()->count(5)->create();
 
@@ -125,8 +149,8 @@ test('bulk delete Advisories', function (): void {
 
     actingAs($user);
 
-    $user->givePermissionTo('advisory.view-any');
-    $user->givePermissionTo('advisory.*.delete');
+    $user->givePermissionTo('advisories.view-any');
+    $user->givePermissionTo('advisories.*.delete');
 
     $advisories = Advisory::factory()->count(10)->create();
 
@@ -138,19 +162,19 @@ test('bulk delete Advisories', function (): void {
     }
 });
 
-it('only shows the bulk delete action to a user with the advisory.delete permission', function (): void {
+it('only shows the bulk delete action to a user with the `advisories.*.delete` permission', function (): void {
     Advisory::factory(15)->create();
 
     $user = User::factory()
         ->create()
-        ->givePermissionTo('advisory.view-any', 'advisory.*.view');
+        ->givePermissionTo('advisories.view-any', 'advisories.*.view');
 
     actingAs($user);
 
     Livewire::test(ListAdvisories::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
-    $user->givePermissionTo('advisory.*.delete');
+    $user->givePermissionTo('advisories.*.delete');
 
     Livewire::test(ListAdvisories::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
@@ -159,7 +183,7 @@ it('only shows the bulk delete action to a user with the advisory.delete permiss
 it('links each row to the advisory view page', function (): void {
     $user = User::factory()
         ->create()
-        ->givePermissionTo('advisory.view-any', 'advisory.*.view');
+        ->givePermissionTo('advisories.view-any', 'advisories.*.view');
 
     actingAs($user);
 
@@ -176,7 +200,7 @@ it('links each row to the advisory view page', function (): void {
 it('does not link a row when the user cannot view the advisory', function (): void {
     $user = User::factory()
         ->create()
-        ->givePermissionTo('advisory.view-any');
+        ->givePermissionTo('advisories.view-any');
 
     actingAs($user);
 
@@ -193,7 +217,7 @@ it('does not link a row when the user cannot view the advisory', function (): vo
 it('renders the severity column as a badge using the severity color', function (): void {
     $user = User::factory()
         ->create()
-        ->givePermissionTo('advisory.view-any');
+        ->givePermissionTo('advisories.view-any');
 
     actingAs($user);
 
@@ -212,7 +236,7 @@ it('renders the severity column as a badge using the severity color', function (
 });
 
 it('can sort advisories by severity rank', function (): void {
-    actingAs(User::factory()->create()->givePermissionTo('advisory.view-any'));
+    actingAs(User::factory()->create()->givePermissionTo('advisories.view-any'));
 
     $minorAdvisory = Advisory::factory()->for(AdvisorySeverity::factory()->state(['sort' => 2]), 'severity')->create();
     $criticalAdvisory = Advisory::factory()->for(AdvisorySeverity::factory()->state(['sort' => 1]), 'severity')->create();
@@ -229,13 +253,13 @@ test('advisories can be created from the list page create modal with proper acce
 
     actingAs($user);
 
-    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisories.view-any');
 
     Livewire::test(ListAdvisories::class)
         ->assertSuccessful()
         ->assertActionHidden('create');
 
-    $user->givePermissionTo('advisory.create');
+    $user->givePermissionTo('advisories.create');
 
     $request = AdvisoryRequestFactory::new()->create();
 
@@ -259,8 +283,8 @@ test('creating an advisory from the list page modal is gated by the advisory man
 
     actingAs($user);
 
-    $user->givePermissionTo('advisory.view-any');
-    $user->givePermissionTo('advisory.create');
+    $user->givePermissionTo('advisories.view-any');
+    $user->givePermissionTo('advisories.create');
 
     Livewire::test(ListAdvisories::class)
         ->assertForbidden();
@@ -336,7 +360,7 @@ test('creating an advisory redirects a user who can view it to the new advisory'
 
     actingAs($user);
 
-    $user->givePermissionTo('advisory.view-any', 'advisory.create', 'advisory.*.view');
+    $user->givePermissionTo('advisories.view-any', 'advisories.create', 'advisories.*.view');
 
     $request = AdvisoryRequestFactory::new()->create();
 
@@ -354,7 +378,7 @@ test('creating an advisory keeps a user who cannot view it on the list page', fu
 
     actingAs($user);
 
-    $user->givePermissionTo('advisory.view-any', 'advisory.create');
+    $user->givePermissionTo('advisories.view-any', 'advisories.create');
 
     $request = AdvisoryRequestFactory::new()->create();
 
@@ -371,7 +395,7 @@ test('the create advisory modal defaults the assigned department to the current 
 
     actingAs($user);
 
-    $user->givePermissionTo('advisory.view-any', 'advisory.create');
+    $user->givePermissionTo('advisories.view-any', 'advisories.create');
 
     Livewire::test(ListAdvisories::class)
         ->mountAction('create')

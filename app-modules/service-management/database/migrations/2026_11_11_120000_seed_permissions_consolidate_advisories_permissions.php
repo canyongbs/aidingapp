@@ -34,15 +34,56 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+use Database\Migrations\Concerns\CanModifyPermissions;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Spatie\Permission\PermissionRegistrar;
 
-use App\Enums\NavigationGroup;
-use Filament\Clusters\Cluster;
-use UnitEnum;
+return new class () extends Migration {
+    use CanModifyPermissions;
 
-class DisplaySettings extends Cluster
-{
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Settings;
+    /**
+     * @var array<string, string>
+     */
+    private array $permissions = [
+        'advisories.view-any' => 'Advisories',
+        'advisories.create' => 'Advisories',
+        'advisories.*.view' => 'Advisories',
+        'advisories.*.update' => 'Advisories',
+        'advisories.*.delete' => 'Advisories',
+        'advisories.*.restore' => 'Advisories',
+        'advisories.*.force-delete' => 'Advisories',
+    ];
 
-    protected static ?int $navigationSort = 110;
-}
+    /**
+     * @var array<string>
+     */
+    private array $guards = [
+        'web',
+        'api',
+    ];
+
+    public function up(): void
+    {
+        DB::transaction(function (): void {
+            collect($this->guards)
+                ->each(fn (string $guard) => $this->createPermissions($this->permissions, $guard));
+
+            DB::afterCommit(function (): void {
+                app(PermissionRegistrar::class)->forgetCachedPermissions();
+            });
+        });
+    }
+
+    public function down(): void
+    {
+        DB::transaction(function (): void {
+            collect($this->guards)
+                ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
+
+            DB::afterCommit(function (): void {
+                app(PermissionRegistrar::class)->forgetCachedPermissions();
+            });
+        });
+    }
+};

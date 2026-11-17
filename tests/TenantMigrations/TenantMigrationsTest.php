@@ -49,6 +49,7 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\AdvisoryPermissionConsolidationFeature;
 use App\Features\AdvisorySeverityNameUniquenessFeature;
 use App\Features\AdvisoryStatusNameUniquenessFeature;
 use App\Features\AssetPermissionConsolidationFeature;
@@ -104,55 +105,6 @@ use Spatie\Permission\PermissionRegistrar;
 //        );
 //    });
 //});
-
-// TODO: Cleanup Task (restore-reclassified-assignments): delete this describe and the test within
-describe('2026_10_06_150704_tmp_restore_reclassified_service_request_assignments', function (): void {
-    it('restores soft-deleted assignments as inactive and leaves other assignments untouched', function (): void {
-        isolatedMigration('2026_10_06_150704_tmp_restore_reclassified_service_request_assignments', function (): void {
-            // Setup data before migration
-            $serviceRequest = ServiceRequest::factory()->create();
-            $user = User::factory()->create();
-
-            $insertAssignment = function (string $status, ?CarbonInterface $deletedAt) use ($serviceRequest, $user): string {
-                $id = (string) Str::uuid();
-
-                DB::table('service_request_assignments')->insert([
-                    'id' => $id,
-                    'service_request_id' => $serviceRequest->getKey(),
-                    'user_id' => $user->getKey(),
-                    'assigned_at' => now(),
-                    'status' => $status,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                    'deleted_at' => $deletedAt,
-                ]);
-
-                return $id;
-            };
-
-            $deletedAssignmentId = $insertAssignment('active', now());
-            $activeAssignmentId = $insertAssignment('active', null);
-
-            // Run the migration
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_10_06_150704_tmp_restore_reclassified_service_request_assignments.php']);
-            // Confirm migration ran successfully
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            // Add any assertions to verify the migration's effects
-            assertDatabaseHas('service_request_assignments', [
-                'id' => $deletedAssignmentId,
-                'deleted_at' => null,
-                'status' => 'inactive',
-            ]);
-
-            assertDatabaseHas('service_request_assignments', [
-                'id' => $activeAssignmentId,
-                'deleted_at' => null,
-                'status' => 'active',
-            ]);
-        });
-    });
-});
 
 // TODO: Cleanup Task (service-request-file-upload-type): delete this describe and the test within
 describe('2026_10_15_081432_tmp_backfill_service_request_media_upload_type', function (): void {
@@ -2064,6 +2016,118 @@ describe('2026_11_10_191246_tmp_grant_contacts_permissions_to_users_and_roles_wi
                 ->and($directPermissionNames($unrelatedUser))->toBe([])
                 ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['product.view-any'])
                 ->and(ContactPermissionConsolidationFeature::active())->toBeTrue();
+        });
+    });
+});
+
+// TODO: Cleanup Task (advisories-permission-consolidation): delete this describe and the test within
+describe('2026_11_11_120001_tmp_grant_advisories_permissions_to_users_and_roles_with_related_permissions', function (): void {
+    it('grants the equivalent advisories permissions to users and roles with a related permission', function (): void {
+        isolatedMigration('2026_11_11_120001_tmp_grant_advisories_permissions_to_users_and_roles_with_related_permissions', function (): void {
+            $actions = ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'];
+            $permissionsFor = fn (string $prefix, array $actions): array => array_map(fn (string $action): string => "{$prefix}.{$action}", $actions);
+            $advisoriesPermissions = $permissionsFor('advisories', $actions);
+
+            $advisoryUser = User::factory()->create();
+            $advisoryUser->givePermissionTo($permissionsFor('advisory', $actions));
+
+            $advisoryUpdateUser = User::factory()->create();
+            $advisoryUpdateUser->givePermissionTo($permissionsFor('advisory_update', $actions));
+
+            $advisoryUpdateRestoreUser = User::factory()->create();
+            $advisoryUpdateRestoreUser->givePermissionTo('advisory_update.*.restore', 'advisory_update.*.force-delete');
+
+            $systemUser = SystemUser::factory()->create();
+            $systemUser->givePermissionTo('advisory_update.create');
+
+            $roleUser = User::factory()->create();
+            $role = Role::factory()->create();
+            $role->givePermissionTo('advisory.*.update');
+            $roleUser->assignRole($role);
+
+            $unrelatedUser = User::factory()->create();
+            $unrelatedUser->givePermissionTo('product.view-any');
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_11_11_120001_tmp_grant_advisories_permissions_to_users_and_roles_with_related_permissions.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $directPermissionNames = fn (User|SystemUser $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->filter(fn (string $name): bool => str_starts_with($name, 'advisories.'))->sort()->values()->all();
+            $sorted = fn (array $names): array => collect($names)->sort()->values()->all();
+
+            expect($directPermissionNames($advisoryUser))->toBe($sorted($advisoriesPermissions))
+                ->and($directPermissionNames($advisoryUpdateUser))->toBe($sorted($permissionsFor('advisories', ['view-any', 'create', '*.view', '*.update', '*.delete'])))
+                ->and($directPermissionNames($advisoryUpdateRestoreUser))->toBe([])
+                ->and($directPermissionNames($systemUser))->toBe(['advisories.create'])
+                ->and($role->refresh()->permissions()->pluck('name')->all())->toContain('advisories.*.update')
+                ->and($directPermissionNames($unrelatedUser))->toBe([])
+                ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['product.view-any'])
+                ->and(AdvisoryPermissionConsolidationFeature::active())->toBeFalse();
+        });
+    });
+});
+
+describe('2026_11_11_120002_purge_unneeded_advisory_permissions', function (): void {
+    $migrationName = '2026_11_11_120002_purge_unneeded_advisory_permissions';
+    $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
+
+    $retiredNames = fn (): array => collect(['advisory', 'advisory_update'])
+        ->flatMap(fn (string $prefix): array => array_map(
+            fn (string $action): string => "{$prefix}.{$action}",
+            ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'],
+        ))
+        ->all();
+
+    it('deletes the Advisory and Advisory Update permissions and groups and activates the consolidation flag without touching the Advisories group or unrelated permissions', function () use ($migrationName, $migrationPath, $retiredNames): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $retiredNames): void {
+            foreach (['web', 'api'] as $guard) {
+                foreach ($retiredNames() as $name) {
+                    assertDatabaseHas('permissions', ['name' => $name, 'guard_name' => $guard]);
+                }
+            }
+
+            expect(AdvisoryPermissionConsolidationFeature::active())->toBeFalse();
+
+            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            expect(AdvisoryPermissionConsolidationFeature::active())->toBeTrue();
+
+            foreach (['web', 'api'] as $guard) {
+                foreach ($retiredNames() as $name) {
+                    assertDatabaseMissing('permissions', ['name' => $name, 'guard_name' => $guard]);
+                }
+
+                assertDatabaseHas('permissions', ['name' => 'advisories.view-any', 'guard_name' => $guard]);
+            }
+
+            assertDatabaseMissing('permission_groups', ['name' => 'Advisory']);
+            assertDatabaseMissing('permission_groups', ['name' => 'Advisory Update']);
+            assertDatabaseHas('permission_groups', ['name' => 'Advisories']);
+            assertDatabaseHas('permissions', ['name' => 'knowledge_base_item.view-any', 'guard_name' => 'web']);
+
+            expect(Artisan::call('migrate:rollback', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            foreach (['web', 'api'] as $guard) {
+                foreach ($retiredNames() as $name) {
+                    expect(Permission::where('name', $name)->where('guard_name', $guard)->count())->toBe(1);
+                }
+            }
+
+            assertDatabaseHas('permission_groups', ['name' => 'Advisory']);
+            assertDatabaseHas('permission_groups', ['name' => 'Advisory Update']);
+
+            expect(AdvisoryPermissionConsolidationFeature::active())->toBeFalse();
+        });
+    });
+
+    it('clears the permission registrar\'s cached permissions', function () use ($migrationName, $migrationPath): void {
+        isolatedMigration($migrationName, function () use ($migrationPath): void {
+            $cacheStore = app(PermissionRegistrar::class)->getCacheStore();
+
+            $cacheStore->forever(config('permission.cache.key'), 'stale');
+
+            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            expect($cacheStore->get(config('permission.cache.key')))->toBeNull();
         });
     });
 });

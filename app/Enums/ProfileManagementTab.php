@@ -34,21 +34,26 @@
 </COPYRIGHT>
 */
 
-use App\Filament\Pages\ManageEmailSettings;
-use App\Models\User;
-use Livewire\Livewire;
+namespace App\Enums;
 
-use function Pest\Laravel\actingAs;
+use App\Models\Pronouns;
+use Filament\Support\Contracts\HasLabel;
 
-it('is gated with proper access control', function (): void {
-    $user = User::factory()->create();
+enum ProfileManagementTab: string implements HasLabel
+{
+    case PersonalPronouns = 'personal-pronouns';
 
-    actingAs($user);
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::PersonalPronouns => 'Personal Pronouns',
+        };
+    }
 
-    Livewire::test(ManageEmailSettings::class)->assertForbidden();
-
-    $user->givePermissionTo('settings.view-any');
-    $user->refresh();
-
-    Livewire::test(ManageEmailSettings::class)->assertOk();
-});
+    public function canView(): bool
+    {
+        return match ($this) {
+            self::PersonalPronouns => auth()->user()?->can('viewAny', Pronouns::class) ?? false,
+        };
+    }
+}
