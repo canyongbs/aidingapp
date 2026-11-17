@@ -64,6 +64,6 @@ class ManageAuditors extends ManageRelatedRecords
     {
         $user = auth()->user();
 
-      return $user->can(['projects.view-any', 'projects.*.view']) && parent::canAccess($arguments);
+        return $user->can(['projects.view-any', 'projects.*.view']) && parent::canAccess($arguments);
     }
 }

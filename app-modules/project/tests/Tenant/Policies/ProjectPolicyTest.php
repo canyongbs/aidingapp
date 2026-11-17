@@ -38,7 +38,6 @@ use AidingApp\Project\Models\Project;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
-
 use function Tests\asSuperAdmin;
 
 $recordIndependentAbilities = [
