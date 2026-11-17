@@ -56,6 +56,7 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Url;
+use UnitEnum;
 
 /**
  * @property-read Schema $notificationsForm
@@ -66,7 +67,7 @@ class ManageCommunicationSettings extends Page implements HasActions, HasForms, 
     use InteractsWithForms;
     use InteractsWithTable;
 
-    protected static string | \UnitEnum | null $navigationGroup = NavigationGroup::Settings;
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Settings;
 
     protected static ?string $navigationLabel = 'Communication Settings';
 

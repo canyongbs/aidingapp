@@ -71,7 +71,7 @@ class EmailTemplatesTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->authorizeIndividualRecords('delete')
-                    ->visible(fn (): bool => Auth::user()?->can('deleteAny', EmailTemplate::class) ?? false),
+                        ->visible(fn (): bool => Auth::user()?->can('deleteAny', EmailTemplate::class) ?? false),
                 ]),
             ]);
     }
