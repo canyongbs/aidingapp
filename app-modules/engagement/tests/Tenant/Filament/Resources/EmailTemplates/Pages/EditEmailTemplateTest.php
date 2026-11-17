@@ -38,9 +38,7 @@ use AidingApp\Engagement\Filament\Resources\EmailTemplates\EmailTemplateResource
 use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\EditEmailTemplate;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\Engagement\Tests\Tenant\Filament\Resources\EmailTemplates\RequestFactories\EditEmailTemplateRequestFactory;
-use App\Features\EmailTemplateNameUniquenessFeature;
 use App\Models\User;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -129,22 +127,6 @@ it('validates the inputs', function (EditEmailTemplateRequestFactory $data, arra
     'name unique' => [EditEmailTemplateRequestFactory::new()->state(['name' => 'Welcome Email']), ['name' => 'unique']],
     'name unique case insensitive' => [EditEmailTemplateRequestFactory::new()->state(['name' => 'WELCOME EMAIL']), ['name' => 'unique']],
 ]);
-
-describe('name uniqueness feature flag', function (): void {
-    it('does not apply the unique form rule when the feature is disabled', function (): void {
-        EmailTemplateNameUniquenessFeature::deactivate();
-
-        asSuperAdmin();
-
-        EmailTemplate::factory()->create(['name' => 'Welcome Email']);
-        $emailTemplate = EmailTemplate::factory()->create(['name' => 'Reminder Email']);
-
-        expect(fn () => Livewire::test(EditEmailTemplate::class, ['record' => $emailTemplate->getRouteKey()])
-            ->fillForm(['name' => 'Welcome Email'])
-            ->call('save'))
-            ->toThrow(UniqueConstraintViolationException::class);
-    });
-});
 
 describe('authorization', function (): void {
     it('denies access to the edit page without the `settings.*.update` permission', function (): void {
