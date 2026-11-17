@@ -34,18 +34,13 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Models\Permission;
-use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
-use App\Features\ProjectPermissionConsolidationFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 
 use function Pest\Laravel\actingAs;
-
-use Spatie\Permission\PermissionRegistrar;
 
 use function Tests\asSuperAdmin;
 
@@ -74,32 +69,6 @@ it('governs pipelines without a project with the projects permissions', function
     $user->givePermissionTo("projects.{$action}");
 
     expect($user->can($ability, $arguments))->toBeTrue();
-})->with($standalonePipelineAbilities);
-
-// TODO: Cleanup Task (projects-permission-consolidation): delete this test, the feature will always be active
-it('governs pipelines without a project with the pipeline permissions while the projects permission consolidation is inactive', function (string $ability, string $action, bool $forRecord): void {
-    ProjectPermissionConsolidationFeature::deactivate();
-
-    $legacyPermission = Permission::factory()->create([
-        'name' => "pipeline.{$action}",
-        'guard_name' => 'web',
-        'group_id' => PermissionGroup::create(['name' => 'Pipeline'])->getKey(),
-    ]);
-    app(PermissionRegistrar::class)->forgetCachedPermissions();
-
-    $arguments = $forRecord ? Pipeline::factory()->make(['project_id' => null]) : Pipeline::class;
-
-    $user = User::factory()->create()->givePermissionTo("projects.{$action}");
-
-    actingAs($user);
-
-    expect($user->can($ability, $arguments))->toBeFalse();
-
-    $legacyUser = User::factory()->create()->givePermissionTo($legacyPermission);
-
-    actingAs($legacyUser);
-
-    expect($legacyUser->can($ability, $arguments))->toBeTrue();
 })->with($standalonePipelineAbilities);
 
 it('delegates viewAny to the project when a project is passed', function (): void {

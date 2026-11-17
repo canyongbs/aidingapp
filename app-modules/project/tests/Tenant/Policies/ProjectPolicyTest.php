@@ -34,15 +34,10 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Models\Permission;
-use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Project\Models\Project;
-use App\Features\ProjectPermissionConsolidationFeature;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
-
-use Spatie\Permission\PermissionRegistrar;
 
 use function Tests\asSuperAdmin;
 
@@ -67,32 +62,6 @@ it('is governed by the projects permissions', function (string $ability, string 
     $user->givePermissionTo("projects.{$action}");
 
     expect($user->can($ability, $arguments))->toBeTrue();
-})->with($recordIndependentAbilities);
-
-// TODO: Cleanup Task (projects-permission-consolidation): delete this test, the feature will always be active
-it('is governed by the project permissions while the projects permission consolidation is inactive', function (string $ability, string $action, bool $forRecord): void {
-    ProjectPermissionConsolidationFeature::deactivate();
-
-    $legacyPermission = Permission::factory()->create([
-        'name' => "project.{$action}",
-        'guard_name' => 'web',
-        'group_id' => PermissionGroup::create(['name' => 'Project'])->getKey(),
-    ]);
-    app(PermissionRegistrar::class)->forgetCachedPermissions();
-
-    $arguments = $forRecord ? Project::factory()->make() : Project::class;
-
-    $user = User::factory()->create()->givePermissionTo("projects.{$action}");
-
-    actingAs($user);
-
-    expect($user->can($ability, $arguments))->toBeFalse();
-
-    $legacyUser = User::factory()->create()->givePermissionTo($legacyPermission);
-
-    actingAs($legacyUser);
-
-    expect($legacyUser->can($ability, $arguments))->toBeTrue();
 })->with($recordIndependentAbilities);
 
 it('only allows creating a project with the create permission', function (): void {
