@@ -41,7 +41,6 @@ use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 
 use function Pest\Laravel\actingAs;
-
 use function Tests\asSuperAdmin;
 
 $standalonePipelineAbilities = [
