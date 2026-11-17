@@ -36,40 +36,26 @@
 
 namespace App\Filament\Pages;
 
-use AidingApp\Engagement\Filament\Resources\EmailTemplates\EmailTemplateResource;
-use AidingApp\Engagement\Models\EmailTemplate;
 use App\Enums\CommunicationSettingsTab;
 use App\Enums\NavigationGroup;
+use App\Filament\Pages\ManageCommunicationSettings\Components\NotificationSettingsComponent;
+use App\Filament\Pages\ManageCommunicationSettings\Tables\EmailTemplatesTable;
 use App\Settings\NotificationSettings;
-use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
-use Filament\Actions\Action;
-use Filament\Actions\BulkActionGroup;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Schemas\Components\Actions;
-use Filament\Schemas\Components\Component;
-use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\EmbeddedTable;
-use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Url;
-use UnitEnum;
 
 /**
  * @property-read Schema $notificationsForm
@@ -80,7 +66,7 @@ class ManageCommunicationSettings extends Page implements HasActions, HasForms, 
     use InteractsWithForms;
     use InteractsWithTable;
 
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Settings;
+    protected static string | \UnitEnum | null $navigationGroup = NavigationGroup::Settings;
 
     protected static ?string $navigationLabel = 'Communication Settings';
 
@@ -124,7 +110,7 @@ class ManageCommunicationSettings extends Page implements HasActions, HasForms, 
                         CommunicationSettingsTab::Notifications->value => Tab::make(CommunicationSettingsTab::Notifications->getLabel())
                             ->visible(fn (): bool => CommunicationSettingsTab::Notifications->canView())
                             ->schema([
-                                $this->makeFormContentComponent('notificationsForm', 'saveNotifications'),
+                                NotificationSettingsComponent::make($this->canUpdate()),
                             ]),
                         CommunicationSettingsTab::EmailTemplates->value => Tab::make(CommunicationSettingsTab::EmailTemplates->getLabel())
                             ->visible(fn (): bool => CommunicationSettingsTab::EmailTemplates->canView())
@@ -137,24 +123,7 @@ class ManageCommunicationSettings extends Page implements HasActions, HasForms, 
 
     public function notificationsForm(Schema $schema): Schema
     {
-        return $schema
-            ->columns(1)
-            ->components([
-                TextInput::make('from_name')
-                    ->string()
-                    ->maxLength(150)
-                    ->autocomplete(false),
-                ColorSelect::make('primary_color'),
-                SpatieMediaLibraryFileUpload::make('logo')
-                    ->disk('s3-public')
-                    ->collection('logo')
-                    ->visibility('public')
-                    ->model(NotificationSettings::getSettingsPropertyModel('notifications.logo'))
-                    ->image()
-                    ->maxSize(10240),
-            ])
-            ->disabled(! $this->canUpdate())
-            ->statePath('notificationsData');
+        return NotificationSettingsComponent::configureSchema($schema, $this->canUpdate());
     }
 
     public function saveNotifications(): void
@@ -175,50 +144,12 @@ class ManageCommunicationSettings extends Page implements HasActions, HasForms, 
 
     public function table(Table $table): Table
     {
-        return $table
-            ->query(EmailTemplate::query())
-            ->columns([
-                TextColumn::make('name'),
-                TextColumn::make('description'),
-            ])
-            ->headerActions([
-                CreateAction::make()
-                    ->label('New email template')
-                    ->url(fn (): string => EmailTemplateResource::getUrl('create'))
-                    ->visible(fn (): bool => EmailTemplateResource::canCreate()),
-            ])
-            ->recordActions([
-                EditAction::make()
-                    ->url(fn (EmailTemplate $record): string => EmailTemplateResource::getUrl('edit', ['record' => $record]))
-                    ->visible(fn (EmailTemplate $record): bool => EmailTemplateResource::canEdit($record)),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->authorizeIndividualRecords('delete')
-                        ->visible(fn (): bool => auth()->user()?->can('deleteAny', EmailTemplate::class) ?? false),
-                ]),
-            ]);
+        return EmailTemplatesTable::configure($table);
     }
 
     protected function fillForms(): void
     {
         $this->notificationsForm->fill(app(NotificationSettings::class)->toArray());
-    }
-
-    protected function makeFormContentComponent(string $schema, string $submitHandler): Component
-    {
-        return Form::make([EmbeddedSchema::make($schema)])
-            ->id($schema)
-            ->livewireSubmitHandler($submitHandler)
-            ->footer([
-                Actions::make([
-                    Action::make($submitHandler)
-                        ->label('Save')
-                        ->submit($submitHandler)
-                        ->visible(fn (): bool => $this->canUpdate()),
-                ]),
-            ]);
     }
 
     protected function canUpdate(): bool
