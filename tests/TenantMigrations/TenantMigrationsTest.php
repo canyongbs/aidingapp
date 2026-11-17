@@ -48,6 +48,7 @@ use AidingApp\Notification\Models\EmailMessageEvent;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectMilestone;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\AdvisoryPermissionConsolidationFeature;
 use App\Features\AdvisorySeverityNameUniquenessFeature;

@@ -36,6 +36,8 @@
 
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Observers\ProjectMilestoneObserver;
+use App\Features\MilestoneProjectFromPipelineFeature;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -96,4 +98,26 @@ it('does not assign or override the pipeline, leaving it to the caller', functio
     ]);
 
     expect($milestone->pipeline_id)->toBe($chosenPipeline->getKey());
+});
+
+// TODO: Cleanup Task (milestone-project-from-pipeline): Remove this pre-migration compatibility test after the feature flag is active in production.
+it('synchronizes the legacy project ID when a milestone pipeline changes while the feature is inactive', function (): void {
+    $projectA = Project::factory()->create();
+    $projectB = Project::factory()->create();
+
+    $pipelineA = Pipeline::factory()->for($projectA)->create();
+    $pipelineB = Pipeline::factory()->for($projectB)->create();
+
+    $milestone = $pipelineA->milestones()->create([
+        'title' => 'Moving Milestone',
+        'description' => 'Will be moved to another project',
+        'pipeline_id' => $pipelineA->getKey(),
+    ]);
+
+    MilestoneProjectFromPipelineFeature::deactivate();
+    $milestone->setAttribute('pipeline_id', $pipelineB->getKey());
+
+    (new ProjectMilestoneObserver())->updating($milestone);
+
+    expect($milestone->getAttributes())->toHaveKey('project_id', $projectB->getKey());
 });
