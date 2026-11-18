@@ -34,42 +34,37 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Pages;
+namespace App\Filament\Pages\ManageCommunicationSettings\Components;
 
-use App\Enums\CommunicationNavigationGroup;
-use App\Filament\Clusters\Communication;
-use App\Models\User;
 use App\Settings\NotificationSettings;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Actions\Action;
-use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
-use Filament\Pages\SettingsPage;
+use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\EmbeddedSchema;
+use Filament\Schemas\Components\Form;
 use Filament\Schemas\Schema;
-use UnitEnum;
 
-class ManageNotificationSettings extends SettingsPage
+class NotificationSettingsComponent
 {
-    protected static string $settings = NotificationSettings::class;
-
-    protected static ?string $cluster = Communication::class;
-
-    protected static string | UnitEnum | null $navigationGroup = CommunicationNavigationGroup::Communication;
-
-    protected static string | null $navigationLabel = 'Notifications';
-
-    protected static ?int $navigationSort = 110;
-
-    public static function canAccess(): bool
+    public static function make(bool $canUpdate): Component
     {
-        $user = auth()->user();
-        assert($user instanceof User);
-
-        return $user->can('settings.view-any') && parent::canAccess();
+        return Form::make([EmbeddedSchema::make('notificationsForm')])
+            ->id('notificationsForm')
+            ->livewireSubmitHandler('saveNotifications')
+            ->footer([
+                Actions::make([
+                    Action::make('saveNotifications')
+                        ->label('Save')
+                        ->submit('saveNotifications')
+                        ->visible($canUpdate),
+                ]),
+            ]);
     }
 
-    public function form(Schema $schema): Schema
+    public static function configureSchema(Schema $schema, bool $canUpdate): Schema
     {
         return $schema
             ->columns(1)
@@ -87,27 +82,7 @@ class ManageNotificationSettings extends SettingsPage
                     ->model(NotificationSettings::getSettingsPropertyModel('notifications.logo'))
                     ->image()
                     ->maxSize(10240),
-            ]);
-    }
-
-    public function save(): void
-    {
-        if (! auth()->user()->can('settings.*.update')) {
-            return;
-        }
-
-        parent::save();
-    }
-
-    /**
-     * @return array<Action | ActionGroup>
-     */
-    public function getFormActions(): array
-    {
-        if (! auth()->user()->can('settings.*.update')) {
-            return [];
-        }
-
-        return parent::getFormActions();
+            ])
+            ->disabled(! $canUpdate);
     }
 }

@@ -34,43 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages;
+namespace App\Filament\Pages\ManageCommunicationSettings\Tables;
 
 use AidingApp\Engagement\Filament\Resources\EmailTemplates\EmailTemplateResource;
+use AidingApp\Engagement\Models\EmailTemplate;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
-class ListEmailTemplates extends ListRecords
+class EmailTemplatesTable
 {
-    protected static string $resource = EmailTemplateResource::class;
-
-    public function table(Table $table): Table
+    public static function configure(Table $table): Table
     {
         return $table
+            ->query(EmailTemplate::query())
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('description'),
             ])
+            ->headerActions([
+                CreateAction::make()
+                    ->label('New email template')
+                    ->url(fn (): string => EmailTemplateResource::getUrl('create'))
+                    ->authorize(fn (): bool => Auth::user()?->can('create', EmailTemplate::class) ?? false),
+            ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->url(fn (EmailTemplate $record): string => EmailTemplateResource::getUrl('edit', ['record' => $record]))
+                    ->authorize(fn (EmailTemplate $record): bool => Auth::user()?->can('update', $record) ?? false),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->authorizeIndividualRecords('delete'),
+                        ->authorizeIndividualRecords('delete')
+                        ->visible(fn (): bool => Auth::user()?->can('deleteAny', EmailTemplate::class) ?? false),
                 ]),
             ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            CreateAction::make(),
-        ];
     }
 }

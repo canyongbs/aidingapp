@@ -36,16 +36,28 @@
 
 namespace App\Enums;
 
+use AidingApp\Engagement\Filament\Resources\EmailTemplates\EmailTemplateResource;
 use Filament\Support\Contracts\HasLabel;
 
-enum CommunicationNavigationGroup implements HasLabel
+enum CommunicationSettingsTab: string implements HasLabel
 {
-    case Communication;
+    case Notifications = 'notifications';
+
+    case EmailTemplates = 'email-templates';
 
     public function getLabel(): string
     {
         return match ($this) {
-            self::Communication => 'Communication',
+            self::Notifications => 'Notifications',
+            self::EmailTemplates => 'Email Templates',
+        };
+    }
+
+    public function canView(): bool
+    {
+        return match ($this) {
+            self::Notifications => auth()->user()?->can('settings.view-any') ?? false,
+            self::EmailTemplates => EmailTemplateResource::canViewAny(),
         };
     }
 }
