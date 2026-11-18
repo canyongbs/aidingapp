@@ -45,7 +45,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     /*
      * TODO: Cleanup Task (project-and-milestone-name-uniqueness): after ProjectMilestoneTitleUniquenessFeature is removed:
-     * - remove the `FixesDuplicateNames` trait, the `$chunkSize`, `$usesSoftDeletes` and `$groupByColumns` properties, and the `fixDuplicates()` / `revertDuplicates()` / `reconcileDuplicatesAcrossAllRows()` calls
+     * - remove the `FixesDuplicateNames` trait, the `$chunkSize`, `$usesSoftDeletes` and `$groupByColumns` properties, and the `fixDuplicates()` / `reconcileDuplicatesAcrossAllRows()` calls
      * - keep the citext column conversion and the partial unique index, they are permanent
      */
     use FixesDuplicateNames;
