@@ -36,7 +36,6 @@
 
 namespace AidingApp\Project\Filament\Resources\Pipelines\Forms\Components;
 
-use App\Features\PipelineStageNameUniquenessFeature;
 use Closure;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -51,31 +50,26 @@ class PipelineStageNameInput
             ->label('Stage')
             ->required()
             ->maxLength(255)
-            // TODO: Cleanup Task (pipeline-name-uniqueness): remove this `when()` and always apply the case-insensitive rule (drop the `distinct()` fallback) once the flag is removed.
-            ->when(
-                PipelineStageNameUniquenessFeature::active(),
-                fn (TextInput $input): TextInput => $input->rule(static fn (TextInput $component): Closure => function (string $attribute, mixed $value, Closure $fail) use ($component): void {
-                    $repeater = $component->getParentRepeater();
-                    $item = $component->getParentRepeaterItem();
+            ->rule(static fn (TextInput $component): Closure => function (string $attribute, mixed $value, Closure $fail) use ($component): void {
+                $repeater = $component->getParentRepeater();
+                $item = $component->getParentRepeaterItem();
 
-                    if (! is_string($value) || blank($value) || ! $repeater || ! $item instanceof Schema) {
-                        return;
-                    }
+                if (! is_string($value) || blank($value) || ! $repeater || ! $item instanceof Schema) {
+                    return;
+                }
 
-                    $name = Str::lower($value);
+                $name = Str::lower($value);
 
-                    $siblings = Arr::except((array) $repeater->getRawState(), [$item->getStatePath(isAbsolute: false)]);
+                $siblings = Arr::except((array) $repeater->getRawState(), [$item->getStatePath(isAbsolute: false)]);
 
-                    $hasDuplicateSibling = array_any(
-                        $siblings,
-                        fn (mixed $sibling): bool => is_array($sibling) && is_string($sibling['name'] ?? null) && Str::lower($sibling['name']) === $name,
-                    );
+                $hasDuplicateSibling = array_any(
+                    $siblings,
+                    fn (mixed $sibling): bool => is_array($sibling) && is_string($sibling['name'] ?? null) && Str::lower($sibling['name']) === $name,
+                );
 
-                    if ($hasDuplicateSibling) {
-                        $fail(__('validation.distinct', ['attribute' => $component->getValidationAttribute()]));
-                    }
-                }),
-                fn (TextInput $input): TextInput => $input->distinct(),
-            );
+                if ($hasDuplicateSibling) {
+                    $fail(__('validation.distinct', ['attribute' => $component->getValidationAttribute()]));
+                }
+            });
     }
 }
