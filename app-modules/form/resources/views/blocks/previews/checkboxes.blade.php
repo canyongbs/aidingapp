@@ -1,0 +1,60 @@
+{{--
+    <COPYRIGHT>
+    
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
+    
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
+    
+    Notice:
+    
+    - You may not provide the software to third parties as a hosted or managed
+    service, where the service provides users with access to any substantial set of
+    the features or functionality of the software.
+    - You may not move, change, disable, or circumvent the license key functionality
+    in the software, and you may not remove or obscure any functionality in the
+    software that is protected by the license key.
+    - You may not alter, remove, or obscure any licensing, copyright, or other notices
+    of the licensor in the software. Any use of the licensor’s trademarks is subject
+    to applicable law.
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+    same in return. Canyon GBS® and Aiding App® are registered trademarks of
+    Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
+    vigorously.
+    - The software solution, including services, infrastructure, and code, is offered as a
+    Software as a Service (SaaS) by Canyon GBS Inc.
+    - Use of this software implies agreement to the license terms and conditions as stated
+    in the Elastic License 2.0.
+    
+    For more information or inquiries please visit our website at
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
+    
+    </COPYRIGHT>
+--}}
+@php
+    $optionsData = array_is_list($options ?? []) ? collect($options ?? [])->pluck('label') : $options ?? [];
+@endphp
+
+<x-form::blocks.field-wrapper :$label :$isRequired>
+    <div class="grid gap-y-2">
+        @foreach ($optionsData as $option)
+            <div class="flex items-center gap-2">
+                <div class="h-3 w-3 rounded border border-gray-500"></div>
+
+                <div class="text-sm font-medium leading-6">
+                    {{ $option }}
+                </div>
+            </div>
+        @endforeach
+
+        @if ($hasOtherOption ?? false)
+            <div class="flex items-center gap-2">
+                <div class="h-3 w-3 flex-shrink-0 rounded border border-gray-500"></div>
+
+                <div class="flex flex-1 items-center rounded border border-gray-400">
+                    <span class="px-3 py-1 text-sm text-gray-400">Other</span>
+                </div>
+            </div>
+        @endif
+    </div>
+</x-form::blocks.field-wrapper>
