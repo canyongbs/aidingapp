@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\StepDescriptionFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
@@ -47,16 +46,12 @@ return new class () extends Migration {
             Schema::table('service_request_form_steps', function (Blueprint $table): void {
                 $table->text('description')->nullable();
             });
-
-            StepDescriptionFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function (): void {
-            StepDescriptionFeature::deactivate();
-
             Schema::table('service_request_form_steps', function (Blueprint $table): void {
                 $table->dropColumn('description');
             });
