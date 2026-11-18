@@ -40,7 +40,6 @@ use AidingApp\Form\Actions\GenerateFormKitSchema;
 use AidingApp\Form\Actions\ResolveBlockRegistry;
 use AidingApp\Form\Models\Submissible;
 use AidingApp\Form\Models\SubmissibleStep;
-use App\Features\StepDescriptionFeature;
 
 /**
  * @phpstan-import-type FormKitNode from GenerateFormKitSchema
@@ -219,7 +218,7 @@ class GeneratePortalServiceRequestFormKitSchema
     protected function stepHeader(SubmissibleStep $step): array
     {
         $title = $step->getAttribute('display_label');
-        $description = StepDescriptionFeature::active() ? $step->description : null;
+        $description = $step->description;
 
         return [
             '$el' => 'div',
