@@ -219,7 +219,10 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
             ->placeholder('Drag blocks here to build your service request form')
             ->hiddenLabel()
             ->columnSpanFull()
-            ->extraInputAttributes(['style' => 'min-height: 12rem;']);
+            ->extraInputAttributes([
+                'style' => 'min-height: 12rem;',
+                'data-custom-block-badges' => 'true',
+            ]);
     }
 
     protected function fillForm(): void

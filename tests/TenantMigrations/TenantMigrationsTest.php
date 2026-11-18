@@ -46,11 +46,14 @@ use AidingApp\Notification\Models\EmailMessageEvent;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use App\Features\AdvisoryPermissionConsolidationFeature;
 use App\Features\AdvisorySeverityNameUniquenessFeature;
 use App\Features\AdvisoryStatusNameUniquenessFeature;
+use App\Features\AssetNameUniquenessFeature;
 use App\Features\ChangeRequestStatusNameUniquenessFeature;
 use App\Features\ChangeRequestTypeNameUniquenessFeature;
+use App\Features\CheckboxesFormFieldFeature;
 use App\Features\ContactTypeNameUniquenessFeature;
 use App\Features\ContractNameUniquenessFeature;
 use App\Features\ContractTypeNameUniquenessFeature;
@@ -1956,4 +1959,256 @@ describe('2026_11_11_150003_purge_unneeded_license_permissions', function (): vo
             expect($cacheStore->get(config('permission.cache.key')))->toBeNull();
         });
     });
+});
+
+// TODO: Cleanup Task (asset-type-status-and-location-name-uniqueness): delete the helper below, the three describes that follow, and the tests within
+$defineAssetNameUniquenessTests = function (string $migrationName, string $table, array $extraColumns, bool $activatesFeatureFlag): void {
+    $migrationPath = "app-modules/inventory-management/database/migrations/{$migrationName}.php";
+
+    $insertRecord = function (string $name, CarbonInterface $createdAt, ?CarbonInterface $deletedAt = null) use ($table, $extraColumns): string {
+        $id = (string) Str::uuid();
+
+        DB::table($table)->insert([
+            'id' => $id,
+            'name' => $name,
+            ...$extraColumns,
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+            'deleted_at' => $deletedAt,
+        ]);
+
+        return $id;
+    };
+
+    it('rewrites case-insensitive duplicate names with a numeric suffix and keeps the oldest', function () use ($migrationName, $migrationPath, $insertRecord, $table, $activatesFeatureFlag): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table, $activatesFeatureFlag): void {
+            $firstId = $insertRecord('Storage', now()->subMinutes(3));
+            $secondId = $insertRecord('storage', now()->subMinutes(2));
+            $thirdId = $insertRecord('STORAGE', now()->subMinute());
+            $existingSuffixedId = $insertRecord('Storage-2', now()->subMinutes(4));
+            $uniqueId = $insertRecord('Archive', now()->subMinutes(5));
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table($table)->where('id', $id)->value('name');
+
+            expect($name($firstId))->toBe('Storage')
+                ->and($name($secondId))->toBe('storage-3')
+                ->and($name($thirdId))->toBe('STORAGE-4')
+                ->and($name($existingSuffixedId))->toBe('Storage-2')
+                ->and($name($uniqueId))->toBe('Archive')
+                ->and(AssetNameUniquenessFeature::active())->toBe($activatesFeatureFlag);
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched', function () use ($migrationName, $migrationPath, $insertRecord, $table): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table): void {
+            $keptId = $insertRecord('Storage', now()->subMinutes(2));
+            $trashedId = $insertRecord('storage', now()->subMinute(), now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table($table)->where('id', $keptId)->value('name'))->toBe('Storage')
+                ->and(DB::table($table)->where('id', $trashedId)->value('name'))->toBe('storage');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness among non-trashed records at the database level', function () use ($migrationName, $migrationPath, $insertRecord): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertRecord('Storage', now());
+
+            expect(fn (): string => $insertRecord('STORAGE', now()))
+                ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+
+    it('allows a name freed by a soft-deleted record to be reused at the database level', function () use ($migrationName, $migrationPath, $insertRecord, $table): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertRecord('Storage', now()->subMinute(), now());
+            $insertRecord('STORAGE', now());
+
+            expect(DB::table($table)->count())->toBe(2);
+        });
+    });
+
+    it('drops the unique index on rollback without altering stored names', function () use ($migrationName, $migrationPath, $insertRecord, $table): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table): void {
+            $insertRecord('Storage', now()->subMinutes(2));
+            $secondId = $insertRecord('storage', now()->subMinute());
+            $legitimateId = $insertRecord('Building-2', now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect(DB::table($table)->where('id', $secondId)->value('name'))->toBe('storage-2')
+                ->and(DB::table($table)->where('id', $legitimateId)->value('name'))->toBe('Building-2')
+                ->and(AssetNameUniquenessFeature::active())->toBeFalse();
+
+            $insertRecord('Storage', now());
+
+            expect(DB::table($table)->where('name', 'Storage')->count())->toBe(2);
+        });
+    });
+};
+
+describe('2026_11_11_100000_convert_asset_types_name_to_citext_and_enforce_unique', function () use ($defineAssetNameUniquenessTests): void {
+    $defineAssetNameUniquenessTests(
+        '2026_11_11_100000_convert_asset_types_name_to_citext_and_enforce_unique',
+        'asset_types',
+        [],
+        activatesFeatureFlag: false,
+    );
+});
+
+describe('2026_11_11_100001_convert_asset_statuses_name_to_citext_and_enforce_unique', function () use ($defineAssetNameUniquenessTests): void {
+    $defineAssetNameUniquenessTests(
+        '2026_11_11_100001_convert_asset_statuses_name_to_citext_and_enforce_unique',
+        'asset_statuses',
+        ['classification' => 'unavailable'],
+        activatesFeatureFlag: false,
+    );
+
+    it('keeps the exact `Under Maintenance` status over an older case-variant duplicate', function (): void {
+        isolatedMigration('2026_11_11_100001_convert_asset_statuses_name_to_citext_and_enforce_unique', function (): void {
+            $insertStatus = function (string $name, string $classification, CarbonInterface $createdAt): string {
+                $id = (string) Str::uuid();
+
+                DB::table('asset_statuses')->insert([
+                    'id' => $id,
+                    'name' => $name,
+                    'classification' => $classification,
+                    'created_at' => $createdAt,
+                    'updated_at' => $createdAt,
+                ]);
+
+                return $id;
+            };
+
+            $olderVariantId = $insertStatus('under maintenance', 'available', now()->subMinutes(2));
+            $underMaintenanceId = $insertStatus('Under Maintenance', 'unavailable', now()->subMinute());
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/inventory-management/database/migrations/2026_11_11_100001_convert_asset_statuses_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('asset_statuses')->where('id', $underMaintenanceId)->value('name'))->toBe('Under Maintenance')
+                ->and(DB::table('asset_statuses')->where('id', $olderVariantId)->value('name'))->toBe('under maintenance-2')
+                ->and(DB::table('asset_statuses')->where('name', 'Under Maintenance')->value('id'))->toBe($underMaintenanceId);
+        });
+    });
+
+    it('reverts only the converted fields, their content blocks and their responses on rollback', function (): void {
+        isolatedMigration('2026_11_03_124335_tmp_convert_checkbox_form_fields_to_checkboxes', function (): void {
+            $migrationPath = 'app-modules/service-management/database/migrations/2026_11_03_124335_tmp_convert_checkbox_form_fields_to_checkboxes.php';
+            $block = fn (string $type, string $fieldId, array $config = []): array => [
+                'type' => 'customBlock',
+                'attrs' => ['id' => $type, 'config' => ['fieldId' => $fieldId, 'label' => 'Agree', 'isRequired' => true, ...$config]],
+            ];
+
+            $form = ServiceRequestForm::factory()->create();
+            $legacyId = (string) Str::uuid();
+            $newId = (string) Str::uuid();
+
+            $insertField = fn (string $id, string $type, array $config): bool => DB::table('service_request_form_fields')->insert([
+                'id' => $id,
+                'label' => 'Agree',
+                'type' => $type,
+                'is_required' => true,
+                'config' => json_encode($config),
+                'service_request_form_id' => $form->getKey(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $insertField($legacyId, 'checkbox', ['description' => 'Please confirm']);
+
+            DB::table('service_request_forms')->where('id', $form->getKey())->update([
+                'content' => json_encode(['type' => 'doc', 'content' => [$block('checkbox', $legacyId)]]),
+            ]);
+
+            $submissionId = (string) Str::uuid();
+
+            DB::table('service_request_form_submissions')->insert([
+                'id' => $submissionId,
+                'service_request_form_id' => $form->getKey(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $insertResponse = function (string $fieldId, string $response) use ($submissionId): string {
+                $id = (string) Str::uuid();
+
+                DB::table('service_request_form_field_submission')->insert([
+                    'id' => $id,
+                    'response' => $response,
+                    'service_request_form_field_id' => $fieldId,
+                    'service_request_form_submission_id' => $submissionId,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                return $id;
+            };
+
+            $checkedResponseId = $insertResponse($legacyId, 'true');
+            $uncheckedResponseId = $insertResponse($legacyId, '0');
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            // A `checkboxes` field created after the migration has no legacy equivalent.
+            $newConfig = ['hasOtherOption' => false, 'options' => [['label' => 'Red', 'value' => 'red'], ['label' => 'Blue', 'value' => 'blue']]];
+            $insertField($newId, 'checkboxes', $newConfig);
+            $newResponseId = $insertResponse($newId, '["red"]');
+
+            DB::table('service_request_forms')->where('id', $form->getKey())->update([
+                'content' => json_encode(['type' => 'doc', 'content' => [
+                    ...json_decode(DB::table('service_request_forms')->where('id', $form->getKey())->value('content'), associative: true)['content'],
+                    $block('checkboxes', $newId, $newConfig),
+                ]]),
+            ]);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            $legacyField = DB::table('service_request_form_fields')->where('id', $legacyId)->first();
+
+            expect($legacyField->type)->toBe('checkbox')
+                ->and(json_decode($legacyField->config, associative: true))->toBe(['description' => 'Please confirm'])
+                ->and(DB::table('service_request_form_fields')->where('id', $newId)->value('type'))->toBe('checkboxes');
+
+            $content = json_decode(DB::table('service_request_forms')->where('id', $form->getKey())->value('content'), associative: true);
+
+            expect($content['content'][0]['attrs']['id'])->toBe('checkbox')
+                ->and($content['content'][0]['attrs']['config'])->toBe(['fieldId' => $legacyId, 'label' => 'Agree', 'isRequired' => true])
+                ->and($content['content'][1]['attrs']['id'])->toBe('checkboxes')
+                ->and($content['content'][1]['attrs']['config']['options'])->toHaveCount(2);
+
+            $response = fn (string $id): string => DB::table('service_request_form_field_submission')->where('id', $id)->value('response');
+
+            expect($response($checkedResponseId))->toBe('1')
+                ->and($response($uncheckedResponseId))->toBe('0')
+                ->and($response($newResponseId))->toBe('["red"]')
+                ->and(CheckboxesFormFieldFeature::active())->toBeFalse();
+        });
+    });
+});
+
+describe('2026_11_11_100002_convert_asset_locations_name_to_citext_and_enforce_unique', function () use ($defineAssetNameUniquenessTests): void {
+    $defineAssetNameUniquenessTests(
+        '2026_11_11_100002_convert_asset_locations_name_to_citext_and_enforce_unique',
+        'asset_locations',
+        [],
+        activatesFeatureFlag: true,
+    );
 });
