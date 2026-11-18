@@ -68,6 +68,7 @@ class NotificationSettingsComponent
     {
         return $schema
             ->columns(1)
+            ->disabled(! auth()->user()->can('settings.*.update'))
             ->components([
                 TextInput::make('from_name')
                     ->string()
