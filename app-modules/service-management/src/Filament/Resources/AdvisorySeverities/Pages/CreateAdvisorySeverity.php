@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\AdvisorySeverityResource;
-use App\Features\AdvisorySeverityNameUniquenessFeature;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
@@ -57,11 +56,7 @@ class CreateAdvisorySeverity extends CreateRecord
                     ->required()
                     ->maxLength(255)
                     ->string()
-                    // TODO: Cleanup Task (advisory-status-and-severity-name-uniqueness): replace this `when()` with `->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())` once the flag is removed.
-                    ->when(
-                        AdvisorySeverityNameUniquenessFeature::active(),
-                        fn (TextInput $input): TextInput => $input->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
-                    ),
+                    ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
                 ColorSelect::make('color')
                     ->label('Color')
                     ->required(),

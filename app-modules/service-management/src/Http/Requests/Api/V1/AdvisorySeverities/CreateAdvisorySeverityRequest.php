@@ -37,9 +37,7 @@
 namespace AidingApp\ServiceManagement\Http\Requests\Api\V1\AdvisorySeverities;
 
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use App\Features\AdvisorySeverityNameUniquenessFeature;
 use CanyonGBS\Common\Enums\Color;
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -59,7 +57,7 @@ class CreateAdvisorySeverityRequest extends FormRequest
     }
 
     /**
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return array<string, array<mixed>|string>
      */
     public function rules(): array
     {
@@ -68,11 +66,7 @@ class CreateAdvisorySeverityRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                // TODO: Cleanup Task (advisory-status-and-severity-name-uniqueness): replace this `Rule::when()` with its unique rule once the flag is removed.
-                Rule::when(
-                    AdvisorySeverityNameUniquenessFeature::active(),
-                    [Rule::unique(AdvisorySeverity::class, 'name')->withoutTrashed()],
-                ),
+                Rule::unique(AdvisorySeverity::class, 'name')->withoutTrashed(),
             ],
             // Shades are excluded, like the admin panel's color picker.
             'color' => ['required', Rule::enum(Color::class)->except(array_filter(Color::cases(), fn (Color $color): bool => $color->isShade()))],
