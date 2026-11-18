@@ -38,10 +38,8 @@ use AidingApp\ContractManagement\Filament\Resources\ContractTypes\ContractTypeRe
 use AidingApp\ContractManagement\Filament\Resources\ContractTypes\Pages\EditContractType;
 use AidingApp\ContractManagement\Models\ContractType;
 use AidingApp\ContractManagement\Tests\Tenant\Filament\Resources\ContractTypes\RequestFactories\EditContractTypeRequestFactory;
-use App\Features\ContractTypeNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -111,26 +109,6 @@ it('validates the inputs', function (EditContractTypeRequestFactory $data, array
     'name unique' => [EditContractTypeRequestFactory::new()->state(['name' => 'Software License']), ['name' => 'unique']],
     'name unique case insensitive' => [EditContractTypeRequestFactory::new()->state(['name' => 'SOFTWARE LICENSE']), ['name' => 'unique']],
 ]);
-
-// TODO: Cleanup Task (contract-name-uniqueness): delete this describe and the test within
-describe('name uniqueness feature flag', function (): void {
-    it('does not apply the unique form rule when the feature is disabled', function (): void {
-        ContractTypeNameUniquenessFeature::deactivate();
-        DB::statement('DROP INDEX IF EXISTS contract_types_name_unique');
-
-        asSuperAdmin();
-
-        ContractType::factory()->create(['name' => 'Software License']);
-        $contractType = ContractType::factory()->create(['name' => 'Hardware Lease']);
-
-        Livewire::test(EditContractType::class, ['record' => $contractType->getRouteKey()])
-            ->fillForm(['name' => 'Software License'])
-            ->call('save')
-            ->assertHasNoFormErrors();
-
-        expect($contractType->refresh()->name)->toBe('Software License');
-    });
-});
 
 describe('authorization', function (): void {
     it('denies access to the edit page without the `settings.*.update` permission', function (): void {
