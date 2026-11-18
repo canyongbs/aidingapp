@@ -60,12 +60,12 @@ class EmailTemplatesTable
                 CreateAction::make()
                     ->label('New email template')
                     ->url(fn (): string => EmailTemplateResource::getUrl('create'))
-                ->authorize(fn (): bool => Auth::user()?->can('create', EmailTemplate::class) ?? false),
+                    ->authorize(fn (): bool => Auth::user()?->can('create', EmailTemplate::class) ?? false),
             ])
             ->recordActions([
                 EditAction::make()
                     ->url(fn (EmailTemplate $record): string => EmailTemplateResource::getUrl('edit', ['record' => $record]))
-                ->authorize(fn (EmailTemplate $record): bool => Auth::user()?->can('update', $record) ?? false),
+                    ->authorize(fn (EmailTemplate $record): bool => Auth::user()?->can('update', $record) ?? false),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
