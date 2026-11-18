@@ -34,55 +34,33 @@
 </COPYRIGHT>
 */
 
-use App\Features\PipelineNameUniquenessFeature;
-use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
-    /*
-     * TODO: Cleanup Task (pipeline-name-uniqueness): after PipelineNameUniquenessFeature is removed:
-     * - remove the `FixesDuplicateNames` trait, the `$chunkSize`, `$usesSoftDeletes` and `$groupByColumns` properties, and the `fixDuplicates()` call
-     * - keep the citext column conversion and the unique index, they are permanent
-     */
-    use FixesDuplicateNames;
-
     private string $table = 'pipelines';
 
     private string $column = 'name';
 
-    /** @var array<int, string> */
-    private array $groupByColumns = ['project_id'];
-
-    private int $chunkSize = 500;
-
-    private bool $usesSoftDeletes = false;
-
     public function up(): void
     {
         DB::transaction(function (): void {
-            // Block concurrent writes so the repair and the unique index operate on a stable set of rows.
+            // Block concurrent writes so the unique index is created against a stable set of rows.
             DB::statement("LOCK TABLE {$this->table} IN ACCESS EXCLUSIVE MODE");
-
-            $this->fixDuplicates();
 
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
 
             Schema::table($this->table, function (Blueprint $table): void {
                 $table->uniqueIndex(['project_id', $this->column], 'pipelines_name_unique');
             });
-
-            PipelineNameUniquenessFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function (): void {
-            PipelineNameUniquenessFeature::deactivate();
-
             DB::statement('DROP INDEX IF EXISTS pipelines_name_unique');
 
             // Names rewritten by up() are intentionally kept: stripping numeric suffixes cannot tell them

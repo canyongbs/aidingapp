@@ -40,7 +40,6 @@ use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectFile;
 use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
-use App\Features\ProjectPermissionConsolidationFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -105,7 +104,7 @@ class ProjectFilePolicy
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ProjectPermissionConsolidationFeature::active() ? 'projects.*.update' : 'project.*.update',
+            abilities: 'projects.*.update',
             denyResponse: 'You do not have permission to delete any project file.'
         );
     }

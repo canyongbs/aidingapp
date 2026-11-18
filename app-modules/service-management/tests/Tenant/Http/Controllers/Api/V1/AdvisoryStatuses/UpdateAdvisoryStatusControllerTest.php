@@ -36,12 +36,9 @@
 
 use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use App\Features\AdvisoryStatusNameUniquenessFeature;
 use App\Models\SystemUser;
-use Illuminate\Database\UniqueConstraintViolationException;
 
 use function Pest\Laravel\patchJson;
-use function Pest\Laravel\withoutExceptionHandling;
 use function Tests\actingAsApiUser;
 
 $actingAsAdvisoryStatusUpdater = function (): SystemUser {
@@ -163,20 +160,4 @@ it('returns not found for a soft deleted advisory status', function () use ($act
 
     patchJson(route('api.v1.advisory-statuses.update', ['advisoryStatus' => $advisoryStatus], false), ['name' => 'Monitoring'])
         ->assertNotFound();
-});
-
-// TODO: Cleanup Task (advisory-status-and-severity-name-uniqueness): delete this test
-it('does not validate name uniqueness when the name uniqueness feature is inactive', function () use ($actingAsAdvisoryStatusUpdater): void {
-    AdvisoryStatusNameUniquenessFeature::deactivate();
-
-    $actingAsAdvisoryStatusUpdater();
-
-    AdvisoryStatus::factory()->create(['name' => 'Monitoring']);
-    $advisoryStatus = AdvisoryStatus::factory()->create(['name' => 'Investigating']);
-
-    withoutExceptionHandling();
-
-    // The unique index exists in tests, so the database rejects the duplicate instead of validation.
-    expect(fn () => patchJson(route('api.v1.advisory-statuses.update', ['advisoryStatus' => $advisoryStatus], false), ['name' => 'Monitoring']))
-        ->toThrow(UniqueConstraintViolationException::class);
 });
