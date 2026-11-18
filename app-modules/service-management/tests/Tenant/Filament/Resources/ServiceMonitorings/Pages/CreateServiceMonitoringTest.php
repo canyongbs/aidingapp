@@ -44,12 +44,10 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\Crea
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
-use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 
@@ -1274,19 +1272,4 @@ test('CreateServiceMonitoring allows reusing the name of a soft-deleted service 
         ->assertHasNoFormErrors();
 
     assertDatabaseHas(ServiceMonitoringTarget::class, ['name' => 'Customer Website', 'deleted_at' => null]);
-});
-
-test('CreateServiceMonitoring does not apply the unique name rule when the feature is disabled', function (): void {
-    ServiceMonitoringTargetNameUniquenessFeature::deactivate();
-
-    asSuperAdmin();
-
-    ServiceMonitoringTarget::factory()->create(['name' => 'Customer Website']);
-
-    $request = ServiceMonitoringTargetRequestFactory::new()->state(['name' => 'Customer Website'])->create();
-
-    expect(fn () => Livewire::test(CreateServiceMonitoring::class)
-        ->fillForm($request)
-        ->call('create'))
-        ->toThrow(UniqueConstraintViolationException::class);
 });

@@ -38,10 +38,8 @@ use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\EditProduct;
 use AidingApp\LicenseManagement\Filament\Resources\Products\ProductResource;
 use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\LicenseManagement\Tests\Tenant\Filament\Products\RequestFactories\EditProductRequestFactory;
-use App\Features\ProductNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -133,22 +131,6 @@ it('validates the inputs', function (EditProductRequestFactory $data, array $err
     'name unique case insensitive' => [EditProductRequestFactory::new()->state(['name' => 'AIDING APP']), ['name' => 'unique']],
     'url url' => [EditProductRequestFactory::new()->state(['url' => 'not-a-url']), ['url' => 'url']],
 ]);
-
-describe('name uniqueness feature flag', function (): void {
-    it('does not apply the unique form rule when the feature is disabled', function (): void {
-        ProductNameUniquenessFeature::deactivate();
-
-        asSuperAdmin();
-
-        Product::factory()->create(['name' => 'Aiding App']);
-        $product = Product::factory()->create(['name' => 'Advising App']);
-
-        expect(fn () => Livewire::test(EditProduct::class, ['record' => $product->getRouteKey()])
-            ->fillForm(['name' => 'Aiding App'])
-            ->call('save'))
-            ->toThrow(UniqueConstraintViolationException::class);
-    });
-});
 
 describe('authorization', function (): void {
     it('denies access to the edit page without the `licenses.*.update` permission', function (): void {
