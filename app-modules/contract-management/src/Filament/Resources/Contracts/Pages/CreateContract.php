@@ -38,7 +38,6 @@ namespace AidingApp\ContractManagement\Filament\Resources\Contracts\Pages;
 
 use AidingApp\ContractManagement\Filament\Resources\Contracts\ContractResource;
 use AidingApp\ContractManagement\Models\ContractType;
-use App\Features\ContractNameUniquenessFeature;
 use Cknow\Money\Money;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -64,11 +63,7 @@ class CreateContract extends CreateRecord
                     ->string()
                     ->required()
                     ->maxLength(255)
-                    // TODO: Cleanup Task (contract-name-uniqueness): replace this `when()` with `->unique(modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed())` once the flag is removed.
-                    ->when(
-                        ContractNameUniquenessFeature::active(),
-                        fn (TextInput $field): TextInput => $field->unique(modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed()),
-                    ),
+                    ->unique(modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed()),
                 Select::make('contract_type_id')
                     ->required()
                     ->label('Contract Type')
