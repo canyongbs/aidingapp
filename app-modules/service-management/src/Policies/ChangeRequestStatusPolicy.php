@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Policies;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
-use App\Features\ChangeRequestPermissionCompressionFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -59,7 +58,7 @@ class ChangeRequestStatusPolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ChangeRequestPermissionCompressionFeature::active() ? 'change_request.view-any' : 'change_request_status.view-any',
+            abilities: 'change_request.view-any',
             denyResponse: 'You do not have permission to view change request statuses.'
         );
     }
@@ -67,7 +66,7 @@ class ChangeRequestStatusPolicy
     public function view(Authenticatable $authenticatable, ChangeRequestStatus $changeRequestStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ChangeRequestPermissionCompressionFeature::active() ? ['change_request.*.view'] : ['change_request_status.*.view'],
+            abilities: ['change_request.*.view'],
             denyResponse: 'You do not have permission to view this change request status.'
         );
     }
@@ -75,7 +74,7 @@ class ChangeRequestStatusPolicy
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ChangeRequestPermissionCompressionFeature::active() ? 'change_request.create' : 'change_request_status.create',
+            abilities: 'change_request.create',
             denyResponse: 'You do not have permission to create change request statuses.'
         );
     }
@@ -83,7 +82,7 @@ class ChangeRequestStatusPolicy
     public function update(Authenticatable $authenticatable, ChangeRequestStatus $changeRequestStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ChangeRequestPermissionCompressionFeature::active() ? ['change_request.*.update'] : ['change_request_status.*.update'],
+            abilities: ['change_request.*.update'],
             denyResponse: 'You do not have permission to update this change request status.'
         );
     }
@@ -91,7 +90,7 @@ class ChangeRequestStatusPolicy
     public function delete(Authenticatable $authenticatable, ChangeRequestStatus $changeRequestStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ChangeRequestPermissionCompressionFeature::active() ? ['change_request.*.delete'] : ['change_request_status.*.delete'],
+            abilities: ['change_request.*.delete'],
             denyResponse: 'You do not have permission to delete this change request status.'
         );
     }
@@ -99,7 +98,7 @@ class ChangeRequestStatusPolicy
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ChangeRequestPermissionCompressionFeature::active() ? ['change_request.*.delete'] : ['change_request_status.*.delete'],
+            abilities: ['change_request.*.delete'],
             denyResponse: 'You do not have permission to delete any change request status.'
         );
     }
@@ -107,7 +106,7 @@ class ChangeRequestStatusPolicy
     public function restore(Authenticatable $authenticatable, ChangeRequestStatus $changeRequestStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ChangeRequestPermissionCompressionFeature::active() ? ['change_request.*.restore'] : ['change_request_status.*.restore'],
+            abilities: ['change_request.*.restore'],
             denyResponse: 'You do not have permission to restore this change request status.'
         );
     }
@@ -115,7 +114,7 @@ class ChangeRequestStatusPolicy
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ChangeRequestPermissionCompressionFeature::active() ? ['change_request.*.restore'] : ['change_request_status.*.restore'],
+            abilities: ['change_request.*.restore'],
             denyResponse: 'You do not have permission to restore any change request status.'
         );
     }
@@ -127,7 +126,7 @@ class ChangeRequestStatusPolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ChangeRequestPermissionCompressionFeature::active() ? ['change_request.*.force-delete'] : ['change_request_status.*.force-delete'],
+            abilities: ['change_request.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this change request status.'
         );
     }
@@ -135,7 +134,7 @@ class ChangeRequestStatusPolicy
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ChangeRequestPermissionCompressionFeature::active() ? ['change_request.*.force-delete'] : ['change_request_status.*.force-delete'],
+            abilities: ['change_request.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete any change request status.'
         );
     }

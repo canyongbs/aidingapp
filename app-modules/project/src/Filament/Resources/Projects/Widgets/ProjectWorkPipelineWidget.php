@@ -496,7 +496,6 @@ class ProjectWorkPipelineWidget extends TableWidget
 
         $emptyMilestones = PipelineEntry::query()->getConnection()
             ->table('project_milestones')
-            ->where('project_milestones.project_id', $pipeline->project_id)
             ->where('project_milestones.pipeline_id', $pipeline->getKey())
             ->whereNull('project_milestones.archived_at')
             ->whereNull('project_milestones.deleted_at')

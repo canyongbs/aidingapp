@@ -39,10 +39,8 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Tests\Tenant\Filament\Resources\PipelineResource\RequestFactory\EditPipelineRequestFactory;
-use App\Features\PipelineNameUniquenessFeature;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -179,7 +177,6 @@ it('can delete pipelines', function (): void {
         ->assertRedirect();
 });
 
-// TODO: Cleanup Task (pipeline-name-uniqueness): keep these tests, but remove the feature flag describe block below
 describe('name uniqueness', function (): void {
     it('rejects a pipeline name that differs only by case from another pipeline', function (string $name): void {
         asSuperAdmin();
@@ -297,22 +294,5 @@ describe('name uniqueness', function (): void {
 
         expect($first->refresh()->name)->toBe('approval')
             ->and($second->refresh()->name)->toBe('review');
-    });
-
-    describe('feature flag', function (): void {
-        it('does not apply the unique form rule when the feature is disabled', function (): void {
-            PipelineNameUniquenessFeature::deactivate();
-
-            asSuperAdmin();
-
-            $project = Project::factory()->create();
-            Pipeline::factory()->for($project)->create(['name' => 'Admissions']);
-            $pipeline = Pipeline::factory()->for($project)->has(PipelineStage::factory(), 'stages')->create(['name' => 'Retention']);
-
-            expect(fn () => Livewire::test(EditPipeline::class, ['record' => $pipeline->getKey(), 'parentRecord' => $project])
-                ->fillForm(['name' => 'Admissions'])
-                ->call('save'))
-                ->toThrow(UniqueConstraintViolationException::class);
-        });
     });
 });
