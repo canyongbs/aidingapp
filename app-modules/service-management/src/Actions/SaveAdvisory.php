@@ -148,30 +148,18 @@ class SaveAdvisory
     }
 
     /**
-     * Severities, statuses, and departments are referenced by name. Severity and status names may not be unique
-     * while their uniqueness flags are inactive, so an ambiguous name is reported rather than guessed.
-     *
-     * TODO: Cleanup Task (advisory-status-and-severity-name-uniqueness): once both flags are removed, every name is unique,
-     * so look the ID up with `value('id')` and drop the `limit(2)` and the ambiguous-name error.
-     *
      * @param class-string<AdvisorySeverity|AdvisoryStatus|Department> $model
      * @param array<string, string> $errors
      */
     private function resolveId(string $model, string $field, string $name, array &$errors): ?string
     {
-        $ids = $model::query()->where('name', $name)->limit(2)->pluck('id');
+        $id = $model::query()->where('name', $name)->value('id');
 
-        if ($ids->count() === 1) {
-            $id = $ids->first();
-
-            assert(is_string($id));
-
+        if (is_string($id)) {
             return $id;
         }
 
-        $errors[$field] = $ids->isEmpty()
-            ? "The specified {$field} does not exist."
-            : "The specified {$field} name is ambiguous.";
+        $errors[$field] = "The specified {$field} does not exist.";
 
         return null;
     }
