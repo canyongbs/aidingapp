@@ -67,7 +67,7 @@ abstract class TimelinePage extends Page
 
     public static function canAccess(array $parameters = []): bool
     {
-      if (auth()->user()->cannot(['contacts.view-any', 'contacts.*.view'])) {
+        if (auth()->user()->cannot(['contacts.view-any', 'contacts.*.view'])) {
             return false;
         }
 
