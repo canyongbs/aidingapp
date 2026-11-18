@@ -5,9 +5,7 @@ created: 2026-11-11
 
 ## Feature Flags
 
-- App\Features\AssetLocationNameUniquenessFeature
-- App\Features\AssetStatusNameUniquenessFeature
-- App\Features\AssetTypeNameUniquenessFeature
+- App\Features\AssetNameUniquenessFeature
 
 ## Temporary Migrations
 

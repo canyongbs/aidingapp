@@ -40,7 +40,7 @@ use AidingApp\InventoryManagement\Filament\Resources\AssetLocations\Pages\Create
 use AidingApp\InventoryManagement\Filament\Resources\AssetLocations\Pages\ListAssetLocations;
 use AidingApp\InventoryManagement\Filament\Resources\AssetLocations\Pages\ViewAssetLocation;
 use AidingApp\InventoryManagement\Models\AssetLocation;
-use App\Features\AssetLocationNameUniquenessFeature;
+use App\Features\AssetNameUniquenessFeature;
 use App\Filament\Clusters\AssetManagement;
 use BackedEnum;
 use Filament\Forms\Components\TextInput;
@@ -71,7 +71,7 @@ class AssetLocationResource extends Resource
                     ->string()
                     // TODO: Cleanup Task (asset-type-status-and-location-name-uniqueness): replace this `when()` with `->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())` once the flag is removed.
                     ->when(
-                        AssetLocationNameUniquenessFeature::active(),
+                        AssetNameUniquenessFeature::active(),
                         fn (TextInput $input): TextInput => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
                     ),
             ]);

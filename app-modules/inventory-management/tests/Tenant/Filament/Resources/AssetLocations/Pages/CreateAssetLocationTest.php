@@ -38,7 +38,7 @@ use AidingApp\InventoryManagement\Filament\Resources\AssetLocations\AssetLocatio
 use AidingApp\InventoryManagement\Filament\Resources\AssetLocations\Pages\CreateAssetLocation;
 use AidingApp\InventoryManagement\Models\AssetLocation;
 use AidingApp\InventoryManagement\Tests\Tenant\Filament\Resources\AssetLocations\RequestFactories\CreateAssetLocationRequestFactory;
-use App\Features\AssetLocationNameUniquenessFeature;
+use App\Features\AssetNameUniquenessFeature;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
@@ -103,7 +103,7 @@ it('validates the inputs', function (CreateAssetLocationRequestFactory $data, ar
 // TODO: Cleanup Task (asset-type-status-and-location-name-uniqueness): delete this describe and the test within
 describe('name uniqueness feature flag', function (): void {
     it('does not apply the unique form rule when the feature is disabled', function (): void {
-        AssetLocationNameUniquenessFeature::deactivate();
+        AssetNameUniquenessFeature::deactivate();
 
         asSuperAdmin();
 

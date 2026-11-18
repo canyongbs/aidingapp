@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\AssetStatusNameUniquenessFeature;
 use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
@@ -44,7 +43,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     /*
-     * TODO: Cleanup Task (asset-type-status-and-location-name-uniqueness): after AssetStatusNameUniquenessFeature is removed:
+     * TODO: Cleanup Task (asset-type-status-and-location-name-uniqueness): after AssetNameUniquenessFeature is removed:
      * - remove the `FixesDuplicateNames` trait, the `orderDuplicateRecords()` override, the `$chunkSize` and `$usesSoftDeletes` properties, and the `fixDuplicates()` call
      * - keep the citext column conversion and the unique index, they are permanent
      */
@@ -69,16 +68,12 @@ return new class () extends Migration {
                 $table->uniqueIndex($this->column, "{$this->table}_name_unique")
                     ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
             });
-
-            AssetStatusNameUniquenessFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function (): void {
-            AssetStatusNameUniquenessFeature::deactivate();
-
             DB::statement("DROP INDEX IF EXISTS {$this->table}_name_unique");
 
             // Names rewritten by `fixDuplicates()` are kept: the `-N` suffix cannot be told apart from a genuine name.

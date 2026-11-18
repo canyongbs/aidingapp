@@ -49,9 +49,7 @@ use AidingApp\Project\Models\Project;
 use App\Features\AdvisoryPermissionConsolidationFeature;
 use App\Features\AdvisorySeverityNameUniquenessFeature;
 use App\Features\AdvisoryStatusNameUniquenessFeature;
-use App\Features\AssetLocationNameUniquenessFeature;
-use App\Features\AssetStatusNameUniquenessFeature;
-use App\Features\AssetTypeNameUniquenessFeature;
+use App\Features\AssetNameUniquenessFeature;
 use App\Features\ChangeRequestStatusNameUniquenessFeature;
 use App\Features\ChangeRequestTypeNameUniquenessFeature;
 use App\Features\ContactPermissionConsolidationFeature;
@@ -2019,13 +2017,7 @@ describe('2026_11_11_150003_purge_unneeded_license_permissions', function (): vo
 });
 
 // TODO: Cleanup Task (asset-type-status-and-location-name-uniqueness): delete the helper below, the three describes that follow, and the tests within
-$defineAssetNameUniquenessTests = function (string $migrationName, string $table, array $extraColumns, string $featureClass, array $otherFeatureClasses): void {
-    assert(is_subclass_of($featureClass, AbstractFeatureFlag::class));
-
-    foreach ($otherFeatureClasses as $otherFeatureClass) {
-        assert(is_subclass_of($otherFeatureClass, AbstractFeatureFlag::class));
-    }
-
+$defineAssetNameUniquenessTests = function (string $migrationName, string $table, array $extraColumns, bool $activatesFeatureFlag): void {
     $migrationPath = "app-modules/inventory-management/database/migrations/{$migrationName}.php";
 
     $insertRecord = function (string $name, CarbonInterface $createdAt, ?CarbonInterface $deletedAt = null) use ($table, $extraColumns): string {
@@ -2043,21 +2035,13 @@ $defineAssetNameUniquenessTests = function (string $migrationName, string $table
         return $id;
     };
 
-    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates only its own feature flag', function () use ($migrationName, $migrationPath, $insertRecord, $table, $featureClass, $otherFeatureClasses): void {
-        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table, $featureClass, $otherFeatureClasses): void {
+    it('rewrites case-insensitive duplicate names with a numeric suffix and keeps the oldest', function () use ($migrationName, $migrationPath, $insertRecord, $table, $activatesFeatureFlag): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table, $activatesFeatureFlag): void {
             $firstId = $insertRecord('Storage', now()->subMinutes(3));
             $secondId = $insertRecord('storage', now()->subMinutes(2));
             $thirdId = $insertRecord('STORAGE', now()->subMinute());
             $existingSuffixedId = $insertRecord('Storage-2', now()->subMinutes(4));
             $uniqueId = $insertRecord('Archive', now()->subMinutes(5));
-
-            $featureClass::deactivate();
-
-            foreach ($otherFeatureClasses as $otherFeatureClass) {
-                $otherFeatureClass::deactivate();
-            }
-
-            expect($featureClass::active())->toBeFalse();
 
             $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
             expect($migrate)->toBe(Command::SUCCESS);
@@ -2069,11 +2053,7 @@ $defineAssetNameUniquenessTests = function (string $migrationName, string $table
                 ->and($name($thirdId))->toBe('STORAGE-4')
                 ->and($name($existingSuffixedId))->toBe('Storage-2')
                 ->and($name($uniqueId))->toBe('Archive')
-                ->and($featureClass::active())->toBeTrue();
-
-            foreach ($otherFeatureClasses as $otherFeatureClass) {
-                expect($otherFeatureClass::active())->toBeFalse();
-            }
+                ->and(AssetNameUniquenessFeature::active())->toBe($activatesFeatureFlag);
         });
     });
 
@@ -2114,8 +2094,8 @@ $defineAssetNameUniquenessTests = function (string $migrationName, string $table
         });
     });
 
-    it('drops the unique index and deactivates its feature flag on rollback without altering stored names', function () use ($migrationName, $migrationPath, $insertRecord, $table, $featureClass): void {
-        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table, $featureClass): void {
+    it('drops the unique index on rollback without altering stored names', function () use ($migrationName, $migrationPath, $insertRecord, $table): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table): void {
             $insertRecord('Storage', now()->subMinutes(2));
             $secondId = $insertRecord('storage', now()->subMinute());
             $legitimateId = $insertRecord('Building-2', now());
@@ -2128,7 +2108,7 @@ $defineAssetNameUniquenessTests = function (string $migrationName, string $table
 
             expect(DB::table($table)->where('id', $secondId)->value('name'))->toBe('storage-2')
                 ->and(DB::table($table)->where('id', $legitimateId)->value('name'))->toBe('Building-2')
-                ->and($featureClass::active())->toBeFalse();
+                ->and(AssetNameUniquenessFeature::active())->toBeFalse();
 
             $insertRecord('Storage', now());
 
@@ -2142,8 +2122,7 @@ describe('2026_11_11_100000_convert_asset_types_name_to_citext_and_enforce_uniqu
         '2026_11_11_100000_convert_asset_types_name_to_citext_and_enforce_unique',
         'asset_types',
         [],
-        AssetTypeNameUniquenessFeature::class,
-        [AssetStatusNameUniquenessFeature::class, AssetLocationNameUniquenessFeature::class],
+        activatesFeatureFlag: false,
     );
 });
 
@@ -2152,8 +2131,7 @@ describe('2026_11_11_100001_convert_asset_statuses_name_to_citext_and_enforce_un
         '2026_11_11_100001_convert_asset_statuses_name_to_citext_and_enforce_unique',
         'asset_statuses',
         ['classification' => 'unavailable'],
-        AssetStatusNameUniquenessFeature::class,
-        [AssetTypeNameUniquenessFeature::class, AssetLocationNameUniquenessFeature::class],
+        activatesFeatureFlag: false,
     );
 
     it('keeps the exact `Under Maintenance` status over an older case-variant duplicate', function (): void {
@@ -2190,7 +2168,6 @@ describe('2026_11_11_100002_convert_asset_locations_name_to_citext_and_enforce_u
         '2026_11_11_100002_convert_asset_locations_name_to_citext_and_enforce_unique',
         'asset_locations',
         [],
-        AssetLocationNameUniquenessFeature::class,
-        [AssetTypeNameUniquenessFeature::class, AssetStatusNameUniquenessFeature::class],
+        activatesFeatureFlag: true,
     );
 });

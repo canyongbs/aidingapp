@@ -38,7 +38,7 @@ namespace AidingApp\InventoryManagement\Filament\Resources\AssetStatuses\Pages;
 
 use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
 use AidingApp\InventoryManagement\Filament\Resources\AssetStatuses\AssetStatusResource;
-use App\Features\AssetStatusNameUniquenessFeature;
+use App\Features\AssetNameUniquenessFeature;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
@@ -59,7 +59,7 @@ class CreateAssetStatus extends CreateRecord
                     ->string()
                     // TODO: Cleanup Task (asset-type-status-and-location-name-uniqueness): replace this `when()` with `->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())` once the flag is removed.
                     ->when(
-                        AssetStatusNameUniquenessFeature::active(),
+                        AssetNameUniquenessFeature::active(),
                         fn (TextInput $input): TextInput => $input->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
                     ),
                 Select::make('classification')

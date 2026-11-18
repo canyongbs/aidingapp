@@ -37,7 +37,7 @@
 namespace AidingApp\InventoryManagement\Filament\Resources\AssetLocations\Pages;
 
 use AidingApp\InventoryManagement\Filament\Resources\AssetLocations\AssetLocationResource;
-use App\Features\AssetLocationNameUniquenessFeature;
+use App\Features\AssetNameUniquenessFeature;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
@@ -57,7 +57,7 @@ class CreateAssetLocation extends CreateRecord
                     ->string()
                     // TODO: Cleanup Task (asset-type-status-and-location-name-uniqueness): replace this `when()` with `->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())` once the flag is removed.
                     ->when(
-                        AssetLocationNameUniquenessFeature::active(),
+                        AssetNameUniquenessFeature::active(),
                         fn (TextInput $input): TextInput => $input->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
                     ),
             ]);

@@ -36,7 +36,7 @@
 
 use AidingApp\InventoryManagement\Filament\Resources\AssetLocations\Pages\ListAssetLocations;
 use AidingApp\InventoryManagement\Models\AssetLocation;
-use App\Features\AssetLocationNameUniquenessFeature;
+use App\Features\AssetNameUniquenessFeature;
 use App\Models\User;
 use Filament\Actions\EditAction;
 use Filament\Actions\Testing\TestAction;
@@ -122,7 +122,7 @@ describe('edit action', function (): void {
 // TODO: Cleanup Task (asset-type-status-and-location-name-uniqueness): delete this describe and the test within
 describe('name uniqueness feature flag', function (): void {
     it('does not apply the unique form rule when the feature is disabled', function (): void {
-        AssetLocationNameUniquenessFeature::deactivate();
+        AssetNameUniquenessFeature::deactivate();
 
         asSuperAdmin();
 
