@@ -41,17 +41,13 @@ use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
-    private string $table = 'advisory_statuses';
-
-    private string $column = 'name';
-
     public function up(): void
     {
         DB::transaction(function (): void {
-            DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
+            DB::statement('ALTER TABLE advisory_statuses ALTER COLUMN name TYPE citext');
 
-            Schema::table($this->table, function (Blueprint $table): void {
-                $table->uniqueIndex($this->column, "{$this->table}_name_unique")
+            Schema::table('advisory_statuses', function (Blueprint $table): void {
+                $table->uniqueIndex('name', 'advisory_statuses_name_unique')
                     ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
             });
         });
@@ -60,9 +56,9 @@ return new class () extends Migration {
     public function down(): void
     {
         DB::transaction(function (): void {
-            DB::statement("DROP INDEX IF EXISTS {$this->table}_name_unique");
+            DB::statement('DROP INDEX IF EXISTS advisory_statuses_name_unique');
 
-            DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
+            DB::statement('ALTER TABLE advisory_statuses ALTER COLUMN name TYPE varchar(255)');
         });
     }
 };
