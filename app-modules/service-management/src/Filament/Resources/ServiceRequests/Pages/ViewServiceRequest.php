@@ -49,7 +49,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\Timeline\Livewire\TimelineList;
 use App\Enums\Feature;
-use App\Features\ContactPermissionConsolidationFeature;
 use App\Settings\DisplaySettings;
 use Filament\Actions\DeleteAction;
 use Filament\Infolists\Components\TextEntry;
@@ -173,11 +172,7 @@ class ViewServiceRequest extends ViewRecord
 
     private function canViewTimeline(): bool
     {
-        return auth()->user()->can(
-            ContactPermissionConsolidationFeature::active()
-                ? ['contacts.view-any', 'contacts.*.view']
-                : ['engagement.view-any', 'engagement.*.view']
-        );
+        return auth()->user()->can(['contacts.view-any', 'contacts.*.view']);
     }
 
     /**
