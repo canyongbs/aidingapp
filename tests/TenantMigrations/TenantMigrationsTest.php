@@ -40,34 +40,25 @@ use AidingApp\Authorization\Models\Role;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\ContractManagement\Models\ContractType;
-use AidingApp\Engagement\Models\EmailTemplate;
-use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\Notification\Enums\EmailMessageEventType;
 use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Notification\Models\EmailMessageEvent;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\AdvisoryPermissionConsolidationFeature;
 use App\Features\AdvisorySeverityNameUniquenessFeature;
 use App\Features\AdvisoryStatusNameUniquenessFeature;
-use App\Features\AssetPermissionConsolidationFeature;
 use App\Features\ChangeRequestStatusNameUniquenessFeature;
 use App\Features\ChangeRequestTypeNameUniquenessFeature;
 use App\Features\ContactTypeNameUniquenessFeature;
 use App\Features\ContractNameUniquenessFeature;
 use App\Features\ContractTypeNameUniquenessFeature;
-use App\Features\EmailTemplateNameUniquenessFeature;
 use App\Features\KnowledgeBaseCategoryNameUniquenessFeature;
-use App\Features\LicensePermissionConsolidationFeature;
 use App\Features\MaintenanceProviderNameUniquenessFeature;
 use App\Features\PipelineNameUniquenessFeature;
 use App\Features\PipelineStageNameUniquenessFeature;
-use App\Features\ProductNameUniquenessFeature;
 use App\Features\ProjectPermissionConsolidationFeature;
-use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
-use App\Features\ServiceRequestFileUploadTypeFeature;
 use App\Features\ServiceRequestTypeCategoryNameUniquenessFeature;
 use App\Features\SlaNameUniquenessFeature;
 use App\Features\SystemUserNameUniquenessFeature;
@@ -76,7 +67,6 @@ use App\Models\User;
 use App\Support\AbstractFeatureFlag;
 use Carbon\CarbonInterface;
 use Illuminate\Console\Command;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -104,66 +94,6 @@ use Spatie\Permission\PermissionRegistrar;
 //        );
 //    });
 //});
-
-// TODO: Cleanup Task (service-request-file-upload-type): delete this describe and the test within
-describe('2026_10_15_081432_tmp_backfill_service_request_media_upload_type', function (): void {
-    it('backfills the upload type of files attached directly to service requests and activates the feature flag', function (): void {
-        isolatedMigration('2026_10_15_081432_tmp_backfill_service_request_media_upload_type', function (): void {
-            $submittedAt = now()->subDay();
-            $serviceRequest = ServiceRequest::factory()->create(['created_at' => $submittedAt]);
-            $contact = Contact::factory()->create();
-            $user = User::factory()->create();
-            $systemUser = SystemUser::factory()->create();
-
-            $insertMedia = function (string $modelType, string $modelId, ?Model $createdBy, CarbonInterface $createdAt, array $customProperties = []): int {
-                return DB::table('media')->insertGetId([
-                    'model_type' => $modelType,
-                    'model_id' => $modelId,
-                    'uuid' => (string) Str::uuid(),
-                    'collection_name' => 'uploads',
-                    'name' => 'file',
-                    'file_name' => 'file.png',
-                    'disk' => 's3',
-                    'size' => 1,
-                    'manipulations' => '[]',
-                    'custom_properties' => json_encode($customProperties),
-                    'generated_conversions' => '[]',
-                    'responsive_images' => '[]',
-                    'created_by_type' => $createdBy?->getMorphClass(),
-                    'created_by_id' => $createdBy?->getKey(),
-                    'created_at' => $createdAt,
-                    'updated_at' => $createdAt,
-                ]);
-            };
-
-            $contactMediaId = $insertMedia('service_request', $serviceRequest->getKey(), $contact, $submittedAt->copy()->addDays(5), ['custom_headers' => ['ContentType' => 'image/png']]);
-            $userMediaId = $insertMedia('service_request', $serviceRequest->getKey(), $user, $submittedAt->copy()->addMinute());
-            $submittedWithinWindowMediaId = $insertMedia('service_request', $serviceRequest->getKey(), null, $submittedAt->copy()->addMinutes(10));
-            $submittedAfterWindowMediaId = $insertMedia('service_request', $serviceRequest->getKey(), null, $submittedAt->copy()->addMinutes(11));
-            $systemUserWithinWindowMediaId = $insertMedia('service_request', $serviceRequest->getKey(), $systemUser, $submittedAt->copy()->addMinute());
-            $systemUserAfterWindowMediaId = $insertMedia('service_request', $serviceRequest->getKey(), $systemUser, $submittedAt->copy()->addHour());
-            $alreadyRecordedMediaId = $insertMedia('service_request', $serviceRequest->getKey(), $contact, $submittedAt, ['upload_type' => 'staff_upload']);
-            $serviceRequestUpdateMediaId = $insertMedia('service_request_update', (string) Str::uuid(), $contact, $submittedAt);
-
-            expect(ServiceRequestFileUploadTypeFeature::active())->toBeFalse();
-
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_10_15_081432_tmp_backfill_service_request_media_upload_type.php']);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $customProperties = fn (int $mediaId): array => json_decode(DB::table('media')->where('id', $mediaId)->value('custom_properties'), associative: true);
-
-            expect($customProperties($contactMediaId))->toEqual(['upload_type' => 'request_submission', 'custom_headers' => ['ContentType' => 'image/png']])
-                ->and($customProperties($userMediaId))->toEqual(['upload_type' => 'staff_upload'])
-                ->and($customProperties($submittedWithinWindowMediaId))->toEqual(['upload_type' => 'request_submission'])
-                ->and($customProperties($submittedAfterWindowMediaId))->toEqual(['upload_type' => 'staff_upload'])
-                ->and($customProperties($systemUserWithinWindowMediaId))->toEqual(['upload_type' => 'request_submission'])
-                ->and($customProperties($systemUserAfterWindowMediaId))->toEqual(['upload_type' => 'staff_upload'])
-                ->and($customProperties($alreadyRecordedMediaId))->toEqual(['upload_type' => 'staff_upload'])
-                ->and($customProperties($serviceRequestUpdateMediaId))->toEqual([])
-                ->and(ServiceRequestFileUploadTypeFeature::active())->toBeTrue();
-        });
-    });
-});
 
 describe('2026_10_15_101455_delete_role_group_and_interaction_import_permissions', function (): void {
     it('deletes the retired Role Group and interaction.import permissions and their emptied groups without touching unrelated permissions', function (): void {
@@ -230,120 +160,6 @@ describe('2026_10_15_101455_delete_role_group_and_interaction_import_permissions
                     expect(Permission::where('name', $name)->where('guard_name', $guard)->count())->toBe(1);
                 }
             }
-        });
-    });
-});
-
-// TODO: Cleanup Task (email-template-name-uniqueness): delete this describe and the tests within
-describe('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function (): void {
-    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest and activates the feature flag', function (): void {
-        isolatedMigration('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function (): void {
-            $first = EmailTemplate::factory()->create(['name' => 'Welcome Email', 'created_at' => now()->subMinutes(3)]);
-            $second = EmailTemplate::factory()->create(['name' => 'welcome email', 'created_at' => now()->subMinutes(2)]);
-            $third = EmailTemplate::factory()->create(['name' => 'WELCOME EMAIL', 'created_at' => now()->subMinute()]);
-            $unique = EmailTemplate::factory()->create(['name' => 'Reminder Email', 'created_at' => now()->subMinutes(4)]);
-
-            expect(EmailTemplateNameUniquenessFeature::active())->toBeFalse();
-
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique.php']);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            expect($first->refresh()->name)->toBe('Welcome Email')
-                ->and($second->refresh()->name)->toBe('welcome email-2')
-                ->and($third->refresh()->name)->toBe('WELCOME EMAIL-3')
-                ->and($unique->refresh()->name)->toBe('Reminder Email')
-                ->and(EmailTemplateNameUniquenessFeature::active())->toBeTrue();
-        });
-    });
-
-    it('leaves soft-deleted duplicates untouched', function (): void {
-        isolatedMigration('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function (): void {
-            $kept = EmailTemplate::factory()->create(['name' => 'Welcome Email', 'created_at' => now()->subMinutes(2)]);
-            $trashed = EmailTemplate::factory()->create(['name' => 'welcome email', 'created_at' => now()->subMinute()]);
-            $trashed->delete();
-
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique.php']);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            expect($kept->refresh()->name)->toBe('Welcome Email')
-                ->and($trashed->refresh()->name)->toBe('welcome email');
-        });
-    });
-
-    it('strips the numeric suffix on rollback once the original name is no longer taken', function (): void {
-        isolatedMigration('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function (): void {
-            $first = EmailTemplate::factory()->create(['name' => 'Welcome Email', 'created_at' => now()->subMinutes(2)]);
-            $second = EmailTemplate::factory()->create(['name' => 'welcome email', 'created_at' => now()->subMinute()]);
-
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique.php']);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            expect($second->refresh()->name)->toBe('welcome email-2');
-
-            $first->delete();
-
-            $rollback = Artisan::call('migrate:rollback', ['--path' => 'app-modules/engagement/database/migrations/2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique.php']);
-            expect($rollback)->toBe(Command::SUCCESS);
-
-            expect($second->refresh()->name)->toBe('welcome email')
-                ->and(EmailTemplateNameUniquenessFeature::active())->toBeFalse();
-        });
-    });
-});
-
-// TODO: Cleanup Task (product-name-uniqueness): delete this describe and the tests within
-describe('2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique', function (): void {
-    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest and activates the feature flag', function (): void {
-        isolatedMigration('2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique', function (): void {
-            $first = Product::factory()->create(['name' => 'Aiding App', 'created_at' => now()->subMinutes(3)]);
-            $second = Product::factory()->create(['name' => 'aiding app', 'created_at' => now()->subMinutes(2)]);
-            $third = Product::factory()->create(['name' => 'AIDING APP', 'created_at' => now()->subMinute()]);
-            $unique = Product::factory()->create(['name' => 'Advising App', 'created_at' => now()->subMinutes(4)]);
-
-            expect(ProductNameUniquenessFeature::active())->toBeFalse();
-
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/license-management/database/migrations/2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique.php']);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            expect($first->refresh()->name)->toBe('Aiding App')
-                ->and($second->refresh()->name)->toBe('aiding app-2')
-                ->and($third->refresh()->name)->toBe('AIDING APP-3')
-                ->and($unique->refresh()->name)->toBe('Advising App')
-                ->and(ProductNameUniquenessFeature::active())->toBeTrue();
-        });
-    });
-
-    it('leaves soft-deleted duplicates untouched', function (): void {
-        isolatedMigration('2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique', function (): void {
-            $kept = Product::factory()->create(['name' => 'Aiding App', 'created_at' => now()->subMinutes(2)]);
-            $trashed = Product::factory()->create(['name' => 'aiding app', 'created_at' => now()->subMinute()]);
-            $trashed->delete();
-
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/license-management/database/migrations/2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique.php']);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            expect($kept->refresh()->name)->toBe('Aiding App')
-                ->and($trashed->refresh()->name)->toBe('aiding app');
-        });
-    });
-
-    it('strips the numeric suffix on rollback once the original name is no longer taken', function (): void {
-        isolatedMigration('2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique', function (): void {
-            $first = Product::factory()->create(['name' => 'Aiding App', 'created_at' => now()->subMinutes(2)]);
-            $second = Product::factory()->create(['name' => 'aiding app', 'created_at' => now()->subMinute()]);
-
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/license-management/database/migrations/2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique.php']);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            expect($second->refresh()->name)->toBe('aiding app-2');
-
-            $first->delete();
-
-            $rollback = Artisan::call('migrate:rollback', ['--path' => 'app-modules/license-management/database/migrations/2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique.php']);
-            expect($rollback)->toBe(Command::SUCCESS);
-
-            expect($second->refresh()->name)->toBe('aiding app')
-                ->and(ProductNameUniquenessFeature::active())->toBeFalse();
         });
     });
 });
@@ -614,100 +430,6 @@ describe('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_uniq
                 ->and($second->refresh()->name)->toBe(str_repeat('a', 253) . '-3')
                 // The pre-existing truncated row is in its own group and is left untouched.
                 ->and($third->refresh()->name)->toBe($truncatedCollision);
-        });
-    });
-});
-
-// TODO: Cleanup Task (service-monitoring-target-name-uniqueness): delete this describe and the tests within
-describe('2026_10_26_122324_convert_service_monitoring_targets_name_to_citext_and_enforce_unique', function (): void {
-    $migrationName = '2026_10_26_122324_convert_service_monitoring_targets_name_to_citext_and_enforce_unique';
-    $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
-
-    $insertTarget = function (string $name, CarbonInterface $createdAt, ?CarbonInterface $deletedAt = null): string {
-        $id = (string) Str::uuid();
-
-        DB::table('service_monitoring_targets')->insert([
-            'id' => $id,
-            'name' => $name,
-            'domain' => 'https://example.com',
-            'frequency' => '5_minutes',
-            'monitor_type' => 'availability',
-            'follow_redirection' => true,
-            'auth_type' => 'none',
-            'created_at' => $createdAt,
-            'updated_at' => $createdAt,
-            'deleted_at' => $deletedAt,
-        ]);
-
-        return $id;
-    };
-
-    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates the feature flag', function () use ($migrationName, $migrationPath, $insertTarget): void {
-        isolatedMigration($migrationName, function () use ($migrationPath, $insertTarget): void {
-            $firstId = $insertTarget('Customer Website', now()->subMinutes(3));
-            $secondId = $insertTarget('customer website', now()->subMinutes(2));
-            $thirdId = $insertTarget('CUSTOMER WEBSITE', now()->subMinute());
-            $existingSuffixedId = $insertTarget('Customer Website-2', now()->subMinutes(4));
-            $uniqueId = $insertTarget('Payment API', now()->subMinutes(5));
-
-            expect(ServiceMonitoringTargetNameUniquenessFeature::active())->toBeFalse();
-
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $name = fn (string $id): string => DB::table('service_monitoring_targets')->where('id', $id)->value('name');
-
-            expect($name($firstId))->toBe('Customer Website')
-                ->and($name($secondId))->toBe('customer website-3')
-                ->and($name($thirdId))->toBe('CUSTOMER WEBSITE-4')
-                ->and($name($existingSuffixedId))->toBe('Customer Website-2')
-                ->and($name($uniqueId))->toBe('Payment API')
-                ->and(ServiceMonitoringTargetNameUniquenessFeature::active())->toBeTrue();
-        });
-    });
-
-    it('leaves soft-deleted duplicates untouched', function () use ($migrationName, $migrationPath, $insertTarget): void {
-        isolatedMigration($migrationName, function () use ($migrationPath, $insertTarget): void {
-            $keptId = $insertTarget('Customer Website', now()->subMinutes(2));
-            $trashedId = $insertTarget('customer website', now()->subMinute(), now());
-
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            expect(DB::table('service_monitoring_targets')->where('id', $keptId)->value('name'))->toBe('Customer Website')
-                ->and(DB::table('service_monitoring_targets')->where('id', $trashedId)->value('name'))->toBe('customer website');
-        });
-    });
-
-    it('enforces case-insensitive uniqueness among non-trashed service monitoring targets at the database level', function () use ($migrationName, $migrationPath, $insertTarget): void {
-        isolatedMigration($migrationName, function () use ($migrationPath, $insertTarget): void {
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $insertTarget('Customer Website', now());
-
-            expect(fn (): string => $insertTarget('CUSTOMER WEBSITE', now()))
-                ->toThrow(UniqueConstraintViolationException::class);
-        });
-    });
-
-    it('strips the numeric suffix on rollback once the original name is no longer taken', function () use ($migrationName, $migrationPath, $insertTarget): void {
-        isolatedMigration($migrationName, function () use ($migrationPath, $insertTarget): void {
-            $firstId = $insertTarget('Customer Website', now()->subMinutes(2));
-            $secondId = $insertTarget('customer website', now()->subMinute());
-
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            expect(DB::table('service_monitoring_targets')->where('id', $secondId)->value('name'))->toBe('customer website-2');
-
-            DB::table('service_monitoring_targets')->where('id', $firstId)->update(['deleted_at' => now()]);
-
-            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
-            expect($rollback)->toBe(Command::SUCCESS);
-
-            expect(DB::table('service_monitoring_targets')->where('id', $secondId)->value('name'))->toBe('customer website')
-                ->and(ServiceMonitoringTargetNameUniquenessFeature::active())->toBeFalse();
         });
     });
 });
@@ -1915,54 +1637,6 @@ describe('2026_11_04_164715_convert_advisory_severities_name_to_citext_and_enfor
     );
 });
 
-// TODO: Cleanup Task - Compress Change Request Permissions: delete this describe and the test within
-describe('2026_11_06_233425_tmp_grant_change_request_permissions_to_users_and_roles_with_related_permissions', function (): void {
-    it('grants the equivalent change request permission to users with a related permission', function (): void {
-        isolatedMigration('2026_11_06_233425_tmp_grant_change_request_permissions_to_users_and_roles_with_related_permissions', function (): void {
-            $permissionsFor = fn (string $prefix): array => array_map(
-                fn (string $action): string => "{$prefix}.{$action}",
-                ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'],
-            );
-
-            $changeRequestPermissions = $permissionsFor('change_request');
-
-            $statusUser = User::factory()->create();
-            $statusUser->givePermissionTo($permissionsFor('change_request_status'));
-
-            $typeUser = User::factory()->create();
-            $typeUser->givePermissionTo($permissionsFor('change_request_type'));
-
-            $systemUser = SystemUser::factory()->create();
-            $systemUser->givePermissionTo($permissionsFor('change_request_type'));
-
-            $roleUser = User::factory()->create();
-            $role = Role::factory()->create();
-            $relatedRolePermissions = [
-                ...$permissionsFor('change_request_status'),
-                ...$permissionsFor('change_request_type'),
-            ];
-            $role->givePermissionTo($relatedRolePermissions);
-            $roleUser->assignRole($role);
-
-            $unrelatedUser = User::factory()->create();
-            $unrelatedUser->givePermissionTo('product.view-any');
-
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_11_06_233425_tmp_grant_change_request_permissions_to_users_and_roles_with_related_permissions.php']);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $directPermissionNames = fn (User|SystemUser $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->all();
-            $rolePermissionNames = fn (Role $role): array => $role->refresh()->permissions()->pluck('name')->all();
-
-            expect($directPermissionNames($statusUser))->toContain(...$changeRequestPermissions)
-                ->and($directPermissionNames($typeUser))->toContain(...$changeRequestPermissions)
-                ->and($directPermissionNames($systemUser))->toContain(...$changeRequestPermissions)
-                ->and($rolePermissionNames($role))->toContain(...$changeRequestPermissions)
-                ->and($directPermissionNames($unrelatedUser))->not->toContain(...$changeRequestPermissions)
-                ->and($directPermissionNames($unrelatedUser))->toBe(['product.view-any']);
-        });
-    });
-});
-
 // TODO: Cleanup Task (advisories-permission-consolidation): delete this describe and the test within
 describe('2026_11_11_120001_tmp_grant_advisories_permissions_to_users_and_roles_with_related_permissions', function (): void {
     it('grants the equivalent advisories permissions to users and roles with a related permission', function (): void {
@@ -2224,62 +1898,6 @@ describe('2026_11_10_221002_tmp_grant_projects_permissions_to_users_and_roles_wi
     });
 });
 
-// TODO: Cleanup Task (licenses-permission-consolidation): delete this describe and the test within
-describe('2026_11_11_150002_tmp_grant_licenses_permissions_to_users_and_roles_with_related_permissions', function (): void {
-    it('grants the equivalent licenses permissions to users and roles with a related permission', function (): void {
-        isolatedMigration('2026_11_11_150002_tmp_grant_licenses_permissions_to_users_and_roles_with_related_permissions', function (): void {
-            $permissionsFor = fn (string $prefix): array => array_map(
-                fn (string $action): string => "{$prefix}.{$action}",
-                ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'],
-            );
-
-            $licensesPermissions = $permissionsFor('licenses');
-
-            $productUser = User::factory()->create();
-            $productUser->givePermissionTo($permissionsFor('product'));
-
-            $productLicenseUser = User::factory()->create();
-            $productLicenseUser->givePermissionTo($permissionsFor('product_license'));
-
-            $partialProductLicenseUser = User::factory()->create();
-            $partialProductLicenseUser->givePermissionTo('product_license.*.update');
-
-            $systemUser = SystemUser::factory()->create();
-            $systemUser->givePermissionTo('product_license.view-any');
-
-            $roleUser = User::factory()->create();
-            $role = Role::factory()->create();
-            $role->givePermissionTo('product.*.delete');
-            $roleUser->assignRole($role);
-
-            $apiRole = Role::factory()->create(['guard_name' => 'api']);
-            $apiRole->givePermissionTo('product.view-any');
-
-            $unrelatedUser = User::factory()->create();
-            $unrelatedUser->givePermissionTo('knowledge_base_item.view-any');
-
-            expect(LicensePermissionConsolidationFeature::active())->toBeFalse();
-
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/license-management/database/migrations/2026_11_11_150002_tmp_grant_licenses_permissions_to_users_and_roles_with_related_permissions.php']);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $directLicensesPermissionNames = fn (User|SystemUser $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->filter(fn (string $name): bool => str_starts_with($name, 'licenses.'))->sort()->values()->all();
-            $sorted = fn (array $names): array => collect($names)->sort()->values()->all();
-
-            expect($directLicensesPermissionNames($productUser))->toBe($sorted($licensesPermissions))
-                ->and($directLicensesPermissionNames($productLicenseUser))->toBe($sorted($licensesPermissions))
-                ->and($directLicensesPermissionNames($partialProductLicenseUser))->toBe(['licenses.*.update'])
-                ->and($directLicensesPermissionNames($systemUser))->toBe(['licenses.view-any'])
-                ->and($role->refresh()->permissions()->pluck('name')->all())->toContain('licenses.*.delete')
-                ->and($roleUser->refresh()->hasPermissionTo('licenses.*.delete'))->toBeTrue()
-                ->and($apiRole->refresh()->permissions()->pluck('name')->all())->toContain('licenses.view-any')
-                ->and($directLicensesPermissionNames($unrelatedUser))->toBe([])
-                ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['knowledge_base_item.view-any'])
-                ->and(LicensePermissionConsolidationFeature::active())->toBeTrue();
-        });
-    });
-});
-
 describe('2026_11_11_150003_purge_unneeded_license_permissions', function (): void {
     $migrationName = '2026_11_11_150003_purge_unneeded_license_permissions';
     $migrationPath = "app-modules/license-management/database/migrations/{$migrationName}.php";
@@ -2336,133 +1954,6 @@ describe('2026_11_11_150003_purge_unneeded_license_permissions', function (): vo
             expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
 
             expect($cacheStore->get(config('permission.cache.key')))->toBeNull();
-        });
-    });
-});
-
-// TODO: Cleanup Task - Compress Service Request Permissions: delete this describe and the test within
-describe('2026_11_11_042242_tmp_grant_service_request_permissions_to_users_and_roles_with_related_permissions', function (): void {
-    it('grants the equivalent service request permission to users and roles with a related permission and activates the feature flag', function (): void {
-        isolatedMigration('2026_11_11_042242_tmp_grant_service_request_permissions_to_users_and_roles_with_related_permissions', function (): void {
-            $permissionsFor = fn (string $prefix): array => array_map(
-                fn (string $action): string => "{$prefix}.{$action}",
-                ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'],
-            );
-
-            $serviceRequestPermissions = $permissionsFor('service_request');
-            $updateMappedPermissions = array_values(array_diff($serviceRequestPermissions, ['service_request.create']));
-
-            $assignmentUser = User::factory()->create();
-            $assignmentUser->givePermissionTo($permissionsFor('service_request_assignment'));
-
-            $historyUser = User::factory()->create();
-            $historyUser->givePermissionTo($permissionsFor('service_request_history'));
-
-            $priorityUser = User::factory()->create();
-            $priorityUser->givePermissionTo($permissionsFor('service_request_priority'));
-
-            $updateUser = User::factory()->create();
-            $updateUser->givePermissionTo($permissionsFor('service_request_update'));
-
-            $systemUser = SystemUser::factory()->create();
-            $systemUser->givePermissionTo($permissionsFor('service_request_update'));
-
-            $roleUser = User::factory()->create();
-            $role = Role::factory()->create();
-            $role->givePermissionTo([
-                ...$permissionsFor('service_request_assignment'),
-                ...$permissionsFor('service_request_history'),
-                ...$permissionsFor('service_request_priority'),
-                ...$permissionsFor('service_request_update'),
-            ]);
-            $roleUser->assignRole($role);
-
-            $partialUser = User::factory()->create();
-            $partialUser->givePermissionTo('service_request_priority.view-any');
-
-            $updateCreatorUser = User::factory()->create();
-            $updateCreatorUser->givePermissionTo('service_request_update.create');
-
-            $unrelatedUser = User::factory()->create();
-            $unrelatedUser->givePermissionTo('product.view-any');
-
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_11_11_042242_tmp_grant_service_request_permissions_to_users_and_roles_with_related_permissions.php']);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $directPermissionNames = fn (User|SystemUser $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->all();
-            $rolePermissionNames = fn (Role $role): array => $role->refresh()->permissions()->pluck('name')->all();
-
-            expect($directPermissionNames($assignmentUser))->toContain(...$serviceRequestPermissions)
-                ->and($directPermissionNames($historyUser))->toContain(...$serviceRequestPermissions)
-                ->and($directPermissionNames($priorityUser))->toContain(...$serviceRequestPermissions)
-                ->and($directPermissionNames($updateUser))->toContain(...$updateMappedPermissions)
-                ->and($directPermissionNames($updateUser))->not->toContain('service_request.create')
-                ->and($directPermissionNames($systemUser))->toContain(...$updateMappedPermissions)
-                ->and($directPermissionNames($systemUser))->not->toContain('service_request.create')
-                ->and($rolePermissionNames($role))->toContain(...$serviceRequestPermissions)
-                ->and($directPermissionNames($partialUser))->toEqualCanonicalizing(['service_request_priority.view-any', 'service_request.view-any'])
-                ->and($directPermissionNames($updateCreatorUser))->toEqualCanonicalizing(['service_request_update.create', 'service_request.*.update'])
-                ->and($directPermissionNames($unrelatedUser))->toBe(['product.view-any']);
-        });
-    });
-});
-
-// TODO: Cleanup Task (assets-permission-consolidation): delete this describe and the test within
-describe('2026_11_10_205002_tmp_grant_assets_permissions_to_users_and_roles_with_related_permissions', function (): void {
-    it('grants the equivalent assets permissions to users and roles with a related permission without adding unsupported actions', function (): void {
-        isolatedMigration('2026_11_10_205002_tmp_grant_assets_permissions_to_users_and_roles_with_related_permissions', function (): void {
-            $allActions = ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'];
-            $permissionsFor = fn (string $prefix, ?array $actions = null): array => array_map(fn (string $action): string => "{$prefix}.{$action}", $actions ?? $allActions);
-            $assetsPermissions = $permissionsFor('assets');
-
-            $fullUsers = collect(['asset', 'asset_location', 'asset_status', 'asset_type', 'maintenance_provider'])
-                ->mapWithKeys(function (string $prefix) use ($permissionsFor): array {
-                    $user = User::factory()->create();
-                    $user->givePermissionTo($permissionsFor($prefix));
-
-                    return [$prefix => $user];
-                });
-
-            $maintenanceActivityUser = User::factory()->create();
-            $maintenanceActivityUser->givePermissionTo($permissionsFor('maintenance_activity'));
-
-            $checkInUser = User::factory()->create();
-            $checkInUser->givePermissionTo($permissionsFor('asset_check_in'));
-
-            $checkOutUser = User::factory()->create();
-            $checkOutUser->givePermissionTo($permissionsFor('asset_check_out'));
-
-            $systemUser = SystemUser::factory()->create();
-            $systemUser->givePermissionTo('asset.view-any');
-
-            $roleUser = User::factory()->create();
-            $role = Role::factory()->create();
-            $role->givePermissionTo('asset_type.*.update');
-            $roleUser->assignRole($role);
-
-            $unrelatedUser = User::factory()->create();
-            $unrelatedUser->givePermissionTo('product.view-any');
-
-            expect(AssetPermissionConsolidationFeature::active())->toBeFalse();
-
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/inventory-management/database/migrations/2026_11_10_205002_tmp_grant_assets_permissions_to_users_and_roles_with_related_permissions.php']);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $directPermissionNames = fn (User|SystemUser $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->filter(fn (string $name): bool => str_starts_with($name, 'assets.'))->sort()->values()->all();
-            $sorted = fn (array $names): array => collect($names)->sort()->values()->all();
-
-            foreach ($fullUsers as $user) {
-                expect($directPermissionNames($user))->toBe($sorted($assetsPermissions));
-            }
-
-            expect($directPermissionNames($maintenanceActivityUser))->toBe($sorted(['assets.view-any', 'assets.create', 'assets.*.view', 'assets.*.update']))
-                ->and($directPermissionNames($checkInUser))->toBe($sorted(['assets.view-any', 'assets.*.view']))
-                ->and($directPermissionNames($checkOutUser))->toBe($sorted(['assets.view-any', 'assets.*.view']))
-                ->and($directPermissionNames($systemUser))->toBe($sorted(['assets.view-any']))
-                ->and($role->refresh()->permissions()->pluck('name')->all())->toContain('assets.*.update')
-                ->and($directPermissionNames($unrelatedUser))->toBe([])
-                ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['product.view-any'])
-                ->and(AssetPermissionConsolidationFeature::active())->toBeTrue();
         });
     });
 });

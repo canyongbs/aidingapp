@@ -38,7 +38,6 @@ use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Portal\Filament\Pages\ManagePortalSettings;
 use AidingApp\Portal\Settings\AiDisclaimerSettings;
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\AiDisclaimerFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\DB;
@@ -130,8 +129,6 @@ it('saves a customized AI disclaimer text', function (): void {
 });
 
 it('saves portal settings before the AI disclaimer settings exist', function (): void {
-    AiDisclaimerFeature::deactivate();
-
     DB::table('settings')->where('group', 'portal_ai_disclaimer')->delete();
 
     $licenseSettings = app(LicenseSettings::class);

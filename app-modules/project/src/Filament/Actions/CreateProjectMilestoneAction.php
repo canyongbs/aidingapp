@@ -59,14 +59,12 @@ class CreateProjectMilestoneAction
             ->slideOver()
             ->modalHeading('Create Project Milestone')
             ->schema(static::formSchema())
-            ->action(function (array $data, LivewireComponent $livewire) use ($project, $pipeline): void {
+            ->action(function (array $data, LivewireComponent $livewire) use ($pipeline): void {
                 // A milestone must belong to the pipeline it was created under. The action is only
                 // available when a pipeline is selected, so associate the new milestone with it.
-                if ($pipeline instanceof Pipeline) {
-                    $data['pipeline_id'] = $pipeline->getKey();
-                }
+                assert($pipeline instanceof Pipeline);
 
-                $project->milestones()->create($data);
+                $pipeline->milestones()->create($data);
 
                 $livewire->dispatch('projectMilestonesUpdated');
 
