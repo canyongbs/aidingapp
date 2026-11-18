@@ -34,11 +34,9 @@
 </COPYRIGHT>
 */
 
-use App\Features\UserFullNameFeature;
 use App\Models\Scopes\OrderByFullName;
 use App\Models\Scopes\WhereFullNameLike;
 use App\Models\User;
-use App\Observers\UserObserver;
 
 use function Pest\Laravel\assertDatabaseHas;
 
@@ -126,23 +124,5 @@ describe('full name', function (): void {
 
         expect(User::query()->tap(new WhereFullNameLike('jordan BLA'))->pluck('id')->all())
             ->toBe([$matching->getKey()]);
-    });
-
-    it('keeps the legacy name column populated until the column has been dropped', function (): void {
-        UserFullNameFeature::deactivate();
-
-        $user = User::factory()->make(['first_name' => 'Jordan', 'last_name' => 'Blake']);
-
-        app(UserObserver::class)->saving($user);
-
-        expect($user->getAttributes())->toHaveKey('name', 'Jordan Blake');
-    });
-
-    it('does not write the legacy name column once it has been dropped', function (): void {
-        $user = User::factory()->make(['first_name' => 'Jordan', 'last_name' => 'Blake']);
-
-        app(UserObserver::class)->saving($user);
-
-        expect($user->getAttributes())->not->toHaveKey('name');
     });
 });

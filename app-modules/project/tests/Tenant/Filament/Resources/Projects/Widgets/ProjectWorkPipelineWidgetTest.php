@@ -161,7 +161,7 @@ it('renders a task as having no associated milestone when its milestone has been
     $pipeline = Pipeline::factory()->for($project)->create();
     $stage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Planning]);
 
-    $milestone = ProjectMilestone::factory()->for($project)->create();
+    $milestone = ProjectMilestone::factory()->forProject($project)->create();
 
     $entry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
         'project_milestone_id' => $milestone->getKey(),

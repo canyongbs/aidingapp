@@ -38,7 +38,6 @@ namespace AidingApp\InventoryManagement\Policies;
 
 use AidingApp\InventoryManagement\Models\AssetType;
 use App\Enums\Feature;
-use App\Features\AssetPermissionConsolidationFeature;
 use App\Models\Authenticatable;
 use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
@@ -60,7 +59,7 @@ class AssetTypePolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? 'assets.view-any' : 'asset_type.view-any',
+            abilities: 'assets.view-any',
             denyResponse: 'You do not have permission to view asset types.'
         );
     }
@@ -68,7 +67,7 @@ class AssetTypePolicy
     public function view(Authenticatable $authenticatable, AssetType $assetType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.view'] : ['asset_type.*.view'],
+            abilities: ['assets.*.view'],
             denyResponse: 'You do not have permission to view this asset type.'
         );
     }
@@ -76,7 +75,7 @@ class AssetTypePolicy
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? 'assets.create' : 'asset_type.create',
+            abilities: 'assets.create',
             denyResponse: 'You do not have permission to create asset types.'
         );
     }
@@ -84,7 +83,7 @@ class AssetTypePolicy
     public function update(Authenticatable $authenticatable, AssetType $assetType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.update'] : ['asset_type.*.update'],
+            abilities: ['assets.*.update'],
             denyResponse: 'You do not have permission to update this asset type.'
         );
     }
@@ -92,7 +91,7 @@ class AssetTypePolicy
     public function delete(Authenticatable $authenticatable, AssetType $assetType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.delete'] : ['asset_type.*.delete'],
+            abilities: ['assets.*.delete'],
             denyResponse: 'You do not have permission to delete this asset type.'
         );
     }
@@ -100,7 +99,7 @@ class AssetTypePolicy
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.delete'] : ['asset_type.*.delete'],
+            abilities: ['assets.*.delete'],
             denyResponse: 'You do not have permission to delete any asset type.'
         );
     }
@@ -108,7 +107,7 @@ class AssetTypePolicy
     public function restore(Authenticatable $authenticatable, AssetType $assetType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.restore'] : ['asset_type.*.restore'],
+            abilities: ['assets.*.restore'],
             denyResponse: 'You do not have permission to restore this asset type.'
         );
     }
@@ -116,7 +115,7 @@ class AssetTypePolicy
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.restore'] : ['asset_type.*.restore'],
+            abilities: ['assets.*.restore'],
             denyResponse: 'You do not have permission to restore any asset type.'
         );
     }
@@ -124,7 +123,7 @@ class AssetTypePolicy
     public function forceDelete(Authenticatable $authenticatable, AssetType $assetType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.force-delete'] : ['asset_type.*.force-delete'],
+            abilities: ['assets.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this asset type.'
         );
     }
@@ -132,7 +131,7 @@ class AssetTypePolicy
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.force-delete'] : ['asset_type.*.force-delete'],
+            abilities: ['assets.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete any asset type.'
         );
     }
