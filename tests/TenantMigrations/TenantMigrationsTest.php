@@ -43,23 +43,17 @@ use AidingApp\ContractManagement\Models\ContractType;
 use AidingApp\Notification\Enums\EmailMessageEventType;
 use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Notification\Models\EmailMessageEvent;
-use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineStage;
-use AidingApp\Project\Models\Project;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use App\Features\AdvisoryPermissionConsolidationFeature;
 use App\Features\AssetNameUniquenessFeature;
 use App\Features\ChangeRequestStatusNameUniquenessFeature;
 use App\Features\ChangeRequestTypeNameUniquenessFeature;
 use App\Features\CheckboxesFormFieldFeature;
-use App\Features\ContactPermissionConsolidationFeature;
 use App\Features\ContactTypeNameUniquenessFeature;
 use App\Features\ContractNameUniquenessFeature;
 use App\Features\ContractTypeNameUniquenessFeature;
 use App\Features\KnowledgeBaseCategoryNameUniquenessFeature;
 use App\Features\MaintenanceProviderNameUniquenessFeature;
-use App\Features\PipelineNameUniquenessFeature;
-use App\Features\PipelineStageNameUniquenessFeature;
 use App\Features\ProjectPermissionConsolidationFeature;
 use App\Features\ServiceRequestTypeCategoryNameUniquenessFeature;
 use App\Features\SlaNameUniquenessFeature;
@@ -864,162 +858,6 @@ describe('2026_10_30_104700_convert_tags_name_to_citext_and_enforce_unique', fun
     });
 });
 
-// TODO: Cleanup Task (pipeline-name-uniqueness): delete this describe and the tests within
-describe('2026_11_04_100000_convert_pipelines_name_to_citext_and_enforce_unique', function (): void {
-    $migrationName = '2026_11_04_100000_convert_pipelines_name_to_citext_and_enforce_unique';
-    $migrationPath = "app-modules/project/database/migrations/{$migrationName}.php";
-
-    it('rewrites case-insensitive duplicate names within a project with a numeric suffix, keeps the oldest and leaves other projects untouched', function () use ($migrationName, $migrationPath): void {
-        isolatedMigration($migrationName, function () use ($migrationPath): void {
-            $project = Project::factory()->create();
-            $otherProject = Project::factory()->create();
-
-            $first = Pipeline::factory()->for($project)->create(['name' => 'Admissions', 'created_at' => now()->subMinutes(3)]);
-            $second = Pipeline::factory()->for($project)->create(['name' => 'admissions', 'created_at' => now()->subMinutes(2)]);
-            $third = Pipeline::factory()->for($project)->create(['name' => 'ADMISSIONS', 'created_at' => now()->subMinute()]);
-            $unique = Pipeline::factory()->for($project)->create(['name' => 'Retention', 'created_at' => now()->subMinutes(4)]);
-            $other = Pipeline::factory()->for($otherProject)->create(['name' => 'admissions', 'created_at' => now()->subMinutes(5)]);
-
-            expect(PipelineNameUniquenessFeature::active())->toBeFalse();
-
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            expect($first->refresh()->name)->toBe('Admissions')
-                ->and($second->refresh()->name)->toBe('admissions-2')
-                ->and($third->refresh()->name)->toBe('ADMISSIONS-3')
-                ->and($unique->refresh()->name)->toBe('Retention')
-                ->and($other->refresh()->name)->toBe('admissions')
-                ->and(PipelineNameUniquenessFeature::active())->toBeTrue()
-                ->and(PipelineStageNameUniquenessFeature::active())->toBeFalse();
-        });
-    });
-
-    it('treats archived pipelines as regular rows when repairing duplicates', function () use ($migrationName, $migrationPath): void {
-        isolatedMigration($migrationName, function () use ($migrationPath): void {
-            $project = Project::factory()->create();
-            $kept = Pipeline::factory()->for($project)->create(['name' => 'Admissions', 'created_at' => now()->subMinutes(2)]);
-            $archived = Pipeline::factory()->for($project)->create(['name' => 'admissions', 'created_at' => now()->subMinute()]);
-            $archived->archive();
-
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            expect($kept->refresh()->name)->toBe('Admissions')
-                ->and($archived->refresh()->name)->toBe('admissions-2');
-        });
-    });
-
-    it('enforces case-insensitive uniqueness within a project at the database level but not across projects', function () use ($migrationName, $migrationPath): void {
-        isolatedMigration($migrationName, function () use ($migrationPath): void {
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $project = Project::factory()->create();
-            Pipeline::factory()->for($project)->create(['name' => 'Admissions']);
-
-            expect(fn () => Pipeline::factory()->for($project)->create(['name' => 'ADMISSIONS']))
-                ->toThrow(UniqueConstraintViolationException::class);
-
-            $other = Pipeline::factory()->for(Project::factory()->create())->create(['name' => 'ADMISSIONS']);
-
-            expect($other->refresh()->name)->toBe('ADMISSIONS');
-        });
-    });
-
-    it('keeps names untouched on rollback, including legitimate names that end in a numeric suffix', function () use ($migrationName, $migrationPath): void {
-        isolatedMigration($migrationName, function () use ($migrationPath): void {
-            $project = Project::factory()->create();
-            Pipeline::factory()->for($project)->create(['name' => 'Admissions', 'created_at' => now()->subMinutes(3)]);
-            $renamed = Pipeline::factory()->for($project)->create(['name' => 'admissions', 'created_at' => now()->subMinutes(2)]);
-            $legitimate = Pipeline::factory()->for($project)->create(['name' => 'Release-2026', 'created_at' => now()->subMinute()]);
-
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
-            expect($rollback)->toBe(Command::SUCCESS);
-
-            expect($renamed->refresh()->name)->toBe('admissions-2')
-                ->and($legitimate->refresh()->name)->toBe('Release-2026')
-                ->and(PipelineNameUniquenessFeature::active())->toBeFalse();
-
-            Pipeline::factory()->for($project)->create(['name' => 'ADMISSIONS']);
-        });
-    });
-});
-
-// TODO: Cleanup Task (pipeline-name-uniqueness): delete this describe and the tests within
-describe('2026_11_04_100100_convert_pipeline_stages_name_to_citext_and_enforce_unique', function (): void {
-    $migrationName = '2026_11_04_100100_convert_pipeline_stages_name_to_citext_and_enforce_unique';
-    $migrationPath = "app-modules/project/database/migrations/{$migrationName}.php";
-
-    it('rewrites case-insensitive duplicate names within a pipeline, keeps the oldest and leaves other pipelines untouched', function () use ($migrationName, $migrationPath): void {
-        isolatedMigration($migrationName, function () use ($migrationPath): void {
-            $pipeline = Pipeline::factory()->create();
-            $otherPipeline = Pipeline::factory()->create();
-
-            $first = PipelineStage::factory()->for($pipeline)->create(['name' => 'Review', 'created_at' => now()->subMinutes(3)]);
-            $second = PipelineStage::factory()->for($pipeline)->create(['name' => 'review', 'created_at' => now()->subMinutes(2)]);
-            $third = PipelineStage::factory()->for($pipeline)->create(['name' => 'REVIEW', 'created_at' => now()->subMinute()]);
-            $other = PipelineStage::factory()->for($otherPipeline)->create(['name' => 'review', 'created_at' => now()->subMinutes(4)]);
-
-            expect(PipelineStageNameUniquenessFeature::active())->toBeFalse();
-
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            expect($first->refresh()->name)->toBe('Review')
-                ->and($second->refresh()->name)->toBe('review-2')
-                ->and($third->refresh()->name)->toBe('REVIEW-3')
-                ->and($other->refresh()->name)->toBe('review')
-                ->and(PipelineStageNameUniquenessFeature::active())->toBeTrue();
-        });
-    });
-
-    it('enforces case-insensitive uniqueness within a pipeline at the database level but not across pipelines', function () use ($migrationName, $migrationPath): void {
-        isolatedMigration($migrationName, function () use ($migrationPath): void {
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $pipeline = Pipeline::factory()->create();
-            PipelineStage::factory()->for($pipeline)->create(['name' => 'Review']);
-
-            expect(fn () => PipelineStage::factory()->for($pipeline)->create(['name' => 'REVIEW']))
-                ->toThrow(UniqueConstraintViolationException::class);
-
-            $other = PipelineStage::factory()->for(Pipeline::factory()->create())->create(['name' => 'REVIEW']);
-
-            expect($other->refresh()->name)->toBe('REVIEW');
-        });
-    });
-
-    it('keeps names untouched on rollback and restores the original unique constraint', function () use ($migrationName, $migrationPath): void {
-        isolatedMigration($migrationName, function () use ($migrationPath): void {
-            $pipeline = Pipeline::factory()->create();
-            PipelineStage::factory()->for($pipeline)->create(['name' => 'Review', 'created_at' => now()->subMinutes(3)]);
-            $renamed = PipelineStage::factory()->for($pipeline)->create(['name' => 'review', 'created_at' => now()->subMinutes(2)]);
-            $legitimate = PipelineStage::factory()->for($pipeline)->create(['name' => 'Phase-2', 'created_at' => now()->subMinute()]);
-
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
-            expect($rollback)->toBe(Command::SUCCESS);
-
-            expect($renamed->refresh()->name)->toBe('review-2')
-                ->and($legitimate->refresh()->name)->toBe('Phase-2')
-                ->and(PipelineStageNameUniquenessFeature::active())->toBeFalse()
-                ->and(PipelineNameUniquenessFeature::active())->toBeTrue();
-
-            PipelineStage::factory()->for($pipeline)->create(['name' => 'REVIEW']);
-
-            expect(fn () => PipelineStage::factory()->for($pipeline)->create(['name' => 'REVIEW']))
-                ->toThrow(UniqueConstraintViolationException::class);
-        });
-    });
-});
-
 describe('2026_10_30_002949_increase_occurred_at_precision_on_email_message_events_table', function (): void {
     it('keeps fractional seconds on occurred_at', function (): void {
         isolatedMigration('2026_10_30_002949_increase_occurred_at_precision_on_email_message_events_table', function (): void {
@@ -1506,62 +1344,6 @@ describe('2026_11_04_120100_convert_contracts_name_to_citext_and_enforce_unique'
             expect(DB::table('contracts')->where('id', $firstId)->value('name'))->toBe('Master Agreement')
                 ->and(DB::table('contracts')->where('id', $secondId)->value('name'))->toBe('master agreement-2')
                 ->and(ContractNameUniquenessFeature::active())->toBeFalse();
-        });
-    });
-});
-
-// TODO: Cleanup Task (contacts-permission-consolidation): delete this describe and the test within
-describe('2026_11_10_191246_tmp_grant_contacts_permissions_to_users_and_roles_with_related_permissions', function (): void {
-    it('grants the equivalent contacts permissions to users and roles with a related permission', function (): void {
-        isolatedMigration('2026_11_10_191246_tmp_grant_contacts_permissions_to_users_and_roles_with_related_permissions', function (): void {
-            $actions = ['view-any', 'create', '*.view', '*.update', '*.delete', '*.restore', '*.force-delete'];
-            $permissionsFor = fn (string $prefix): array => array_map(fn (string $action): string => "{$prefix}.{$action}", $actions);
-            $contactsPermissions = $permissionsFor('contacts');
-
-            $contactUser = User::factory()->create();
-            $contactUser->givePermissionTo([...$permissionsFor('contact'), 'contact.import']);
-
-            $fileUser = User::factory()->create();
-            $fileUser->givePermissionTo($permissionsFor('engagement_file'));
-
-            $responseUser = User::factory()->create();
-            $responseUser->givePermissionTo($permissionsFor('engagement_response'));
-
-            $timelineUser = User::factory()->create();
-            $timelineUser->givePermissionTo('engagement.view-any', 'engagement.*.view');
-
-            $sendUser = User::factory()->create();
-            $sendUser->givePermissionTo('engagement.create');
-
-            $systemUser = SystemUser::factory()->create();
-            $systemUser->givePermissionTo('contact.view-any');
-
-            $roleUser = User::factory()->create();
-            $role = Role::factory()->create();
-            $role->givePermissionTo('engagement.*.update');
-            $roleUser->assignRole($role);
-
-            $unrelatedUser = User::factory()->create();
-            $unrelatedUser->givePermissionTo('product.view-any');
-
-            expect(ContactPermissionConsolidationFeature::active())->toBeFalse();
-
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/contact/database/migrations/2026_11_10_191246_tmp_grant_contacts_permissions_to_users_and_roles_with_related_permissions.php']);
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $directPermissionNames = fn (User|SystemUser $user): array => $user->refresh()->getDirectPermissions()->pluck('name')->filter(fn (string $name): bool => str_starts_with($name, 'contacts.'))->sort()->values()->all();
-            $sorted = fn (array $names): array => collect($names)->sort()->values()->all();
-
-            expect($directPermissionNames($contactUser))->toBe($sorted([...$contactsPermissions, 'contacts.import']))
-                ->and($directPermissionNames($fileUser))->toBe($sorted($contactsPermissions))
-                ->and($directPermissionNames($responseUser))->toBe($sorted($contactsPermissions))
-                ->and($directPermissionNames($timelineUser))->toBe($sorted(['contacts.view-any', 'contacts.*.view']))
-                ->and($directPermissionNames($sendUser))->toBe($sorted(['contacts.view-any', 'contacts.*.view', 'contacts.*.update']))
-                ->and($directPermissionNames($systemUser))->toBe($sorted(['contacts.view-any']))
-                ->and($role->refresh()->permissions()->pluck('name')->all())->toContain('contacts.*.update')
-                ->and($directPermissionNames($unrelatedUser))->toBe([])
-                ->and($unrelatedUser->refresh()->getDirectPermissions()->pluck('name')->all())->toBe(['product.view-any'])
-                ->and(ContactPermissionConsolidationFeature::active())->toBeTrue();
         });
     });
 });
