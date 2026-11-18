@@ -43,7 +43,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
-use App\Features\StepDescriptionFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
@@ -115,8 +114,7 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
                         Textarea::make('description')
                             ->label('Step Description')
                             ->string()
-                            ->columnSpanFull()
-                            ->visible(fn (): bool => StepDescriptionFeature::active()),
+                            ->columnSpanFull(),
                         $this->fieldBuilder('content'),
                     ])
                     ->addActionLabel('New step')
@@ -167,7 +165,7 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
             foreach ($state['steps'] ?? [] as $stepState) {
                 $step = $form->steps()->create([
                     'label' => $stepState['label'] ?? '',
-                    ...(StepDescriptionFeature::active() ? ['description' => $stepState['description'] ?? null] : []),
+                    'description' => $stepState['description'] ?? null,
                     'sort' => $sort++,
                     'content' => ['type' => 'doc', 'content' => []],
                 ]);
@@ -239,7 +237,7 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
                     ->get()
                     ->map(fn (ServiceRequestFormStep $step): array => [
                         'label' => $step->label,
-                        ...(StepDescriptionFeature::active() ? ['description' => $step->description] : []),
+                        'description' => $step->description,
                         'content' => $step->content,
                     ])
                     ->all()
