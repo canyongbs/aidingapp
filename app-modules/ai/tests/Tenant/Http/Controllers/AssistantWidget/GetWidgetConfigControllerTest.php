@@ -37,7 +37,6 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Settings\AiDisclaimerSettings;
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\AiDisclaimerFeature;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\File;
 use Illuminate\Testing\TestResponse;
@@ -183,14 +182,6 @@ it('does not expose the AI disclaimer when it is disabled', function () use ($ge
     $disclaimerSettings = app(AiDisclaimerSettings::class);
     $disclaimerSettings->is_enabled = false;
     $disclaimerSettings->save();
-
-    $getWidgetConfig()
-        ->assertOk()
-        ->assertJson(['ai_disclaimer' => null]);
-});
-
-it('does not expose the AI disclaimer before the feature is activated', function () use ($getWidgetConfig): void {
-    AiDisclaimerFeature::deactivate();
 
     $getWidgetConfig()
         ->assertOk()

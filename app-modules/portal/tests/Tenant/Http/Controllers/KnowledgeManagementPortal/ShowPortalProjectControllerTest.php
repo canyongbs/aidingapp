@@ -74,9 +74,9 @@ it('shows guest-visible pipeline tasks grouped by milestone', function (): void 
         'name' => 'Complete',
         'classification' => PipelineStageClassification::Complete,
     ]);
-    $activeMilestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Interior Areas']);
-    $emptyMilestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Security Systems']);
-    $hiddenMilestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Internal Work']);
+    $activeMilestone = ProjectMilestone::factory()->forProject($project)->create(['title' => 'Interior Areas']);
+    $emptyMilestone = ProjectMilestone::factory()->forProject($project)->create(['title' => 'Security Systems']);
+    $hiddenMilestone = ProjectMilestone::factory()->forProject($project)->create(['title' => 'Internal Work']);
 
     $planningEntry = PipelineEntry::factory()
         ->for($planningStage, 'pipelineStage')
@@ -245,9 +245,9 @@ it('does not report a milestone as empty when its tasks fall on a later page', f
     $pipeline = Pipeline::factory()->for($project)->create();
     $stage = PipelineStage::factory()->for($pipeline)->create();
 
-    $fullMilestone = ProjectMilestone::factory()->for($project)->create(['title' => 'A Milestone']);
-    $laterPageMilestone = ProjectMilestone::factory()->for($project)->create(['title' => 'B Milestone']);
-    $emptyMilestone = ProjectMilestone::factory()->for($project)->create(['title' => 'C Milestone']);
+    $fullMilestone = ProjectMilestone::factory()->forProject($project)->create(['title' => 'A Milestone']);
+    $laterPageMilestone = ProjectMilestone::factory()->forProject($project)->create(['title' => 'B Milestone']);
+    $emptyMilestone = ProjectMilestone::factory()->forProject($project)->create(['title' => 'C Milestone']);
 
     PipelineEntry::factory()->count(50)->for($stage, 'pipelineStage')->for($fullMilestone, 'milestone')->create();
     $laterPageEntry = PipelineEntry::factory()->for($stage, 'pipelineStage')->for($laterPageMilestone, 'milestone')->create();
@@ -298,7 +298,7 @@ it('does not show archived pipeline tasks or milestones', function (): void {
 
     $pipeline = Pipeline::factory()->for($project)->create(['name' => 'Active Pipeline']);
     $stage = PipelineStage::factory()->for($pipeline)->create();
-    $milestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Active Milestone']);
+    $milestone = ProjectMilestone::factory()->forProject($project)->create(['title' => 'Active Milestone']);
     PipelineEntry::factory()
         ->for($stage, 'pipelineStage')
         ->for($milestone, 'milestone')
@@ -307,7 +307,7 @@ it('does not show archived pipeline tasks or milestones', function (): void {
     $archivedEntry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create(['name' => 'Archived Task']);
     $archivedEntry->archive();
 
-    $archivedMilestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Archived Milestone']);
+    $archivedMilestone = ProjectMilestone::factory()->forProject($project)->create(['title' => 'Archived Milestone']);
     PipelineEntry::factory()
         ->for($stage, 'pipelineStage')
         ->for($archivedMilestone, 'milestone')

@@ -35,6 +35,7 @@
 */
 
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 it('excludes its basic auth credentials from serialization and audits', function (): void {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->basicAuth()->create();
@@ -55,4 +56,11 @@ it('computes is_max_latency_enabled from whether max_latency_ms is set', functio
 
     expect($enabled->is_max_latency_enabled)->toBeTrue()
         ->and($disabled->is_max_latency_enabled)->toBeFalse();
+});
+
+it('does not allow two live service monitoring targets with names that differ only by case', function (): void {
+    ServiceMonitoringTarget::factory()->create(['name' => 'Customer Website']);
+
+    expect(fn () => ServiceMonitoringTarget::factory()->create(['name' => 'CUSTOMER WEBSITE']))
+        ->toThrow(UniqueConstraintViolationException::class);
 });
