@@ -34,14 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+use AidingApp\Form\Filament\Blocks\CheckboxesFormFieldBlock;
+use AidingApp\Form\Filament\Blocks\CheckboxFormFieldBlock;
+use AidingApp\Form\Filament\Blocks\FormFieldBlockRegistry;
+use App\Features\CheckboxesFormFieldFeature;
 
-use App\Support\AbstractFeatureFlag;
+// TODO: Cleanup Task (convert-checkbox-form-fields): delete this test.
+it('offers the legacy checkbox block while the feature flag is inactive', function (): void {
+    CheckboxesFormFieldFeature::deactivate();
 
-class PipelineStageNameUniquenessFeature extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
-    {
-        return false;
-    }
-}
+    expect(FormFieldBlockRegistry::get())
+        ->toContain(CheckboxFormFieldBlock::class)
+        ->and(FormFieldBlockRegistry::get())->not()->toContain(CheckboxesFormFieldBlock::class)
+        ->and(FormFieldBlockRegistry::keyByType())->toHaveKey('checkbox')->not()->toHaveKey('checkboxes');
+});
+
+it('offers the checkboxes block instead of the legacy checkbox block', function (): void {
+    expect(FormFieldBlockRegistry::get())
+        ->toContain(CheckboxesFormFieldBlock::class)
+        ->and(FormFieldBlockRegistry::get())->not()->toContain(CheckboxFormFieldBlock::class)
+        ->and(FormFieldBlockRegistry::keyByType())->toHaveKey('checkboxes')->not()->toHaveKey('checkbox');
+});

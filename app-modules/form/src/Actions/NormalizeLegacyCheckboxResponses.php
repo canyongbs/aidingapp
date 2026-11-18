@@ -34,14 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\Form\Actions;
 
-use App\Support\AbstractFeatureFlag;
+use AidingApp\Form\Filament\Blocks\CheckboxesFormFieldBlock;
+use AidingApp\Form\Models\SubmissibleField;
+use Illuminate\Support\Collection;
 
-class PipelineNameUniquenessFeature extends AbstractFeatureFlag
+// TODO: Cleanup Task (convert-checkbox-form-fields): delete this action and its call sites, and the `isLegacyCheckbox` config marker set by the tmp migration.
+class NormalizeLegacyCheckboxResponses
 {
-    public function resolve(mixed $scope): mixed
+    public const MARKER = 'isLegacyCheckbox';
+
+    /**
+     * Forms opened before the checkbox to checkboxes migration still submit a boolean for the converted fields.
+     *
+     * @param Collection<int, SubmissibleField> $fields
+     * @param array<string, mixed> $responses keyed by field ID
+     *
+     * @return array<string, mixed>
+     */
+    public function __invoke(Collection $fields, array $responses): array
     {
-        return false;
+        foreach ($fields as $field) {
+            if ($field->type !== CheckboxesFormFieldBlock::type()
+                || ! ($field->config[self::MARKER] ?? false)
+                || ! array_key_exists($field->getKey(), $responses)
+                || ! is_bool($responses[$field->getKey()])) {
+                continue;
+            }
+
+            $value = $field->config['options'][0]['value'] ?? null;
+
+            $responses[$field->getKey()] = $responses[$field->getKey()] && is_string($value) ? [$value] : [];
+        }
+
+        return $responses;
     }
 }

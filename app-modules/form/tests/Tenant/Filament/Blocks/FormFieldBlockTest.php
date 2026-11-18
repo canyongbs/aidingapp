@@ -34,14 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+use AidingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
+use AidingApp\Form\Filament\Blocks\FormFieldBlock;
+use AidingApp\Form\Filament\Blocks\RadioFormFieldBlock;
+use AidingApp\Form\Filament\Blocks\TextInputFormFieldBlock;
+use Filament\Actions\Action;
 
-use App\Support\AbstractFeatureFlag;
+it('configures editor actions as slide-overs', function (string $block): void {
+    $action = $block::configureEditorAction(Action::make('configure'));
 
-class ContactPermissionConsolidationFeature extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
-    {
-        return false;
-    }
-}
+    expect($action->isModalSlideOver())->toBeTrue();
+})->with([
+    'base block' => FormFieldBlock::class,
+    'text input block' => TextInputFormFieldBlock::class,
+    'radio block' => RadioFormFieldBlock::class,
+    'educatable email block' => EducatableEmailFormFieldBlock::class,
+]);
+
+it('always uses the block type label for the rich editor header, regardless of the configured field label', function (): void {
+    expect(TextInputFormFieldBlock::getPreviewLabel(['label' => 'First Name']))->toBe('Text input');
+});
+
+it('still renders the configured field label inside the block preview body', function (): void {
+    expect(TextInputFormFieldBlock::toPreviewHtml(['label' => 'First Name', 'isRequired' => true]))
+        ->toContain('First Name');
+});
+
+it('falls back to the block type label inside the preview body when no field label has been configured yet', function (): void {
+    expect(TextInputFormFieldBlock::toPreviewHtml([]))
+        ->toContain('Text input');
+});

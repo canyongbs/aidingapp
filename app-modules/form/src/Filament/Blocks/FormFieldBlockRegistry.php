@@ -36,6 +36,7 @@
 
 namespace AidingApp\Form\Filament\Blocks;
 
+use App\Features\CheckboxesFormFieldFeature;
 use Illuminate\Support\Collection;
 
 class FormFieldBlockRegistry
@@ -54,7 +55,8 @@ class FormFieldBlockRegistry
             RadioFormFieldBlock::class,
             DateFormFieldBlock::class,
             TimeFormFieldBlock::class,
-            CheckboxFormFieldBlock::class,
+            // TODO: Cleanup Task (convert-checkbox-form-fields): keep only CheckboxesFormFieldBlock, then delete CheckboxFormFieldBlock and its `checkbox` preview and submission views.
+            CheckboxesFormFieldFeature::active() ? CheckboxesFormFieldBlock::class : CheckboxFormFieldBlock::class,
             SignatureFormFieldBlock::class,
             EmailFormFieldBlock::class,
             NumberFormFieldBlock::class,
