@@ -35,7 +35,6 @@
 */
 
 use AidingApp\Contact\Models\Organization;
-use App\Features\OrganizationArchivingFeature;
 
 it('excludes archived organizations', function (): void {
     $organization = Organization::factory()->create();
@@ -43,18 +42,4 @@ it('excludes archived organizations', function (): void {
 
     expect(Organization::query()->withoutArchived()->pluck('id')->all())
         ->toBe([$organization->getKey()]);
-});
-
-it('does not filter when the organization archiving feature is inactive', function (): void {
-    $organization = Organization::factory()->create();
-    $archivedOrganization = Organization::factory()->archived()->create();
-
-    OrganizationArchivingFeature::deactivate();
-
-    $query = Organization::query()->withoutArchived();
-
-    expect($query->pluck('id')->all())
-        ->toEqualCanonicalizing([$organization->getKey(), $archivedOrganization->getKey()]);
-
-    expect($query->toRawSql())->not->toContain('archived_at');
 });

@@ -43,7 +43,6 @@ use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Rules\OrganizationNameNotArchived;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
 use AidingApp\Contact\Support\OrganizationDomainsLock;
-use App\Features\OrganizationArchivingFeature;
 use App\Filament\Forms\Components\AddressInput;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
@@ -78,11 +77,8 @@ class CreateOrganization extends CreateRecord
                             ->required()
                             ->string()
                             // Stops at the first failure, so an archived match shows its own message instead of the generic unique one.
-                            ->rule('bail', fn (): bool => OrganizationArchivingFeature::active())
-                            ->rule(
-                                fn (): OrganizationNameNotArchived => new OrganizationNameNotArchived(),
-                                fn (): bool => OrganizationArchivingFeature::active(),
-                            )
+                            ->rule('bail')
+                            ->rule(fn (): OrganizationNameNotArchived => new OrganizationNameNotArchived())
                             ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
                         TextInput::make('email')
                             ->label('Organization Email')

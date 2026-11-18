@@ -38,7 +38,6 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageGuests;
 use AidingApp\Project\Filament\Resources\Projects\RelationManagers\GuestOrganizationsRelationManager;
 use AidingApp\Project\Models\Project;
-use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
@@ -153,25 +152,6 @@ it('marks only archived guest organizations with the archived indicator', functi
 
     expect(substr_count($html, 'This organization is archived.'))->toBe(substr_count(view('filament.tables.columns.organization.archived-name', ['name' => 'x'])->render(), 'This organization is archived.'))
         ->toBeGreaterThan(0);
-});
-
-it('does not mark archived guest organizations while organization archiving is inactive', function (): void {
-    OrganizationArchivingFeature::deactivate();
-
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-
-    $archivedOrganization = Organization::factory()->archived()->create();
-
-    $project->guestOrganizations()->attach($archivedOrganization->getKey());
-
-    Livewire::test(GuestOrganizationsRelationManager::class, [
-        'ownerRecord' => $project,
-        'pageClass' => ManageGuests::class,
-    ])
-        ->assertCanSeeTableRecords([$archivedOrganization])
-        ->assertDontSee('This organization is archived.');
 });
 
 it('can detach a guest organization from a project', function (): void {

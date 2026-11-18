@@ -40,7 +40,6 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Support\OrganizationDomainsLock;
-use App\Features\OrganizationArchivingFeature;
 use App\Models\Import;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Illuminate\Support\Str;
@@ -443,24 +442,4 @@ it('links unaffiliated contacts on the new domain when an import unarchives an o
 
     expect($organization->refresh()->isArchived())->toBeFalse()
         ->and($contact->refresh()->organization_id)->toBe($organization->getKey());
-});
-
-it('updates but does not unarchive an archived organization when the organization archiving feature is inactive', function () use ($runOrganizationImport): void {
-    OrganizationArchivingFeature::deactivate();
-
-    $organization = Organization::factory()->archived()->create([
-        'name' => 'Archived College',
-        'city' => 'Old City',
-    ]);
-
-    $runOrganizationImport([
-        'name' => 'Archived College',
-        'city' => 'New City',
-    ]);
-
-    $organization->refresh();
-
-    expect(Organization::query()->where('name', 'Archived College')->count())->toBe(1)
-        ->and($organization->isArchived())->toBeTrue()
-        ->and($organization->city)->toBe('New City');
 });

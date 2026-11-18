@@ -40,7 +40,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\CreateContactRequestFactory;
 use App\Features\ContactArchivingFeature;
-use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 use Filament\Forms\Components\TableSelect\Livewire\TableSelectLivewireComponent;
 use Filament\Forms\Components\TextInput;
@@ -221,19 +220,5 @@ describe('organization picker', function (): void {
         ])
             ->assertCanSeeTableRecords([$organization])
             ->assertCanNotSeeTableRecords([$archivedOrganization]);
-    });
-
-    it('lists archived organizations when organization archiving is inactive', function (): void {
-        OrganizationArchivingFeature::deactivate();
-        asSuperAdmin();
-
-        $archivedOrganization = Organization::factory()->archived()->create();
-
-        Livewire::test(TableSelectLivewireComponent::class, [
-            'tableConfiguration' => base64_encode(OrganizationsTable::class),
-            'model' => Contact::class,
-            'relationshipName' => 'organization',
-        ])
-            ->assertCanSeeTableRecords([$archivedOrganization]);
     });
 });

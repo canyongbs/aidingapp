@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Rules;
 
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Support\OrganizationEmailDomainLookup;
-use App\Features\OrganizationArchivingFeature;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Builder;
@@ -75,7 +74,7 @@ class UniqueOrganizationDomain implements ValidationRule
             return;
         }
 
-        if (OrganizationArchivingFeature::active() && $this->holders($value)->onlyArchived()->exists()) {
+        if ($this->holders($value)->onlyArchived()->exists()) {
             $fail('This domain is reserved by an archived organization.');
         }
     }
