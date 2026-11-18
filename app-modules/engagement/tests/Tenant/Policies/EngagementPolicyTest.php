@@ -34,13 +34,9 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Models\Permission;
-use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Engagement\Models\Engagement;
-use App\Features\ContactPermissionConsolidationFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
-use Spatie\Permission\PermissionRegistrar;
 
 $abilities = [
     'viewAny' => ['viewAny', 'view-any', false],
@@ -64,23 +60,3 @@ it('requires permission to both view and update contacts to create an engagement
         ->and(Gate::forUser(User::factory()->create()->givePermissionTo('contacts.create', 'contacts.view-any'))->inspect('create', Engagement::class)->denied())->toBeTrue()
         ->and(Gate::forUser(User::factory()->create()->givePermissionTo('contacts.*.view', 'contacts.*.update'))->inspect('create', Engagement::class)->allowed())->toBeTrue();
 });
-
-// TODO: Cleanup Task (contacts-permission-consolidation): delete this test, the feature will always be active
-it('is governed by the engagement permissions while the contacts permission consolidation is inactive', function (string $ability, string $action, bool $forRecord): void {
-    ContactPermissionConsolidationFeature::deactivate();
-
-    $legacyPermission = Permission::factory()->create([
-        'name' => "engagement.{$action}",
-        'guard_name' => 'web',
-        'group_id' => PermissionGroup::create(['name' => 'Engagement'])->getKey(),
-    ]);
-    app(PermissionRegistrar::class)->forgetCachedPermissions();
-
-    $arguments = $forRecord ? Engagement::factory()->make(['dispatched_at' => null]) : Engagement::class;
-
-    expect(Gate::forUser(User::factory()->create()->givePermissionTo("contacts.{$action}"))->inspect($ability, $arguments)->denied())->toBeTrue()
-        ->and(Gate::forUser(User::factory()->create()->givePermissionTo($legacyPermission))->inspect($ability, $arguments)->allowed())->toBeTrue();
-})->with([
-    ...$abilities,
-    'create' => ['create', 'create', false],
-]);

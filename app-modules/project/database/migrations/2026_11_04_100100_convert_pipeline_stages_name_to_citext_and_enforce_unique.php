@@ -34,57 +34,35 @@
 </COPYRIGHT>
 */
 
-use App\Features\PipelineStageNameUniquenessFeature;
-use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
-    /*
-     * TODO: Cleanup Task (pipeline-name-uniqueness): after PipelineStageNameUniquenessFeature is removed:
-     * - remove the `FixesDuplicateNames` trait, the `$chunkSize`, `$usesSoftDeletes` and `$groupByColumns` properties, and the `fixDuplicates()` call
-     * - keep the citext column conversion and the unique constraint, they are permanent
-     */
-    use FixesDuplicateNames;
-
     private string $table = 'pipeline_stages';
 
     private string $column = 'name';
 
-    /** @var array<int, string> */
-    private array $groupByColumns = ['pipeline_id'];
-
-    private int $chunkSize = 500;
-
-    private bool $usesSoftDeletes = false;
-
     public function up(): void
     {
         DB::transaction(function (): void {
-            // Block concurrent writes so the repair and the unique constraint operate on a stable set of rows.
+            // Block concurrent writes so the unique constraint is created against a stable set of rows.
             DB::statement("LOCK TABLE {$this->table} IN ACCESS EXCLUSIVE MODE");
 
             DB::statement('ALTER TABLE pipeline_stages DROP CONSTRAINT IF EXISTS pipeline_stages_name_pipeline_id_unique');
-
-            $this->fixDuplicates();
 
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
 
             // Deferrable so a multi-stage rename (e.g. swapping or shifting names) can be saved in one
             // transaction with `SET CONSTRAINTS ALL DEFERRED` without tripping on intermediate states.
             DB::statement("ALTER TABLE {$this->table} ADD CONSTRAINT pipeline_stages_name_pipeline_id_unique UNIQUE ({$this->column}, pipeline_id) DEFERRABLE INITIALLY IMMEDIATE");
-
-            PipelineStageNameUniquenessFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function (): void {
-            PipelineStageNameUniquenessFeature::deactivate();
-
             DB::statement('ALTER TABLE pipeline_stages DROP CONSTRAINT IF EXISTS pipeline_stages_name_pipeline_id_unique');
 
             DB::statement('DROP INDEX IF EXISTS pipeline_stages_name_pipeline_id_unique');

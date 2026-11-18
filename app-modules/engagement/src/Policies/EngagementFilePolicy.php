@@ -37,7 +37,6 @@
 namespace AidingApp\Engagement\Policies;
 
 use AidingApp\Engagement\Models\EngagementFile;
-use App\Features\ContactPermissionConsolidationFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -46,7 +45,7 @@ class EngagementFilePolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? 'contacts.view-any' : 'engagement_file.view-any',
+            abilities: 'contacts.view-any',
             denyResponse: 'You do not have permissions to view engagement files.'
         );
     }
@@ -54,7 +53,7 @@ class EngagementFilePolicy
     public function view(Authenticatable $authenticatable, EngagementFile $engagementFile): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.view'] : ['engagement_file.*.view'],
+            abilities: ['contacts.*.view'],
             denyResponse: 'You do not have permissions to view this engagement file.'
         );
     }
@@ -62,7 +61,7 @@ class EngagementFilePolicy
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? 'contacts.create' : 'engagement_file.create',
+            abilities: 'contacts.create',
             denyResponse: 'You do not have permissions to create engagement files.'
         );
     }
@@ -70,7 +69,7 @@ class EngagementFilePolicy
     public function update(Authenticatable $authenticatable, EngagementFile $engagementFile): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.update'] : ['engagement_file.*.update'],
+            abilities: ['contacts.*.update'],
             denyResponse: 'You do not have permissions to update this engagement file.'
         );
     }
@@ -78,7 +77,7 @@ class EngagementFilePolicy
     public function delete(Authenticatable $authenticatable, EngagementFile $engagementFile): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.delete'] : ['engagement_file.*.delete'],
+            abilities: ['contacts.*.delete'],
             denyResponse: 'You do not have permissions to delete this engagement file.'
         );
     }
@@ -86,7 +85,7 @@ class EngagementFilePolicy
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.delete'] : ['engagement_file.*.delete'],
+            abilities: ['contacts.*.delete'],
             denyResponse: 'You do not have permissions to delete any engagement file.'
         );
     }
@@ -94,7 +93,7 @@ class EngagementFilePolicy
     public function restore(Authenticatable $authenticatable, EngagementFile $engagementFile): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.restore'] : ['engagement_file.*.restore'],
+            abilities: ['contacts.*.restore'],
             denyResponse: 'You do not have permissions to restore this engagement file.'
         );
     }
@@ -102,7 +101,7 @@ class EngagementFilePolicy
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.restore'] : ['engagement_file.*.restore'],
+            abilities: ['contacts.*.restore'],
             denyResponse: 'You do not have permissions to restore any engagement file.'
         );
     }
@@ -110,7 +109,7 @@ class EngagementFilePolicy
     public function forceDelete(Authenticatable $authenticatable, EngagementFile $engagementFile): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.force-delete'] : ['engagement_file.*.force-delete'],
+            abilities: ['contacts.*.force-delete'],
             denyResponse: 'You do not have permissions to force delete this engagement file.'
         );
     }
@@ -118,7 +117,7 @@ class EngagementFilePolicy
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.force-delete'] : ['engagement_file.*.force-delete'],
+            abilities: ['contacts.*.force-delete'],
             denyResponse: 'You do not have permissions to force delete any engagement file.'
         );
     }

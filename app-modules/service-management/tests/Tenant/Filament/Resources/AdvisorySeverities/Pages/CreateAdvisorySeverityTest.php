@@ -38,9 +38,7 @@ use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\AdvisorySe
 use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\Pages\CreateAdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\AdvisorySeverityRequestFactory;
-use App\Features\AdvisorySeverityNameUniquenessFeature;
 use App\Models\User;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -132,22 +130,4 @@ test('CreateAdvisorySeverity allows the name of a soft deleted advisory severity
         ->assertHasNoFormErrors();
 
     expect(AdvisorySeverity::query()->where('name', 'Critical')->count())->toBe(1);
-});
-
-// TODO: Cleanup Task (advisory-status-and-severity-name-uniqueness): delete this describe and the test within
-describe('name uniqueness feature flag', function (): void {
-    it('does not apply the unique form rule when the feature is disabled', function (): void {
-        AdvisorySeverityNameUniquenessFeature::deactivate();
-
-        asSuperAdmin();
-
-        AdvisorySeverity::factory()->create(['name' => 'Critical']);
-
-        $request = AdvisorySeverityRequestFactory::new()->state(['name' => 'Critical'])->create();
-
-        expect(fn () => Livewire::test(CreateAdvisorySeverity::class)
-            ->fillForm($request)
-            ->call('create'))
-            ->toThrow(UniqueConstraintViolationException::class);
-    });
 });

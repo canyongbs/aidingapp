@@ -38,9 +38,7 @@ use AidingApp\ServiceManagement\Filament\Resources\AdvisoryStatuses\AdvisoryStat
 use AidingApp\ServiceManagement\Filament\Resources\AdvisoryStatuses\Pages\CreateAdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\AdvisoryStatusRequestFactory;
-use App\Features\AdvisoryStatusNameUniquenessFeature;
 use App\Models\User;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -131,22 +129,4 @@ test('CreateAdvisoryStatus allows the name of a soft deleted advisory status', f
         ->assertHasNoFormErrors();
 
     expect(AdvisoryStatus::query()->where('name', 'Investigating')->count())->toBe(1);
-});
-
-// TODO: Cleanup Task (advisory-status-and-severity-name-uniqueness): delete this describe and the test within
-describe('name uniqueness feature flag', function (): void {
-    it('does not apply the unique form rule when the feature is disabled', function (): void {
-        AdvisoryStatusNameUniquenessFeature::deactivate();
-
-        asSuperAdmin();
-
-        AdvisoryStatus::factory()->create(['name' => 'Investigating']);
-
-        $request = AdvisoryStatusRequestFactory::new()->state(['name' => 'Investigating'])->create();
-
-        expect(fn () => Livewire::test(CreateAdvisoryStatus::class)
-            ->fillForm($request)
-            ->call('create'))
-            ->toThrow(UniqueConstraintViolationException::class);
-    });
 });
