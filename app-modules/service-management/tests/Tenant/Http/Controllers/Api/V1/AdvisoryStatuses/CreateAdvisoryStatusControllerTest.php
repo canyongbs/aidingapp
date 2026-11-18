@@ -36,12 +36,9 @@
 
 use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use App\Features\AdvisoryStatusNameUniquenessFeature;
 use App\Models\SystemUser;
-use Illuminate\Database\UniqueConstraintViolationException;
 
 use function Pest\Laravel\postJson;
-use function Pest\Laravel\withoutExceptionHandling;
 use function Tests\actingAsApiUser;
 
 $actingAsAdvisoryStatusCreator = function (): SystemUser {
@@ -132,19 +129,4 @@ it('allows the name of a soft deleted advisory status to be reused', function ()
 
     postJson(route('api.v1.advisory-statuses.store', [], false), ['name' => 'Investigating', 'classification' => 'open'])
         ->assertCreated();
-});
-
-// TODO: Cleanup Task (advisory-status-and-severity-name-uniqueness): delete this test
-it('does not validate name uniqueness when the name uniqueness feature is inactive', function () use ($actingAsAdvisoryStatusCreator): void {
-    AdvisoryStatusNameUniquenessFeature::deactivate();
-
-    $actingAsAdvisoryStatusCreator();
-
-    AdvisoryStatus::factory()->create(['name' => 'Investigating']);
-
-    withoutExceptionHandling();
-
-    // The unique index exists in tests, so the database rejects the duplicate instead of validation.
-    expect(fn () => postJson(route('api.v1.advisory-statuses.store', [], false), ['name' => 'Investigating', 'classification' => 'open']))
-        ->toThrow(UniqueConstraintViolationException::class);
 });

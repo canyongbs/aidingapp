@@ -94,29 +94,17 @@ class SaveAdvisoryUpdate
     }
 
     /**
-     * Statuses are referenced by name, which may not be unique while the uniqueness flag is inactive, so an
-     * ambiguous name is reported rather than guessed.
-     *
-     * TODO: Cleanup Task (advisory-status-and-severity-name-uniqueness): once the flag is removed, every name is unique,
-     * so look the ID up with `value('id')` and drop the `limit(2)` and the ambiguous-name error.
-     *
      * @throws ValidationException
      */
     private function resolveStatusId(string $name): string
     {
-        $ids = AdvisoryStatus::query()->where('name', $name)->limit(2)->pluck('id');
+        $id = AdvisoryStatus::query()->where('name', $name)->value('id');
 
-        if ($ids->count() !== 1) {
+        if (! is_string($id)) {
             throw ValidationException::withMessages([
-                'status' => $ids->isEmpty()
-                    ? 'The specified status does not exist.'
-                    : 'The specified status name is ambiguous.',
+                'status' => 'The specified status does not exist.',
             ]);
         }
-
-        $id = $ids->first();
-
-        assert(is_string($id));
 
         return $id;
     }

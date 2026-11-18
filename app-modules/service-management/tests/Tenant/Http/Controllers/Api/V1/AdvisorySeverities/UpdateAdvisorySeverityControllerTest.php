@@ -35,13 +35,10 @@
 */
 
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use App\Features\AdvisorySeverityNameUniquenessFeature;
 use App\Models\SystemUser;
 use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\UniqueConstraintViolationException;
 
 use function Pest\Laravel\patchJson;
-use function Pest\Laravel\withoutExceptionHandling;
 use function Tests\actingAsApiUser;
 
 $actingAsAdvisorySeverityUpdater = function (): SystemUser {
@@ -176,20 +173,4 @@ it('returns not found for a soft deleted advisory severity', function () use ($a
 
     patchJson(route('api.v1.advisory-severities.update', ['advisorySeverity' => $advisorySeverity], false), ['name' => 'Major'])
         ->assertNotFound();
-});
-
-// TODO: Cleanup Task (advisory-status-and-severity-name-uniqueness): delete this test
-it('does not validate name uniqueness when the name uniqueness feature is inactive', function () use ($actingAsAdvisorySeverityUpdater): void {
-    AdvisorySeverityNameUniquenessFeature::deactivate();
-
-    $actingAsAdvisorySeverityUpdater();
-
-    AdvisorySeverity::factory()->create(['name' => 'Major']);
-    $advisorySeverity = AdvisorySeverity::factory()->create(['name' => 'Critical']);
-
-    withoutExceptionHandling();
-
-    // The unique index exists in tests, so the database rejects the duplicate instead of validation.
-    expect(fn () => patchJson(route('api.v1.advisory-severities.update', ['advisorySeverity' => $advisorySeverity], false), ['name' => 'Major']))
-        ->toThrow(UniqueConstraintViolationException::class);
 });

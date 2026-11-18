@@ -35,13 +35,10 @@
 */
 
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use App\Features\AdvisorySeverityNameUniquenessFeature;
 use App\Models\SystemUser;
 use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\UniqueConstraintViolationException;
 
 use function Pest\Laravel\postJson;
-use function Pest\Laravel\withoutExceptionHandling;
 use function Tests\actingAsApiUser;
 
 $actingAsAdvisorySeverityCreator = function (): SystemUser {
@@ -144,19 +141,4 @@ it('allows the name of a soft deleted advisory severity to be reused', function 
 
     postJson(route('api.v1.advisory-severities.store', [], false), ['name' => 'Critical', 'color' => 'red'])
         ->assertCreated();
-});
-
-// TODO: Cleanup Task (advisory-status-and-severity-name-uniqueness): delete this test
-it('does not validate name uniqueness when the name uniqueness feature is inactive', function () use ($actingAsAdvisorySeverityCreator): void {
-    AdvisorySeverityNameUniquenessFeature::deactivate();
-
-    $actingAsAdvisorySeverityCreator();
-
-    AdvisorySeverity::factory()->create(['name' => 'Critical']);
-
-    withoutExceptionHandling();
-
-    // The unique index exists in tests, so the database rejects the duplicate instead of validation.
-    expect(fn () => postJson(route('api.v1.advisory-severities.store', [], false), ['name' => 'Critical', 'color' => 'red']))
-        ->toThrow(UniqueConstraintViolationException::class);
 });
