@@ -339,7 +339,7 @@ class ServiceRequestsRelationManager extends RelationManager
             if ($field && filled($response)) {
                 $submission->fields()->attach($field->id, [
                     'id' => Str::orderedUuid(),
-                    'response' => $response,
+                    'response' => is_array($response) ? json_encode($response) : $response,
                 ]);
             }
         }

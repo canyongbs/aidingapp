@@ -37,6 +37,7 @@
 namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Form\Actions\NormalizeLegacyCheckboxResponses;
 use AidingApp\Form\Actions\ResolveBlockRegistry;
 use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\UploadFormFieldBlock;
@@ -119,8 +120,15 @@ class StoreServiceRequestController extends Controller
             $validation = $this->buildCustomFieldValidation($form);
 
             try {
+                $customFields = $data['custom_fields'] ?? [];
+
+                // TODO: Cleanup Task (convert-checkbox-form-fields): remove this normalization loop.
+                foreach ($form->steps as $step) {
+                    $customFields = app(NormalizeLegacyCheckboxResponses::class)($step->fields, $customFields);
+                }
+
                 $validated = Validator::make(
-                    $data['custom_fields'] ?? [],
+                    $customFields,
                     $validation['rules'],
                     [],
                     $validation['attributes'],
