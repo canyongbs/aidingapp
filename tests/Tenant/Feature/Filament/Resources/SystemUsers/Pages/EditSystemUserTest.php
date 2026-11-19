@@ -34,10 +34,8 @@
 </COPYRIGHT>
 */
 
-use App\Features\SystemUserNameUniquenessFeature;
 use App\Filament\Resources\SystemUsers\Pages\EditSystemUser;
 use App\Models\SystemUser;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
@@ -79,20 +77,4 @@ it('allows updating a system user to a name freed up by a soft-deleted system us
         ->assertHasNoFormErrors();
 
     expect($systemUser->refresh()->name)->toBe('integration service');
-});
-
-describe('name uniqueness feature flag', function (): void {
-    it('does not apply the unique form rule when the feature is disabled', function (): void {
-        SystemUserNameUniquenessFeature::deactivate();
-
-        asSuperAdmin();
-
-        SystemUser::factory()->create(['name' => 'Integration Service']);
-        $systemUser = SystemUser::factory()->create(['name' => 'Reporting Service']);
-
-        expect(fn () => Livewire::test(EditSystemUser::class, ['record' => $systemUser->getRouteKey()])
-            ->fillForm(['name' => 'Integration Service'])
-            ->call('save'))
-            ->toThrow(UniqueConstraintViolationException::class);
-    });
 });
