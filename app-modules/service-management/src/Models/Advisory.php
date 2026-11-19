@@ -78,8 +78,8 @@ class Advisory extends Model implements Auditable
     protected $table = 'advisories';
 
     protected $attributes = [
-      'visibility' => AdvisoryVisibility::Public->value,
-      'is_visibility_restricted' => false,
+        'visibility' => AdvisoryVisibility::Public->value,
+        'is_visibility_restricted' => false,
     ];
 
     /**
