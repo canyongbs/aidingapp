@@ -961,20 +961,24 @@ $defineChangeRequestStatusNameUniquenessTests = function (string $migrationName,
             $uniqueId = $insertRecord('Minor Change', now()->subMinutes(5));
 
             $featureClass::deactivate();
-
-            expect($featureClass::active())->toBeFalse();
+            assert($featureClass::active() === false);
 
             $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
             expect($migrate)->toBe(Command::SUCCESS);
 
-            $name = fn (string $id): string => DB::table($table)->where('id', $id)->value('name');
+            $name = fn (string $id): string => (string) DB::table($table)->where('id', $id)->value('name');
+            $firstName = $name($firstId);
+            $secondName = $name($secondId);
+            $thirdName = $name($thirdId);
+            $existingSuffixedName = $name($existingSuffixedId);
+            $uniqueName = $name($uniqueId);
 
-            expect($name($firstId))->toBe('Major Change')
-                ->and($name($secondId))->toBe('major change-3')
-                ->and($name($thirdId))->toBe('MAJOR CHANGE-4')
-                ->and($name($existingSuffixedId))->toBe('Major Change-2')
-                ->and($name($uniqueId))->toBe('Minor Change')
-                ->and($featureClass::active())->toBeTrue();
+            expect($firstName)->toBe('Major Change');
+            expect($secondName)->toBe('major change-3');
+            expect($thirdName)->toBe('MAJOR CHANGE-4');
+            expect($existingSuffixedName)->toBe('Major Change-2');
+            expect($uniqueName)->toBe('Minor Change');
+            assert($featureClass::active() === true);
         });
     });
 
@@ -987,11 +991,14 @@ $defineChangeRequestStatusNameUniquenessTests = function (string $migrationName,
             $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
             expect($migrate)->toBe(Command::SUCCESS);
 
-            $name = fn (string $id): string => DB::table($table)->where('id', $id)->value('name');
+            $name = fn (string $id): string => (string) DB::table($table)->where('id', $id)->value('name');
+            $firstName = $name($firstId);
+            $secondName = $name($secondId);
+            $existingSuffixedName = $name($existingSuffixedId);
 
-            expect($name($firstId))->toBe('Ops\\Change')
-                ->and($name($secondId))->toBe('ops\\change-3')
-                ->and($name($existingSuffixedId))->toBe('Ops\\Change-2');
+            expect($firstName)->toBe('Ops\\Change');
+            expect($secondName)->toBe('ops\\change-3');
+            expect($existingSuffixedName)->toBe('Ops\\Change-2');
         });
     });
 
@@ -1003,11 +1010,12 @@ $defineChangeRequestStatusNameUniquenessTests = function (string $migrationName,
             $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
             expect($migrate)->toBe(Command::SUCCESS);
 
-            $secondName = DB::table($table)->where('id', $secondId)->value('name');
+            $firstName = (string) DB::table($table)->where('id', $firstId)->value('name');
+            $secondName = (string) DB::table($table)->where('id', $secondId)->value('name');
 
-            expect(DB::table($table)->where('id', $firstId)->value('name'))->toBe(str_repeat('A', 255))
-                ->and($secondName)->toBe(str_repeat('a', 253) . '-2')
-                ->and(mb_strlen($secondName))->toBe(255);
+            expect($firstName)->toBe(str_repeat('A', 255));
+            expect($secondName)->toBe(str_repeat('a', 253) . '-2');
+            expect(mb_strlen($secondName))->toBe(255);
         });
     });
 
@@ -1019,8 +1027,8 @@ $defineChangeRequestStatusNameUniquenessTests = function (string $migrationName,
             $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
             expect($migrate)->toBe(Command::SUCCESS);
 
-            expect(DB::table($table)->where('id', $keptId)->value('name'))->toBe('Major Change')
-                ->and(DB::table($table)->where('id', $trashedId)->value('name'))->toBe('major change');
+            expect((string) DB::table($table)->where('id', $keptId)->value('name'))->toBe('Major Change');
+            expect((string) DB::table($table)->where('id', $trashedId)->value('name'))->toBe('major change');
         });
     });
 
@@ -1060,9 +1068,9 @@ $defineChangeRequestStatusNameUniquenessTests = function (string $migrationName,
             $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
             expect($rollback)->toBe(Command::SUCCESS);
 
-            expect(DB::table($table)->where('id', $secondId)->value('name'))->toBe('major change-2')
-                ->and(DB::table($table)->where('id', $legitimateId)->value('name'))->toBe('Phase-2')
-                ->and($featureClass::active())->toBeFalse();
+            expect((string) DB::table($table)->where('id', $secondId)->value('name'))->toBe('major change-2');
+            expect((string) DB::table($table)->where('id', $legitimateId)->value('name'))->toBe('Phase-2');
+            assert($featureClass::active() === false);
 
             $insertRecord('Major Change', now());
 
