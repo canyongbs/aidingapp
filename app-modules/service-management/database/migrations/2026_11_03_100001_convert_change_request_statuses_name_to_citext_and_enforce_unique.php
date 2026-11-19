@@ -45,12 +45,12 @@ return new class () extends Migration {
     {
         DB::transaction(function (): void {
             // Blocks concurrent writes from code that predates the unique index until the index exists.
-      DB::statement('LOCK TABLE change_request_statuses IN ACCESS EXCLUSIVE MODE');
+            DB::statement('LOCK TABLE change_request_statuses IN ACCESS EXCLUSIVE MODE');
 
-      DB::statement('ALTER TABLE change_request_statuses ALTER COLUMN name TYPE citext');
+            DB::statement('ALTER TABLE change_request_statuses ALTER COLUMN name TYPE citext');
 
-      Schema::table('change_request_statuses', function (Blueprint $table): void {
-        $table->uniqueIndex('name', 'change_request_statuses_name_unique')
+            Schema::table('change_request_statuses', function (Blueprint $table): void {
+                $table->uniqueIndex('name', 'change_request_statuses_name_unique')
                     ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
             });
         });
@@ -59,9 +59,9 @@ return new class () extends Migration {
     public function down(): void
     {
         DB::transaction(function (): void {
-      DB::statement('DROP INDEX IF EXISTS change_request_statuses_name_unique');
+            DB::statement('DROP INDEX IF EXISTS change_request_statuses_name_unique');
 
-      DB::statement('ALTER TABLE change_request_statuses ALTER COLUMN name TYPE varchar(255)');
+            DB::statement('ALTER TABLE change_request_statuses ALTER COLUMN name TYPE varchar(255)');
 
             // Renamed duplicates are intentionally kept: a numeric suffix added here cannot be told apart from one that was part of the original name.
         });
