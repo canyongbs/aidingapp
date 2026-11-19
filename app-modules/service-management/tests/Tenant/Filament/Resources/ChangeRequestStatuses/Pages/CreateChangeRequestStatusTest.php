@@ -37,8 +37,6 @@
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\Pages\CreateChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use AidingApp\ServiceManagement\Tests\Tenant\Filament\Resources\ChangeRequestStatuses\RequestFactories\CreateChangeRequestStatusRequestFactory;
-use App\Features\ChangeRequestStatusNameUniquenessFeature;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\assertDatabaseHas;
@@ -87,21 +85,3 @@ it('validates the inputs', function (CreateChangeRequestStatusRequestFactory $da
     'name unique' => [CreateChangeRequestStatusRequestFactory::new()->state(['name' => 'Under Review']), ['name' => 'unique']],
     'name unique case insensitive' => [CreateChangeRequestStatusRequestFactory::new()->state(['name' => 'UNDER REVIEW']), ['name' => 'unique']],
 ]);
-
-// TODO: Cleanup Task (change-request-status-name-uniqueness): delete this describe and the tests within
-describe('name uniqueness feature flag', function (): void {
-    it('does not apply the unique form rule when the feature is disabled', function (): void {
-        ChangeRequestStatusNameUniquenessFeature::deactivate();
-
-        asSuperAdmin();
-
-        ChangeRequestStatus::factory()->create(['name' => 'Under Review']);
-
-        $request = CreateChangeRequestStatusRequestFactory::new()->state(['name' => 'Under Review'])->create();
-
-        expect(fn () => Livewire::test(CreateChangeRequestStatus::class)
-            ->fillForm($request)
-            ->call('create'))
-            ->toThrow(UniqueConstraintViolationException::class);
-    });
-});
