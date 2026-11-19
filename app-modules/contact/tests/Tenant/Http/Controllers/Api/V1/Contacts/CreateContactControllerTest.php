@@ -37,7 +37,6 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
-use App\Features\ContactArchivingFeature;
 use App\Features\OrganizationArchivingFeature;
 use App\Models\SystemUser;
 
@@ -303,8 +302,6 @@ it('explains that an archived contact reserves the email', function () use ($act
 
 it('rejects an email used by an archived contact while contact archiving is inactive', function () use ($actingAsContactCreator): void {
     $actingAsContactCreator();
-
-    ContactArchivingFeature::deactivate();
 
     Contact::factory()->archived()->create(['email' => 'archived@example.com']);
 

@@ -39,7 +39,6 @@ use AidingApp\Contact\Filament\Tables\OrganizationsTable;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\CreateContactRequestFactory;
-use App\Features\ContactArchivingFeature;
 use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 use Filament\Forms\Components\TableSelect\Livewire\TableSelectLivewireComponent;
@@ -182,8 +181,6 @@ it('does not create a contact with the email of an archived contact', function (
 });
 
 it('rejects the email of an archived contact with the unique message while contact archiving is inactive', function (): void {
-    ContactArchivingFeature::deactivate();
-
     $user = User::factory()->create();
     $user->givePermissionTo('contacts.view-any');
     $user->givePermissionTo('contacts.create');

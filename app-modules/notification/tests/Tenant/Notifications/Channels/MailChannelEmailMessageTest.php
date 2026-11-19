@@ -41,7 +41,6 @@ use AidingApp\Notification\Notifications\Attributes\SystemNotification;
 use AidingApp\Notification\Notifications\Contracts\OnDemandNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Notification\Tests\Fixtures\TestEmailNotification;
-use App\Features\ContactArchivingFeature;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
@@ -191,22 +190,6 @@ it('suppresses the send and records a SuppressedByArchived event for an on-deman
     expect($emailMessages->first()->recipient->is($contact))->toBeTrue();
     expect($emailMessages->first()->events->count())->toBe(1);
     expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::SuppressedByArchived);
-});
-
-it('still dispatches to an archived contact when the contact archiving feature is inactive', function (): void {
-    ContactArchivingFeature::deactivate();
-
-    $contact = Contact::factory()->archived()->create();
-
-    $contact->notify(new TestEmailNotification());
-
-    $emailMessages = EmailMessage::query()
-        ->with('events')
-        ->get();
-
-    expect($emailMessages->count())->toBe(1);
-    expect($emailMessages->first()->events->count())->toBe(1);
-    expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::Dispatched);
 });
 
 it('still dispatches to a healthy contact', function (): void {

@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Http\Requests\Api\V1\Contacts;
 
 use AidingApp\Contact\Models\Contact;
-use App\Features\ContactArchivingFeature;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 
@@ -55,7 +54,7 @@ class DeleteContactRequest extends FormRequest
         Gate::authorize('viewAny', Contact::class);
         Gate::authorize('delete', $contact);
 
-        abort_if(ContactArchivingFeature::active() && $contact->isArchived(), 404);
+        abort_if($contact->isArchived(), 404);
 
         return true;
     }

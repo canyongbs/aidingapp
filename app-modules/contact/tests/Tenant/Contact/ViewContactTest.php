@@ -46,7 +46,6 @@ use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\EditContactRequestFactory;
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers\EngagementFilesRelationManager;
-use App\Features\ContactArchivingFeature;
 use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 use Dom\HTMLDocument;
@@ -191,18 +190,6 @@ describe('archiving', function (): void {
 
         expect($contact->refresh()->isArchived())->toBeTrue();
     });
-});
-
-it('shows the delete action when the contact archiving feature is inactive', function (): void {
-    ContactArchivingFeature::deactivate();
-
-    asSuperAdmin();
-
-    $contact = Contact::factory()->create();
-
-    Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
-        ->assertActionVisible('delete')
-        ->assertActionDoesNotExist('archive');
 });
 
 // Permission Tests

@@ -35,7 +35,6 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use App\Features\ContactArchivingFeature;
 use Illuminate\Support\Facades\Auth;
 
 it('does not retrieve an archived contact for the contact guard', function (): void {
@@ -47,14 +46,4 @@ it('does not retrieve an archived contact for the contact guard', function (): v
 
     expect($provider->retrieveById($archived->getKey()))->toBeNull()
         ->and($provider->retrieveById($active->getKey())?->is($active))->toBeTrue();
-});
-
-it('retrieves an archived contact for the contact guard when the contact archiving feature is inactive', function (): void {
-    ContactArchivingFeature::deactivate();
-
-    $archived = Contact::factory()->archived()->create();
-
-    $guard = Auth::guard('contact');
-
-    expect($guard->getProvider()->retrieveById($archived->getKey())?->is($archived))->toBeTrue();
 });

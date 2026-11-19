@@ -59,7 +59,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
-use App\Features\ContactArchivingFeature;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV3;
 use Aws\Kms\KmsClient;
@@ -708,9 +707,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
         $senderName = trim((string) $senderName);
 
         // Archived contacts are included here, and another worker may have unarchived this one since the caller's lookup.
-        $existingContact = ContactArchivingFeature::active()
-            ? Contact::query()->where('email', $sender)->first()
-            : null;
+        $existingContact = Contact::query()->where('email', $sender)->first();
 
         if ($existingContact !== null) {
             if (! $existingContact->isArchived()) {

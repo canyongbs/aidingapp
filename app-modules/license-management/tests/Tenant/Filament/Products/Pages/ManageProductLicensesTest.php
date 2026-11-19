@@ -40,7 +40,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\ManageProductLicenses;
 use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\LicenseManagement\Models\ProductLicense;
-use App\Features\ContactArchivingFeature;
 use App\Features\LicensePermissionConsolidationFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
@@ -121,26 +120,6 @@ test('ManageProductLicenses keeps an archived contact that is already assigned t
         ->assertHasNoFormErrors();
 
     expect($productLicense->refresh()->assigned_to)->toBe($archivedContact->getKey());
-});
-
-test('ManageProductLicenses offers every contact as the license assignee when the contact archiving feature is inactive', function (): void {
-    ContactArchivingFeature::deactivate();
-
-    $settings = app(LicenseSettings::class);
-    $settings->data->addons->licenseManagement = true;
-    $settings->save();
-
-    asSuperAdmin();
-
-    $archivedContact = Contact::factory()->archived()->create();
-
-    $product = Product::factory()->create();
-
-    Livewire::test(ManageProductLicenses::class, ['record' => $product->getRouteKey()])
-        ->mountTableAction('create')
-        ->assertFormFieldExists('assigned_to', 'mountedActionSchema0', function (Select $field) use ($archivedContact): bool {
-            return array_key_exists($archivedContact->getKey(), $field->getOptions());
-        });
 });
 
 // TODO: Cleanup Task (licenses-permission-consolidation): delete this test

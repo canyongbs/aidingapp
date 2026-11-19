@@ -35,7 +35,6 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 
@@ -47,15 +46,6 @@ it('denies deleting a managed contact', function (): void {
 
     expect($response->denied())->toBeTrue()
         ->and($response->message())->toBe('This contact is managed and synchronized from a user, so it cannot be archived.');
-});
-
-it('allows deleting a managed contact when the contact archiving feature is inactive', function (): void {
-    ContactArchivingFeature::deactivate();
-
-    $user = User::factory()->create()->givePermissionTo('contacts.*.delete');
-    $managed = Contact::factory()->for(User::factory(), 'managedByUser')->create();
-
-    expect(Gate::forUser($user)->inspect('delete', $managed)->allowed())->toBeTrue();
 });
 
 it('only allows updating any contact with the `contacts.*.update` permission', function (): void {

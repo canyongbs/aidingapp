@@ -45,7 +45,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMon
 use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
-use App\Features\ContactArchivingFeature;
 use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
@@ -1197,21 +1196,6 @@ test('EditServiceMonitoring keeps an archived report contact that is already sel
     expect($configuration->refresh()->reportContacts()->pluck('contacts.id')->all())->toBe([$archivedContact->getKey()]);
 });
 
-test('EditServiceMonitoring offers every contact as a report recipient when the contact archiving feature is inactive', function (): void {
-    ContactArchivingFeature::deactivate();
-
-    asSuperAdmin();
-
-    $archivedContact = Contact::factory()->archived()->create();
-
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
-
-    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
-        ->assertFormFieldExists('report_configurations.daily.report_contacts', function (Select $field) use ($archivedContact): bool {
-            return array_key_exists($archivedContact->getKey(), $field->getOptions());
-        });
-});
-
 test('EditServiceMonitoring does not offer archived contacts as confidential contacts', function (): void {
     asSuperAdmin();
 
@@ -1248,19 +1232,4 @@ test('EditServiceMonitoring keeps an archived confidential contact that is alrea
         ->assertHasNoFormErrors();
 
     expect($serviceMonitoringTarget->confidentialContacts()->pluck('contacts.id')->all())->toBe([$archivedContact->getKey()]);
-});
-
-test('EditServiceMonitoring offers every contact as a confidential contact when the contact archiving feature is inactive', function (): void {
-    ContactArchivingFeature::deactivate();
-
-    asSuperAdmin();
-
-    $archivedContact = Contact::factory()->archived()->create();
-
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->confidential()->create();
-
-    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
-        ->assertFormFieldExists('confidentialContacts', function (Select $field) use ($archivedContact): bool {
-            return array_key_exists($archivedContact->getKey(), $field->getOptions());
-        });
 });
