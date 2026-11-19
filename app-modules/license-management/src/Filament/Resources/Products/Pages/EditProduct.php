@@ -37,7 +37,6 @@
 namespace AidingApp\LicenseManagement\Filament\Resources\Products\Pages;
 
 use AidingApp\LicenseManagement\Filament\Resources\Products\ProductResource;
-use App\Features\ProductNameUniquenessFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Textarea;
@@ -61,10 +60,7 @@ class EditProduct extends EditRecord
                     ->required()
                     ->string()
                     ->maxLength(255)
-                    ->when(
-                        ProductNameUniquenessFeature::active(),
-                        fn (TextInput $input): TextInput => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
-                    ),
+                    ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
                 TextInput::make('url')
                     ->label('Product Link')
                     ->maxLength(255)

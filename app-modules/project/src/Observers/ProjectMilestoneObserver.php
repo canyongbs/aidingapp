@@ -37,6 +37,7 @@
 namespace AidingApp\Project\Observers;
 
 use AidingApp\Project\Models\ProjectMilestone;
+use App\Features\MilestoneProjectFromPipelineFeature;
 
 class ProjectMilestoneObserver
 {
@@ -49,6 +50,23 @@ class ProjectMilestoneObserver
     {
         if (blank($projectMilestone->created_by_id)) {
             $projectMilestone->created_by_id = auth()->id();
+        }
+
+        // TODO: Cleanup Task (milestone-project-from-pipeline) - Remove this block once the
+        // project_id column is dropped and the flag is removed.
+        if (! MilestoneProjectFromPipelineFeature::active()) {
+            $projectMilestone->setAttribute('project_id', $projectMilestone->pipeline()->value('project_id'));
+        }
+    }
+
+    /**
+     * When a milestone is moved to a different pipeline, synchronize the legacy project_id column
+     * to prevent cascade deletion if the original project is deleted (while the flag is inactive).
+     */
+    public function updating(ProjectMilestone $projectMilestone): void
+    {
+        if (! MilestoneProjectFromPipelineFeature::active() && $projectMilestone->isDirty('pipeline_id')) {
+            $projectMilestone->setAttribute('project_id', $projectMilestone->pipeline()->value('project_id'));
         }
     }
 }

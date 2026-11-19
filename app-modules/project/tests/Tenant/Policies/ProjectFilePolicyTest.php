@@ -34,15 +34,10 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Models\Permission;
-use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Project\Models\ProjectFile;
-use App\Features\ProjectPermissionConsolidationFeature;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
-
-use Spatie\Permission\PermissionRegistrar;
 
 it('only allows deleting any project file with the `projects.*.update` permission', function (): void {
     $user = User::factory()->create();
@@ -54,28 +49,4 @@ it('only allows deleting any project file with the `projects.*.update` permissio
     $user->givePermissionTo('projects.*.update');
 
     expect($user->can('deleteAny', ProjectFile::class))->toBeTrue();
-});
-
-// TODO: Cleanup Task (projects-permission-consolidation): delete this test, the feature will always be active
-it('only allows deleting any project file with the `project.*.update` permission while the projects permission consolidation is inactive', function (): void {
-    ProjectPermissionConsolidationFeature::deactivate();
-
-    $legacyPermission = Permission::factory()->create([
-        'name' => 'project.*.update',
-        'guard_name' => 'web',
-        'group_id' => PermissionGroup::create(['name' => 'Project'])->getKey(),
-    ]);
-    app(PermissionRegistrar::class)->forgetCachedPermissions();
-
-    $user = User::factory()->create()->givePermissionTo('projects.*.update');
-
-    actingAs($user);
-
-    expect($user->can('deleteAny', ProjectFile::class))->toBeFalse();
-
-    $legacyUser = User::factory()->create()->givePermissionTo($legacyPermission);
-
-    actingAs($legacyUser);
-
-    expect($legacyUser->can('deleteAny', ProjectFile::class))->toBeTrue();
 });

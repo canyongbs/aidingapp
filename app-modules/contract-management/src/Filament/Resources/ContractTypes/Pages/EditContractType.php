@@ -38,7 +38,6 @@ namespace AidingApp\ContractManagement\Filament\Resources\ContractTypes\Pages;
 
 use AidingApp\ContractManagement\Filament\Resources\ContractTypes\ContractTypeResource;
 use AidingApp\ContractManagement\Models\ContractType;
-use App\Features\ContractTypeNameUniquenessFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -61,11 +60,7 @@ class EditContractType extends EditRecord
                     ->string()
                     ->required()
                     ->maxLength(255)
-                    // TODO: Cleanup Task (contract-name-uniqueness): replace this `when()` with `->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed())` once the flag is removed.
-                    ->when(
-                        ContractTypeNameUniquenessFeature::active(),
-                        fn (TextInput $field): TextInput => $field->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed()),
-                    ),
+                    ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed()),
                 Toggle::make('is_default')
                     ->label('Default')
                     ->live()

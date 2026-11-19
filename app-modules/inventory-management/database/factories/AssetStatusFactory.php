@@ -49,7 +49,7 @@ class AssetStatusFactory extends Factory
     {
         return [
             'classification' => SystemAssetStatusClassification::Unavailable,
-            'name' => $this->faker->word(),
+            'name' => $this->faker->unique()->words(asText: true),
         ];
     }
 

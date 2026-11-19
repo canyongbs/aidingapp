@@ -115,8 +115,8 @@ it('archives a pipeline\'s milestones without tasks when the pipeline is archive
     $pipeline = Pipeline::factory()->for($project)->create();
     $otherPipeline = Pipeline::factory()->for($project)->create();
 
-    $milestone = ProjectMilestone::factory()->for($project)->create(['pipeline_id' => $pipeline->getKey()]);
-    $otherPipelineMilestone = ProjectMilestone::factory()->for($project)->create(['pipeline_id' => $otherPipeline->getKey()]);
+    $milestone = ProjectMilestone::factory()->create(['pipeline_id' => $pipeline->getKey()]);
+    $otherPipelineMilestone = ProjectMilestone::factory()->create(['pipeline_id' => $otherPipeline->getKey()]);
 
     $pipeline->archive();
 

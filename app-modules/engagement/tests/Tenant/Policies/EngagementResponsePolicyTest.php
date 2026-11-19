@@ -34,13 +34,9 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Models\Permission;
-use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Engagement\Models\EngagementResponse;
-use App\Features\ContactPermissionConsolidationFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
-use Spatie\Permission\PermissionRegistrar;
 
 $abilities = [
     'viewAny' => ['viewAny', 'view-any', false],
@@ -57,21 +53,4 @@ it('is governed by the contacts permissions', function (string $ability, string 
 
     expect(Gate::forUser(User::factory()->create())->inspect($ability, $arguments)->denied())->toBeTrue()
         ->and(Gate::forUser(User::factory()->create()->givePermissionTo("contacts.{$action}"))->inspect($ability, $arguments)->allowed())->toBeTrue();
-})->with($abilities);
-
-// TODO: Cleanup Task (contacts-permission-consolidation): delete this test, the feature will always be active
-it('is governed by the engagement response permissions while the contacts permission consolidation is inactive', function (string $ability, string $action, bool $forRecord): void {
-    ContactPermissionConsolidationFeature::deactivate();
-
-    $legacyPermission = Permission::factory()->create([
-        'name' => "engagement_response.{$action}",
-        'guard_name' => 'web',
-        'group_id' => PermissionGroup::create(['name' => 'Engagement Response'])->getKey(),
-    ]);
-    app(PermissionRegistrar::class)->forgetCachedPermissions();
-
-    $arguments = $forRecord ? EngagementResponse::factory()->make() : EngagementResponse::class;
-
-    expect(Gate::forUser(User::factory()->create()->givePermissionTo("contacts.{$action}"))->inspect($ability, $arguments)->denied())->toBeTrue()
-        ->and(Gate::forUser(User::factory()->create()->givePermissionTo($legacyPermission))->inspect($ability, $arguments)->allowed())->toBeTrue();
 })->with($abilities);

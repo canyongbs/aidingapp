@@ -45,14 +45,12 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMon
 use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
-use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 
@@ -1134,23 +1132,6 @@ test('EditServiceMonitoring allows renaming to the name of a soft-deleted servic
         ->assertHasNoFormErrors();
 
     expect($serviceMonitoringTarget->refresh()->name)->toBe('Customer Website');
-});
-
-test('EditServiceMonitoring does not apply the unique name rule when the feature is disabled', function (): void {
-    ServiceMonitoringTargetNameUniquenessFeature::deactivate();
-
-    asSuperAdmin();
-
-    ServiceMonitoringTarget::factory()->create(['name' => 'Customer Website']);
-
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Payment API']);
-
-    expect(fn () => Livewire::test(EditServiceMonitoring::class, [
-        'record' => $serviceMonitoringTarget->getRouteKey(),
-    ])
-        ->fillForm(['name' => 'Customer Website'])
-        ->call('save'))
-        ->toThrow(UniqueConstraintViolationException::class);
 });
 
 test('EditServiceMonitoring does not offer archived contacts as report recipients', function (): void {
