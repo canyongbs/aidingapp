@@ -41,7 +41,6 @@ use AidingApp\Report\Filament\Pages\AiSupportAssistant;
 use AidingApp\Report\Models\ReportDepartmentAccess;
 use AidingApp\Report\Models\ReportGroupAccess;
 use AidingApp\Report\Models\ReportUserAccess;
-use App\Features\ReportGroupAccessFeature;
 use App\Models\User;
 use Livewire\Livewire;
 
@@ -96,22 +95,4 @@ it('grants access to a user belonging to a group that has been granted access', 
     ]);
 
     get(AiSupportAssistant::getUrl())->assertSuccessful();
-});
-
-it('does not grant access through a group when the group access feature is inactive', function (): void {
-    ReportGroupAccessFeature::deactivate();
-
-    $group = Group::factory()->create();
-
-    $user = User::factory()->create();
-    $group->users()->attach($user);
-
-    ReportGroupAccess::factory()->create([
-        'report_key' => ReportAccessKey::AiSupportAssistant->value,
-        'group_id' => $group->getKey(),
-    ]);
-
-    actingAs($user);
-
-    Livewire::test(AiSupportAssistant::class)->assertForbidden();
 });

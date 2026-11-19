@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\ReportGroupAccessFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
@@ -52,16 +51,12 @@ return new class () extends Migration {
 
                 $table->uniqueIndex(['report_key', 'group_id']);
             });
-
-            ReportGroupAccessFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function (): void {
-            ReportGroupAccessFeature::deactivate();
-
             Schema::dropIfExists('report_group_accesses');
         });
     }
