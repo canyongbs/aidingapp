@@ -37,13 +37,10 @@
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages\EditChangeRequestType;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\Filament\Resources\ChangeRequestTypes\RequestFactories\EditChangeRequestTypeRequestFactory;
-use App\Features\ChangeRequestTypeNameUniquenessFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
 use function Pest\Laravel\assertDatabaseHas;
@@ -133,40 +130,6 @@ describe('restoring', function (): void {
             ->assertNotified('Unable to restore this change request type');
 
         expect($changeRequestType->refresh()->trashed())->toBeTrue();
-    });
-});
-
-// TODO: Cleanup Task (change-request-type-name-uniqueness): delete this describe and the tests within
-describe('name uniqueness feature flag', function (): void {
-    it('does not apply the unique form rule when the feature is disabled', function (): void {
-        ChangeRequestTypeNameUniquenessFeature::deactivate();
-
-        asSuperAdmin();
-
-        ChangeRequestType::factory()->create(['name' => 'Major Change']);
-        $changeRequestType = ChangeRequestType::factory()->create(['name' => 'Minor Change']);
-
-        expect(fn () => Livewire::test(EditChangeRequestType::class, ['record' => $changeRequestType->getRouteKey()])
-            ->fillForm(['name' => 'Major Change'])
-            ->call('save'))
-            ->toThrow(UniqueConstraintViolationException::class);
-    });
-
-    it('allows editing other fields of a record that already shares its name with another record when the feature is disabled', function (): void {
-        ChangeRequestTypeNameUniquenessFeature::deactivate();
-        DB::statement('DROP INDEX change_request_types_name_unique');
-
-        asSuperAdmin();
-
-        ChangeRequestType::factory()->create(['name' => 'Major Change']);
-        $changeRequestType = ChangeRequestType::factory()->create(['name' => 'Major Change']);
-
-        Livewire::test(EditChangeRequestType::class, ['record' => $changeRequestType->getRouteKey()])
-            ->fillForm(['number_of_required_approvals' => '2'])
-            ->call('save')
-            ->assertHasNoFormErrors();
-
-        expect(ChangeRequestType::query()->where('name', 'Major Change')->count())->toBe(2);
     });
 });
 

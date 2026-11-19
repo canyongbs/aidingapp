@@ -49,7 +49,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use App\Features\AdvisoryPermissionConsolidationFeature;
 use App\Features\AssetNameUniquenessFeature;
 use App\Features\ChangeRequestStatusNameUniquenessFeature;
-use App\Features\ChangeRequestTypeNameUniquenessFeature;
 use App\Features\CheckboxesFormFieldFeature;
 use App\Features\ContactTypeNameUniquenessFeature;
 use App\Features\KnowledgeBaseCategoryNameUniquenessFeature;
@@ -61,7 +60,6 @@ use App\Features\SlaNameUniquenessFeature;
 use App\Features\SystemUserNameUniquenessFeature;
 use App\Models\SystemUser;
 use App\Models\User;
-use App\Support\AbstractFeatureFlag;
 use Carbon\CarbonInterface;
 use Illuminate\Console\Command;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -935,11 +933,8 @@ describe('2026_10_30_003135_tmp_backfill_email_message_events_occurred_at', func
     ]);
 });
 
-// TODO: Cleanup Task (change-request-type-name-uniqueness): delete the helper below, the two describes that follow, and the tests within
 // TODO: Cleanup Task (change-request-status-name-uniqueness): delete the helper below, the two describes that follow, and the tests within
-$defineChangeRequestNameUniquenessTests = function (string $migrationName, string $table, array $extraColumns, string $featureClass, string $otherFeatureClass): void {
-    assert(is_subclass_of($featureClass, AbstractFeatureFlag::class));
-    assert(is_subclass_of($otherFeatureClass, AbstractFeatureFlag::class));
+$defineChangeRequestStatusNameUniquenessTests = function (string $migrationName, string $table, array $extraColumns, string $featureClass): void {
     $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
 
     $insertRecord = function (string $name, CarbonInterface $createdAt, ?CarbonInterface $deletedAt = null) use ($table, $extraColumns): string {
@@ -957,8 +952,8 @@ $defineChangeRequestNameUniquenessTests = function (string $migrationName, strin
         return $id;
     };
 
-    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates only its own feature flag', function () use ($migrationName, $migrationPath, $insertRecord, $table, $featureClass, $otherFeatureClass): void {
-        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table, $featureClass, $otherFeatureClass): void {
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates its feature flag', function () use ($migrationName, $migrationPath, $insertRecord, $table, $featureClass): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table, $featureClass): void {
             $firstId = $insertRecord('Major Change', now()->subMinutes(3));
             $secondId = $insertRecord('major change', now()->subMinutes(2));
             $thirdId = $insertRecord('MAJOR CHANGE', now()->subMinute());
@@ -966,7 +961,6 @@ $defineChangeRequestNameUniquenessTests = function (string $migrationName, strin
             $uniqueId = $insertRecord('Minor Change', now()->subMinutes(5));
 
             $featureClass::deactivate();
-            $otherFeatureClass::deactivate();
 
             expect($featureClass::active())->toBeFalse();
 
@@ -980,8 +974,7 @@ $defineChangeRequestNameUniquenessTests = function (string $migrationName, strin
                 ->and($name($thirdId))->toBe('MAJOR CHANGE-4')
                 ->and($name($existingSuffixedId))->toBe('Major Change-2')
                 ->and($name($uniqueId))->toBe('Minor Change')
-                ->and($featureClass::active())->toBeTrue()
-                ->and($otherFeatureClass::active())->toBeFalse();
+                ->and($featureClass::active())->toBeTrue();
         });
     });
 
@@ -1078,23 +1071,12 @@ $defineChangeRequestNameUniquenessTests = function (string $migrationName, strin
     });
 };
 
-describe('2026_11_03_100000_convert_change_request_types_name_to_citext_and_enforce_unique', function () use ($defineChangeRequestNameUniquenessTests): void {
-    $defineChangeRequestNameUniquenessTests(
-        '2026_11_03_100000_convert_change_request_types_name_to_citext_and_enforce_unique',
-        'change_request_types',
-        ['number_of_required_approvals' => 1],
-        ChangeRequestTypeNameUniquenessFeature::class,
-        ChangeRequestStatusNameUniquenessFeature::class,
-    );
-});
-
-describe('2026_11_03_100001_convert_change_request_statuses_name_to_citext_and_enforce_unique', function () use ($defineChangeRequestNameUniquenessTests): void {
-    $defineChangeRequestNameUniquenessTests(
+describe('2026_11_03_100001_convert_change_request_statuses_name_to_citext_and_enforce_unique', function () use ($defineChangeRequestStatusNameUniquenessTests): void {
+    $defineChangeRequestStatusNameUniquenessTests(
         '2026_11_03_100001_convert_change_request_statuses_name_to_citext_and_enforce_unique',
         'change_request_statuses',
         ['classification' => 'new'],
         ChangeRequestStatusNameUniquenessFeature::class,
-        ChangeRequestTypeNameUniquenessFeature::class,
     );
 });
 
