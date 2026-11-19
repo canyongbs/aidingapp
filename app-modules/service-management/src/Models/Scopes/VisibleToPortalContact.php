@@ -40,7 +40,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Enums\AdvisoryVisibility;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisoryVisibilityContactType;
-use App\Features\AdvisoryVisibilityFeature;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -57,15 +56,6 @@ class VisibleToPortalContact
      */
     public function __invoke(Builder $query): void
     {
-        if (! AdvisoryVisibilityFeature::active()) {
-            // Until the migration runs, advisories were only ever available to signed-in contacts.
-            if ($this->contact === null) {
-                $query->whereRaw('false');
-            }
-
-            return;
-        }
-
         $query->where(function (Builder $query): void {
             $query->where('advisories.visibility', AdvisoryVisibility::Public);
 

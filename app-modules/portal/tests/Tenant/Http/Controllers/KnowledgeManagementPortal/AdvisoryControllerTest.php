@@ -42,7 +42,6 @@ use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
-use App\Features\AdvisoryVisibilityFeature;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Carbon;
 
@@ -375,15 +374,6 @@ describe('visibility', function (): void {
 
         expect($response->collect('data')->pluck('id')->sort()->values()->all())
             ->toBe($advisories->pluck('id')->sort()->values()->all());
-    });
-
-    it('lists nothing to guests until the advisory visibility migration has run', function (): void {
-        AdvisoryVisibilityFeature::deactivate();
-        auth()->logout();
-
-        Advisory::factory()->for(AdvisoryStatus::factory()->open(), 'status')->create();
-
-        getJson(route('api.portal.advisories'))->assertOk()->assertJsonCount(0, 'data');
     });
 });
 

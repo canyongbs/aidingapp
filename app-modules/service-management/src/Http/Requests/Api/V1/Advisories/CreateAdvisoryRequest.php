@@ -42,7 +42,6 @@ use AidingApp\ServiceManagement\Enums\AdvisoryVisibility;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use App\Features\AdvisoryVisibilityFeature;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
@@ -76,15 +75,13 @@ class CreateAdvisoryRequest extends FormRequest
             'status' => ['required', 'string', 'max:255', Rule::exists(AdvisoryStatus::class, 'name')->withoutTrashed()],
             /** The name of the department to assign the advisory to. */
             'department' => ['nullable', 'string', 'max:255', Rule::exists(Department::class, 'name')],
-            ...(AdvisoryVisibilityFeature::active() ? [
-                /** Defaults to `public`. */
-                'visibility' => ['sometimes', 'required', Rule::enum(AdvisoryVisibility::class)],
-                /** Whether only contacts of the `restricted_to_contact_types` can see an `authenticated` advisory. Defaults to `false`. */
-                'is_visibility_restricted' => ['sometimes', 'required', 'boolean'],
-                /** The names of the contact types that can see the advisory. Required when the advisory is `authenticated` and restricted. */
-                'restricted_to_contact_types' => ['sometimes', 'nullable', 'array'],
-                'restricted_to_contact_types.*' => ['required', 'string', 'max:255', 'distinct:ignore_case', new ResolvableContactTypeName()],
-            ] : []),
+            /** Defaults to `public`. */
+            'visibility' => ['sometimes', 'required', Rule::enum(AdvisoryVisibility::class)],
+            /** Whether only contacts of the `restricted_to_contact_types` can see an `authenticated` advisory. Defaults to `false`. */
+            'is_visibility_restricted' => ['sometimes', 'required', 'boolean'],
+            /** The names of the contact types that can see the advisory. Required when the advisory is `authenticated` and restricted. */
+            'restricted_to_contact_types' => ['sometimes', 'nullable', 'array'],
+            'restricted_to_contact_types.*' => ['required', 'string', 'max:255', 'distinct:ignore_case', new ResolvableContactTypeName()],
         ];
     }
 }

@@ -43,7 +43,6 @@ use AidingApp\ServiceManagement\Enums\AdvisoryVisibility;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use App\Features\AdvisoryVisibilityFeature;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -74,7 +73,7 @@ class SaveAdvisory
 
         $contactTypeIds = null;
 
-        if (AdvisoryVisibilityFeature::active() && ! $data->restrictedToContactTypes instanceof Optional) {
+        if (! $data->restrictedToContactTypes instanceof Optional) {
             $contactTypeIds = $this->resolveContactTypeIds($data->restrictedToContactTypes ?? [], $errors);
         }
 
@@ -87,14 +86,12 @@ class SaveAdvisory
                 ? new Advisory()
                 : Advisory::query()->whereKey($existing->getKey())->lockForUpdate()->firstOrFail();
 
-            if (AdvisoryVisibilityFeature::active()) {
-                $attributes = [
-                    ...$attributes,
-                    ...$this->visibilityAttributes($data, $advisory),
-                ];
+            $attributes = [
+                ...$attributes,
+                ...$this->visibilityAttributes($data, $advisory),
+            ];
 
-                $this->ensureRestrictedAdvisoryHasContactTypes($advisory, $attributes, $contactTypeIds);
-            }
+            $this->ensureRestrictedAdvisoryHasContactTypes($advisory, $attributes, $contactTypeIds);
 
             $advisory->fill($attributes);
             $advisory->save();
