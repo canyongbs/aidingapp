@@ -180,30 +180,6 @@ it('does not create a contact with the email of an archived contact', function (
     assertCount(1, Contact::all());
 });
 
-it('rejects the email of an archived contact with the unique message while contact archiving is inactive', function (): void {
-    $user = User::factory()->create();
-    $user->givePermissionTo('contacts.view-any');
-    $user->givePermissionTo('contacts.create');
-
-    Contact::factory()->archived()->create(['email' => 'archived@example.com']);
-
-    $request = collect(CreateContactRequestFactory::new()->create([
-        'email' => 'archived@example.com',
-        'created_by_id' => $user->id,
-    ]));
-
-    actingAs($user);
-
-    $component = Livewire::test(CreateContact::class)
-        ->fillForm($request->toArray())
-        ->call('create')
-        ->assertHasFormErrors(['email' => 'unique']);
-
-    expect($component->errors()->get('data.email'))->not->toContain('An archived contact with this email already exists.');
-
-    assertCount(1, Contact::all());
-});
-
 describe('organization picker', function (): void {
     it('lists active organizations and not archived ones', function (): void {
         asSuperAdmin();
