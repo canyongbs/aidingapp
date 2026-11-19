@@ -61,7 +61,7 @@ class CreateChangeRequestType extends CreateRecord
                             ->required()
                             ->string()
                             ->maxLength(255)
-                          ->unique(modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed()),
+                            ->unique(modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed()),
                         Select::make('number_of_required_approvals')
                             ->options([
                                 '0' => '0',
