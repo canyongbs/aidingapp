@@ -300,7 +300,7 @@ it('explains that an archived contact reserves the email', function () use ($act
         ->and(Contact::query()->count())->toBe(1);
 });
 
-it('rejects an email used by an archived contact while contact archiving is inactive', function () use ($actingAsContactCreator): void {
+it('rejects an email used by an archived contact', function () use ($actingAsContactCreator): void {
     $actingAsContactCreator();
 
     Contact::factory()->archived()->create(['email' => 'archived@example.com']);
@@ -311,7 +311,7 @@ it('rejects an email used by an archived contact while contact archiving is inac
         'email' => 'archived@example.com',
         'type' => ContactType::factory()->create(['name' => 'Customer'])->name,
     ])->assertUnprocessable()
-        ->assertJsonPath('errors.email', ['The email has already been taken.']);
+        ->assertJsonPath('errors.email', ['An archived contact with this email already exists.']);
 });
 
 it('matches an organization by email domain when none is provided', function (bool $omitOrganization) use ($actingAsContactCreator): void {
