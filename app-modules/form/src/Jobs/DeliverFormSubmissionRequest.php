@@ -34,62 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Actions;
+namespace AidingApp\Form\Jobs;
 
-use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\Form\Models\Submission;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class CreateServiceRequestHistory implements ShouldQueue
+abstract class DeliverFormSubmissionRequest implements ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
 
-    /**
-     * @var array<int, string>
-     */
-    private const IGNORED_KEYS = [
-        'updated_at',
-        'status_updated_at',
-        'time_to_resolution',
-        'service_request_form_submission_id',
-        'secret_key',
-    ];
-
-    /**
-     * @param array<string, mixed> $changes
-     * @param array<string, mixed> $original
-     */
     public function __construct(
-        public ServiceRequest $serviceRequest,
-        public array $changes,
-        public array $original,
-        public ?string $actorType = null,
-        public ?string $actorId = null,
-    ) {
-        $this->afterCommit = true;
-    }
+        public Submission $submission,
+    ) {}
 
-    public function handle(): void
-    {
-        foreach ($this->changes as $key => $value) {
-            if (in_array($key, self::IGNORED_KEYS, true)) {
-                continue;
-            }
-
-            $row = [
-                'original_values' => [$key => $this->original[$key] ?? null],
-                'new_values' => [$key => $value],
-                'actor_type' => $this->actorType,
-                'actor_id' => $this->actorId,
-            ];
-
-            $this->serviceRequest->histories()->create($row);
-        }
-    }
+    abstract public function handle(): void;
 }

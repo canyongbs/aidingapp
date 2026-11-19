@@ -36,7 +36,7 @@
 
 namespace AidingApp\Form\Enums;
 
-use AidingApp\Form\Actions\DeliverFormSubmissionRequestByEmail;
+use AidingApp\Form\Jobs\DeliverFormSubmissionRequestByEmail;
 use AidingApp\Form\Models\Submission;
 use Filament\Support\Contracts\HasLabel;
 
