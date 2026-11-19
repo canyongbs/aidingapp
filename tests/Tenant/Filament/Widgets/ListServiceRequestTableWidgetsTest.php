@@ -48,6 +48,7 @@ it('searches respondent names case insensitively', function (string $firstName, 
     actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
 
     $status = ServiceRequestStatus::factory()->state([
+        'name' => 'Open',
         'classification' => SystemServiceRequestClassification::Open,
     ])->create();
 

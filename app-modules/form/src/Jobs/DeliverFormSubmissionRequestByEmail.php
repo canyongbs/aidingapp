@@ -34,25 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Form\Actions;
+namespace AidingApp\Form\Jobs;
 
-use AidingApp\Form\Models\Submission;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
+use AidingApp\Form\Notifications\FormSubmissionRequestNotification;
 
-abstract class DeliverFormSubmissionRequest implements ShouldQueue
+class DeliverFormSubmissionRequestByEmail extends DeliverFormSubmissionRequest
 {
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
-
-    public function __construct(
-        public Submission $submission,
-    ) {}
-
-    abstract public function handle(): void;
+    public function handle(): void
+    {
+        $this->submission
+            ->author
+            ->notify(new FormSubmissionRequestNotification($this->submission));
+    }
 }

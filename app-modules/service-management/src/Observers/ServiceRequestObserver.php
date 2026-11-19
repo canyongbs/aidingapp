@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Observers;
 
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
-use AidingApp\ServiceManagement\Actions\CreateServiceRequestHistory;
 use AidingApp\ServiceManagement\Actions\NotifyServiceRequestUsers;
 use AidingApp\ServiceManagement\Actions\RecordServiceRequestStatusPeriod;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
@@ -46,6 +45,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberUpdateAttemptException;
+use AidingApp\ServiceManagement\Jobs\CreateServiceRequestHistory;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Notifications\Concerns\FetchServiceRequestTemplate;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
