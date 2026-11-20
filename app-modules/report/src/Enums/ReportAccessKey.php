@@ -56,7 +56,6 @@ use AidingApp\Report\Models\ReportDepartmentAccess;
 use AidingApp\Report\Models\ReportGroupAccess;
 use AidingApp\Report\Models\ReportUserAccess;
 use App\Enums\Feature;
-use App\Features\ReportGroupAccessFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
@@ -212,15 +211,14 @@ enum ReportAccessKey: string
             return true;
         }
 
-        return ReportGroupAccessFeature::active()
-            && $user->groups()
-                ->whereIn(
-                    (new Group())->getQualifiedKeyName(),
-                    ReportGroupAccess::query()
-                        ->where('report_key', $this->value)
-                        ->select('group_id')
-                )
-                ->exists();
+        return $user->groups()
+            ->whereIn(
+                (new Group())->getQualifiedKeyName(),
+                ReportGroupAccess::query()
+                    ->where('report_key', $this->value)
+                    ->select('group_id')
+            )
+            ->exists();
     }
 
     /**
@@ -244,16 +242,13 @@ enum ReportAccessKey: string
                             ->where('report_key', $this->value)
                             ->select('department_id')
                     )
-                    ->when(
-                        ReportGroupAccessFeature::active(),
-                        fn (Builder $query): Builder => $query->orWhereHas(
-                            'groups',
-                            fn (Builder $query): Builder => $query->whereIn(
-                                (new Group())->getQualifiedKeyName(),
-                                ReportGroupAccess::query()
-                                    ->where('report_key', $this->value)
-                                    ->select('group_id')
-                            )
+                    ->orWhereHas(
+                        'groups',
+                        fn (Builder $query): Builder => $query->whereIn(
+                            (new Group())->getQualifiedKeyName(),
+                            ReportGroupAccess::query()
+                                ->where('report_key', $this->value)
+                                ->select('group_id')
                         )
                     );
             })
