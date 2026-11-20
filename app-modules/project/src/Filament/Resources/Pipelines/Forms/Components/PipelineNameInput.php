@@ -37,7 +37,6 @@
 namespace AidingApp\Project\Filament\Resources\Pipelines\Forms\Components;
 
 use AidingApp\Project\Models\Pipeline;
-use App\Features\PipelineNameUniquenessFeature;
 use Closure;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Validation\Rules\Unique;
@@ -52,14 +51,10 @@ class PipelineNameInput
         return TextInput::make('name')
             ->required()
             ->maxLength(255)
-            // TODO: Cleanup Task (pipeline-name-uniqueness): replace this `when()` with `->unique(table: Pipeline::class, ignoreRecord: $ignoreRecord, modifyRuleUsing: fn (Unique $rule): Unique => $rule->where('project_id', $projectId()))` once the flag is removed.
-            ->when(
-                PipelineNameUniquenessFeature::active(),
-                fn (TextInput $input): TextInput => $input->unique(
-                    table: Pipeline::class,
-                    ignoreRecord: $ignoreRecord,
-                    modifyRuleUsing: fn (Unique $rule): Unique => $rule->where('project_id', $projectId()),
-                ),
+            ->unique(
+                table: Pipeline::class,
+                ignoreRecord: $ignoreRecord,
+                modifyRuleUsing: fn (Unique $rule): Unique => $rule->where('project_id', $projectId()),
             );
     }
 }

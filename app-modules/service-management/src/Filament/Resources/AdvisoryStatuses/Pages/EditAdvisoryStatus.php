@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\AdvisoryStatuses\Pages;
 use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
 use AidingApp\ServiceManagement\Filament\Resources\AdvisoryStatuses\AdvisoryStatusResource;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use App\Features\AdvisoryStatusNameUniquenessFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
@@ -62,11 +61,7 @@ class EditAdvisoryStatus extends EditRecord
                     ->required()
                     ->maxLength(255)
                     ->string()
-                    // TODO: Cleanup Task (advisory-status-and-severity-name-uniqueness): replace this `when()` with `->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())` once the flag is removed.
-                    ->when(
-                        AdvisoryStatusNameUniquenessFeature::active(),
-                        fn (TextInput $input): TextInput => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
-                    ),
+                    ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
                 Select::make('classification')
                     ->label('Classification')
                     ->required()

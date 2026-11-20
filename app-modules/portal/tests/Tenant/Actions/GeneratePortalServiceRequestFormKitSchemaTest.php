@@ -39,7 +39,6 @@ use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\StepDescriptionFeature;
 
 /**
  * Collects every schema node whose `class` attribute contains the given class name, so
@@ -106,23 +105,6 @@ it('titles the Main step after the step combined into it', function () use ($fin
     expect(array_column($findNodesByClass($schema, 'wizard-title'), 'children'))->toBe(['Personal details', 'Review'])
         ->and(array_column($findNodesByClass($schema, 'wizard-description'), 'children'))->toBe(['Tell us about yourself.'])
         ->and(json_encode($schema, JSON_THROW_ON_ERROR))->toContain('"name":"Main"');
-});
-
-it('does not render step descriptions when `StepDescriptionFeature` is inactive', function () use ($findNodesByClass, $generateSchema): void {
-    StepDescriptionFeature::deactivate();
-
-    $type = ServiceRequestType::factory()->create();
-
-    $form = ServiceRequestForm::factory()
-        ->for($type, 'type')
-        ->create(['is_wizard' => true, 'is_first_step_combined' => false]);
-
-    $form->steps()->create(['label' => 'Personal details', 'description' => 'Tell us about yourself.', 'sort' => 0]);
-
-    $schema = $generateSchema($type);
-
-    expect($findNodesByClass($schema, 'wizard-title'))->toHaveCount(2)
-        ->and($findNodesByClass($schema, 'wizard-description'))->toBeEmpty();
 });
 
 it('renders back and next navigation around the step progress instead of step tabs', function () use ($findNodesByClass, $generateSchema): void {

@@ -38,7 +38,6 @@ namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
 use AidingApp\Portal\Settings\AiDisclaimerSettings;
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\AiDisclaimerFeature;
 use App\Http\Controllers\Controller;
 use App\Settings\LicenseSettings;
 use Filament\Support\Colors\Color;
@@ -62,7 +61,7 @@ class GetWidgetConfigController extends Controller
         $serviceManagementEnabled = $settings->knowledge_management_portal_service_management
             && (bool) app(LicenseSettings::class)->data?->addons?->serviceManagement;
 
-        $aiDisclaimerSettings = AiDisclaimerFeature::active() ? app(AiDisclaimerSettings::class) : null;
+        $aiDisclaimerSettings = app(AiDisclaimerSettings::class);
 
         $websocketsConfig = config('filament.broadcasting.echo');
 
@@ -89,7 +88,7 @@ class GetWidgetConfigController extends Controller
                 ? route('widgets.assistant.api.service-request-types')
                 : null,
             'portal_service_management' => $serviceManagementEnabled,
-            'ai_disclaimer' => $aiDisclaimerSettings?->is_enabled ? $aiDisclaimerSettings->text : null,
+            'ai_disclaimer' => $aiDisclaimerSettings->is_enabled ? $aiDisclaimerSettings->text : null,
         ]);
     }
 }

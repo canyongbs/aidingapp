@@ -41,7 +41,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use App\Features\ServiceRequestFileUploadTypeFeature;
 use App\Models\Authenticatable;
 use App\Models\Media;
 use App\Models\User;
@@ -855,30 +854,6 @@ describe('ServiceRequest', function (): void {
         $media = $serviceRequest->fresh()->getFirstMedia('uploads');
 
         expect(ServiceRequestFileUploadType::fromMedia($media))->toBe(ServiceRequestFileUploadType::StaffUpload);
-    });
-
-    test('does not list files attached to the updates of the service request when the feature flag is inactive', function (): void {
-        ServiceRequestFileUploadTypeFeature::deactivate();
-
-        asSuperAdmin();
-
-        Storage::fake('s3');
-
-        $serviceRequest = ServiceRequest::factory()->create();
-        $serviceRequestMedia = $serviceRequest
-            ->addMedia(UploadedFile::fake()->image('report.png'))
-            ->toMediaCollection('uploads');
-        $serviceRequestUpdateMedia = ServiceRequestUpdate::factory()->for($serviceRequest)->create()
-            ->addMedia(UploadedFile::fake()->image('attachment.png'))
-            ->toMediaCollection('uploads');
-
-        Livewire::test(ServiceRequestMediaTable::class, [
-            'record' => $serviceRequest,
-            'collectionName' => 'uploads',
-        ])
-            ->assertCanSeeTableRecords([$serviceRequestMedia])
-            ->assertCanNotSeeTableRecords([$serviceRequestUpdateMedia])
-            ->assertTableColumnHidden('upload_type');
     });
 });
 

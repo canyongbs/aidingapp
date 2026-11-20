@@ -38,10 +38,8 @@ use AidingApp\ContractManagement\Filament\Resources\Contracts\ContractResource;
 use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\CreateContract;
 use AidingApp\ContractManagement\Models\Contract;
 use AidingApp\ContractManagement\Tests\Tenant\Filament\Resources\Contracts\RequestFactories\CreateContractRequestFactory;
-use App\Features\ContractNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -97,27 +95,6 @@ it('validates the inputs', function (CreateContractRequestFactory $data, array $
     'name unique' => [CreateContractRequestFactory::new()->state(['name' => 'Master Agreement']), ['name' => 'unique']],
     'name unique case insensitive' => [CreateContractRequestFactory::new()->state(['name' => 'MASTER AGREEMENT']), ['name' => 'unique']],
 ]);
-
-// TODO: Cleanup Task (contract-name-uniqueness): delete this describe and the test within
-describe('name uniqueness feature flag', function (): void {
-    it('does not apply the unique form rule when the feature is disabled', function (): void {
-        ContractNameUniquenessFeature::deactivate();
-        DB::statement('DROP INDEX IF EXISTS contracts_name_unique');
-
-        asSuperAdmin();
-
-        Contract::factory()->create(['name' => 'Master Agreement']);
-
-        $request = CreateContractRequestFactory::new()->state(['name' => 'Master Agreement'])->create();
-
-        Livewire::test(CreateContract::class)
-            ->fillForm($request)
-            ->call('create')
-            ->assertHasNoFormErrors();
-
-        expect(Contract::query()->where('name', 'Master Agreement')->count())->toBe(2);
-    });
-});
 
 describe('authorization', function (): void {
     it('denies access to the create page without the `contract.create` permission', function (): void {

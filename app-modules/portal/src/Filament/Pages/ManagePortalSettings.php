@@ -47,7 +47,6 @@ use AidingApp\Portal\Settings\AiDisclaimerSettings;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
 use App\Enums\NavigationGroup;
-use App\Features\AiDisclaimerFeature;
 use App\Models\User;
 use App\Rules\ValidUrl;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
@@ -139,14 +138,14 @@ class ManagePortalSettings extends SettingsPage
                             ->live(),
                         Toggle::make('ai_disclaimer_enabled')
                             ->label('AI Disclaimer')
-                            ->visible(fn (Get $get): bool => AiDisclaimerFeature::active() && $get('knowledge_management_portal_enabled') && $get('ai_support_assistant') && app(AiSupportAssistantSettings::class)->is_enabled)
+                            ->visible(fn (Get $get): bool => $get('knowledge_management_portal_enabled') && $get('ai_support_assistant') && app(AiSupportAssistantSettings::class)->is_enabled)
                             ->live()
                             ->columnSpanFull(),
                         TextInput::make('ai_disclaimer_text')
                             ->label('AI Disclaimer Text')
                             ->required()
                             ->maxLength(255)
-                            ->visible(fn (Get $get): bool => AiDisclaimerFeature::active() && $get('knowledge_management_portal_enabled') && $get('ai_support_assistant') && $get('ai_disclaimer_enabled') && app(AiSupportAssistantSettings::class)->is_enabled)
+                            ->visible(fn (Get $get): bool => $get('knowledge_management_portal_enabled') && $get('ai_support_assistant') && $get('ai_disclaimer_enabled') && app(AiSupportAssistantSettings::class)->is_enabled)
                             ->columnSpanFull(),
                         Toggle::make('embed_assistant')
                             ->label('Embed Support Assistant')
@@ -315,10 +314,6 @@ class ManagePortalSettings extends SettingsPage
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        if (! AiDisclaimerFeature::active()) {
-            return $data;
-        }
-
         $aiDisclaimerSettings = app(AiDisclaimerSettings::class);
 
         return [
@@ -335,12 +330,10 @@ class ManagePortalSettings extends SettingsPage
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        if (AiDisclaimerFeature::active()) {
-            $aiDisclaimerSettings = app(AiDisclaimerSettings::class);
-            $aiDisclaimerSettings->is_enabled = $data['ai_disclaimer_enabled'] ?? $aiDisclaimerSettings->is_enabled;
-            $aiDisclaimerSettings->text = $data['ai_disclaimer_text'] ?? $aiDisclaimerSettings->text;
-            $aiDisclaimerSettings->save();
-        }
+        $aiDisclaimerSettings = app(AiDisclaimerSettings::class);
+        $aiDisclaimerSettings->is_enabled = $data['ai_disclaimer_enabled'] ?? $aiDisclaimerSettings->is_enabled;
+        $aiDisclaimerSettings->text = $data['ai_disclaimer_text'] ?? $aiDisclaimerSettings->text;
+        $aiDisclaimerSettings->save();
 
         unset($data['ai_disclaimer_enabled'], $data['ai_disclaimer_text']);
 

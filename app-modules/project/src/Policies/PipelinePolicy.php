@@ -38,7 +38,6 @@ namespace AidingApp\Project\Policies;
 
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
-use App\Features\ProjectPermissionConsolidationFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -53,7 +52,7 @@ class PipelinePolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ProjectPermissionConsolidationFeature::active() ? 'projects.view-any' : 'pipeline.view-any',
+            abilities: 'projects.view-any',
             denyResponse: 'You do not have permission to view pipelines.'
         );
     }
@@ -73,7 +72,7 @@ class PipelinePolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ProjectPermissionConsolidationFeature::active() ? ['projects.*.view'] : ['pipeline.*.view'],
+            abilities: ['projects.*.view'],
             denyResponse: 'You do not have permission to view this pipeline.'
         );
     }
@@ -87,7 +86,7 @@ class PipelinePolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ProjectPermissionConsolidationFeature::active() ? 'projects.create' : 'pipeline.create',
+            abilities: 'projects.create',
             denyResponse: 'You do not have permission to create pipeline.'
         );
     }
@@ -107,7 +106,7 @@ class PipelinePolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ProjectPermissionConsolidationFeature::active() ? ['projects.*.update'] : ['pipeline.*.update'],
+            abilities: ['projects.*.update'],
             denyResponse: 'You do not have permission to update this pipeline.'
         );
     }
@@ -121,7 +120,7 @@ class PipelinePolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ProjectPermissionConsolidationFeature::active() ? ['projects.*.delete'] : ['pipeline.*.delete'],
+            abilities: ['projects.*.delete'],
             denyResponse: 'You do not have permission to delete this pipeline.'
         );
     }
@@ -129,7 +128,7 @@ class PipelinePolicy
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ProjectPermissionConsolidationFeature::active() ? ['projects.*.delete'] : ['pipeline.*.delete'],
+            abilities: ['projects.*.delete'],
             denyResponse: 'You do not have permission to delete any pipeline.'
         );
     }
@@ -143,7 +142,7 @@ class PipelinePolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ProjectPermissionConsolidationFeature::active() ? ['projects.*.restore'] : ['pipeline.*.restore'],
+            abilities: ['projects.*.restore'],
             denyResponse: 'You do not have permission to restore this pipeline.'
         );
     }
@@ -151,7 +150,7 @@ class PipelinePolicy
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ProjectPermissionConsolidationFeature::active() ? ['projects.*.restore'] : ['pipeline.*.restore'],
+            abilities: ['projects.*.restore'],
             denyResponse: 'You do not have permission to restore any pipeline.'
         );
     }
@@ -165,7 +164,7 @@ class PipelinePolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ProjectPermissionConsolidationFeature::active() ? ['projects.*.force-delete'] : ['pipeline.*.force-delete'],
+            abilities: ['projects.*.force-delete'],
             denyResponse: 'You do not have permission to force delete this pipeline.'
         );
     }
@@ -173,7 +172,7 @@ class PipelinePolicy
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ProjectPermissionConsolidationFeature::active() ? ['projects.*.force-delete'] : ['pipeline.*.force-delete'],
+            abilities: ['projects.*.force-delete'],
             denyResponse: 'You do not have permission to force delete any pipeline.'
         );
     }

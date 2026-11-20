@@ -38,7 +38,6 @@ namespace AidingApp\InventoryManagement\Policies;
 
 use AidingApp\InventoryManagement\Models\AssetLocation;
 use App\Enums\Feature;
-use App\Features\AssetPermissionConsolidationFeature;
 use App\Models\Authenticatable;
 use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
@@ -60,7 +59,7 @@ class AssetLocationPolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? 'assets.view-any' : 'asset_location.view-any',
+            abilities: 'assets.view-any',
             denyResponse: 'You do not have permission to view asset locations.'
         );
     }
@@ -68,7 +67,7 @@ class AssetLocationPolicy
     public function view(Authenticatable $authenticatable, AssetLocation $assetLocation): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.view'] : ['asset_location.*.view'],
+            abilities: ['assets.*.view'],
             denyResponse: 'You do not have permission to view this asset location.'
         );
     }
@@ -76,7 +75,7 @@ class AssetLocationPolicy
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? 'assets.create' : 'asset_location.create',
+            abilities: 'assets.create',
             denyResponse: 'You do not have permission to create asset locations.'
         );
     }
@@ -84,7 +83,7 @@ class AssetLocationPolicy
     public function update(Authenticatable $authenticatable, AssetLocation $assetLocation): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.update'] : ['asset_location.*.update'],
+            abilities: ['assets.*.update'],
             denyResponse: 'You do not have permission to update this asset location.'
         );
     }
@@ -92,7 +91,7 @@ class AssetLocationPolicy
     public function delete(Authenticatable $authenticatable, AssetLocation $assetLocation): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.delete'] : ['asset_location.*.delete'],
+            abilities: ['assets.*.delete'],
             denyResponse: 'You do not have permission to delete this asset location.'
         );
     }
@@ -100,7 +99,7 @@ class AssetLocationPolicy
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.delete'] : ['asset_location.*.delete'],
+            abilities: ['assets.*.delete'],
             denyResponse: 'You do not have permission to delete any asset location.'
         );
     }
@@ -108,7 +107,7 @@ class AssetLocationPolicy
     public function restore(Authenticatable $authenticatable, AssetLocation $assetLocation): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.restore'] : ['asset_location.*.restore'],
+            abilities: ['assets.*.restore'],
             denyResponse: 'You do not have permission to restore this asset location.'
         );
     }
@@ -116,7 +115,7 @@ class AssetLocationPolicy
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.restore'] : ['asset_location.*.restore'],
+            abilities: ['assets.*.restore'],
             denyResponse: 'You do not have permission to restore any asset location.'
         );
     }
@@ -124,7 +123,7 @@ class AssetLocationPolicy
     public function forceDelete(Authenticatable $authenticatable, AssetLocation $assetLocation): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.force-delete'] : ['asset_location.*.force-delete'],
+            abilities: ['assets.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this asset location.'
         );
     }
@@ -132,7 +131,7 @@ class AssetLocationPolicy
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: AssetPermissionConsolidationFeature::active() ? ['assets.*.force-delete'] : ['asset_location.*.force-delete'],
+            abilities: ['assets.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete any asset location.'
         );
     }
