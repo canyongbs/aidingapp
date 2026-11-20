@@ -43,8 +43,10 @@ use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Support\KnowledgeBasePortalUrl;
 use App\Http\Controllers\Controller;
+use Dom\HTMLDocument;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Str;
 
 class KnowledgeManagementPortalArticleController extends Controller
 {
@@ -69,74 +71,67 @@ class KnowledgeManagementPortalArticleController extends Controller
     }
 
     /**
-     * @param  array<string, mixed>|null  $content
-     */
-    protected static function generateTableOfContents(?array $content, int $maxDepth = 3): string
-    {
-        if (blank($content) || ! isset($content['content'])) {
-            return '';
-        }
-
-        $headings = static::extractHeadings($content['content'], $maxDepth);
-
-        if (empty($headings)) {
-            return '';
-        }
-
-        $result = '<ul>';
-        $prev = $headings[0]['level'];
-
-        foreach ($headings as $item) {
-            $prev <= $item['level'] ?: $result .= str_repeat('</ul>', $prev - $item['level']);
-            $prev >= $item['level'] ?: $result .= '<ul>';
-
-            $result .= '<li><a href="#' . $item['id'] . '">' . e($item['text']) . '</a></li>';
-
-            $prev = $item['level'];
-        }
-
-        $result .= '</ul>';
-
-        return $result;
-    }
-
-    /**
-     * @param  array<int, array<string, mixed>>  $nodes
+     * Gives each heading up to `$maxDepth` a unique anchor `id`, and lists those headings in document order.
      *
-     * @return array<int, array{level: int, id: string, text: string}>
+     * Anchors are prefixed because the portal's sanitizer drops any `id` matching a DOM property name, like `title`.
+     *
+     * @return array{0: string, 1: array<int, array{id: string, text: string, level: int}>}
      */
-    protected static function extractHeadings(array $nodes, int $maxDepth): array
+    protected static function generateTableOfContents(string $content, int $maxDepth = 3): array
     {
+        $body = HTMLDocument::createFromString(
+            "<!doctype html><html><body>{$content}</body></html>",
+            LIBXML_NOERROR,
+            'UTF-8',
+        )->body;
+
+        if ($body === null) {
+            return [$content, []];
+        }
+
+        $usedIds = [];
+
+        foreach ($body->querySelectorAll('[id]') as $element) {
+            $usedIds[$element->id] = true;
+        }
+
+        $headingSelector = collect(range(1, $maxDepth))
+            ->map(fn (int $level): string => "h{$level}")
+            ->implode(', ');
+
         $headings = [];
 
-        foreach ($nodes as $node) {
-            if (($node['type'] ?? null) === 'heading') {
-                $level = $node['attrs']['level'] ?? 1;
+        foreach ($body->querySelectorAll($headingSelector) as $heading) {
+            $text = Str::squish($heading->textContent ?? '');
 
-                if ($level <= $maxDepth) {
-                    /** @var array<int, array<string, mixed>> $children */
-                    $children = $node['content'] ?? [];
-
-                    $text = collect($children)
-                        ->map(fn (array $node): ?string => $node['text'] ?? null)
-                        ->implode(' ');
-
-                    $id = $node['attrs']['id'] ?? str($text)->kebab()->toString();
-
-                    $headings[] = [
-                        'level' => $level,
-                        'id' => $id,
-                        'text' => $text,
-                    ];
-                }
+            if ($text === '') {
+                continue;
             }
 
-            if (! empty($node['content'])) {
-                $headings = [...$headings, ...static::extractHeadings($node['content'], $maxDepth)];
+            $baseId = 'section-' . (Str::slug($text) ?: 'heading');
+            $id = $baseId;
+            $duplicateCount = 1;
+
+            while (isset($usedIds[$id])) {
+                $duplicateCount++;
+                $id = "{$baseId}-{$duplicateCount}";
             }
+
+            $usedIds[$id] = true;
+            $heading->id = $id;
+
+            $headings[] = [
+                'id' => $id,
+                'text' => $text,
+                'level' => (int) Str::after($heading->localName, 'h'),
+            ];
         }
 
-        return $headings;
+        if ($headings === []) {
+            return [$content, []];
+        }
+
+        return [$body->innerHTML, $headings];
     }
 
     private function response(KnowledgeBaseItem $article): JsonResponse
@@ -168,13 +163,10 @@ class KnowledgeManagementPortalArticleController extends Controller
         }
 
         $content = $article->article_details ? $article->renderRichContent('article_details') : '';
+        $tableOfContents = [];
 
-        if ($article->has_table_of_contents) {
-            $tableOfContents = static::generateTableOfContents($article->article_details);
-
-            if (filled($tableOfContents)) {
-                $content = '<h2>Table of Contents</h2><div class="prose-toc">' . $tableOfContents . '</div>' . $content;
-            }
+        if ($article->has_table_of_contents && filled($content)) {
+            [$content, $tableOfContents] = static::generateTableOfContents($content);
         }
 
         return response()->json([
@@ -224,6 +216,7 @@ class KnowledgeManagementPortalArticleController extends Controller
             ]),
             'portal_view_count' => $article->portal_view_count,
             'helpful_vote_percentage' => $helpfulVotePercentage,
+            'table_of_contents' => $tableOfContents,
         ]);
     }
 }

@@ -43,6 +43,15 @@ use Illuminate\Support\Facades\Storage;
 
 use function Pest\Laravel\getJson;
 
+/**
+ * @return array<string, mixed>
+ */
+$heading = fn (int $level, string $text): array => [
+    'type' => 'heading',
+    'attrs' => ['level' => $level],
+    'content' => [['type' => 'text', 'text' => $text]],
+];
+
 beforeEach(function (): void {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
@@ -134,4 +143,89 @@ it('resolves an article via the legacy category-slug route', function (): void {
         ->assertOk()
         ->assertJsonPath('article.id', $article->getKey())
         ->assertJsonPath('article.publicId', $article->public_id);
+});
+
+describe('table of contents', function () use ($heading): void {
+    it('lists the headings up to level three and anchors each one', function () use ($heading): void {
+        $article = KnowledgeBaseItem::factory()->create([
+            'public' => true,
+            'has_table_of_contents' => true,
+            'article_details' => [
+                'type' => 'doc',
+                'content' => [
+                    $heading(1, 'Getting started'),
+                    [
+                        'type' => 'heading',
+                        'attrs' => ['level' => 2],
+                        'content' => [
+                            ['type' => 'text', 'text' => 'Set up the '],
+                            ['type' => 'text', 'text' => 'connection', 'marks' => [['type' => 'bold']]],
+                        ],
+                    ],
+                    $heading(3, 'API key & permissions'),
+                    $heading(4, 'Too deep for the contents'),
+                    ['type' => 'heading', 'attrs' => ['level' => 2]],
+                ],
+            ],
+        ]);
+
+        $response = getJson(route('api.portal.article.show-canonical', [
+            'article' => "article-{$article->public_id}",
+        ]))
+            ->assertOk()
+            ->assertJsonPath('table_of_contents', [
+                ['id' => 'section-getting-started', 'text' => 'Getting started', 'level' => 1],
+                ['id' => 'section-set-up-the-connection', 'text' => 'Set up the connection', 'level' => 2],
+                ['id' => 'section-api-key-permissions', 'text' => 'API key & permissions', 'level' => 3],
+            ]);
+
+        expect($response->json('article.content'))
+            ->toContain('<h1 id="section-getting-started">Getting started</h1>')
+            ->toContain('<h2 id="section-set-up-the-connection">Set up the <strong>connection</strong></h2>')
+            ->toContain('<h3 id="section-api-key-permissions">API key &amp; permissions</h3>')
+            ->toContain('<h4>Too deep for the contents</h4>');
+    });
+
+    it('gives headings that share the same text their own anchors', function () use ($heading): void {
+        $article = KnowledgeBaseItem::factory()->create([
+            'public' => true,
+            'has_table_of_contents' => true,
+            'article_details' => [
+                'type' => 'doc',
+                'content' => [
+                    $heading(2, 'Overview'),
+                    $heading(2, 'Overview'),
+                    $heading(2, 'Overview 2'),
+                ],
+            ],
+        ]);
+
+        $response = getJson(route('api.portal.article.show-canonical', [
+            'article' => "article-{$article->public_id}",
+        ]))->assertOk();
+
+        expect($response->json('table_of_contents.*.id'))
+            ->toBe(['section-overview', 'section-overview-2', 'section-overview-2-2']);
+    });
+
+    it('does not list or anchor headings when the table of contents is turned off', function () use ($heading): void {
+        $article = KnowledgeBaseItem::factory()->create([
+            'public' => true,
+            'has_table_of_contents' => false,
+            'article_details' => [
+                'type' => 'doc',
+                'content' => [
+                    $heading(2, 'Overview'),
+                ],
+            ],
+        ]);
+
+        $response = getJson(route('api.portal.article.show-canonical', [
+            'article' => "article-{$article->public_id}",
+        ]))
+            ->assertOk()
+            ->assertJsonPath('table_of_contents', []);
+
+        expect($response->json('article.content'))->toContain('<h2>Overview</h2>');
+    });
 });
