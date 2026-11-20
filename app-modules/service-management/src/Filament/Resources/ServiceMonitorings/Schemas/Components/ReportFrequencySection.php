@@ -40,7 +40,6 @@ use AidingApp\Contact\Models\Builders\ContactBuilder;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
-use App\Features\ContactArchivingFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Scopes\OrderByFullName;
 use App\Models\Scopes\WithoutAnyAdmin;
@@ -100,7 +99,7 @@ class ReportFrequencySection
                             ->preload()
                             ->searchable()
                             ->options(fn (?array $state): array => Contact::query()
-                                ->when(ContactArchivingFeature::active(), fn (ContactBuilder $query): ContactBuilder => $query->where(fn (ContactBuilder $query): ContactBuilder => $query->withoutArchived()->orWhereKey($state ?? [])))
+                                ->where(fn (ContactBuilder $query): ContactBuilder => $query->withoutArchived()->orWhereKey($state ?? []))
                                 ->orderBy('full_name')
                                 ->pluck('full_name', 'id')
                                 ->all()),

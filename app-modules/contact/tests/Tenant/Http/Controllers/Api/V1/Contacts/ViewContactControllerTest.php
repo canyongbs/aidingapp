@@ -35,7 +35,6 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use App\Features\ContactArchivingFeature;
 use App\Models\SystemUser;
 
 use function Pest\Laravel\getJson;
@@ -125,20 +124,6 @@ it('checks permissions before returning not found for an archived contact', func
 
     getJson(route('api.v1.contacts.show', ['contact' => $contact], false))
         ->assertForbidden();
-});
-
-it('returns an archived contact while contact archiving is inactive', function (): void {
-    ContactArchivingFeature::deactivate();
-
-    $user = SystemUser::factory()->create();
-    $user->givePermissionTo(['contacts.view-any', 'contacts.*.view']);
-    actingAsApiUser($user);
-
-    $contact = Contact::factory()->archived()->create();
-
-    getJson(route('api.v1.contacts.show', ['contact' => $contact], false))
-        ->assertOk()
-        ->assertJsonPath('data.id', $contact->getKey());
 });
 
 it('returns not found for an identifier that is not a UUID', function (): void {

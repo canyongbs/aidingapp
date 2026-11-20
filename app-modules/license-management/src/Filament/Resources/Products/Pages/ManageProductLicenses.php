@@ -39,7 +39,6 @@ namespace AidingApp\LicenseManagement\Filament\Resources\Products\Pages;
 use AidingApp\Contact\Models\Builders\ContactBuilder;
 use AidingApp\LicenseManagement\Filament\Resources\Products\ProductResource;
 use AidingApp\LicenseManagement\Models\ProductLicense;
-use App\Features\ContactArchivingFeature;
 use App\Filament\Infolists\Components\MaskedTextEntry;
 use App\Filament\Tables\Columns\MaskedTextColumn;
 use Filament\Actions\BulkActionGroup;
@@ -88,9 +87,7 @@ class ManageProductLicenses extends ManageRelatedRecords
                     ->relationship(
                         name: 'contact',
                         titleAttribute: 'full_name',
-                        modifyQueryUsing: fn (ContactBuilder $query, ?ProductLicense $record): ContactBuilder => ContactArchivingFeature::active()
-                            ? $query->where(fn (ContactBuilder $query): ContactBuilder => $query->withoutArchived()->when($record?->assigned_to, fn (ContactBuilder $query, string $contactId): ContactBuilder => $query->orWhereKey($contactId)))
-                            : $query,
+                        modifyQueryUsing: fn (ContactBuilder $query, ?ProductLicense $record): ContactBuilder => $query->where(fn (ContactBuilder $query): ContactBuilder => $query->withoutArchived()->when($record?->assigned_to, fn (ContactBuilder $query, string $contactId): ContactBuilder => $query->orWhereKey($contactId))),
                     )
                     ->label('Assigned To')
                     ->preload()

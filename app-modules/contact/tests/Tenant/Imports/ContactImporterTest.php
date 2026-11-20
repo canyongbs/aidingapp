@@ -38,7 +38,6 @@ use AidingApp\Contact\Imports\ContactImporter;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
-use App\Features\ContactArchivingFeature;
 use App\Models\Import;
 use App\Models\User;
 use Illuminate\Support\Str;
@@ -131,28 +130,5 @@ it('unarchives and updates an archived contact with the same email', function ()
     expect($contact->first_name)->toBe('Updated')
         ->and($contact->isArchived())->toBeFalse()
         ->and($contact->audits()->where('event', 'unarchived')->exists())->toBeTrue()
-        ->and(Contact::query()->where('email', 'person@example.com')->count())->toBe(1);
-});
-
-it('updates a contact with the same email when the contact archiving feature is inactive', function () use ($runContactImport): void {
-    ContactArchivingFeature::deactivate();
-
-    $existingContact = Contact::factory()->archived()->create([
-        'email' => 'person@example.com',
-        'first_name' => 'Original',
-    ]);
-
-    $runContactImport([
-        'first_name' => 'Updated',
-        'last_name' => 'Last',
-        'full_name' => 'Updated Last',
-        'type' => 'Default',
-        'email' => 'person@example.com',
-    ]);
-
-    $contact = $existingContact->fresh();
-
-    expect($contact->first_name)->toBe('Updated')
-        ->and($contact->isArchived())->toBeTrue()
         ->and(Contact::query()->where('email', 'person@example.com')->count())->toBe(1);
 });

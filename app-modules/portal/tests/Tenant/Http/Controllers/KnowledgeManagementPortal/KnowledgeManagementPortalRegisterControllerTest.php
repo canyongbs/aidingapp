@@ -40,16 +40,12 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Portal\Enums\PortalType;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\ContactArchivingFeature;
-use Illuminate\Database\UniqueConstraintViolationException;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 use Laravel\Sanctum\PersonalAccessToken;
 
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\withHeader;
-use function Pest\Laravel\withoutExceptionHandling;
 
 beforeEach(function (): void {
     $settings = app(PortalSettings::class);
@@ -175,56 +171,6 @@ it('unarchives and updates an archived contact with the same email', function ()
         ->and($archivedContact->phone)->toBe('+15550007777')
         ->and($archivedContact->audits()->where('event', 'unarchived')->exists())->toBeTrue()
         ->and(PersonalAccessToken::findToken($response->json('token'))?->tokenable?->is($archivedContact))->toBeTrue();
-});
-
-it('fails to register with an archived contact\'s email when the contact archiving feature is inactive', function (): void {
-    ContactArchivingFeature::deactivate();
-
-    ContactType::factory()->create([
-        'is_default' => true,
-    ]);
-
-    Organization::factory()->create([
-        'is_contact_generation_enabled' => true,
-        'domains' => [
-            ['domain' => 'example.com'],
-        ],
-    ]);
-
-    $archivedContact = Contact::factory()->archived()->create([
-        'email' => 'archived.contact@example.com',
-        'first_name' => 'Original',
-    ]);
-
-    $plainCode = 123456;
-
-    $authentication = PortalAuthentication::factory()->create([
-        'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make((string) $plainCode),
-        'created_at' => now(),
-    ]);
-
-    $url = URL::signedRoute(
-        name: 'api.portal.authenticate.register.embedded',
-        parameters: ['authentication' => $authentication, 'email' => 'archived.contact@example.com'],
-        absolute: false,
-    );
-
-    withoutExceptionHandling();
-
-    // A savepoint keeps the test transaction usable after the expected constraint violation.
-    expect(fn () => DB::connection('tenant')->transaction(fn () => postJson($url, [
-        'email' => 'archived.contact@example.com',
-        'first_name' => 'Returning',
-        'last_name' => 'Contact',
-        'mobile' => '+15550008888',
-        'code' => $plainCode,
-    ])))->toThrow(UniqueConstraintViolationException::class);
-
-    $archivedContact->refresh();
-
-    expect($archivedContact->isArchived())->toBeTrue()
-        ->and($archivedContact->first_name)->toBe('Original');
 });
 
 test('it does not rotate the csrf token shared with the admin panel', function (): void {
