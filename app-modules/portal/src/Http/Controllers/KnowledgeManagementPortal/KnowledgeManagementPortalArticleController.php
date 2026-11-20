@@ -71,10 +71,9 @@ class KnowledgeManagementPortalArticleController extends Controller
     }
 
     /**
-     * Gives each heading the table of contents covers a unique anchor `id`, and lists those headings in document order.
+     * Gives each heading up to `$maxDepth` a unique anchor `id`, and lists those headings in document order.
      *
-     * Anchors are prefixed so they always contain a hyphen: the portal's HTML sanitizer drops any `id` that matches a
-     * DOM property name (such as `title` or `location`), and the prefix also keeps them clear of the portal's own ids.
+     * Anchors are prefixed because the portal's sanitizer drops any `id` matching a DOM property name, like `title`.
      *
      * @return array{0: string, 1: array<int, array{id: string, text: string, level: int}>}
      */

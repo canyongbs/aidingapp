@@ -48,7 +48,6 @@
 
     const emit = defineEmits(['navigate']);
 
-    // Every group starts expanded, so only the groups a reader collapses are tracked.
     const collapsedIds = ref(new Set());
 
     const hasExpandableItems = computed(() => props.items.some((item) => item.children.length > 0));
@@ -59,6 +58,16 @@
         } else {
             collapsedIds.value.add(id);
         }
+    }
+
+    function navigate(event, id) {
+        if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+            return;
+        }
+
+        event.preventDefault();
+
+        emit('navigate', id);
     }
 </script>
 
@@ -87,7 +96,7 @@
                         'min-w-0 break-words rounded py-0.5 text-sm outline-none transition duration-75 hover:text-brand-600 focus-visible:ring-2 focus-visible:ring-brand-600',
                         depth === 0 ? 'font-medium text-gray-900' : 'text-gray-600',
                     ]"
-                    @click.prevent="emit('navigate', item.id)"
+                    @click="navigate($event, item.id)"
                 >
                     {{ item.text }}
                 </a>

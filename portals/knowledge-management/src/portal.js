@@ -90,10 +90,9 @@ customElements.define(
                         return savedPosition;
                     }
 
-                    // Linked to a section, such as an article heading — jump to it. The router can only look for it in
-                    // the main document, which cannot see inside the portal's shadow root, so look for it there instead.
+                    // Linked to a section — find it in the portal's shadow root, which the router can't look inside.
                     if (to.hash) {
-                        // On a first visit the boot screen is still showing at this point, so let the page render first.
+                        // On a first visit, wait for the boot screen to give way to the page.
                         await new Promise((resolve) => setTimeout(resolve));
 
                         const target = shadowRoot?.getElementById(to.hash.slice(1));

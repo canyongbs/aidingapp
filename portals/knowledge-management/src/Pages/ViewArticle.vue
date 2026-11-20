@@ -120,12 +120,22 @@
             return;
         }
 
+        heading.setAttribute('tabindex', '-1');
+        heading.focus({ preventScroll: true });
+
         heading.scrollIntoView({
             behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
         });
 
-        // Record the section in the URL so it can be shared, without a route change that would reload the article.
-        window.history.replaceState(window.history.state, '', `#${id}`);
+        // Update the URL without a route change, which would reload the article.
+        const resolved = router.resolve({ path: route.path, query: route.query, hash: `#${id}` });
+        const state = { ...window.history.state };
+
+        if (state.current) {
+            state.current = resolved.fullPath;
+        }
+
+        window.history.replaceState(state, '', resolved.href);
     }
 
     async function toggleFeedback(type) {

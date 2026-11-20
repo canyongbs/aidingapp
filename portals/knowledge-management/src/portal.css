@@ -220,10 +220,8 @@ li[data-message-type='success'] {
 }
 
 /* Rich editor content styles */
-
-/* Keep article headings clear of the sticky header when jumping to them from the table of contents. */
 .prose :is(h1, h2, h3) {
-    @apply scroll-mt-24;
+    @apply scroll-mt-24 rounded-sm outline-offset-4 focus-visible:outline-2 focus-visible:outline-brand-600;
 }
 
 .prose .grid-layout {

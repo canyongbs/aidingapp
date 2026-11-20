@@ -53,7 +53,6 @@
     const panelId = useId();
     const isOpen = ref(false);
 
-    // Nest each heading under the closest heading before it that has a higher level.
     const items = computed(() => {
         const rootItems = [];
         const ancestors = [];
