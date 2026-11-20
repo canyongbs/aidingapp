@@ -219,11 +219,13 @@ li[data-message-type='success'] {
     }
 }
 
-.prose-toc {
-    @apply mb-16;
+/* Rich editor content styles */
+
+/* Keep article headings clear of the sticky header when jumping to them from the table of contents. */
+.prose :is(h1, h2, h3) {
+    @apply scroll-mt-24;
 }
 
-/* Rich editor content styles */
 .prose .grid-layout {
     @apply grid grid-cols-1 gap-4;
 

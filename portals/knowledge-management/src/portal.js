@@ -35,7 +35,7 @@ import { defaultConfig, plugin } from '@formkit/vue';
 import { PiniaColada } from '@pinia/colada';
 import { createPinia } from 'pinia';
 import PrimeVue from 'primevue/config';
-import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
+import { createApp, defineCustomElement, getCurrentInstance, h, useShadowRoot } from 'vue';
 import { createRouter, createWebHistory, RouterView } from 'vue-router';
 import { DataLoaderPlugin } from 'vue-router/experimental';
 import VueSignaturePad from 'vue-signature-pad';
@@ -80,12 +80,27 @@ customElements.define(
 
             const { baseUrl } = getAppContext(props.accessUrl);
 
+            const shadowRoot = useShadowRoot();
+
             const router = createRouter({
                 history: createWebHistory(),
-                scrollBehavior(to, from, savedPosition) {
+                async scrollBehavior(to, from, savedPosition) {
                     // Restore the previous position on back/forward navigation.
                     if (savedPosition) {
                         return savedPosition;
+                    }
+
+                    // Linked to a section, such as an article heading — jump to it. The router can only look for it in
+                    // the main document, which cannot see inside the portal's shadow root, so look for it there instead.
+                    if (to.hash) {
+                        // On a first visit the boot screen is still showing at this point, so let the page render first.
+                        await new Promise((resolve) => setTimeout(resolve));
+
+                        const target = shadowRoot?.getElementById(to.hash.slice(1));
+
+                        if (target) {
+                            return { el: target, top: parseFloat(getComputedStyle(target).scrollMarginTop) };
+                        }
                     }
 
                     // Same page, only the query changed (pagination / tab switches) — leave

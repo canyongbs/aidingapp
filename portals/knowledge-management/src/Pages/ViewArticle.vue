@@ -45,6 +45,7 @@
     import truncate from 'lodash/truncate';
     import { computed, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
+    import ArticleTableOfContents from '../Components/Articles/ArticleTableOfContents.vue';
     import { apiPost } from '../Services/api.js';
     import formatDateTime from '../Services/FormatDateTime.js';
     import { articleRoute, categoryRoute } from '../Services/KnowledgeBaseRoutes.js';
@@ -59,7 +60,9 @@
     const article = computed(() => articleData.value?.article ?? null);
     const parentCategory = computed(() => articleData.value?.category?.parentCategory ?? null);
     const portalViewCount = computed(() => articleData.value?.portal_view_count ?? 0);
+    const tableOfContents = computed(() => articleData.value?.table_of_contents ?? []);
 
+    const articleContent = ref(null);
     const feedback = ref(null);
     const helpfulVotePercentage = ref(0);
 
@@ -73,7 +76,7 @@
                 const canonicalRoute = articleRoute(data.article, data.category);
 
                 if (router.resolve(canonicalRoute).path !== route.path) {
-                    router.replace(canonicalRoute);
+                    router.replace({ ...canonicalRoute, hash: route.hash });
                 }
             }
         },
@@ -109,6 +112,21 @@
     });
 
     const currentCrumb = computed(() => (article.value ? truncate(article.value.name, { length: 16 }) : 'Not Found'));
+
+    function navigateToHeading(id) {
+        const heading = articleContent.value?.$el.querySelector(`#${CSS.escape(id)}`);
+
+        if (!heading) {
+            return;
+        }
+
+        heading.scrollIntoView({
+            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        });
+
+        // Record the section in the URL so it can be shared, without a route change that would reload the article.
+        window.history.replaceState(window.history.state, '', `#${id}`);
+    }
 
     async function toggleFeedback(type) {
         try {
@@ -152,15 +170,44 @@
             <ArticleAttachments :attachments="article.attachments" />
         </PageCard>
 
-        <PageCard>
-            <ArticleContent v-code-blocks :content="article.content" />
-
-            <ArticleFeedback
-                :feedback="feedback"
-                :helpfulVotePercentage="helpfulVotePercentage"
-                @toggle-feedback="toggleFeedback"
+        <div class="rounded-lg bg-white shadow-sm ring-1 ring-gray-950/5">
+            <ArticleTableOfContents
+                v-if="tableOfContents.length > 0"
+                :headings="tableOfContents"
+                collapsible
+                class="border-b border-gray-200 lg:hidden"
+                @navigate="navigateToHeading"
             />
-        </PageCard>
+
+            <div class="lg:flex">
+                <div class="flex min-w-0 flex-1 flex-col gap-y-6 p-6 sm:p-8">
+                    <ArticleContent
+                        ref="articleContent"
+                        v-code-blocks
+                        :content="article.content"
+                        class="max-w-none! [&>:first-child]:mt-0!"
+                    />
+
+                    <ArticleFeedback
+                        :feedback="feedback"
+                        :helpfulVotePercentage="helpfulVotePercentage"
+                        class="max-w-none!"
+                        @toggle-feedback="toggleFeedback"
+                    />
+                </div>
+
+                <aside
+                    v-if="tableOfContents.length > 0"
+                    class="hidden w-72 shrink-0 border-s border-gray-200 lg:block xl:w-80"
+                >
+                    <ArticleTableOfContents
+                        :headings="tableOfContents"
+                        class="sticky top-16 max-h-[calc(100dvh-4rem)] overflow-y-auto p-8"
+                        @navigate="navigateToHeading"
+                    />
+                </aside>
+            </div>
+        </div>
     </Page>
 
     <Page v-if="!category || !article">
