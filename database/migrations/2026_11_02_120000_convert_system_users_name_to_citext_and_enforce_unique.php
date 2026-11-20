@@ -46,10 +46,10 @@ return new class () extends Migration {
         DB::transaction(function (): void {
             DB::statement('ALTER TABLE system_users DROP CONSTRAINT IF EXISTS system_users_name_unique');
 
-      DB::statement('ALTER TABLE system_users ALTER COLUMN name TYPE citext');
+            DB::statement('ALTER TABLE system_users ALTER COLUMN name TYPE citext');
 
-      Schema::table('system_users', function (Blueprint $table): void {
-        $table->uniqueIndex('name', 'system_users_name_unique')
+            Schema::table('system_users', function (Blueprint $table): void {
+                $table->uniqueIndex('name', 'system_users_name_unique')
                     ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
             });
         });
@@ -60,10 +60,10 @@ return new class () extends Migration {
         DB::transaction(function (): void {
             DB::statement('DROP INDEX IF EXISTS system_users_name_unique');
 
-      DB::statement('ALTER TABLE system_users ALTER COLUMN name TYPE varchar(255)');
+            DB::statement('ALTER TABLE system_users ALTER COLUMN name TYPE varchar(255)');
 
-      Schema::table('system_users', function (Blueprint $table): void {
-        $table->unique('name', 'system_users_name_unique');
+            Schema::table('system_users', function (Blueprint $table): void {
+                $table->unique('name', 'system_users_name_unique');
             });
         });
     }

@@ -54,7 +54,7 @@ class CreateSystemUser extends CreateRecord
             TextInput::make('name')
                 ->required()
                 ->string()
-            ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
+                ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
         ]);
     }
 }

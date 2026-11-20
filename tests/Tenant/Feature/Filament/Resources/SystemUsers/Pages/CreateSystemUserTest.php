@@ -78,4 +78,3 @@ it('allows creating a system user whose name is freed up by a soft-deleted syste
         'deleted_at' => null,
     ]);
 });
-
