@@ -40,12 +40,10 @@ use AidingApp\Contact\Filament\Exports\OrganizationExporter;
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Contact\Imports\OrganizationImporter;
 use AidingApp\Contact\Models\Organization;
-use App\Features\OrganizationArchivingFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ImportAction;
@@ -87,9 +85,7 @@ class ListOrganizations extends ListRecords
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    OrganizationArchivingFeature::active()
-                        ? ArchiveBulkAction::make()->authorizeIndividualRecords('delete')
-                        : DeleteBulkAction::make()->authorizeIndividualRecords('delete'),
+                    ArchiveBulkAction::make()->authorizeIndividualRecords('delete'),
                 ]),
             ]);
     }

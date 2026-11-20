@@ -35,11 +35,9 @@
 */
 
 use AidingApp\Contact\Models\Organization;
-use App\Features\OrganizationArchivingFeature;
 use App\Models\SystemUser;
 
 use function Pest\Laravel\assertModelExists;
-use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Laravel\deleteJson;
 use function Tests\actingAsApiUser;
 
@@ -126,22 +124,4 @@ it('returns not found for a soft deleted organization', function (): void {
 
     deleteJson(route('api.v1.organizations.delete', ['organization' => $organization], false))
         ->assertNotFound();
-});
-
-it('soft deletes the organization when organization archiving is inactive', function (): void {
-    OrganizationArchivingFeature::deactivate();
-
-    $user = SystemUser::factory()->create();
-    $user->givePermissionTo('organization.view-any');
-    $user->givePermissionTo('organization.*.delete');
-    actingAsApiUser($user);
-
-    $organization = Organization::factory()->create();
-
-    deleteJson(route('api.v1.organizations.delete', ['organization' => $organization], false))
-        ->assertNoContent();
-
-    assertSoftDeleted($organization);
-
-    expect($organization->refresh()->isArchived())->toBeFalse();
 });

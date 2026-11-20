@@ -41,7 +41,6 @@ use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Rules\OrganizationNameNotArchived;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
-use App\Features\OrganizationArchivingFeature;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
@@ -60,7 +59,7 @@ class UpdateOrganizationRequest extends FormRequest
             return false;
         }
 
-        if (OrganizationArchivingFeature::active() && $organization instanceof Organization && $organization->isArchived()) {
+        if ($organization instanceof Organization && $organization->isArchived()) {
             abort(404);
         }
 
@@ -83,7 +82,8 @@ class UpdateOrganizationRequest extends FormRequest
                 'string',
                 'max:255',
                 // Stops at the first failure, so an archived match shows its own message instead of the generic unique one.
-                Rule::when(fn (): bool => OrganizationArchivingFeature::active(), ['bail', new OrganizationNameNotArchived(ignore: $organization instanceof Organization ? $organization : null)]),
+                'bail',
+                new OrganizationNameNotArchived(ignore: $organization instanceof Organization ? $organization : null),
                 Rule::unique(Organization::class, 'name')->ignore($organizationId)->withoutTrashed(),
             ],
             'email' => ['nullable', 'string', 'email', 'max:255'],

@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Http\Controllers\Api\V1\Organizations;
 
 use AidingApp\Contact\Models\Organization;
-use App\Features\OrganizationArchivingFeature;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
@@ -49,12 +48,6 @@ class DeleteOrganizationController
     {
         Gate::authorize('viewAny', Organization::class);
         Gate::authorize('delete', $organization);
-
-        if (! OrganizationArchivingFeature::active()) {
-            $organization->delete();
-
-            return response()->noContent();
-        }
 
         if ($organization->isArchived()) {
             abort(404);

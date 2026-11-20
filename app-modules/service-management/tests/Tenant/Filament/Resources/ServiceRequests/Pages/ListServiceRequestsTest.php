@@ -50,7 +50,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
-use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
@@ -1228,25 +1227,4 @@ it('does not offer archived organizations in the organization filter', function 
     expect($options)
         ->toHaveKey($organization->getKey())
         ->not()->toHaveKey($archivedOrganization->getKey());
-});
-
-it('offers every organization in the organization filter when archiving is inactive', function (): void {
-    OrganizationArchivingFeature::deactivate();
-    asSuperAdmin();
-
-    $organization = Organization::factory()->create();
-    $archivedOrganization = Organization::factory()->archived()->create();
-
-    $select = Livewire::test(ListServiceRequests::class)
-        ->instance()
-        ->getTableFiltersForm()
-        ->getComponentByStatePath('organization.value');
-
-    assert($select instanceof Select);
-
-    $options = $select->getOptions();
-
-    expect($options)
-        ->toHaveKey($organization->getKey())
-        ->toHaveKey($archivedOrganization->getKey());
 });
