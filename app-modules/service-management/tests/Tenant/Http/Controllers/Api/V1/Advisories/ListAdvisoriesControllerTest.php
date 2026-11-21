@@ -39,7 +39,6 @@ use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use App\Features\AdvisoryVisibilityFeature;
 use App\Models\SystemUser;
 use App\Settings\LicenseSettings;
 use CanyonGBS\Common\Enums\Color;
@@ -132,20 +131,6 @@ it('returns a null department for an unassigned advisory', function () use ($act
 
     getJson(route('api.v1.advisories.index', [], false))
         ->assertJsonPath('data.0.department', null);
-});
-
-it('omits the visibility fields when `AdvisoryVisibilityFeature` is inactive', function () use ($actingAsAdvisoryViewer): void {
-    AdvisoryVisibilityFeature::deactivate();
-
-    $actingAsAdvisoryViewer();
-
-    Advisory::factory()->create();
-
-    $advisory = getJson(route('api.v1.advisories.index', [], false))
-        ->assertOk()
-        ->json('data.0');
-
-    expect($advisory)->not->toHaveKeys(['visibility', 'is_visibility_restricted', 'restricted_to_contact_types']);
 });
 
 it('does not return soft deleted advisories', function () use ($actingAsAdvisoryViewer): void {

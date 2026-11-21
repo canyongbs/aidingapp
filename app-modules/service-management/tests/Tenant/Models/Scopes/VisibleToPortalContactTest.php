@@ -38,7 +38,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\Scopes\VisibleToPortalContact;
-use App\Features\AdvisoryVisibilityFeature;
 
 it('shows public advisories to everyone', function (): void {
     $advisory = Advisory::factory()->create();
@@ -68,13 +67,4 @@ it('ignores the contact types of an advisory that is no longer restricted', func
     $advisory = Advisory::factory()->restrictedToContactTypes(ContactType::factory()->create())->create(['is_visibility_restricted' => false]);
 
     expect(Advisory::query()->tap(new VisibleToPortalContact(Contact::factory()->create()))->pluck('id')->all())->toBe([$advisory->getKey()]);
-});
-
-it('only shows advisories to signed-in contacts until `AdvisoryVisibilityFeature` is active', function (): void {
-    AdvisoryVisibilityFeature::deactivate();
-
-    $advisory = Advisory::factory()->authenticated()->create();
-
-    expect(Advisory::query()->tap(new VisibleToPortalContact(null))->exists())->toBeFalse()
-        ->and(Advisory::query()->tap(new VisibleToPortalContact(Contact::factory()->create()))->pluck('id')->all())->toBe([$advisory->getKey()]);
 });

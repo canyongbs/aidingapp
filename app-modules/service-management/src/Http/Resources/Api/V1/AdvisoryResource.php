@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Http\Resources\Api\V1;
 
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\ServiceManagement\Models\Advisory;
-use App\Features\AdvisoryVisibilityFeature;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -73,17 +72,17 @@ class AdvisoryResource extends JsonResource
                 'name' => $this->resource->assignedDepartment->name,
             ] : null,
             /** Who can see the advisory in the portal: everyone (`public`) or only signed-in contacts (`authenticated`). */
-            'visibility' => $this->when(AdvisoryVisibilityFeature::active(), fn () => $this->resource->visibility),
+            'visibility' => $this->resource->visibility,
             /** Whether only contacts of the `restricted_to_contact_types` can see an `authenticated` advisory. */
-            'is_visibility_restricted' => $this->when(AdvisoryVisibilityFeature::active(), fn (): bool => $this->resource->is_visibility_restricted),
-            'restricted_to_contact_types' => $this->when(AdvisoryVisibilityFeature::active(), fn (): array => $this->resource->restrictedToContactTypes
+            'is_visibility_restricted' => $this->resource->is_visibility_restricted,
+            'restricted_to_contact_types' => $this->resource->restrictedToContactTypes
                 ->sortBy('name')
                 ->map(fn (ContactType $contactType): array => [
                     'id' => $contactType->id,
                     'name' => $contactType->name,
                 ])
                 ->values()
-                ->all()),
+                ->all(),
             'created_at' => $this->resource->created_at,
             'updated_at' => $this->resource->updated_at,
         ];

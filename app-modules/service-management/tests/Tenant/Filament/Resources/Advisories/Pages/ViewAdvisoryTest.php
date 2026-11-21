@@ -46,13 +46,11 @@ use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use App\Features\AdvisoryPermissionConsolidationFeature;
-use App\Features\AdvisoryVisibilityFeature;
 use App\Models\User;
 use CanyonGBS\Common\Enums\Color;
 use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\Select;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Components\Section;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 
@@ -536,22 +534,6 @@ describe('advisory visibility', function () use ($visibilityInfolistEntry): void
 
         expect($visibilityInfolistEntry($component, 'is_visibility_restricted')->isVisible())->toBeFalse()
             ->and($visibilityInfolistEntry($component, 'restrictedToContactTypes.name')->isVisible())->toBeFalse();
-    });
-
-    it('does not display the visibility section until the advisory visibility migration has run', function (): void {
-        asSuperAdmin();
-
-        $record = Advisory::factory()->create()->getRouteKey();
-
-        $section = fn (Testable $component): Section => $component->instance()
-            ->getSchema('infolist')
-            ->getComponent('visibility', withHidden: true);
-
-        expect($section(Livewire::test(ViewAdvisory::class, ['record' => $record]))->isVisible())->toBeTrue();
-
-        AdvisoryVisibilityFeature::deactivate();
-
-        expect($section(Livewire::test(ViewAdvisory::class, ['record' => $record]))->isVisible())->toBeFalse();
     });
 
     it('gates the edit action with proper access control', function (): void {

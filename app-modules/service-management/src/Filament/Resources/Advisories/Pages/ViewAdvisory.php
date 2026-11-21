@@ -41,7 +41,6 @@ use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\RelationManagers\AdvisoryUpdatesRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Schemas\AdvisoryForm;
 use AidingApp\ServiceManagement\Models\Advisory;
-use App\Features\AdvisoryVisibilityFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
@@ -87,7 +86,6 @@ class ViewAdvisory extends ViewRecord
                     ]),
                 Section::make('Advisory Visibility')
                     ->key('visibility')
-                    ->visible(fn (): bool => AdvisoryVisibilityFeature::active())
                     ->headerActions([
                         EditAction::make('editVisibility')
                             ->label('Edit')

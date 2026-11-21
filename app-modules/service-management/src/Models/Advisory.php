@@ -77,7 +77,10 @@ class Advisory extends Model implements Auditable
 
     protected $table = 'advisories';
 
-    // TODO: Cleanup Task (advisory-visibility): mirror the `visibility` ('public') and `is_visibility_restricted` (false) column defaults in an `$attributes` property.
+    protected $attributes = [
+        'visibility' => AdvisoryVisibility::Public->value,
+        'is_visibility_restricted' => false,
+    ];
 
     /**
      * @return BelongsToMany<ContactType, $this, covariant AdvisoryVisibilityContactType>

@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Http\Controllers\Api\V1\Advisories;
 use AidingApp\ServiceManagement\Http\Resources\Api\V1\AdvisoryResource;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use App\Features\AdvisoryVisibilityFeature;
 use Closure;
 use Dedoc\Scramble\Attributes\Example;
 use Dedoc\Scramble\Attributes\Group;
@@ -94,7 +93,7 @@ class ListAdvisoriesController
                 'severity',
                 'status',
                 'assignedDepartment',
-                ...(AdvisoryVisibilityFeature::active() ? ['restrictedToContactTypes'] : []),
+                'restrictedToContactTypes',
             ])
         )
             ->allowedFilters(
