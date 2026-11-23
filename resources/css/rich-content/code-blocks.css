@@ -77,6 +77,11 @@
     padding: 0.125em 0.375em;
     white-space: normal;
     word-break: break-word;
+    /* Reserve room around the bordered chip so wrapped lines don't sit flush against each other */
+    line-height: 1.75rem;
+    /* Give each wrapped fragment its own full border, padding and radius */
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
 }
 
 /* Remove the backtick pseudo-elements Filament / Tailwind Typography add around inline code */
