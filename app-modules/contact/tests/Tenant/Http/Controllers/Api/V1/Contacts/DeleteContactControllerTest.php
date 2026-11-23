@@ -37,12 +37,10 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Services\ManagedContactService;
-use App\Features\ContactArchivingFeature;
 use App\Models\SystemUser;
 use App\Models\User;
 
 use function Pest\Laravel\assertModelExists;
-use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Laravel\deleteJson;
 use function Tests\actingAsApiUser;
 
@@ -107,20 +105,6 @@ it('does not report success when archiving is cancelled', function () use ($acti
         ->assertUnprocessable()
         ->assertJsonValidationErrors(['contact'])
         ->assertJsonPath('errors.contact.0', 'The contact could not be archived.');
-
-    expect($contact->refresh()->isArchived())->toBeFalse();
-});
-
-it('soft deletes the contact when contact archiving is inactive', function () use ($actingAsContactDeleter): void {
-    $actingAsContactDeleter();
-
-    ContactArchivingFeature::deactivate();
-    $contact = Contact::factory()->create();
-
-    deleteJson(route('api.v1.contacts.delete', ['contact' => $contact], false))
-        ->assertNoContent();
-
-    assertSoftDeleted($contact);
 
     expect($contact->refresh()->isArchived())->toBeFalse();
 });

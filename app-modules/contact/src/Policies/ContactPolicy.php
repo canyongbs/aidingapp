@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Policies;
 
 use AidingApp\Contact\Models\Contact;
-use App\Features\ContactArchivingFeature;
 use App\Models\Authenticatable;
 use Filament\Support\Authorization\DenyResponse;
 use Illuminate\Auth\Access\Response;
@@ -115,7 +114,7 @@ class ContactPolicy
 
     public function delete(Authenticatable $authenticatable, Contact $contact): Response
     {
-        if (ContactArchivingFeature::active() && $contact->isManaged()) {
+        if ($contact->isManaged()) {
             return DenyResponse::make(
                 'managed_contact',
                 message: function (int $failureCount, int $totalCount): string {

@@ -44,12 +44,10 @@ use AidingApp\Contact\Imports\ContactImporter;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use App\Features\ContactArchivingFeature;
 use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Columns\TextColumn;
@@ -116,9 +114,7 @@ class ListContacts extends ListRecords
                         ChangeTypeBulkAction::make(),
                     ])->dropdown(false),
                     ActionGroup::make([
-                        ContactArchivingFeature::active()
-                            ? ArchiveBulkAction::make()->authorizeIndividualRecords('delete')
-                            : DeleteBulkAction::make()->authorizeIndividualRecords('delete'),
+                        ArchiveBulkAction::make()->authorizeIndividualRecords('delete'),
                     ])->dropdown(false),
                 ]),
             ]);

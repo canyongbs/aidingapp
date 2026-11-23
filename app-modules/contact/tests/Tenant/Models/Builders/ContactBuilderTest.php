@@ -35,7 +35,6 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use App\Features\ContactArchivingFeature;
 
 it('excludes archived contacts', function (): void {
     $contact = Contact::factory()->create();
@@ -43,18 +42,4 @@ it('excludes archived contacts', function (): void {
 
     expect(Contact::query()->withoutArchived()->pluck('id')->all())
         ->toBe([$contact->getKey()]);
-});
-
-it('does not filter when the contact archiving feature is inactive', function (): void {
-    $contact = Contact::factory()->create();
-    $archivedContact = Contact::factory()->archived()->create();
-
-    ContactArchivingFeature::deactivate();
-
-    $query = Contact::query()->withoutArchived();
-
-    expect($query->pluck('id')->all())
-        ->toEqualCanonicalizing([$contact->getKey(), $archivedContact->getKey()]);
-
-    expect($query->toRawSql())->not->toContain('archived_at');
 });

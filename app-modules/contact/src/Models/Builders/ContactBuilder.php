@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Models\Builders;
 
 use AidingApp\Contact\Models\Contact;
-use App\Features\ContactArchivingFeature;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -47,17 +46,8 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class ContactBuilder extends Builder
 {
-    /**
-     * Overrides the `withoutArchived()` macro so it does nothing while the contact archiving feature is inactive.
-     *
-     * TODO: Cleanup Task (contact-builder-without-archived) - delete this override so the macro applies.
-     */
     public function withoutArchived(): static
     {
-        if (! ContactArchivingFeature::active()) {
-            return $this;
-        }
-
         return parent::__call(__FUNCTION__, []);
     }
 }

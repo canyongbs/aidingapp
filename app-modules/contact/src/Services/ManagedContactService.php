@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Services;
 
 use AidingApp\Contact\Models\Contact;
-use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -90,7 +89,7 @@ class ManagedContactService
 
         $this->syncContact($contact, $user);
 
-        if (ContactArchivingFeature::active() && $contact->isArchived()) {
+        if ($contact->isArchived()) {
             $contact->unarchive();
         }
 

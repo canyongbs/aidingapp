@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Imports;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
-use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
@@ -164,7 +163,7 @@ class ContactImporter extends Importer
 
         assert($record instanceof Contact);
 
-        if (ContactArchivingFeature::active() && $record->isArchived()) {
+        if ($record->isArchived()) {
             $record->unarchive();
         }
     }
