@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Enums\AdvisoryVisibility;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use App\Features\AdvisoryVisibilityFeature;
 use App\Models\SystemUser;
 use App\Settings\LicenseSettings;
 
@@ -242,31 +241,6 @@ it('validates the request', function (array $data, array $errors) use ($actingAs
     'restricted_to_contact_types array' => [['restricted_to_contact_types' => 'Student'], ['restricted_to_contact_types']],
     'restricted_to_contact_types exists' => [['restricted_to_contact_types' => ['Unknown']], ['restricted_to_contact_types.0']],
 ]);
-
-it('ignores the visibility fields when `AdvisoryVisibilityFeature` is inactive', function () use ($actingAsAdvisoryUpdater): void {
-    AdvisoryVisibilityFeature::deactivate();
-
-    $actingAsAdvisoryUpdater();
-
-    $advisory = Advisory::factory()->create(['title' => 'Email outage']);
-
-    $response = patchJson(route('api.v1.advisories.update', ['advisory' => $advisory], false), [
-        'title' => 'Email outage resolved',
-        'visibility' => 'authenticated',
-        'is_visibility_restricted' => true,
-        'restricted_to_contact_types' => ['Unknown'],
-    ]);
-
-    $response->assertOk();
-
-    expect($response->json('data'))->not->toHaveKeys(['visibility', 'is_visibility_restricted', 'restricted_to_contact_types']);
-
-    $advisory->refresh();
-
-    expect($advisory->title)->toBe('Email outage resolved')
-        ->and($advisory->visibility)->toBe(AdvisoryVisibility::Public)
-        ->and($advisory->is_visibility_restricted)->toBeFalse();
-});
 
 it('returns not found for a soft deleted advisory', function () use ($actingAsAdvisoryUpdater): void {
     $actingAsAdvisoryUpdater();

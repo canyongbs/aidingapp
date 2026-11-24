@@ -41,7 +41,6 @@ use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Schemas\AdvisoryForm;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use App\Features\AdvisoryVisibilityFeature;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -102,7 +101,7 @@ class ListAdvisories extends ListRecords
                 ])
                 ->schema([
                     AdvisoryForm::propertiesSection(),
-                    ...(AdvisoryVisibilityFeature::active() ? [AdvisoryForm::visibilitySection()] : []),
+                    AdvisoryForm::visibilitySection(),
                     AdvisoryForm::trackingSection(),
                     AdvisoryForm::assignmentSection(),
                 ]),

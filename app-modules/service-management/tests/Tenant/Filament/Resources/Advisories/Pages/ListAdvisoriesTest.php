@@ -45,7 +45,6 @@ use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\AdvisoryRequestFactory;
 use App\Features\AdvisoryPermissionConsolidationFeature;
-use App\Features\AdvisoryVisibilityFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use CanyonGBS\Common\Enums\Color;
@@ -497,23 +496,5 @@ describe('advisory visibility', function (): void {
                     && $labels[49] === 'Type 50'
                     && $contactTypes->count() === 55;
             });
-    });
-
-    it('does not offer the visibility section until the advisory visibility migration has run', function (): void {
-        AdvisoryVisibilityFeature::deactivate();
-
-        asSuperAdmin();
-
-        $request = AdvisoryRequestFactory::new()->create();
-
-        Livewire::test(ListAdvisories::class)
-            ->mountAction('create')
-            ->assertSchemaComponentDoesNotExist('visibility', 'mountedActionSchema0');
-
-        Livewire::test(ListAdvisories::class)
-            ->callAction('create', $request)
-            ->assertHasNoActionErrors();
-
-        assertDatabaseHas(Advisory::class, ['title' => $request['title']]);
     });
 });

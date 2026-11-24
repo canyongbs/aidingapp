@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Enums\AdvisoryVisibility;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use App\Features\AdvisoryVisibilityFeature;
 use App\Models\SystemUser;
 use App\Settings\LicenseSettings;
 
@@ -242,30 +241,4 @@ it('rejects duplicate contact types regardless of case', function () use ($actin
     ])
         ->assertUnprocessable()
         ->assertJsonValidationErrors(['restricted_to_contact_types.0', 'restricted_to_contact_types.1']);
-});
-
-it('ignores the visibility fields when `AdvisoryVisibilityFeature` is inactive', function () use ($actingAsAdvisoryCreator): void {
-    AdvisoryVisibilityFeature::deactivate();
-
-    $actingAsAdvisoryCreator();
-
-    $response = postJson(route('api.v1.advisories.store', [], false), [
-        'title' => 'Email outage',
-        'description' => 'Email is down.',
-        'severity' => 'Critical',
-        'status' => 'Investigating',
-        'visibility' => 'authenticated',
-        'is_visibility_restricted' => true,
-        'restricted_to_contact_types' => ['Unknown'],
-    ]);
-
-    $response->assertCreated();
-
-    expect($response->json('data'))->not->toHaveKeys(['visibility', 'is_visibility_restricted', 'restricted_to_contact_types']);
-
-    $advisory = Advisory::query()->findOrFail($response->json('data.id'));
-
-    expect($advisory->visibility)->toBe(AdvisoryVisibility::Public)
-        ->and($advisory->is_visibility_restricted)->toBeFalse()
-        ->and($advisory->restrictedToContactTypes)->toBeEmpty();
 });

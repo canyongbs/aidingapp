@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\AdvisoryVisibilityFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
@@ -51,16 +50,12 @@ return new class () extends Migration {
 
             // Advisories were only ever visible to authenticated portal users, so existing ones keep that audience.
             DB::table('advisories')->update(['visibility' => 'authenticated']);
-
-            AdvisoryVisibilityFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function (): void {
-            AdvisoryVisibilityFeature::deactivate();
-
             Schema::table('advisories', function (Blueprint $table): void {
                 $table->dropIndex(['visibility']);
                 $table->dropColumn(['visibility', 'is_visibility_restricted']);
