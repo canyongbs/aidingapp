@@ -44,10 +44,8 @@ use AidingApp\Contact\Filament\Support\OrganizationArchivedName;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use App\Enums\PresenceStatus;
-use App\Features\ContactArchivingFeature;
 use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use Filament\Actions\Action;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
@@ -242,7 +240,7 @@ class ViewContact extends ViewRecord
         }
 
         return [
-            ContactArchivingFeature::active() ? ArchiveAction::make() : DeleteAction::make(),
+            ArchiveAction::make(),
         ];
     }
 

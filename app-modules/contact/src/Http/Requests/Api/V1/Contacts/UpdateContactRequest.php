@@ -40,7 +40,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Rules\ContactEmailNotArchived;
 use AidingApp\Contact\Rules\ResolvableContactTypeName;
-use App\Features\ContactArchivingFeature;
 use App\Features\OrganizationArchivingFeature;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
@@ -62,7 +61,7 @@ class UpdateContactRequest extends FormRequest
         Gate::authorize('viewAny', Contact::class);
         Gate::authorize('update', $contact);
 
-        abort_if(ContactArchivingFeature::active() && $contact->isArchived(), 404);
+        abort_if($contact->isArchived(), 404);
 
         return true;
     }
@@ -89,7 +88,8 @@ class UpdateContactRequest extends FormRequest
                 'email',
                 'max:255',
                 // Stops at the first failure, so an archived match shows its own message instead of the generic unique one.
-                Rule::when(fn (): bool => ContactArchivingFeature::active(), ['bail', new ContactEmailNotArchived(ignore: $contact)]),
+                'bail',
+                new ContactEmailNotArchived(ignore: $contact),
                 Rule::unique(Contact::class, 'email')->ignore($contact)->withoutTrashed(),
             ],
             'mobile' => ['sometimes', 'nullable', 'string', 'max:255'],

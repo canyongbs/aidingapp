@@ -34,14 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\Form\Jobs;
 
-use App\Support\AbstractFeatureFlag;
+use AidingApp\Form\Models\Submission;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
-class ChangeRequestTypeNameUniquenessFeature extends AbstractFeatureFlag
+abstract class DeliverFormSubmissionRequest implements ShouldQueue
 {
-    public function resolve(mixed $scope): mixed
-    {
-        return false;
-    }
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+
+    public function __construct(
+        public Submission $submission,
+    ) {}
+
+    abstract public function handle(): void;
 }

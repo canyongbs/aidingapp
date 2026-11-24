@@ -34,17 +34,48 @@
 </COPYRIGHT>
 */
 
-use App\Features\ContactArchivingFeature;
-use Illuminate\Database\Migrations\Migration;
+namespace AidingApp\ServiceManagement\Filament\Concerns;
 
-return new class () extends Migration {
-    public function up(): void
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Models\User;
+
+trait WarnsAboutInaccessibleServiceRequestType
+{
+    /** @var array<string, string> */
+    protected array $inaccessibleTypeWarnings = [];
+
+    public static function inaccessibleTypeWarningMessage(string $typeName): string
     {
-        ContactArchivingFeature::activate();
+        return "This service request will be created in the catalog under {$typeName}. Since you're not a manager or auditor for this type, you won't be able to view the request's details after it's created.";
     }
 
-    public function down(): void
+    /**
+     * The warning for the selected type, or null when the user can see requests of that type.
+     * Memoized per type so the callout's visibility and content checks share one set of lookups.
+     */
+    protected function getInaccessibleTypeWarning(?string $typeId): ?string
     {
-        ContactArchivingFeature::deactivate();
+        if (blank($typeId)) {
+            return null;
+        }
+
+        return $this->inaccessibleTypeWarnings[$typeId] ??= $this->resolveInaccessibleTypeWarning($typeId);
     }
-};
+
+    protected function resolveInaccessibleTypeWarning(string $typeId): string
+    {
+        $user = auth()->user();
+
+        if (! $user instanceof User || $user->isSuperAdmin()) {
+            return '';
+        }
+
+        $type = ServiceRequestType::find($typeId);
+
+        if (is_null($type) || $type->isManagedBy($user) || $type->isAuditedBy($user)) {
+            return '';
+        }
+
+        return self::inaccessibleTypeWarningMessage($type->name);
+    }
+}

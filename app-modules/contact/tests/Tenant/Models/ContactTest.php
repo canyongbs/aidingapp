@@ -37,7 +37,6 @@
 use AidingApp\Contact\Enums\EmailHealthStatus;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
-use App\Features\ContactArchivingFeature;
 
 it('reports a bounced email health status and cannot receive email when the email has bounced', function (): void {
     $contact = Contact::factory()->create(['email_bounce' => true]);
@@ -80,16 +79,4 @@ it('revokes tokens when archived', function (): void {
 
     expect($contact->tokens()->count())->toBe(0)
         ->and($otherContact->tokens()->count())->toBe(1);
-});
-
-it('keeps tokens when archived while the contact archiving feature is inactive', function (): void {
-    ContactArchivingFeature::deactivate();
-
-    $contact = Contact::factory()->create();
-    $contact->createToken('first');
-    $contact->createToken('second');
-
-    $contact->archive();
-
-    expect($contact->tokens()->count())->toBe(2);
 });

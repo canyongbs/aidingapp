@@ -58,7 +58,6 @@ use AidingApp\Project\Models\ProjectGuest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use AidingApp\Timeline\Models\Timeline;
-use App\Features\ContactArchivingFeature;
 use App\Models\Authenticatable;
 use App\Models\Concerns\HasPresence;
 use App\Models\Contracts\Educatable;
@@ -171,7 +170,7 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
 
     public function isSuppressedByArchival(): bool
     {
-        return $this->isArchived() && ContactArchivingFeature::active();
+        return $this->isArchived();
     }
 
     /**
@@ -329,11 +328,7 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     protected static function booted(): void
     {
         static::archived(fn () => Cache::tags('{contacts}')->flush());
-        static::archived(function (Contact $contact): void {
-            if (ContactArchivingFeature::active()) {
-                $contact->tokens()->delete();
-            }
-        });
+        static::archived(fn (Contact $contact) => $contact->tokens()->delete());
         static::unarchived(fn () => Cache::tags('{contacts}')->flush());
         static::unarchived(fn (Contact $contact) => app(MatchContactToOrganization::class)($contact));
     }

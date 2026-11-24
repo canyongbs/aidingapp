@@ -41,7 +41,6 @@ use AidingApp\Report\Enums\ReportAccessKey;
 use AidingApp\Report\Models\ReportDepartmentAccess;
 use AidingApp\Report\Models\ReportGroupAccess;
 use AidingApp\Report\Models\ReportUserAccess;
-use App\Features\ReportGroupAccessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
@@ -290,28 +289,6 @@ it('assigns groups to a report through the manage action', function (): void {
             ->where('group_id', $group->getKey())
             ->exists()
     )->toBeTrue();
-});
-
-it('does not assign groups to a report through the manage action when the group access feature is inactive', function (): void {
-    ReportGroupAccessFeature::deactivate();
-
-    $user = User::factory()->create();
-    $user->givePermissionTo('reporting.view-any');
-    $user->givePermissionTo('reporting.*.update');
-
-    $group = Group::factory()->create();
-
-    actingAs($user);
-
-    Livewire::test(Reporting::class)
-        ->callAction(TestAction::make('manage')->table(ReportAccessKey::AiSupportAssistant->value), [
-            'users' => [],
-            'departments' => [],
-            'groups' => [$group->getKey()],
-        ])
-        ->assertNotified();
-
-    expect(ReportGroupAccess::query()->where('report_key', ReportAccessKey::AiSupportAssistant->value)->exists())->toBeFalse();
 });
 
 it('counts members of an assigned group in the access count without duplicates', function (): void {
