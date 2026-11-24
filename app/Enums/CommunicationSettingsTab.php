@@ -34,17 +34,30 @@
 </COPYRIGHT>
 */
 
-use App\Features\ContactArchivingFeature;
-use Illuminate\Database\Migrations\Migration;
+namespace App\Enums;
 
-return new class () extends Migration {
-    public function up(): void
+use AidingApp\Engagement\Filament\Resources\EmailTemplates\EmailTemplateResource;
+use Filament\Support\Contracts\HasLabel;
+
+enum CommunicationSettingsTab: string implements HasLabel
+{
+    case Notifications = 'notifications';
+
+    case EmailTemplates = 'email-templates';
+
+    public function getLabel(): string
     {
-        ContactArchivingFeature::activate();
+        return match ($this) {
+            self::Notifications => 'Notifications',
+            self::EmailTemplates => 'Email Templates',
+        };
     }
 
-    public function down(): void
+    public function canView(): bool
     {
-        ContactArchivingFeature::deactivate();
+        return match ($this) {
+            self::Notifications => auth()->user()?->can('settings.view-any') ?? false,
+            self::EmailTemplates => EmailTemplateResource::canViewAny(),
+        };
     }
-};
+}

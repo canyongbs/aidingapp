@@ -34,41 +34,25 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\ListEmailTemplates;
-use AidingApp\Engagement\Models\EmailTemplate;
-use App\Models\User;
-use Filament\Actions\Testing\TestAction;
-use Livewire\Livewire;
+namespace AidingApp\Form\Jobs;
 
-use function Pest\Laravel\actingAs;
+use AidingApp\Form\Models\Submission;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
-it('is gated with proper access control', function (): void {
-    $user = User::factory()->create();
+abstract class DeliverFormSubmissionRequest implements ShouldQueue
+{
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
-    actingAs($user);
+    public function __construct(
+        public Submission $submission,
+    ) {}
 
-    Livewire::test(ListEmailTemplates::class)->assertForbidden();
-
-    $user->givePermissionTo('settings.view-any');
-    $user->refresh();
-
-    Livewire::test(ListEmailTemplates::class)->assertOk();
-});
-
-it('only shows the bulk delete action to a user with the settings.delete permission', function (): void {
-    EmailTemplate::factory(15)->create();
-
-    $user = User::factory()
-        ->create()
-        ->givePermissionTo('settings.view-any', 'settings.*.view');
-
-    actingAs($user);
-
-    Livewire::test(ListEmailTemplates::class)
-        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
-
-    $user->givePermissionTo('settings.*.delete');
-
-    Livewire::test(ListEmailTemplates::class)
-        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
-});
+    abstract public function handle(): void;
+}

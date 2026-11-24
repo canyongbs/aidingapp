@@ -34,14 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\Form\Jobs;
 
-use App\Support\AbstractFeatureFlag;
+use AidingApp\Form\Notifications\FormSubmissionRequestNotification;
 
-class ContactPermissionConsolidationFeature extends AbstractFeatureFlag
+class DeliverFormSubmissionRequestByEmail extends DeliverFormSubmissionRequest
 {
-    public function resolve(mixed $scope): mixed
+    public function handle(): void
     {
-        return false;
+        $this->submission
+            ->author
+            ->notify(new FormSubmissionRequestNotification($this->submission));
     }
 }

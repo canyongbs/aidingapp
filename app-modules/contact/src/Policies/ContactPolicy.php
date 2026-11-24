@@ -37,8 +37,6 @@
 namespace AidingApp\Contact\Policies;
 
 use AidingApp\Contact\Models\Contact;
-use App\Features\ContactArchivingFeature;
-use App\Features\ContactPermissionConsolidationFeature;
 use App\Models\Authenticatable;
 use Filament\Support\Authorization\DenyResponse;
 use Illuminate\Auth\Access\Response;
@@ -48,7 +46,7 @@ class ContactPolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? 'contacts.view-any' : 'contact.view-any',
+            abilities: 'contacts.view-any',
             denyResponse: 'You do not have permission to view contacts.'
         );
     }
@@ -56,7 +54,7 @@ class ContactPolicy
     public function view(Authenticatable $authenticatable, Contact $contact): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.view'] : ['contact.*.view'],
+            abilities: ['contacts.*.view'],
             denyResponse: 'You do not have permission to view this contact.'
         );
     }
@@ -64,7 +62,7 @@ class ContactPolicy
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? 'contacts.create' : 'contact.create',
+            abilities: 'contacts.create',
             denyResponse: 'You do not have permission to create contacts.'
         );
     }
@@ -72,7 +70,7 @@ class ContactPolicy
     public function import(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? 'contacts.import' : 'contact.import',
+            abilities: 'contacts.import',
             denyResponse: 'You do not have permission to import contacts.',
         );
     }
@@ -101,7 +99,7 @@ class ContactPolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.update'] : ['contact.*.update'],
+            abilities: ['contacts.*.update'],
             denyResponse: 'You do not have permission to update this contact.'
         );
     }
@@ -109,14 +107,14 @@ class ContactPolicy
     public function updateAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.update'] : ['contact.*.update'],
+            abilities: ['contacts.*.update'],
             denyResponse: 'You do not have permission to update any contact.'
         );
     }
 
     public function delete(Authenticatable $authenticatable, Contact $contact): Response
     {
-        if (ContactArchivingFeature::active() && $contact->isManaged()) {
+        if ($contact->isManaged()) {
             return DenyResponse::make(
                 'managed_contact',
                 message: function (int $failureCount, int $totalCount): string {
@@ -138,7 +136,7 @@ class ContactPolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.delete'] : ['contact.*.delete'],
+            abilities: ['contacts.*.delete'],
             denyResponse: 'You do not have permission to delete this contact.'
         );
     }
@@ -146,7 +144,7 @@ class ContactPolicy
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.delete'] : ['contact.*.delete'],
+            abilities: ['contacts.*.delete'],
             denyResponse: 'You do not have permission to delete any contact.'
         );
     }
@@ -154,7 +152,7 @@ class ContactPolicy
     public function restore(Authenticatable $authenticatable, Contact $contact): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.restore'] : ['contact.*.restore'],
+            abilities: ['contacts.*.restore'],
             denyResponse: 'You do not have permission to restore this contact.'
         );
     }
@@ -162,7 +160,7 @@ class ContactPolicy
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.restore'] : ['contact.*.restore'],
+            abilities: ['contacts.*.restore'],
             denyResponse: 'You do not have permission to restore any contact.'
         );
     }
@@ -170,7 +168,7 @@ class ContactPolicy
     public function forceDelete(Authenticatable $authenticatable, Contact $contact): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.force-delete'] : ['contact.*.force-delete'],
+            abilities: ['contacts.*.force-delete'],
             denyResponse: 'You do not have permission to force delete this contact.'
         );
     }
@@ -178,7 +176,7 @@ class ContactPolicy
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ContactPermissionConsolidationFeature::active() ? ['contacts.*.force-delete'] : ['contact.*.force-delete'],
+            abilities: ['contacts.*.force-delete'],
             denyResponse: 'You do not have permission to force delete any contact.'
         );
     }

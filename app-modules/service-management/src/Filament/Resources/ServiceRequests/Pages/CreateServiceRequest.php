@@ -43,6 +43,7 @@ use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use AidingApp\ServiceManagement\Filament\Concerns\WarnsAboutInaccessibleServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Tables\CreateServiceRequestContactsTable;
 use AidingApp\ServiceManagement\Models\Scopes\SelectableServiceRequestStatuses;
@@ -53,7 +54,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\Authenticatable;
-use App\Models\User;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Actions\Action;
 use Filament\Forms\Components\ModalTableSelect;
@@ -77,12 +77,11 @@ use Illuminate\Support\Str;
 
 class CreateServiceRequest extends CreateRecord
 {
+    use WarnsAboutInaccessibleServiceRequestType;
+
     protected static string $resource = ServiceRequestResource::class;
 
     protected ?string $heading = '';
-
-    /** @var array<string, string> */
-    protected array $inaccessibleTypeWarnings = [];
 
     public function form(Schema $schema): Schema
     {
@@ -185,41 +184,6 @@ class CreateServiceRequest extends CreateRecord
                     ->key('dynamicTypeFields')
                     ->visible(fn (Get $get): bool => filled($get('type_id')) && ! empty($this->getDynamicFields($get('type_id')))),
             ]);
-    }
-
-    public static function inaccessibleTypeWarningMessage(string $typeName): string
-    {
-        return "This service request will be created in the catalog under {$typeName}. Since you're not a manager or auditor for this type, you won't be able to view the request's details after it's created.";
-    }
-
-    /**
-     * The warning for the selected type, or null when the user can see requests of that type.
-     * Memoized per type so the callout's visibility and content checks share one set of lookups.
-     */
-    protected function getInaccessibleTypeWarning(?string $typeId): ?string
-    {
-        if (blank($typeId)) {
-            return null;
-        }
-
-        return $this->inaccessibleTypeWarnings[$typeId] ??= $this->resolveInaccessibleTypeWarning($typeId);
-    }
-
-    protected function resolveInaccessibleTypeWarning(string $typeId): string
-    {
-        $user = auth()->user();
-
-        if (! $user instanceof User || $user->isSuperAdmin()) {
-            return '';
-        }
-
-        $type = ServiceRequestType::find($typeId);
-
-        if (is_null($type) || $type->isManagedBy($user) || $type->isAuditedBy($user)) {
-            return '';
-        }
-
-        return self::inaccessibleTypeWarningMessage($type->name);
     }
 
     /**

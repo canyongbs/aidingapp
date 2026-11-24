@@ -34,17 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+namespace App\Features;
 
-use App\Enums\NavigationGroup;
-use Filament\Clusters\Cluster;
-use UnitEnum;
+use App\Support\AbstractFeatureFlag;
 
-class Communication extends Cluster
+class ProjectNameUniquenessFeature extends AbstractFeatureFlag
 {
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Settings;
-
-    protected static ?string $navigationLabel = 'Communication Settings';
-
-    protected static ?int $navigationSort = 80;
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
+    }
 }

@@ -39,11 +39,8 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Tests\Tenant\Filament\Resources\PipelineResource\RequestFactory\CreatePipelineRequestFactory;
-use App\Features\PipelineNameUniquenessFeature;
-use App\Features\PipelineStageNameUniquenessFeature;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -170,7 +167,6 @@ it('defaults new pipeline stages to planning', function (): void {
     $undoRepeaterFake();
 });
 
-// TODO: Cleanup Task (pipeline-name-uniqueness): keep these tests, but remove the feature flag describe block below
 describe('name uniqueness', function (): void {
     it('rejects a pipeline name that differs only by case', function (string $name): void {
         asSuperAdmin();
@@ -256,43 +252,5 @@ describe('name uniqueness', function (): void {
         expect(PipelineStage::query()->where('name', 'review')->count())->toBe(2);
 
         $undoRepeaterFake();
-    });
-
-    describe('feature flag', function (): void {
-        it('does not apply the unique form rule when the feature is disabled', function (): void {
-            PipelineNameUniquenessFeature::deactivate();
-
-            asSuperAdmin();
-
-            $project = Project::factory()->create();
-            Pipeline::factory()->for($project)->create(['name' => 'Admissions']);
-
-            expect(fn () => Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
-                ->fillForm(CreatePipelineRequestFactory::new()->state(['name' => 'Admissions'])->create())
-                ->call('create'))
-                ->toThrow(UniqueConstraintViolationException::class);
-        });
-
-        it('falls back to the case-sensitive stage name rule when the stage feature is disabled', function (): void {
-            PipelineStageNameUniquenessFeature::deactivate();
-
-            $undoRepeaterFake = Repeater::fake();
-
-            asSuperAdmin();
-
-            $project = Project::factory()->create();
-
-            expect(fn () => Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
-                ->fillForm(CreatePipelineRequestFactory::new()->state([
-                    'stages' => [
-                        ['name' => 'Review', 'classification' => 'planning'],
-                        ['name' => 'review', 'classification' => 'planning'],
-                    ],
-                ])->create())
-                ->call('create'))
-                ->toThrow(UniqueConstraintViolationException::class);
-
-            $undoRepeaterFake();
-        });
     });
 });

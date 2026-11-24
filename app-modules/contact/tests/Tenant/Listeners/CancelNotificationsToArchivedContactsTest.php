@@ -43,7 +43,6 @@ use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Notification\Tests\Fixtures\TestDatabaseNotification;
 use AidingApp\Notification\Tests\Fixtures\TestDualNotification;
 use AidingApp\Notification\Tests\Fixtures\TestEmailNotification;
-use App\Features\ContactArchivingFeature;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\ChannelManager;
 use Illuminate\Notifications\Notification;
@@ -60,16 +59,6 @@ it('does not send database notifications to an archived contact', function (): v
 
 it('sends database notifications to a contact that is not archived', function (): void {
     $contact = Contact::factory()->create();
-
-    $contact->notify(new TestDatabaseNotification());
-
-    expect(DatabaseMessage::query()->count())->toBe(1);
-});
-
-it('sends database notifications to an archived contact when the contact archiving feature is inactive', function (): void {
-    ContactArchivingFeature::deactivate();
-
-    $contact = Contact::factory()->archived()->create();
 
     $contact->notify(new TestDatabaseNotification());
 

@@ -38,8 +38,6 @@ namespace AidingApp\ServiceManagement\Http\Requests\Api\V1\AdvisoryStatuses;
 
 use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use App\Features\AdvisoryStatusNameUniquenessFeature;
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -59,7 +57,7 @@ class CreateAdvisoryStatusRequest extends FormRequest
     }
 
     /**
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return array<string, array<mixed>|string>
      */
     public function rules(): array
     {
@@ -68,11 +66,7 @@ class CreateAdvisoryStatusRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                // TODO: Cleanup Task (advisory-status-and-severity-name-uniqueness): replace this `Rule::when()` with its unique rule once the flag is removed.
-                Rule::when(
-                    AdvisoryStatusNameUniquenessFeature::active(),
-                    [Rule::unique(AdvisoryStatus::class, 'name')->withoutTrashed()],
-                ),
+                Rule::unique(AdvisoryStatus::class, 'name')->withoutTrashed(),
             ],
             'classification' => ['required', Rule::enum(SystemAdvisoryStatusClassification::class)],
         ];

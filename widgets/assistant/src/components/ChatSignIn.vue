@@ -56,8 +56,7 @@
                 Enter your email to receive a sign-in code.
             </p>
             <p v-else class="mt-1 text-sm text-gray-500">
-                Enter the 6-digit code sent to <span class="font-medium text-gray-700">{{ email }}</span
-                >.
+                Enter the 6-digit code sent to <span class="font-medium text-gray-700">{{ email }}</span>.
             </p>
         </div>
 

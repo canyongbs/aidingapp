@@ -34,18 +34,48 @@
 </COPYRIGHT>
 */
 
-namespace App\Enums;
+namespace AidingApp\ServiceManagement\Filament\Concerns;
 
-use Filament\Support\Contracts\HasLabel;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Models\User;
 
-enum CommunicationNavigationGroup implements HasLabel
+trait WarnsAboutInaccessibleServiceRequestType
 {
-    case Communication;
+    /** @var array<string, string> */
+    protected array $inaccessibleTypeWarnings = [];
 
-    public function getLabel(): string
+    public static function inaccessibleTypeWarningMessage(string $typeName): string
     {
-        return match ($this) {
-            self::Communication => 'Communication',
-        };
+        return "This service request will be created in the catalog under {$typeName}. Since you're not a manager or auditor for this type, you won't be able to view the request's details after it's created.";
+    }
+
+    /**
+     * The warning for the selected type, or null when the user can see requests of that type.
+     * Memoized per type so the callout's visibility and content checks share one set of lookups.
+     */
+    protected function getInaccessibleTypeWarning(?string $typeId): ?string
+    {
+        if (blank($typeId)) {
+            return null;
+        }
+
+        return $this->inaccessibleTypeWarnings[$typeId] ??= $this->resolveInaccessibleTypeWarning($typeId);
+    }
+
+    protected function resolveInaccessibleTypeWarning(string $typeId): string
+    {
+        $user = auth()->user();
+
+        if (! $user instanceof User || $user->isSuperAdmin()) {
+            return '';
+        }
+
+        $type = ServiceRequestType::find($typeId);
+
+        if (is_null($type) || $type->isManagedBy($user) || $type->isAuditedBy($user)) {
+            return '';
+        }
+
+        return self::inaccessibleTypeWarningMessage($type->name);
     }
 }

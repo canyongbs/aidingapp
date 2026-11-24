@@ -34,8 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\AdvisoryStatusNameUniquenessFeature;
-use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -43,46 +41,24 @@ use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
-    /*
-     * TODO: Cleanup Task (advisory-status-and-severity-name-uniqueness): after AdvisoryStatusNameUniquenessFeature is removed:
-     * - remove the `FixesDuplicateNames` trait, the `$chunkSize` and `$usesSoftDeletes` properties, and the `fixDuplicates()` call
-     * - keep the citext column conversion and the unique index, they are permanent
-     */
-    use FixesDuplicateNames;
-
-    private string $table = 'advisory_statuses';
-
-    private string $column = 'name';
-
-    private int $chunkSize = 500;
-
-    private bool $usesSoftDeletes = true;
-
     public function up(): void
     {
         DB::transaction(function (): void {
-            $this->fixDuplicates();
+            DB::statement('ALTER TABLE advisory_statuses ALTER COLUMN name TYPE citext');
 
-            DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
-
-            Schema::table($this->table, function (Blueprint $table): void {
-                $table->uniqueIndex($this->column, "{$this->table}_name_unique")
+            Schema::table('advisory_statuses', function (Blueprint $table): void {
+                $table->uniqueIndex('name', 'advisory_statuses_name_unique')
                     ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
             });
-
-            AdvisoryStatusNameUniquenessFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function (): void {
-            AdvisoryStatusNameUniquenessFeature::deactivate();
+            DB::statement('DROP INDEX IF EXISTS advisory_statuses_name_unique');
 
-            DB::statement("DROP INDEX IF EXISTS {$this->table}_name_unique");
-
-            // Names rewritten by `fixDuplicates()` are kept: the `-N` suffix cannot be told apart from a genuine name.
-            DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
+            DB::statement('ALTER TABLE advisory_statuses ALTER COLUMN name TYPE varchar(255)');
         });
     }
 };

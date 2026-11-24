@@ -37,11 +37,9 @@
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages\CreateChangeRequestType;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\Filament\Resources\ChangeRequestTypes\RequestFactories\CreateChangeRequestTypeRequestFactory;
-use App\Features\ChangeRequestTypeNameUniquenessFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 
@@ -91,24 +89,6 @@ it('validates the inputs', function (CreateChangeRequestTypeRequestFactory $data
     'name unique' => [CreateChangeRequestTypeRequestFactory::new()->state(['name' => 'Major Change']), ['name' => 'unique']],
     'name unique case insensitive' => [CreateChangeRequestTypeRequestFactory::new()->state(['name' => 'MAJOR CHANGE']), ['name' => 'unique']],
 ]);
-
-// TODO: Cleanup Task (change-request-type-name-uniqueness): delete this describe and the tests within
-describe('name uniqueness feature flag', function (): void {
-    it('does not apply the unique form rule when the feature is disabled', function (): void {
-        ChangeRequestTypeNameUniquenessFeature::deactivate();
-
-        asSuperAdmin();
-
-        ChangeRequestType::factory()->create(['name' => 'Major Change']);
-
-        $request = CreateChangeRequestTypeRequestFactory::new()->state(['name' => 'Major Change'])->create();
-
-        expect(fn () => Livewire::test(CreateChangeRequestType::class)
-            ->fillForm($request)
-            ->call('create'))
-            ->toThrow(UniqueConstraintViolationException::class);
-    });
-});
 
 // UserSelect (userApprovers field) admin-filtering tests
 // No pre-selected scenario on Create — no persisted record exists yet.

@@ -41,7 +41,6 @@ use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Rules\ServiceMonitorNotificationRecipientsMustHaveConfidentialAccess;
 use AidingApp\ServiceManagement\Rules\ServiceMonitorReportRecipientsMustHaveConfidentialAccess;
-use App\Features\ContactArchivingFeature;
 use App\Filament\Forms\Components\UserSelect;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
@@ -116,9 +115,7 @@ class ConfidentialitySection
                     ->relationship(
                         'confidentialContacts',
                         'full_name',
-                        fn (ContactBuilder $query, ?Model $record): ContactBuilder => ContactArchivingFeature::active()
-                            ? $query->where(fn (ContactBuilder $query): ContactBuilder => $query->withoutArchived()->when($record instanceof ServiceMonitoringTarget && $record->exists ? $record : null, fn (ContactBuilder $query, ServiceMonitoringTarget $target): ContactBuilder => $query->orWhereIn('contacts.id', $target->confidentialContacts()->select('contacts.id'))))
-                            : $query,
+                        fn (ContactBuilder $query, ?Model $record): ContactBuilder => $query->where(fn (ContactBuilder $query): ContactBuilder => $query->withoutArchived()->when($record instanceof ServiceMonitoringTarget && $record->exists ? $record : null, fn (ContactBuilder $query, ServiceMonitoringTarget $target): ContactBuilder => $query->orWhereIn('contacts.id', $target->confidentialContacts()->select('contacts.id')))),
                     )
                     ->label('Contacts')
                     ->multiple()

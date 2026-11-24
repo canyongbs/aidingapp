@@ -41,7 +41,6 @@ use AidingApp\Group\Models\Group;
 use AidingApp\Report\Actions\AssignReportGroups;
 use AidingApp\Report\Models\ReportDepartmentAccess;
 use AidingApp\Report\Models\ReportUserAccess;
-use App\Features\ReportGroupAccessFeature;
 use App\Models\Scopes\OrderByFullName;
 use App\Models\Scopes\WhereFullNameLike;
 use App\Models\Scopes\WithoutAnyAdmin;
@@ -75,9 +74,7 @@ class ManageReportAssignmentsBulkAction
             ->label('Manage Assignments')
             ->authorize(fn (): bool => auth()->user()->can('reporting.*.update'))
             ->modalHeading(fn (Collection $records): string => 'Manage Assignments for ' . $records->count() . ' ' . str('Report')->plural($records->count()))
-            ->modalDescription(fn (): string => ReportGroupAccessFeature::active()
-                ? 'Grant access to the selected reports by assigning individual users, departments, and/or groups.'
-                : 'Grant access to the selected reports by assigning individual users and/or departments.')
+            ->modalDescription('Grant access to the selected reports by assigning individual users, departments, and/or groups.')
             ->form([
                 Select::make('users')
                     ->label('Users')
@@ -132,7 +129,6 @@ class ManageReportAssignmentsBulkAction
                     ->label('Groups')
                     ->multiple()
                     ->searchable()
-                    ->visible(fn (): bool => ReportGroupAccessFeature::active())
                     ->options(
                         fn (): array => $groupsQuery
                             ->clone()
@@ -207,9 +203,7 @@ class ManageReportAssignmentsBulkAction
                                 ]);
                             }
 
-                            if (ReportGroupAccessFeature::active()) {
-                                $assignReportGroups($reportKey, $groupIds, removeUnlisted: $sync);
-                            }
+                            $assignReportGroups($reportKey, $groupIds, removeUnlisted: $sync);
                         });
                     });
 
