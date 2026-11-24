@@ -219,11 +219,11 @@ li[data-message-type='success'] {
     }
 }
 
-.prose-toc {
-    @apply mb-16;
+/* Rich editor content styles */
+.prose :is(h1, h2, h3) {
+    @apply scroll-mt-24 rounded-sm outline-offset-4 focus-visible:outline-2 focus-visible:outline-brand-600;
 }
 
-/* Rich editor content styles */
 .prose .grid-layout {
     @apply grid grid-cols-1 gap-4;
 

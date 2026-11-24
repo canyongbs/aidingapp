@@ -35,7 +35,7 @@ import { defaultConfig, plugin } from '@formkit/vue';
 import { PiniaColada } from '@pinia/colada';
 import { createPinia } from 'pinia';
 import PrimeVue from 'primevue/config';
-import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
+import { createApp, defineCustomElement, getCurrentInstance, h, useShadowRoot } from 'vue';
 import { createRouter, createWebHistory, RouterView } from 'vue-router';
 import { DataLoaderPlugin } from 'vue-router/experimental';
 import VueSignaturePad from 'vue-signature-pad';
@@ -63,6 +63,7 @@ import {
 } from './Pages/loaders.js';
 import './portal.css';
 import getAppContext from './Services/GetAppContext.js';
+import openAncestorDetails from './Services/OpenAncestorDetails.js';
 
 customElements.define(
     'knowledge-management-portal-embed',
@@ -80,12 +81,28 @@ customElements.define(
 
             const { baseUrl } = getAppContext(props.accessUrl);
 
+            const shadowRoot = useShadowRoot();
+
             const router = createRouter({
                 history: createWebHistory(),
-                scrollBehavior(to, from, savedPosition) {
+                async scrollBehavior(to, from, savedPosition) {
                     // Restore the previous position on back/forward navigation.
                     if (savedPosition) {
                         return savedPosition;
+                    }
+
+                    // Linked to a section — find it in the portal's shadow root, which the router can't look inside.
+                    if (to.hash) {
+                        // On a first visit, wait for the boot screen to give way to the page.
+                        await new Promise((resolve) => setTimeout(resolve));
+
+                        const target = shadowRoot?.getElementById(to.hash.slice(1));
+
+                        if (target) {
+                            openAncestorDetails(target);
+
+                            return { el: target, top: parseFloat(getComputedStyle(target).scrollMarginTop) };
+                        }
                     }
 
                     // Same page, only the query changed (pagination / tab switches) — leave
