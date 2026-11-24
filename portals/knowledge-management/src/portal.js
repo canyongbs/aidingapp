@@ -63,6 +63,7 @@ import {
 } from './Pages/loaders.js';
 import './portal.css';
 import getAppContext from './Services/GetAppContext.js';
+import openAncestorDetails from './Services/OpenAncestorDetails.js';
 
 customElements.define(
     'knowledge-management-portal-embed',
@@ -98,6 +99,8 @@ customElements.define(
                         const target = shadowRoot?.getElementById(to.hash.slice(1));
 
                         if (target) {
+                            openAncestorDetails(target);
+
                             return { el: target, top: parseFloat(getComputedStyle(target).scrollMarginTop) };
                         }
                     }

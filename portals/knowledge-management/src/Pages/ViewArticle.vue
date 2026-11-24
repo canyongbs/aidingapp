@@ -49,6 +49,7 @@
     import { apiPost } from '../Services/api.js';
     import formatDateTime from '../Services/FormatDateTime.js';
     import { articleRoute, categoryRoute } from '../Services/KnowledgeBaseRoutes.js';
+    import openAncestorDetails from '../Services/OpenAncestorDetails.js';
     import { useArticleData } from './loaders.js';
 
     const route = useRoute();
@@ -119,6 +120,8 @@
         if (!heading) {
             return;
         }
+
+        openAncestorDetails(heading);
 
         heading.setAttribute('tabindex', '-1');
         heading.focus({ preventScroll: true });
