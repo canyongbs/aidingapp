@@ -54,6 +54,7 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\Select;
+use Filament\Tables\Filters\SelectFilter;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -116,7 +117,7 @@ test('The correct details are displayed on the ListServiceRequests page', functi
         ->assertSee('Resolution:')
         ->assertSee('Created:')
         ->assertSee('Updated:')
-        ->assertSee('Unassigned')
+        ->assertTableFilterExists('assignedTo', fn (SelectFilter $filter): bool => ($filter->getOptions()['']['unassigned'] ?? null) === 'Unassigned')
         ->assertSeeInOrder(['CSAT:', 'N/A', 'NPS:', 'N/A']);
 
     $serviceRequests->each(
