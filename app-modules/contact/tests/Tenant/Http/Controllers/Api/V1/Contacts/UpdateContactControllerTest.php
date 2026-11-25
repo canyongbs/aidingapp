@@ -38,7 +38,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Services\ManagedContactService;
-use App\Features\OrganizationArchivingFeature;
 use App\Models\SystemUser;
 use App\Models\User;
 use Illuminate\Support\Arr;
@@ -241,19 +240,6 @@ it('does not resolve an archived organization by name', function () use ($acting
         ->assertJsonValidationErrors(['organization']);
 
     expect($contact->refresh()->organization_id)->toBe($originalOrganizationId);
-});
-
-it('resolves an archived organization by name while organization archiving is inactive', function () use ($actingAsContactUpdater): void {
-    $actingAsContactUpdater();
-
-    OrganizationArchivingFeature::deactivate();
-
-    $contact = Contact::factory()->create();
-    $organization = Organization::factory()->archived()->create(['name' => 'Acme']);
-
-    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['organization' => $organization->name])
-        ->assertOk()
-        ->assertJsonPath('data.organization.id', $organization->getKey());
 });
 
 it('validates the request', function (array $payload, array $errors) use ($actingAsContactUpdater): void {

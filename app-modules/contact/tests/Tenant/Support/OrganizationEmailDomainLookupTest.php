@@ -36,7 +36,6 @@
 
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Support\OrganizationEmailDomainLookup;
-use App\Features\OrganizationArchivingFeature;
 
 it('matches an exact email domain', function (): void {
     $organization = Organization::factory()->create([
@@ -145,14 +144,4 @@ it('omits archived organization domains from the domain set', function (): void 
 
     expect($lookup->domainSet())->toBe(['active.example' => true])
         ->and($lookup->domainSet($archivedOrganization))->toBe([]);
-});
-
-it('still matches an archived organization while archiving is inactive', function (): void {
-    OrganizationArchivingFeature::deactivate();
-
-    $organization = Organization::factory()->archived()->create([
-        'domains' => [['domain' => 'example.com']],
-    ]);
-
-    expect(app(OrganizationEmailDomainLookup::class)->find('person@example.com')?->is($organization))->toBeTrue();
 });

@@ -36,7 +36,6 @@
 
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ListOrganizations;
 use AidingApp\Contact\Models\Organization;
-use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Livewire\Livewire;
@@ -74,27 +73,6 @@ it('bulk archives organizations', function (): void {
 
     expect($first->refresh()->isArchived())->toBeTrue()
         ->and($second->refresh()->isArchived())->toBeTrue();
-});
-
-it('shows the bulk delete action when the organization archiving feature is inactive', function (): void {
-    OrganizationArchivingFeature::deactivate();
-
-    Organization::factory(3)->create();
-
-    $user = User::factory()
-        ->create()
-        ->givePermissionTo('organization.view-any', 'organization.*.view');
-
-    actingAs($user);
-
-    Livewire::test(ListOrganizations::class)
-        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
-
-    $user->givePermissionTo('organization.*.delete');
-
-    Livewire::test(ListOrganizations::class)
-        ->assertActionVisible(TestAction::make('delete')->table()->bulk())
-        ->assertActionDoesNotExist(TestAction::make('archive')->table()->bulk());
 });
 
 it('only shows the import and export actions to a user with the `organization.import` permission', function (): void {

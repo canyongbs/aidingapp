@@ -37,14 +37,13 @@
 namespace AidingApp\Contact\Filament\Support;
 
 use AidingApp\Contact\Models\Organization;
-use App\Features\OrganizationArchivingFeature;
 use Illuminate\Contracts\View\View;
 
 class OrganizationArchivedName
 {
     public static function format(Organization $organization, string $name): string | View
     {
-        if (OrganizationArchivingFeature::active() && $organization->isArchived()) {
+        if ($organization->isArchived()) {
             return view('filament.tables.columns.organization.archived-name', ['name' => $name]);
         }
 

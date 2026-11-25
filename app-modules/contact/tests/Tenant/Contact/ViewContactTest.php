@@ -46,7 +46,6 @@ use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\EditContactRequestFactory;
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers\EngagementFilesRelationManager;
-use App\Features\OrganizationArchivingFeature;
 use App\Models\User;
 use Dom\HTMLDocument;
 use Dom\Node;
@@ -145,20 +144,6 @@ describe('archived organization indicator', function (): void {
 
         $contact = Contact::factory()
             ->for(Organization::factory()->state(['name' => 'Acme Inc']), 'organization')
-            ->create();
-
-        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
-            ->assertSee('Acme Inc')
-            ->assertDontSee('This organization is archived.');
-    });
-
-    it('does not mark an archived organization when the feature is inactive', function (): void {
-        OrganizationArchivingFeature::deactivate();
-
-        asSuperAdmin();
-
-        $contact = Contact::factory()
-            ->for(Organization::factory()->archived()->state(['name' => 'Acme Inc']), 'organization')
             ->create();
 
         Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
@@ -491,37 +476,6 @@ describe('section edit actions', function (): void {
             ])
                 ->assertCanSeeTableRecords([$activeOrganization])
                 ->assertCanNotSeeTableRecords([$archivedOrganization]);
-        });
-
-        it('lists archived organizations while organization archiving is inactive', function (): void {
-            OrganizationArchivingFeature::deactivate();
-
-            $archivedOrganization = Organization::factory()->archived()->create();
-            $contact = Contact::factory()->create(['organization_id' => null]);
-
-            Livewire::test(TableSelectLivewireComponent::class, [
-                'tableConfiguration' => base64_encode(OrganizationsTable::class),
-                'tableArguments' => ['selectedOrganizationId' => $contact->organization_id],
-                'model' => Contact::class,
-                'relationshipName' => 'organization',
-            ])
-                ->assertCanSeeTableRecords([$archivedOrganization]);
-        });
-
-        it('lists archived organizations alongside the linked organization while organization archiving is inactive', function (): void {
-            OrganizationArchivingFeature::deactivate();
-
-            $linkedOrganization = Organization::factory()->create();
-            $archivedOrganization = Organization::factory()->archived()->create();
-            $contact = Contact::factory()->create(['organization_id' => $linkedOrganization->getKey()]);
-
-            Livewire::test(TableSelectLivewireComponent::class, [
-                'tableConfiguration' => base64_encode(OrganizationsTable::class),
-                'tableArguments' => ['selectedOrganizationId' => $contact->organization_id],
-                'model' => Contact::class,
-                'relationshipName' => 'organization',
-            ])
-                ->assertCanSeeTableRecords([$linkedOrganization, $archivedOrganization]);
         });
     });
 

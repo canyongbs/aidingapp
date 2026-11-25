@@ -43,7 +43,6 @@ use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
-use App\Features\OrganizationArchivingFeature;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
@@ -205,23 +204,6 @@ it('still lists a project through a direct guest assignment when the organizatio
     $contact = Contact::factory()->for($organization)->create();
     $project = Project::factory()->create();
     $project->guestContacts()->attach($contact);
-    $project->guestOrganizations()->attach($organization);
-    $organization->archive();
-
-    actingAs($contact, 'contact');
-
-    getJson(route('api.portal.projects.index'))
-        ->assertOk()
-        ->assertJsonCount(1, 'data')
-        ->assertJsonPath('data.0.id', $project->getKey());
-});
-
-it('lists a project through an archived organization while organization archiving is inactive', function (): void {
-    OrganizationArchivingFeature::deactivate();
-
-    $organization = Organization::factory()->create();
-    $contact = Contact::factory()->for($organization)->create();
-    $project = Project::factory()->create();
     $project->guestOrganizations()->attach($organization);
     $organization->archive();
 

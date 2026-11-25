@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Models\Builders;
 
 use AidingApp\Contact\Models\Organization;
-use App\Features\OrganizationArchivingFeature;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -45,19 +44,4 @@ use Illuminate\Database\Eloquent\Builder;
  *
  * @extends Builder<TModel>
  */
-class OrganizationBuilder extends Builder
-{
-    /**
-     * Overrides the `withoutArchived()` macro so it does nothing while the organization archiving feature is inactive.
-     *
-     * TODO: Cleanup Task (organization-builder-without-archived) - delete this override so the macro applies.
-     */
-    public function withoutArchived(): static
-    {
-        if (! OrganizationArchivingFeature::active()) {
-            return $this;
-        }
-
-        return parent::__call(__FUNCTION__, []);
-    }
-}
+class OrganizationBuilder extends Builder {}

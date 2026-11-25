@@ -40,11 +40,9 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Rules\ContactEmailNotArchived;
 use AidingApp\Contact\Rules\ResolvableContactTypeName;
-use App\Features\OrganizationArchivingFeature;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Exists;
 
 class UpdateContactRequest extends FormRequest
 {
@@ -102,7 +100,7 @@ class UpdateContactRequest extends FormRequest
                 'max:255',
                 Rule::exists(Organization::class, 'name')
                     ->withoutTrashed()
-                    ->when(OrganizationArchivingFeature::active(), fn (Exists $rule): Exists => $rule->whereNull('archived_at')),
+                    ->whereNull('archived_at'),
             ],
             'job_title' => ['sometimes', 'nullable', 'string', 'max:255'],
             'employee_id' => ['sometimes', 'nullable', 'string', 'max:255'],

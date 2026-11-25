@@ -39,7 +39,6 @@ namespace AidingApp\Contact\Filament\Tables;
 use AidingApp\Contact\Filament\Support\OrganizationArchivedName;
 use AidingApp\Contact\Models\Builders\OrganizationBuilder;
 use AidingApp\Contact\Models\Organization;
-use App\Features\OrganizationArchivingFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -54,10 +53,6 @@ class OrganizationsTable
         return $table
             ->query(fn (): Builder => Organization::query())
             ->modifyQueryUsing(function (OrganizationBuilder $query) use ($table): OrganizationBuilder {
-                if (! OrganizationArchivingFeature::active()) {
-                    return $query;
-                }
-
                 $selectedOrganizationId = $table->getArguments()['selectedOrganizationId'] ?? null;
 
                 return $query->where(function (OrganizationBuilder $query) use ($selectedOrganizationId): void {
