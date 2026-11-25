@@ -56,6 +56,8 @@
             ->allowAttribute('data-secret-mask', 'span')
             ->allowAttribute('data-secret-value', 'code')
             ->allowAttribute('data-secret-error', 'span')
+            // symfony/html-sanitizer no longer treats button as a safe element, so the password reveal control must be allowed explicitly.
+            ->allowElement('button', ['type'])
             ->allowAttribute('data-secret-reveal', 'button')
             ->allowAttribute('data-secret-id', 'button');
 
