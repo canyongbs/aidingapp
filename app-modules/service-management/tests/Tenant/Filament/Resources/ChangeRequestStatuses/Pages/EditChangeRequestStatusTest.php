@@ -34,13 +34,9 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\Pages\EditChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use AidingApp\ServiceManagement\Tests\Tenant\Filament\Resources\ChangeRequestStatuses\RequestFactories\EditChangeRequestStatusRequestFactory;
-use App\Features\ChangeRequestStatusNameUniquenessFeature;
-use Illuminate\Database\UniqueConstraintViolationException;
-use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
 use function Pest\Laravel\assertDatabaseHas;
@@ -130,39 +126,5 @@ describe('restoring', function (): void {
             ->assertNotified('Unable to restore this change request status');
 
         expect($changeRequestStatus->refresh()->trashed())->toBeTrue();
-    });
-});
-
-// TODO: Cleanup Task (change-request-status-name-uniqueness): delete this describe and the tests within
-describe('name uniqueness feature flag', function (): void {
-    it('does not apply the unique form rule when the feature is disabled', function (): void {
-        ChangeRequestStatusNameUniquenessFeature::deactivate();
-
-        asSuperAdmin();
-
-        ChangeRequestStatus::factory()->create(['name' => 'Under Review']);
-        $changeRequestStatus = ChangeRequestStatus::factory()->create(['name' => 'On Hold']);
-
-        expect(fn () => Livewire::test(EditChangeRequestStatus::class, ['record' => $changeRequestStatus->getRouteKey()])
-            ->fillForm(['name' => 'Under Review'])
-            ->call('save'))
-            ->toThrow(UniqueConstraintViolationException::class);
-    });
-
-    it('allows editing other fields of a record that already shares its name with another record when the feature is disabled', function (): void {
-        ChangeRequestStatusNameUniquenessFeature::deactivate();
-        DB::statement('DROP INDEX change_request_statuses_name_unique');
-
-        asSuperAdmin();
-
-        ChangeRequestStatus::factory()->create(['name' => 'Under Review']);
-        $changeRequestStatus = ChangeRequestStatus::factory()->create(['name' => 'Under Review']);
-
-        Livewire::test(EditChangeRequestStatus::class, ['record' => $changeRequestStatus->getRouteKey()])
-            ->fillForm(['classification' => SystemChangeRequestClassification::Completed->value])
-            ->call('save')
-            ->assertHasNoFormErrors();
-
-        expect(ChangeRequestStatus::query()->where('name', 'Under Review')->count())->toBe(2);
     });
 });
