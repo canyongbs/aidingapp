@@ -43,11 +43,27 @@ use Filament\Support\Enums\Width;
 
 class Login extends \Filament\Auth\Pages\Login
 {
+    public const MOBILE_APP_USER_AGENT_TOKEN = 'AidingAppMobile';
+
+    public const SWITCH_TENANT_URL = 'aidingappmobile://switch-tenant';
+
+    public const GOOGLE_SSO_UNAVAILABLE_IN_MOBILE_APP_MESSAGE = "Google sign-in isn't available in the mobile app - please use another sign-in method.";
+
     protected string $view = 'authorization::login';
 
     protected static string $layout = 'filament-panels::components.layouts.login';
 
     protected Width | string | null $maxWidth = Width::FourExtraLarge;
+
+    public function isMobileApp(): bool
+    {
+        return str((string) request()->userAgent())->contains(self::MOBILE_APP_USER_AGENT_TOKEN);
+    }
+
+    public function isGoogleSsoUnavailableInMobileApp(): bool
+    {
+        return $this->isMobileApp() && $this->isGoogleSsoEnabled();
+    }
 
     /**
      * @return array<Action>
@@ -67,9 +83,7 @@ class Login extends \Filament\Auth\Pages\Login
                 ->size('sm');
         }
 
-        $googleSsoSettings = app(GoogleSsoSettings::class);
-
-        if ($googleSsoSettings->is_enabled && ! empty($googleSsoSettings->client_id)) {
+        if ($this->isGoogleSsoEnabled() && ! $this->isMobileApp()) {
             $ssoActions[] = Action::make('google_sso')
                 ->label(__('Google'))
                 ->url(route('socialite.redirect', ['provider' => 'google']))
@@ -79,5 +93,12 @@ class Login extends \Filament\Auth\Pages\Login
         }
 
         return $ssoActions;
+    }
+
+    protected function isGoogleSsoEnabled(): bool
+    {
+        $googleSsoSettings = app(GoogleSsoSettings::class);
+
+        return $googleSsoSettings->is_enabled && ! empty($googleSsoSettings->client_id);
     }
 }
