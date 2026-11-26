@@ -32,6 +32,7 @@
     </COPYRIGHT>
 --}}
 @php
+    use AidingApp\Authorization\Filament\Pages\Auth\Login;
     use AidingApp\Theme\Settings\ThemeSettings;
 
     $themeSettings = app(ThemeSettings::class);
@@ -67,7 +68,21 @@
                 :actions="$this->getSsoFormActions()"
                 :full-width="$this->hasFullWidthFormActions()"
             />
+
+            @if ($this->isGoogleSsoUnavailableInMobileApp())
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ Login::GOOGLE_SSO_UNAVAILABLE_IN_MOBILE_APP_MESSAGE }}
+                </p>
+            @endif
         </form>
+
+        @if ($this->isMobileApp())
+            <x-filament::actions class="mt-6" :full-width="true">
+                <x-filament::button tag="a" :href="Login::SWITCH_TENANT_URL" color="gray">
+                    Switch tenant
+                </x-filament::button>
+            </x-filament::actions>
+        @endif
     </div>
 
     <div class="flex w-full flex-col gap-6 lg:w-1/2">
