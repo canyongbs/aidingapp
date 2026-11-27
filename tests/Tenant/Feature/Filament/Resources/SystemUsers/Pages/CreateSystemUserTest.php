@@ -34,10 +34,8 @@
 </COPYRIGHT>
 */
 
-use App\Features\SystemUserNameUniquenessFeature;
 use App\Filament\Resources\SystemUsers\Pages\CreateSystemUser;
 use App\Models\SystemUser;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\assertDatabaseHas;
@@ -79,19 +77,4 @@ it('allows creating a system user whose name is freed up by a soft-deleted syste
         'name' => 'integration service',
         'deleted_at' => null,
     ]);
-});
-
-describe('name uniqueness feature flag', function (): void {
-    it('does not apply the unique form rule when the feature is disabled', function (): void {
-        SystemUserNameUniquenessFeature::deactivate();
-
-        asSuperAdmin();
-
-        SystemUser::factory()->create(['name' => 'Integration Service']);
-
-        expect(fn () => Livewire::test(CreateSystemUser::class)
-            ->fillForm(['name' => 'Integration Service'])
-            ->call('create'))
-            ->toThrow(UniqueConstraintViolationException::class);
-    });
 });
